@@ -1,5 +1,2 @@
 # books-quest
-This program required the following library : 
-OS
-Tkinter
-JSON
+This program required the following Python library : Tkinter, OS and JSON
