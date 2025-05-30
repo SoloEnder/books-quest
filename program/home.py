@@ -1,6 +1,6 @@
 import json
 import tkinter as tk
-from users_manager import pack_users_i
+from users_manager import show_users_icons, add_user_cmd
 
 #charger le fichier "user_infos.json"
 
@@ -14,5 +14,6 @@ home_w.title("Home")
 
 # Pack Users icons
 
-pack_users_i(users_infos, home_w)
+show_users_icons(home_w)
+add_user_cmd(home_w)
 home_w.mainloop()
