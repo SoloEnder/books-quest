@@ -2,5 +2,7 @@
 build/
 dist/
 tests/
+logs/
 *.pyc
 *.spec
+*.log
