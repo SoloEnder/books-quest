@@ -3,6 +3,7 @@ build/
 dist/
 tests/
 logs/
+app/data/books/books.json
 *.pyc
 *.spec
 *.log
