@@ -23,6 +23,7 @@ class SensitiveInfoFilter(logging.Filter):
         if userpath.lower() in record.getMessage().lower():
             record.msg = record.getMessage().replace(userpath, "~")
             record.args = ()
+            
         return True
     
 class ErrorsFilter(logging.Filter):
