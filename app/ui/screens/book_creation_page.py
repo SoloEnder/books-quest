@@ -78,7 +78,7 @@ class BooksCreationScreen(my_frames.MyScrollableFrame):
         self.add_b = ctk.CTkButton(self, text="Ajouter", command=self.add_book)
         self.add_b.grid(row=len(self.book_shelf_cbs)+16, sticky="w")
 
-    def get_tot_pages(self):
+    def get_tot_pages(self, event):
         tot_pages = self.tot_pages_e.get()
 
         if tot_pages.isdigit():
