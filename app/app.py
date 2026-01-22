@@ -4,6 +4,7 @@ import logging
 import pathlib
 import datetime as dt
 
+from app import events_sentinel
 from app.ui import ui
 from app.src import book
 from app.utils import paths
@@ -19,9 +20,11 @@ class App:
         self.app_infos["boot_count"] += 1
         self.check_fisrt_boot()
         self.logger.info("Initialising application...")
-        self.books_handler = book.BooksHandler()
+        self.events_handler = events_sentinel.EventsHandler()
+        self.books_handler = book.BooksHandler(self.events_handler)
         self.books_handler.load_books(paths.get_abspath("app/data/books/books.json"))
-        self.ui = ui.UI(self, self.books_handler)
+        self.books_handler.create_book_shelf(name="Tout les livres", books=self.books_handler.books)
+        self.ui = ui.UI(self, self.books_handler, self.events_handler)
         self.ui.protocol("WM_DELETE_WINDOW", self.close_app)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
