@@ -8,10 +8,10 @@ import customtkinter as ctk
 
 class MenuBar(my_frames.MyFrame):
 
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, events_handler, **kwargs):
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Hi !")
         super().__init__(master, **kwargs)
+        self.events_handler = events_handler
         self.tabs = {}
         self.current_tab = None
 
