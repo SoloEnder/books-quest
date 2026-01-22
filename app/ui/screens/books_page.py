@@ -20,13 +20,13 @@ class BooksTab(my_frames.MyFrame):
 
     def draw_widgets(self, event=None):
         self.columnconfigure(0, weight=1)
-        self.add_book_b = ctk.CTkButton(self, text="add_circle", hover_color=self.cget("bg_color"), fg_color=self.cget("bg_color"), font=("Material Symbols Outlined 28pt", 40), command=lambda: self.switch_mode("book_creation"))
+        self.add_book_b = ctk.CTkButton(self, text="add_circle", hover_color=self.cget("bg_color"), fg_color=self.cget("bg_color"), font=("Material Symbols Outlined 28pt", 40), command=lambda: self.switch_tp_frame("book_creation"))
         self.add_book_b.grid(row=0, column=0, sticky="w")
         self.add_book_lb = ctk.CTkLabel(self, text="Ajouter un livre")
         self.add_book_lb.grid(row=0, column=0, sticky="e")
         self.add_shelf_lb = ctk.CTkLabel(self, text="Ajouter une étagère")
         self.add_shelf_lb.grid(row=1, column=0, sticky="e")
-        self.add_shelf_b = ctk.CTkButton(self, text="add_circle", hover_color=self.cget("bg_color"), fg_color=self.cget("bg_color"), font=("Material Symbols Outlined 28pt", 40), command=lambda: self.switch_mode("shelf_creation"))
+        self.add_shelf_b = ctk.CTkButton(self, text="add_circle", hover_color=self.cget("bg_color"), fg_color=self.cget("bg_color"), font=("Material Symbols Outlined 28pt", 40), command=lambda: self.switch_tp_frame("shelf_creation"))
         self.add_shelf_b.grid(row=1, column=0, sticky="w")
         self.creation_tp = ctk.CTkToplevel(self)
         self.creation_tp.title("New Book") 
@@ -45,20 +45,24 @@ class BooksTab(my_frames.MyFrame):
             book_shelf_fr.draw_widgets()
             book_shelf_fr.grid(row=index+2, column=0, sticky="nsew")
 
-    def switch_mode(self, mode: str):
+    def switch_tp_frame(self, mode: str):
         """
-        Switch the frame in the b
+        Switch the frame in the books/book shelf creation top level 
         """
         if mode == "shelf_creation":
+            self.logger.info("Switching top level frame to book shelf creation frame...")
             self.book_creation_screen.grid_remove()
             self.shelf_creation_screen.grid(row=0, column=0, sticky="nsew")
             self.shelf_creation_screen.draw_widgets()
+            self.logger.info("Showing creation top level...")
             self.creation_tp.deiconify()
 
         elif mode == "book_creation":
+            self.logger.info("Switching top level frame to book creation frame...")
             self.shelf_creation_screen.grid_remove()
             self.book_creation_screen.grid(row=0, column=0, sticky="nsew")
             self.book_creation_screen.draw_widgets()
+            self.logger.info("Showing creation top level...")
             self.creation_tp.deiconify()
 
         else:
@@ -97,14 +101,12 @@ class BooksShelfFrame(my_frames.MyFrame):
         self.books_sf = ctk.CTkScrollableFrame(self, orientation="horizontal")
         self.books_sf.grid(row=1, column=0, sticky="nsew")
         self.logger.info("Drawing books frames...")
-        index = 0
 
-        for book_id, book in self.books_shelf.books.items():
+        for index, book in enumerate(self.books_shelf.books.values()):
             book_fr = BookLocation(self.books_sf, book, self.events_handler)
             book_fr.draw_widgets()
-            book_fr.grid(row=0, column=index, padx=15)
-            index += 1
-            self.books_frames[book_id] = book_fr
+            book_fr.grid(row=0, column=len(self.books_shelf.books)-index, padx=15)
+            self.books_frames[book.internal_id] = book_fr
 
 class BookLocation(my_frames.MyFrame):
 
