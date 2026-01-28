@@ -4,10 +4,11 @@ import logging
 import pathlib
 import datetime as dt
 
-from app import events_sentinel
 from app.ui import ui
 from app.src import book
 from app.utils import paths
+from app import events_sentinel
+from app.src import events_creator
 from app.utils import json_file_manager as jfm
 
 class App:
@@ -21,10 +22,12 @@ class App:
         self.check_fisrt_boot()
         self.logger.info("Initialising application...")
         self.events_handler = events_sentinel.EventsHandler()
+        events_creator.create_event(self.events_handler)
         self.books_handler = book.BooksHandler(self.events_handler)
         self.books_handler.load_books(paths.get_abspath("app/data/books/books.json"))
-        self.books_handler.create_book_shelf(name="Tout les livres", books=self.books_handler.books)
         self.ui = ui.UI(self, self.books_handler, self.events_handler)
+        self.events_handler.raise_event("System.Books.CreateBaseShelf")
+        self.events_handler.raise_event("System.Books.LoadShelfsData", filepath=paths.get_abspath("app/data/books/shelfs.json"))
         self.ui.protocol("WM_DELETE_WINDOW", self.close_app)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
@@ -40,6 +43,7 @@ class App:
         self.logger.info("Saving data...")
         self.save_app_infos(paths.get_abspath("app/data/app_infos.json"))
         self.books_handler.save_books(paths.get_abspath("app/data/books/books.json"))
+        self.events_handler.raise_event("System.Books.SaveShelfsData", filepath=paths.get_abspath("app/data/books/shelfs.json"))
         self.logger.info("Exiting app...")
 
     def check_fisrt_boot(self):
