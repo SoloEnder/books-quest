@@ -2,21 +2,21 @@
 import logging
 import customtkinter as ctk
 
-from app.ui import my_frames
+from app.ui import my_widgets
 from app.ui.screens import book_creation_page
 from app.ui.screens import shelf_creation_page
 from app.src import book
 
-class BooksTab(my_frames.MyFrame):
+class BooksTab(my_widgets.MyScrollableFrame):
 
     def __init__(self, master, books_handler: book.BooksHandler, events_handler, **kwargs):
         super().__init__(master, **kwargs)
-        self.books_shelfs_fr = {}
+        self.shelfs_frs = {}
         self.columnconfigure(0, weight=1)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.events_handler = events_handler
-
+        self.events_handler.add_listener("System.Ui.ShelfFrameCreationRequest", self.create_shelf_frame)
 
     def draw_widgets(self, event=None):
         self.columnconfigure(0, weight=1)
@@ -39,11 +39,10 @@ class BooksTab(my_frames.MyFrame):
         self.book_creation_screen.draw_widgets()
         self.shelf_creation_screen = shelf_creation_page.ShelfCreationFrame(self.creation_tp, self.books_handler, self.events_handler)
 
-        for index, books_shelf in enumerate(self.books_handler.books_shelfs.values()):
+        for index, shelf_fr in enumerate(self.shelfs_frs.values()):
             self.rowconfigure(index+2, weight=1)
-            book_shelf_fr = BooksShelfFrame(self, books_shelf, self.events_handler)
-            book_shelf_fr.draw_widgets()
-            book_shelf_fr.grid(row=index+2, column=0, sticky="nsew")
+            shelf_fr.draw_widgets()
+            shelf_fr.grid(row=index+2, column=0, sticky="nsew")
 
     def switch_tp_frame(self, mode: str):
         """
@@ -66,7 +65,7 @@ class BooksTab(my_frames.MyFrame):
             self.creation_tp.deiconify()
 
         else:
-            raise ValueError(f"Unknown mode : {mode}")
+            self.logger.info(f"Unknown mode : {mode}")
 
     def add_book(self):
         self.logger.info("Showing add books windows...")
@@ -76,8 +75,21 @@ class BooksTab(my_frames.MyFrame):
     def on_closing_add_book_window(self):
         self.logger.info("Hiding add books windows...")
         self.creation_tp.withdraw()
+
+    def create_shelf_frame(self, event, shelf: book.BooksShelf):
+        """
+        Create and display a new shelf frame
+
+        event: used if the function is called by the events handler. set it to None if you call this func manually
+        shelf (book.BookShelf): the book shelf
+        """
+        self.shelf_fr = BooksShelfFrame(self, shelf, self.events_handler)
+        self.shelfs_frs[shelf.name] = self.shelf_fr
+        self.events_handler.raise_event("System.Ui.ShelfFrameCreated")
+        self.draw_widgets()
+
             
-class BooksShelfFrame(my_frames.MyFrame):
+class BooksShelfFrame(my_widgets.MyFrame):
 
     def __init__(self, master, books_self: book.BooksShelf, events_handler, **kwargs):
         super().__init__(master, **kwargs)
@@ -87,12 +99,12 @@ class BooksShelfFrame(my_frames.MyFrame):
         self.books_shelf = books_self
         self.name = self.books_shelf.name
         self.events_handler = events_handler
-        self.events_handler.add_listener("BookShelfUpdated", self.update_screen)
+        self.events_handler.add_listener("System.Books.ShelfUpdated", self.update_screen)
         self.books_frames = {}
 
-    def update_screen(self, event):
+    def update_screen(self, event, shelf):
 
-        if event.kwargs.get("book_shelf_name") == self.name:
+        if shelf.name == self.name:
             self.draw_widgets()
 
     def draw_widgets(self):
@@ -100,15 +112,13 @@ class BooksShelfFrame(my_frames.MyFrame):
         self.title_lb.grid(row=0, column=0, sticky="sw")
         self.books_sf = ctk.CTkScrollableFrame(self, orientation="horizontal")
         self.books_sf.grid(row=1, column=0, sticky="nsew")
-        self.logger.info("Drawing books frames...")
-
         for index, book in enumerate(self.books_shelf.books.values()):
             book_fr = BookLocation(self.books_sf, book, self.events_handler)
             book_fr.draw_widgets()
             book_fr.grid(row=0, column=len(self.books_shelf.books)-index, padx=15)
             self.books_frames[book.internal_id] = book_fr
 
-class BookLocation(my_frames.MyFrame):
+class BookLocation(my_widgets.MyFrame):
 
     def __init__(self, master, book: book.Book, events_handler):
         super().__init__(master)
@@ -124,7 +134,6 @@ class BookLocation(my_frames.MyFrame):
 
         self.authors_ft = ctk.CTkFont(slant="italic")
         self.title_lb = ctk.CTkLabel(self, text=f"{self.book.title}" if self.book.title else "Unknown ", font=("default", 17, "bold"))
-        self.logger.debug(f"Book title label : {self.title_lb.cget("text")}")
         self.title_lb.grid(row=0, column=1, sticky="w")
         self.author_lb = ctk.CTkLabel(self, text=f"{self.book.authors} " if self.book.authors else "Unknown ", font=self.authors_ft)
         self.author_lb.grid(row=1, column=1, sticky="w")
