@@ -1,12 +1,12 @@
 
 import logging
 
-from app.ui import my_frames
+from app.ui import my_widgets
 
 
 import customtkinter as ctk
 
-class MenuBar(my_frames.MyFrame):
+class MenuBar(my_widgets.MyFrame):
 
     def __init__(self, master, events_handler, **kwargs):
         self.logger = logging.getLogger(__name__)
