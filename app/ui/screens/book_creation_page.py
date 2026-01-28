@@ -5,21 +5,20 @@ import datetime as dt
 import customtkinter as ctk
 from tkinter.messagebox import showerror
 
-from app.ui import my_frames
+from app.ui import my_widgets
 from app.src import book
 
-class BooksCreationScreen(my_frames.MyScrollableFrame):
+class BooksCreationScreen(my_widgets.MyScrollableFrame):
 
     def __init__(self, master, books_handler: book.BooksHandler, events_handler, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.events_handler = events_handler
-        self.events_handler.create_event("BookLocationCreationRequest", book_object=None)
 
     def draw_widgets(self):
         self.error_b = ctk.CTkButton(self, text="error", font=("Material Symbols Outlined 28pt", 13), width=4, fg_color=self.cget("bg_color"), text_color="red")
-        self.title_lb = ctk.CTkLabel(self, text="Titre (obligatoire)")
+        self.title_lb = ctk.CTkLabel(self, text="Titre")
         self.title_lb.grid(row=0, column=0, sticky="w")
         self.title_e = ctk.CTkEntry(self, width=250)
         self.title_e.grid(row=1, column=0, sticky="w")
@@ -67,13 +66,14 @@ class BooksCreationScreen(my_frames.MyScrollableFrame):
         for index, book_shelf in enumerate(self.books_handler.books_shelfs.values()):
 
             book_shelf_cb = ctk.CTkCheckBox(self, text=book_shelf.name)
+            book_shelf_cb.shelf_id = book_shelf.id
             book_shelf_cb.grid(row=index+16, sticky="w")
 
             if book_shelf.name == "Tout les livres":
                 book_shelf_cb.configure(state="disabled")
                 book_shelf_cb.select()
 
-            self.book_shelf_cbs[book_shelf.name] = book_shelf_cb
+            self.book_shelf_cbs[book_shelf.id] = book_shelf_cb
 
         self.add_b = ctk.CTkButton(self, text="Ajouter", command=self.add_book)
         self.add_b.grid(row=len(self.book_shelf_cbs)+16, sticky="w")
@@ -102,7 +102,7 @@ class BooksCreationScreen(my_frames.MyScrollableFrame):
         books_infos = self.get_book_infos()
 
         if books_infos:
-            self.events_handler.raise_event("BookCreationRequest", **books_infos)
+            self.events_handler.raise_event("System.Books.BookCreationRequest", **books_infos)
 
     def get_book_infos(self):
         all_right = False
@@ -159,6 +159,7 @@ class BooksCreationScreen(my_frames.MyScrollableFrame):
         self.summary_tb.insert(0.0, ctk.END)
         self.tot_pages_e.delete(0, ctk.END)
         self.tot_pages_e.insert(0, book.tot_pages)
-        self.get_tot_pages()
+        self.get_tot_pages(event=None)
         self.alr_read_pages_sl.set(book.alr_read_pages)
         self.add_b.configure(text="Edit")
+
