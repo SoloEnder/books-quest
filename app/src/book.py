@@ -3,6 +3,7 @@ import json
 import typing
 import logging
 import datetime as dt
+from PySide6 import QtCore
 
 from app.utils import paths
 from app.utils import json_file_manager as jfm
@@ -20,6 +21,7 @@ class Book:
         self.edition = kwargs.get("edition", None)
         self.summary = kwargs.get("summary", None)
         self.isbn = kwargs.get("isbn", None)
+        self.cover_img_path = kwargs.get("cover_img_path", None)
         self.start_read_date = kwargs.get("start_read_date", None)
         self.end_read_date = kwargs.get("end_read_date", None)
         self.status = kwargs.get("status", None)
@@ -28,6 +30,20 @@ class Book:
         self.shelfs_ids = kwargs.get("shelfs_ids", [])
         self.series = kwargs.get("series", None)
         self.internal_id = kwargs.get("internal_id", str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""))
+        self.kwargs["title"] = self.title
+        self.kwargs["authors"] = self.authors
+        self.kwargs["edition"] = self.edition
+        self.kwargs["summary"] = self.summary
+        self.kwargs["isbn"] = self.isbn
+        self.kwargs["cover_img_path"] = self.cover_img_path
+        self.kwargs["start_read_date"] = self.start_read_date
+        self.kwargs["end_read_date"] = self.end_read_date
+        self.kwargs["status"] = self.status
+        self.kwargs["tot_pages"] = self.tot_pages
+        self.kwargs["alr_read_pages"] = self.alr_read_pages
+        self.kwargs["shelfs_ids"] = self.shelfs_ids
+        self.kwargs["series"] = self.series
+        self.kwargs["internal_id"] = self.internal_id
 
 
 class BooksHandler:
@@ -95,7 +111,7 @@ class BooksHandler:
         """
 
         if not book_shelf.id in self.books_shelfs.keys():
-            self.logger.info(f"Adding book shelf '{book_shelf.name}' with books = {book_shelf.books}...")
+            self.logger.info(f"Adding book shelf '{book_shelf.name}'")
             self.books_shelfs[book_shelf.id] = book_shelf
 
             if book_shelf.id in self.books_shelfs.keys():
