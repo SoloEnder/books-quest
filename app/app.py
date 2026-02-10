@@ -1,17 +1,19 @@
 
+import sys
 import json
 import logging
 import pathlib
 import datetime as dt
-
+from PySide6 import QtWidgets
 from app.ui import ui
 from app.src import book
 from app.utils import paths
 from app.utils import json_file_manager as jfm
 
-class App:
+class AppSystem:
 
     def __init__(self):
+        self.app_ui = QtWidgets.QApplication([])
         begin = dt.datetime.now()
         self.logger = logging.getLogger(__name__)
         self.check_folder(paths.get_abspath("app/data"), paths.get_abspath("app/assets"), paths.get_abspath("app/data/books"))
@@ -23,24 +25,37 @@ class App:
         self.books_handler.load_books(paths.get_abspath("app/data/books/books.json"))
         self.books_handler.create_shelf("Tout les livres", self.books_handler.books, str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""))
         self.books_handler.load_shelfs(paths.get_abspath("app/data/books/shelfs.json"))
-        self.ui = ui.UI(self, self.books_handler)
-        self.ui.protocol("WM_DELETE_WINDOW", self.close_app)
+        self.app_ui.aboutToQuit.connect(self.close_app)
+        self.ui = ui.UI(self.books_handler)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
 
         
     def running(self):
         self.logger.info("Showing main window...")
-        self.ui.mainloop()
+        self.ui.show()
+        sys.exit(self.app_ui.exec())
 
     def close_app(self):
         self.logger.info("Closing window...")
-        self.ui.destroy()
         self.logger.info("Saving data...")
         self.save_app_infos(paths.get_abspath("app/data/app_infos.json"))
         self.books_handler.save_books(paths.get_abspath("app/data/books/books.json"))
         self.books_handler.save_shelfs(paths.get_abspath("app/data/books/shelfs.json"))
+        self.logger.info("Deleting files in temporary folder...")
+        self.empty_tmp_folder()
         self.logger.info("Exiting app...")
+
+    def empty_tmp_folder(self):
+        """
+        Erase all the files in the tmp directory
+        """
+        tmp_path = pathlib.Path(paths.get_abspath("app/tmp"))
+
+        for element in tmp_path.iterdir():
+
+            if element.is_file():
+                element.unlink()
 
     def check_fisrt_boot(self):
 
