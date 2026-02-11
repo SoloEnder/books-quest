@@ -21,7 +21,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
     def __init__(self, parent: QtWidgets.QWidget|None=None):
         super().__init__(parent)
-        self.logger = logging.getLogger(__name__+"- UI Pages Manager")
+        self.logger = logging.getLogger(__name__)
         self.pages = {}
         self.history = []
         self.default_page = {}
@@ -51,7 +51,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.default_page = {page_name:self.pages[page_name]}
 
     def switch_to_default_page(self):
-        print(self.default_page.keys())
         self.switch_page(list(self.default_page.keys())[0])
 
         
