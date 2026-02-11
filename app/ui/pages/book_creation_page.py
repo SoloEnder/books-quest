@@ -5,6 +5,7 @@ import logging
 import datetime as dt
 from PIL import Image
 from pathlib import Path
+from typing import Literal
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from app.utils import paths
@@ -16,14 +17,14 @@ class BookCreationPage(QtWidgets.QWidget):
         self.books_handler = books_handler
         self.logger = logging.getLogger(__name__)
         self.icons_folder = paths.get_abspath("app/assets/icons")
+        self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "titre":"Titre : ",
+            "title":"Titre : ",
             "author":"Auteur : ",
             "edition":"Edition : ",
             "summary": "Résumé : ",
             "tot_pages":"Pages totales : ",
-            "alr_read_pages":"Pages lues : "
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -63,19 +64,47 @@ class BookCreationPage(QtWidgets.QWidget):
             if key == "summary":
                 lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
+            elif key == "tot_pages":
+                ew.textEdited.connect(lambda: self.check_int(ew.text(), ew)) # type: ignore
+
             ew.setMaximumWidth(300)
             self.container_widget_layout.addWidget(lb, row, 0)
             self.container_widget_layout.addWidget(ew, row, 1)
             self.basic_book_info_ew[key] = ew
             row += 1
 
-        #Book statut widgets
-        self.book_statut_widgets_infos = ("En cours", "Terminé", "Pas encore lut")
-        self.book_statut_widgets = {}
-
-        for info in self.book_statut_widgets_infos:
-            self.book_statut_rb = QtWidgets.QRadioButton(info)
-            self.book_statut_widgets[info] = self.book_statut_rb
+        #Book status widgets
+        self.book_status_lb = QtWidgets.QLabel("status : ")
+        self.book_status_combob = QtWidgets.QComboBox()
+        self.book_status_combob.addItem("Non lut", "unread")
+        self.book_status_combob.addItem("En cours", "on_reading")
+        self.book_status_combob.addItem("Terminé", "finished")
+        self.book_status_combob.currentIndexChanged.connect(lambda: self.set_book_status(self.book_status_combob.currentData()))
+        self.book_status_widget = QtWidgets.QWidget(self)
+        self.book_status_widget_layout = QtWidgets.QGridLayout()
+        self.book_status_widget.setLayout(self.book_status_widget_layout)
+        self.alr_read_pages_lb = QtWidgets.QLabel("Pages lues : ")
+        self.alr_read_pages_le = QtWidgets.QLineEdit()
+        self.alr_read_pages_le.textEdited.connect(lambda: self.check_int(self.alr_read_pages_le.text(), self.alr_read_pages_le))
+        self.alr_read_pages_le.setMaximumWidth(300)
+        self.today_date = QtCore.QDate(self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day)
+        self.starting_read_date_lb = QtWidgets.QLabel("Commencé le : ")
+        self.starting_read_date_de = QtWidgets.QDateEdit()
+        self.starting_read_date_de.setDate(self.today_date)
+        self.starting_read_date_de.setCalendarPopup(True)
+        self.starting_read_date_de.setMaximumWidth(300)
+        self.end_read_date_lb = QtWidgets.QLabel("Terminé le : ")
+        self.end_read_date_de = QtWidgets.QDateEdit()
+        self.end_read_date_de.setDate(self.today_date)
+        self.end_read_date_de.setCalendarPopup(True)
+        self.end_read_date_de.setMaximumWidth(300)
+        self.set_book_status("unread")
+        self.book_status_widget_layout.addWidget(self.alr_read_pages_lb, 0, 0)
+        self.book_status_widget_layout.addWidget(self.alr_read_pages_le, 0, 1)
+        self.book_status_widget_layout.addWidget(self.starting_read_date_lb, 1, 0)
+        self.book_status_widget_layout.addWidget(self.starting_read_date_de, 1, 1)
+        self.book_status_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
+        self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         #Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel("Etageres : ")
@@ -85,15 +114,15 @@ class BookCreationPage(QtWidgets.QWidget):
         self.shelfs_selection_widget.setLayout(self.shelfs_selection_layout)
         self.shelfs_selection_scroll_area = QtWidgets.QScrollArea(self)
         self.shelfs_selection_scroll_area.setMaximumWidth(300)
-        self.shelfs_selection_scroll_area.setMinimumHeight(450)
+        self.shelfs_selection_scroll_area.setMinimumHeight(400)
         self.shelfs_selection_scroll_area.setWidgetResizable(True)
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
+            shelf_cb = QtWidgets.QCheckBox(shelf.name)
+            self.shelfs_selection_cbs[shelf.id] = shelf_cb
 
             if shelf.name != "Tout les livres":
-                shelf_cb = QtWidgets.QCheckBox(shelf.name)
-                self.shelfs_selection_cbs[shelf.id] = shelf_cb
                 self.shelfs_selection_layout.addWidget(shelf_cb, index)
 
         self.add_b = QtWidgets.QPushButton("Ajouter")
@@ -103,16 +132,62 @@ class BookCreationPage(QtWidgets.QWidget):
         self.container_widget_layout.addWidget(self.exit_b, 0, 0)
         self.container_widget_layout.addWidget(self.book_cover_lb, 1, 0)
         self.container_widget_layout.addWidget(self.edit_cover_b, 2, 0)
+        self.container_widget_layout.addWidget(self.book_status_lb, self.container_widget_layout.rowCount()+1, 0)
+        self.container_widget_layout.addWidget(self.book_status_combob, self.container_widget_layout.rowCount()+1, 1)
+        self.container_widget_layout.addWidget(self.book_status_widget, self.container_widget_layout.rowCount()+1, 0, 2, 0)
         self.container_widget_layout.addWidget(self.shelfs_selection_lb, self.container_widget_layout.rowCount()+1, 0)
         self.container_widget_layout.addWidget(self.shelfs_selection_scroll_area, self.container_widget_layout.rowCount()+1, 0)
         self.container_widget_layout.addWidget(self.add_b, self.container_widget_layout.rowCount()+1, 0)
         self.main_layout.addWidget(self.scroll_area)
+
+    def set_book_status(self, status: Literal["finished", "on_read", "unread"]):
+        """
+        Set the book status and draw the appriopriate widgets
+
+        Args:
+        - status (str): the book status ("finished", "on_read" or "unread")
+        """
+        if status == "finished":
+            self.alr_read_pages_le.setEnabled(False)
+            self.starting_read_date_de.setEnabled(True)
+            self.end_read_date_de.setEnabled(True)
+
+        elif status == "on_read":
+            self.alr_read_pages_le.setEnabled(True)
+            self.starting_read_date_de.setEnabled(True)
+            self.end_read_date_de.setEnabled(False)
+
+        elif status == "unread":
+            self.alr_read_pages_le.setEnabled(False)
+            self.starting_read_date_de.setEnabled(False)
+            self.end_read_date_de.setEnabled(False)
+
+    def check_int(self, text: str, le: QtWidgets.QLineEdit|None=None):
+        """
+        Check if all characters in <text> are numbers return it, and eventually edit the PySide6.QtWidgets.QLineEdit if it is given
+
+        Args:
+        - text (str): the text to check
+        - le (PySide6.QtWidgets.QLineEdit): the QLineEdit widget to change
+        """
+
+        for c in text:
+
+            if not c.isdigit():
+                text = text.replace(c, "")
+
+        if le:
+            le.setText(text)
+
+        return text
 
     def set_default_cover(self):
         self.cover_image = paths.get_abspath("app/assets/default_book_cover.png")
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def select_image(self):
+        """Open a file selecter window for enable user to select an image
+        """
         self.selected_image = QtWidgets.QFileDialog.getOpenFileName(self, "Select Image", str(Path.home()), "Supported Formats (*.png *.jpeg);;PNG Images (*.png);;JPEG Images (*.jpeg)")
 
         if self.selected_image[0]:
@@ -185,8 +260,13 @@ class BookCreationPage(QtWidgets.QWidget):
             if type(w) == QtWidgets.QLineEdit:
                 text = w.text()
 
-                if text:
-                    books_infos[key] = text
+                if key == "tot_pages":
+                    books_infos[key] = text if text else 0
+
+                else:
+
+                    if text:
+                        books_infos[key] = text
 
             elif type(w) == QtWidgets.QTextEdit:
                 text = w.toPlainText()
@@ -196,23 +276,35 @@ class BookCreationPage(QtWidgets.QWidget):
 
         books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now())).replace(".", "")
 
-        if self.cover_image != str(paths.get_abspath("app/assets/default_book_cover.png")):
+        if str(self.cover_image) != str(paths.get_abspath("app/assets/default_book_cover.png")):
             cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
-                #cover_img_path.rename(paths.get_abspath(f"app/data/books/{books_infos['internal_id']}.png"))
                 shutil.move(self.cover_image, paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png"))
                 self.cover_image = paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png")
 
             books_infos["cover_img_path"] = str(paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png"))
 
+        books_infos["status"] = self.book_status_combob.currentData()
+
+        if self.alr_read_pages_le.isEnabled():
+            text = self.alr_read_pages_le.text()
+            books_infos["alr_read_pages"] = int(text) if text else 0
+
+        if self.starting_read_date_de.isEnabled():
+            books_infos["starting_read_date"] = self.starting_read_date_de.date().toString(QtCore.Qt.DateFormat.ISODate)
+
+        if self.end_read_date_de.isEnabled():
+            books_infos["end_read_date"] = self.end_read_date_de.date().toString(QtCore.Qt.DateFormat.ISODate)
+
         books_infos["shelfs_ids"] = []
+
         for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
 
             if shelf_selection_cbs.isChecked():
                 books_infos["shelfs_ids"].append(shelf_id)
 
-        return books_infos        
+        return books_infos 
 
     def add_book(self):
         books_infos = self.get_book_infos()
