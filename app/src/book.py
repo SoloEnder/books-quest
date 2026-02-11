@@ -22,13 +22,12 @@ class Book:
         self.summary = kwargs.get("summary", None)
         self.isbn = kwargs.get("isbn", None)
         self.cover_img_path = kwargs.get("cover_img_path", None)
-        self.start_read_date = kwargs.get("start_read_date", None)
+        self.starting_read_date = kwargs.get("starting_read_date", None)
         self.end_read_date = kwargs.get("end_read_date", None)
         self.status = kwargs.get("status", None)
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
         self.shelfs_ids = kwargs.get("shelfs_ids", [])
-        self.series = kwargs.get("series", None)
         self.internal_id = kwargs.get("internal_id", str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""))
         self.kwargs["title"] = self.title
         self.kwargs["authors"] = self.authors
@@ -36,13 +35,12 @@ class Book:
         self.kwargs["summary"] = self.summary
         self.kwargs["isbn"] = self.isbn
         self.kwargs["cover_img_path"] = self.cover_img_path
-        self.kwargs["start_read_date"] = self.start_read_date
+        self.kwargs["starting_read_date"] = self.starting_read_date
         self.kwargs["end_read_date"] = self.end_read_date
         self.kwargs["status"] = self.status
         self.kwargs["tot_pages"] = self.tot_pages
         self.kwargs["alr_read_pages"] = self.alr_read_pages
         self.kwargs["shelfs_ids"] = self.shelfs_ids
-        self.kwargs["series"] = self.series
         self.kwargs["internal_id"] = self.internal_id
 
 
