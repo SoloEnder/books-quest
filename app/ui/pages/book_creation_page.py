@@ -1,17 +1,16 @@
-
-import io
-import shutil
-import logging
 import datetime as dt
-from PIL import Image
+import logging
+import shutil
 from pathlib import Path
 from typing import Literal
-from PySide6 import QtWidgets, QtCore, QtGui
+
+from PIL import Image
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.utils import paths
 
-class BookCreationPage(QtWidgets.QWidget):
 
+class BookCreationPage(QtWidgets.QWidget):
     def __init__(self, parent: None, books_handler):
         super().__init__(parent)
         self.books_handler = books_handler
@@ -20,11 +19,11 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title":"Titre : ",
-            "author":"Auteur : ",
-            "edition":"Edition : ",
+            "title": "Titre : ",
+            "author": "Auteur : ",
+            "edition": "Edition : ",
             "summary": "Résumé : ",
-            "tot_pages":"Pages totales : ",
+            "tot_pages": "Pages totales : ",
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -40,11 +39,13 @@ class BookCreationPage(QtWidgets.QWidget):
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.container_widget)
 
-        #Exit Widget
+        # Exit Widget
         self.exit_b = QtWidgets.QPushButton("Fermer")
-        self.exit_b.setIcon(QtGui.QIcon(str(Path.joinpath(self.icons_folder, "close_ico.png"))))
+        self.exit_b.setIcon(
+            QtGui.QIcon(str(Path.joinpath(self.icons_folder, "close_ico.png")))
+        )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
-        self.exit_b.clicked.connect(self.close)
+        self.exit_b.clicked.connect(self.close_widget)
 
         # Cover widgets
         self.cover_image = paths.get_abspath("app/assets/default_book_cover.png")
@@ -57,7 +58,10 @@ class BookCreationPage(QtWidgets.QWidget):
 
         # Book infos widgets
         row = 3
-        for key, value, in self.basic_book_infos.items():
+        for (
+            key,
+            value,
+        ) in self.basic_book_infos.items():
             lb = QtWidgets.QLabel(value)
             ew = QtWidgets.QLineEdit() if key != "summary" else QtWidgets.QTextEdit()
 
@@ -65,7 +69,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
             elif key == "tot_pages":
-                ew.textEdited.connect(lambda: self.check_int(ew.text(), ew)) # type: ignore
+                ew.textEdited.connect(lambda: self.check_int(ew.text(), ew))  # type: ignore
 
             ew.setMaximumWidth(300)
             self.container_widget_layout.addWidget(lb, row, 0)
@@ -73,21 +77,29 @@ class BookCreationPage(QtWidgets.QWidget):
             self.basic_book_info_ew[key] = ew
             row += 1
 
-        #Book status widgets
+        # Book status widgets
         self.book_status_lb = QtWidgets.QLabel("status : ")
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
         self.book_status_combob.addItem("En cours", "on_reading")
         self.book_status_combob.addItem("Terminé", "finished")
-        self.book_status_combob.currentIndexChanged.connect(lambda: self.set_book_status(self.book_status_combob.currentData()))
+        self.book_status_combob.currentIndexChanged.connect(
+            lambda: self.set_book_status(self.book_status_combob.currentData())
+        )
         self.book_status_widget = QtWidgets.QWidget(self)
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
         self.alr_read_pages_lb = QtWidgets.QLabel("Pages lues : ")
         self.alr_read_pages_le = QtWidgets.QLineEdit()
-        self.alr_read_pages_le.textEdited.connect(lambda: self.check_int(self.alr_read_pages_le.text(), self.alr_read_pages_le))
+        self.alr_read_pages_le.textEdited.connect(
+            lambda: self.check_int(
+                self.alr_read_pages_le.text(), self.alr_read_pages_le
+            )
+        )
         self.alr_read_pages_le.setMaximumWidth(300)
-        self.today_date = QtCore.QDate(self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day)
+        self.today_date = QtCore.QDate(
+            self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
+        )
         self.starting_read_date_lb = QtWidgets.QLabel("Commencé le : ")
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
@@ -106,11 +118,13 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
         self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
-        #Shelfs widgets
+        # Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel("Etageres : ")
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
-        self.shelfs_selection_layout = QtWidgets.QVBoxLayout(self.shelfs_selection_widget)
+        self.shelfs_selection_layout = QtWidgets.QVBoxLayout(
+            self.shelfs_selection_widget
+        )
         self.shelfs_selection_widget.setLayout(self.shelfs_selection_layout)
         self.shelfs_selection_scroll_area = QtWidgets.QScrollArea(self)
         self.shelfs_selection_scroll_area.setMaximumWidth(300)
@@ -132,12 +146,30 @@ class BookCreationPage(QtWidgets.QWidget):
         self.container_widget_layout.addWidget(self.exit_b, 0, 0)
         self.container_widget_layout.addWidget(self.book_cover_lb, 1, 0)
         self.container_widget_layout.addWidget(self.edit_cover_b, 2, 0)
-        self.container_widget_layout.addWidget(self.book_status_lb, self.container_widget_layout.rowCount()+1, 0)
-        self.container_widget_layout.addWidget(self.book_status_combob, self.container_widget_layout.rowCount()+1, 1)
-        self.container_widget_layout.addWidget(self.book_status_widget, self.container_widget_layout.rowCount()+1, 0, 2, 0)
-        self.container_widget_layout.addWidget(self.shelfs_selection_lb, self.container_widget_layout.rowCount()+1, 0)
-        self.container_widget_layout.addWidget(self.shelfs_selection_scroll_area, self.container_widget_layout.rowCount()+1, 0)
-        self.container_widget_layout.addWidget(self.add_b, self.container_widget_layout.rowCount()+1, 0)
+        self.container_widget_layout.addWidget(
+            self.book_status_lb, self.container_widget_layout.rowCount() + 1, 0
+        )
+        self.container_widget_layout.addWidget(
+            self.book_status_combob, self.container_widget_layout.rowCount() + 1, 1
+        )
+        self.container_widget_layout.addWidget(
+            self.book_status_widget,
+            self.container_widget_layout.rowCount() + 1,
+            0,
+            2,
+            0,
+        )
+        self.container_widget_layout.addWidget(
+            self.shelfs_selection_lb, self.container_widget_layout.rowCount() + 1, 0
+        )
+        self.container_widget_layout.addWidget(
+            self.shelfs_selection_scroll_area,
+            self.container_widget_layout.rowCount() + 1,
+            0,
+        )
+        self.container_widget_layout.addWidget(
+            self.add_b, self.container_widget_layout.rowCount() + 1, 0
+        )
         self.main_layout.addWidget(self.scroll_area)
 
     def set_book_status(self, status: Literal["finished", "on_read", "unread"]):
@@ -162,7 +194,7 @@ class BookCreationPage(QtWidgets.QWidget):
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)
 
-    def check_int(self, text: str, le: QtWidgets.QLineEdit|None=None):
+    def check_int(self, text: str, le: QtWidgets.QLineEdit | None = None):
         """
         Check if all characters in <text> are numbers return it, and eventually edit the PySide6.QtWidgets.QLineEdit if it is given
 
@@ -172,7 +204,6 @@ class BookCreationPage(QtWidgets.QWidget):
         """
 
         for c in text:
-
             if not c.isdigit():
                 text = text.replace(c, "")
 
@@ -186,15 +217,21 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def select_image(self):
-        """Open a file selecter window for enable user to select an image
-        """
-        self.selected_image = QtWidgets.QFileDialog.getOpenFileName(self, "Select Image", str(Path.home()), "Supported Formats (*.png *.jpeg);;PNG Images (*.png);;JPEG Images (*.jpeg)")
+        """Open a file selecter window for enable user to select an image"""
+        self.selected_image = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Select Image",
+            str(Path.home()),
+            "Supported Formats (*.png *.jpeg);;PNG Images (*.png);;JPEG Images (*.jpeg)",
+        )
 
         if self.selected_image[0]:
             self.cover_image = self.selected_image[0]
-            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.prepare_image(self.cover_image)[0]))
+            self.book_cover_lb.setPixmap(
+                QtGui.QPixmap(self.prepare_image(self.cover_image)[0])
+            )
 
-    def prepare_image(self, image_path: str|Path):
+    def prepare_image(self, image_path: str | Path):
         """
         Convert <image_path> to PNG format, resize it and save it in the temporary directory and return the path
         """
@@ -211,19 +248,21 @@ class BookCreationPage(QtWidgets.QWidget):
 
     def resize_image(self, img):
         img_width, img_height = img.size
-        resized_img = img.resize((int(img_width/(img_width/140)), int(img_height/(img_height/200))))
+        resized_img = img.resize(
+            (int(img_width / (img_width / 140)), int(img_height / (img_height / 200)))
+        )
 
         return resized_img
-    
+
     def convert_img_to_png(self, img: Image.Image):
         """
         Convert <img> to PNG format and return it
         """
-        img_rgb = img.convert(mode='RGB')
+        img_rgb = img.convert(mode="RGB")
 
         return img_rgb
-    
-    def close(self):
+
+    def close_widget(self):
         """
         If possible, switch to the previous page
         """
@@ -245,10 +284,9 @@ class BookCreationPage(QtWidgets.QWidget):
         parent = self.parent()
 
         if parent:
-
             if parent.history and len(parent.history) > 1:
                 parent.switch_page(parent.history[1])
-            
+
             else:
                 parent.switch_to_default_page()
 
@@ -256,34 +294,43 @@ class BookCreationPage(QtWidgets.QWidget):
         books_infos = {}
 
         for key, w in self.basic_book_info_ew.items():
-
-            if type(w) == QtWidgets.QLineEdit:
+            if w.isinstance(QtWidgets.QLineEdit):
                 text = w.text()
 
                 if key == "tot_pages":
                     books_infos[key] = text if text else 0
 
                 else:
-
                     if text:
                         books_infos[key] = text
 
-            elif type(w) == QtWidgets.QTextEdit:
+            elif w.isinstance(QtWidgets.QTextEdit):
                 text = w.toPlainText()
 
                 if text:
                     books_infos[key] = text
 
-        books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now())).replace(".", "")
+        books_infos["internal_id"] = str(
+            dt.datetime.timestamp(dt.datetime.now())
+        ).replace(".", "")
 
-        if str(self.cover_image) != str(paths.get_abspath("app/assets/default_book_cover.png")):
+        if str(self.cover_image) != str(
+            paths.get_abspath("app/assets/default_book_cover.png")
+        ):
             cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
-                shutil.move(self.cover_image, paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png"))
-                self.cover_image = paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png")
+                shutil.move(
+                    self.cover_image,
+                    paths.get_abspath(
+                        f"app/data/books/books_covers/{books_infos['internal_id']}.png"
+                    ),
+                )
+                self.cover_image = paths.get_abspath(
+                    f"app/data/books/books_covers/{books_infos['internal_id']}.png"
+                )
 
-            books_infos["cover_img_path"] = str(paths.get_abspath(f"app/data/books/books_covers/{books_infos['internal_id']}.png"))
+        books_infos["cover_img_path"] = str(self.cover_image)
 
         books_infos["status"] = self.book_status_combob.currentData()
 
@@ -292,19 +339,22 @@ class BookCreationPage(QtWidgets.QWidget):
             books_infos["alr_read_pages"] = int(text) if text else 0
 
         if self.starting_read_date_de.isEnabled():
-            books_infos["starting_read_date"] = self.starting_read_date_de.date().toString(QtCore.Qt.DateFormat.ISODate)
+            books_infos["starting_read_date"] = (
+                self.starting_read_date_de.date().toString(QtCore.Qt.DateFormat.ISODate)
+            )
 
         if self.end_read_date_de.isEnabled():
-            books_infos["end_read_date"] = self.end_read_date_de.date().toString(QtCore.Qt.DateFormat.ISODate)
+            books_infos["end_read_date"] = self.end_read_date_de.date().toString(
+                QtCore.Qt.DateFormat.ISODate
+            )
 
         books_infos["shelfs_ids"] = []
 
         for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
-
             if shelf_selection_cbs.isChecked():
                 books_infos["shelfs_ids"].append(shelf_id)
 
-        return books_infos 
+        return books_infos
 
     def add_book(self):
         books_infos = self.get_book_infos()
