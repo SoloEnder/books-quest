@@ -1,56 +1,87 @@
-
 import logging
-from PySide6 import QtWidgets, QtCore
-from app.ui.pages import books_page, book_creation_page
+from re import PatternError
+
+from PySide6 import QtCore, QtWidgets
+
+from app.src import book
+from app.ui.pages import book_creation_page, shelf_view_page, shelfs_pages
+
 
 class UI(QtWidgets.QWidget):
-
     def __init__(self, books_handler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.stacked_widgets = MyStackedWidgets(self)
-        self.main_layout.addWidget(self.stacked_widgets)
-        self.books_page = books_page.BooksPage(parent=self.stacked_widgets, books_handler=self.books_handler)
-        self.book_creation_page = book_creation_page.BookCreationPage(self.stacked_widgets, self.books_handler)
-        self.stacked_widgets.add_page("books_page", self.books_page)
-        self.stacked_widgets.add_page("book_creation_page", self.book_creation_page)
+        self.my_stacked_widgets = MyStackedWidgets(self, self.books_handler)
+        self.main_layout.addWidget(self.my_stacked_widgets)
+        self.my_stacked_widgets.switch_page("shelfs_page")
+
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
-
-    def __init__(self, parent: QtWidgets.QWidget|None=None):
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, books_handler: book.BooksHandler
+    ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
-        self.pages = {}
+        self.books_handler = books_handler
+        self.shelfs_page = shelfs_pages.ShelfsPage(self, self.books_handler)
+        self.book_creation_page = book_creation_page.BookCreationPage(
+            self, self.books_handler
+        )
+        self.shelfs_view_page = shelfs_pages.ShelfsPage(self, self.books_handler)
+        self.pages = {
+            "shelfs_page": self.shelfs_page,
+            "book_creation_page": self.book_creation_page,
+            "shelfs_view_page": self.shelfs_view_page,
+        }
+        self.addWidget(self.shelfs_page)
+        self.addWidget(self.book_creation_page)
+        self.addWidget(self.shelfs_view_page)
         self.history = []
-        self.default_page = {}
+        self.history.append(self.shelfs_page)
 
-    def switch_page(self, page_name: str):
+    def switch_page(self, page_name: str, refresh: bool = False, **kwargs):
         """
-        Switch widget displayed by the stacked widget to <page_name>. <page_name> must be in the <pages> attribut.
+        Change the current widget displayed by the value of <name> in the attribute <pages>
 
-        page_name (str): the page name (a key of the <pages> attribut)
+        Args:
+            - page_name (str): the name of the page, a key of the attribute <pages>.
+            - refresh (bool): if true, the page will be refreshed. default to False
         """
-        self.logger.info(f"Switching to page <{page_name}>...")
 
         if page_name in self.pages.keys():
-            self.setCurrentIndex(self.pages[page_name])
-            self.history.append(page_name)
+            page_obj = self.pages[page_name]
+            self.setCurrentWidget(page_obj)
+
+            if refresh:
+                self.refresh(page_name, **kwargs)
+                self.history.append(page_obj)
 
         else:
-            self.logger.error(f"Page <{page_name}> dosen't exists !")
+            self.logger.error(f"Page <{page_name} not found !>")
 
-    def add_page(self, page_name, page_obj):
-        """
-        Add a new page. Use this instead of the method <addWidget()> only for better organisation 
-        """
-        self.pages[page_name] = self.addWidget(page_obj)
+    def go_back(self):
+        self.switch_page(list(self.pages.keys())[self.indexOf(self.history[0])])
 
-        if not self.default_page:
-            self.default_page = {page_name:self.pages[page_name]}
+    def refresh(self, *pages_names, **kwargs):
+        to_update = pages_names
 
-    def switch_to_default_page(self):
-        self.switch_page(list(self.default_page.keys())[0])
+        for to_update_page in to_update:
+            if to_update_page == "shelfs_page":
+                self.removeWidget(self.shelfs_page)
+                self.shelfs_page.setParent(None)
+                self.shelfs_page.deleteLater()
+                self.shelfs_page = shelfs_pages.ShelfsPage(self, self.books_handler)
+                self.pages["shelfs_page"] = self.shelfs_page
+                self.addWidget(self.shelfs_page)
 
-        
+            elif to_update_page == "book_creation_page":
+                self.removeWidget(self.book_creation_page)
+                self.book_creation_page.setParent(None)
+                self.book_creation_page.deleteLater()
+                self.book_creation_page = book_creation_page.BookCreationPage(
+                    self, self.books_handler
+                )
+                self.pages["book_creation_page"] = self.book_creation_page
+                self.addWidget(self.book_creation_page)
