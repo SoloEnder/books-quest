@@ -11,7 +11,7 @@ from app.utils import paths
 
 
 class BookCreationPage(QtWidgets.QWidget):
-    def __init__(self, parent: None, books_handler):
+    def __init__(self, parent, books_handler):
         super().__init__(parent)
         self.books_handler = books_handler
         self.logger = logging.getLogger(__name__)
@@ -284,11 +284,7 @@ class BookCreationPage(QtWidgets.QWidget):
         parent = self.parent()
 
         if parent:
-            if parent.history and len(parent.history) > 1:
-                parent.switch_page(parent.history[1])
-
-            else:
-                parent.switch_to_default_page()
+            parent.go_back()
 
     def get_book_infos(self):
         books_infos = {}
