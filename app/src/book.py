@@ -1,15 +1,11 @@
-
-import json
-import typing
-import logging
 import datetime as dt
-from PySide6 import QtCore
+import logging
+import typing
 
-from app.utils import paths
 from app.utils import json_file_manager as jfm
 
-class Book:
 
+class Book:
     def __init__(self, **kwargs):
         """
         The base class for the books
@@ -28,25 +24,14 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
         self.shelfs_ids = kwargs.get("shelfs_ids", [])
-        self.internal_id = kwargs.get("internal_id", str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""))
-        self.kwargs["title"] = self.title
-        self.kwargs["authors"] = self.authors
-        self.kwargs["edition"] = self.edition
-        self.kwargs["summary"] = self.summary
-        self.kwargs["isbn"] = self.isbn
-        self.kwargs["cover_img_path"] = self.cover_img_path
-        self.kwargs["starting_read_date"] = self.starting_read_date
-        self.kwargs["end_read_date"] = self.end_read_date
-        self.kwargs["status"] = self.status
-        self.kwargs["tot_pages"] = self.tot_pages
-        self.kwargs["alr_read_pages"] = self.alr_read_pages
-        self.kwargs["shelfs_ids"] = self.shelfs_ids
-        self.kwargs["internal_id"] = self.internal_id
+        self.internal_id = kwargs.get(
+            "internal_id",
+            str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
+        )
 
 
 class BooksHandler:
-
-    def __init__(self, books: dict|None=None):
+    def __init__(self, books: dict | None = None):
         """
         Handle and manage books data
         """
@@ -64,7 +49,7 @@ class BooksHandler:
             del self.books[book_id]
 
         else:
-             self.logger.error(f"Unknown book id : {book_id}")
+            self.logger.error(f"Unknown book id : {book_id}")
 
     def create_book(self, **kwargs):
         """
@@ -74,19 +59,20 @@ class BooksHandler:
         book = Book(**kwargs)
         self.add_book(book)
         return book
-    
+
     def add_book(self, book_obj):
         self.logger.info(f"Adding new book with id : {book_obj.internal_id}...")
 
         for shelf_id in book_obj.shelfs_ids:
-
             if shelf_id in self.books_shelfs.keys():
                 shelf = self.books_shelfs[shelf_id]
                 shelf.add_book(book_obj)
 
             else:
-                self.logger.warning(f"Shelf with id {shelf_id} not found ! Perhaps it has been deleted ?")
-                
+                self.logger.warning(
+                    f"Shelf with id {shelf_id} not found ! Perhaps it has been deleted ?"
+                )
+
         self.books[book_obj.internal_id] = book_obj
         self.shelfs_updated = True
 
@@ -108,7 +94,7 @@ class BooksHandler:
         book_shelf: an instance of a BookShelf object
         """
 
-        if not book_shelf.id in self.books_shelfs.keys():
+        if book_shelf.id not in self.books_shelfs.keys():
             self.logger.info(f"Adding book shelf '{book_shelf.name}'")
             self.books_shelfs[book_shelf.id] = book_shelf
 
@@ -116,10 +102,14 @@ class BooksHandler:
                 self.shelfs_updated = True
 
             else:
-                self.logger.warning(f"Book shelf with id {book_shelf.id} doesn't exists ! Perhaps it has been deleted ?")
+                self.logger.warning(
+                    f"Book shelf with id {book_shelf.id} doesn't exists ! Perhaps it has been deleted ?"
+                )
 
         else:
-            self.logger.warning(f"A book shelf with the id {book_shelf.id} already exists")
+            self.logger.warning(
+                f"A book shelf with the id {book_shelf.id} already exists"
+            )
 
     def remove_shelf(self, name: str):
         self.logger.info(f"Removing book shelf '{name}'")
@@ -129,31 +119,28 @@ class BooksHandler:
 
         else:
             self.logger.error(f"Unknown book shelf : {name}")
-    
+
     def edit_book(self, event, book_id: str, new_book: Book):
         self.logger.info(f"Editing book with id {book_id}...")
         self.books[book_id] = new_book
 
         for shelf_id in new_book.shelfs_ids:
-
             if shelf_id in self.books_shelfs.keys():
                 self.action_on_shelf(shelf_id, action="edited")
 
             else:
-                self.logger.warning(f"Book shelf with id {shelf_id} doesn't exists ! Perhaps it has been deleted ?")
+                self.logger.warning(
+                    f"Book shelf with id {shelf_id} doesn't exists ! Perhaps it has been deleted ?"
+                )
 
     def get_book(self, **kwargs):
         """
         Get all the books who matches with filters given as args and return them
         """
-        title = kwargs.get("title", None)
-        author = kwargs.get("authors", None)
-        id = kwargs.get("internal_id", None) 
         filters = {}
         books_matchs = []
 
         for filter_name, filter in kwargs.items():
-
             if filter:
                 filters[filter_name] = filter
 
@@ -161,29 +148,31 @@ class BooksHandler:
             filter_matchs = []
 
             for filter_name, filter in filters.items():
+                if hasattr(book_obj, filter_name):
+                    if getattr(book_obj, filter_name).lower() == filter.lower():
+                        filter_matchs.append(True)
 
-                if book_obj.kwargs[filter_name].lower() == filter.lower():
-                    filter_matchs.append(True)
+                    else:
+                        filter_matchs.append(False)
 
                 else:
-                    filter_matchs.append(False)
+                    self.logger.warning(
+                        f"Book shelf object with id <{book_obj.internal_id}> has not attribute <{filter_name}> !"
+                    )
 
             if all(filter_matchs):
                 books_matchs.append(book_obj)
 
         return books_matchs
-    
+
     def get_shelf(self, event, **kwargs):
         """
         Get all the books who matches with filters given as args and return them
         """
-        name = kwargs.get("name", None)
-        id = kwargs.get("id", None) 
         filters = {}
         books_matchs = []
 
         for filter_name, filter in kwargs.items():
-
             if filter:
                 filters[filter_name] = filter
 
@@ -191,18 +180,22 @@ class BooksHandler:
             filter_matchs = []
 
             for filter_name, filter in filters.items():
+                if hasattr(book_shelf, filter_name):
+                    if getattr(book_shelf, filter_name).lower() == filter.lower():
+                        filter_matchs.append(True)
 
-                if book_shelf.kwargs[filter_name].lower() == filter.lower():
-                    filter_matchs.append(True)
+                    else:
+                        filter_matchs.append(False)
 
                 else:
-                    filter_matchs.append(False)
+                    self.logger.warning(
+                        f"Book shelf object with id <{book_shelf.id}> has not attribute <{filter_name}> !"
+                    )
 
             if all(filter_matchs):
                 books_matchs.append(book_shelf)
 
         return books_matchs
-
 
     def save_books(self, filepath: str):
         self.logger.info(f"Saving books data at {filepath}...")
@@ -219,7 +212,6 @@ class BooksHandler:
         data = jfm.read_json(filepath)
 
         if data:
-
             for book_data in data:
                 book_obj = Book(**book_data)
                 self.books[book_obj.internal_id] = book_obj
@@ -235,9 +227,14 @@ class BooksHandler:
         data = []
 
         for shelf in self.books_shelfs.values():
-
             if not shelf.name == "Tout les livres":
-                data.append({"name":shelf.name, "id":shelf.id, "books_ids":list(shelf.books.keys())})
+                data.append(
+                    {
+                        "name": shelf.name,
+                        "id": shelf.id,
+                        "books_ids": list(shelf.books.keys()),
+                    }
+                )
 
         jfm.write_json(filepath=filepath, data=data)
 
@@ -247,12 +244,10 @@ class BooksHandler:
         data = jfm.read_json(filepath)
 
         if data:
-
             for shelf_data in data:
                 shelf_books = {}
 
                 for book_id in shelf_data["books_ids"]:
-
                     if book_id in self.books:
                         book_obj = self.books[book_id]
                         shelf_books[book_id] = book_obj
@@ -260,9 +255,13 @@ class BooksHandler:
                     else:
                         self.logger.warning(f"Book with id {book_id} doesn't exists !")
 
-                self.create_shelf(shelf_name=shelf_data["name"], shelf_books=shelf_books, shelf_id=shelf_data["id"])
+                self.create_shelf(
+                    shelf_name=shelf_data["name"],
+                    shelf_books=shelf_books,
+                    shelf_id=shelf_data["id"],
+                )
 
-    def convert_book_id(self, books_ids: list|tuple):
+    def convert_book_id(self, books_ids: list | tuple):
         """
         Convert a list of books ids to a dict of books object
 
@@ -276,17 +275,19 @@ class BooksHandler:
             books_objs[book_id] = book_obj
 
         return books_objs
-    
-    def action_on_shelf(self, shelf_id: int, action: typing.Literal["created", "edited", "deleted"]):
-        self.changes_on_shelfs.append({"shelf_id": shelf_id, "action":action})
+
+    def action_on_shelf(
+        self, shelf_id: int, action: typing.Literal["created", "edited", "deleted"]
+    ):
+        self.changes_on_shelfs.append({"shelf_id": shelf_id, "action": action})
 
     def remove_action_on_shelf(self, index):
 
         if 0 <= index < len(self.changes_on_shelfs):
             del self.changes_on_shelfs[index]
-        
-class Session:
 
+
+class Session:
     def __init__(self, **kwargs):
         self.start_date = kwargs.get("start_date", None)
         self.end_date = kwargs.get("end_date", None)
@@ -294,8 +295,8 @@ class Session:
         self.end_page = kwargs.get("end_page", 0)
         self.pages_read = self.end_page - self.start_page
 
-class Shelf:
 
+class Shelf:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.logger = logging.getLogger(__name__)
@@ -304,15 +305,18 @@ class Shelf:
         self.id = kwargs.get("id")
 
     def add_book(self, book: Book):
-        self.logger.info(f"Adding book with id '{book.internal_id}' to book shelf '{self.name}'...")
+        self.logger.info(
+            f"Adding book with id '{book.internal_id}' to book shelf '{self.name}'..."
+        )
         self.books[book.internal_id] = book
 
     def remove_book(self, book_id: str):
-        self.logger.info(f"Removing book with id '{book_id}' from book shelf '{self.name}'...")
+        self.logger.info(
+            f"Removing book with id '{book_id}' from book shelf '{self.name}'..."
+        )
 
         if book_id in self.books.keys():
             del self.books[book_id]
 
         else:
             self.logger.error(f"Unknown book id : {book_id}")
-            
