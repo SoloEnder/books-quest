@@ -57,7 +57,9 @@ class ShelfWidget(QtWidgets.QWidget):
         self.shelf = shelf
         # self.
         self.main_layout = QtWidgets.QGridLayout(self)
-        self.cover_pm = QtGui.QPixmap("app/assets/default_shelf_cover.png")
+        self.cover_pm = QtGui.QPixmap(
+            os.path.join(paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png")
+        )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
         self.name_lb = QtWidgets.QLabel(self.shelf.name)
