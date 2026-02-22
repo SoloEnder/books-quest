@@ -1,63 +1,59 @@
-
 # app/base_path.py
-from pathlib import Path
+import os
 import sys
+import typing
+from pathlib import Path
 
-# Oui, ce code à été fait par une IA T T
 
-def get_base_path() -> Path:
+def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> str:
     """
-    Retourne le répertoire racine du projet, quel que soit le contexte
-    d'exécution (script normal, PyInstaller --onedir ou --onefile).
+    Return the direcory which is the base of all the programs path
 
-    - En mode PyInstaller, le répertoire contenant le sous‑dossier `_internal`
-      est la racine souhaitée.
-    - En mode développement, on remonte simplement jusqu'à la première
-      occurrence de `_internal` (au cas où le projet serait déjà structuré
-      ainsi) ou on utilise une profondeur fixe comme secours.
+    Args:
+        mode: "frozen" if the app is a binary file made with pyinstaller in --onedir mode, "unfrozen" if else (default)
     """
-    # ------------------------------------------------------------------
-    # Cas où le binaire a été créé par PyInstaller (frozen)
-    # ------------------------------------------------------------------
-    if getattr(sys, "frozen", False):
-        # sys._MEIPASS pointe vers le répertoire temporaire où PyInstaller
-        # a extrait les fichiers. Dans le mode --onedir il contient
-        # le sous‑dossier `_internal`. Dans le mode --onefile il ne le
-        # contient pas, mais le répertoire même est la racine.
-        start = Path(sys._MEIPASS).resolve()
+
+    if mode == "frozen":
+        path = Path(__file__).parents[1]
+
+    elif mode == "unfrozen":
+        path = Path(__file__).parents[1]
+
     else:
-        # ----------------------------------------------------------------
-        # Cas normal (exécution depuis le code source)
-        # ----------------------------------------------------------------
-        start = Path(__file__).resolve()
+        raise ValueError(f"Invalid value given for argument <mode> : '{mode}'")
 
-    # --------------------------------------------------------------------
-    # Parcourir les parents à la recherche de `_internal`
-    # --------------------------------------------------------------------
-    for current in start.parents:
-        internal_dir = current / "_internal"
-        if internal_dir.is_dir():
-            # Le répertoire qui contient `_internal` est la racine du projet
-            return current
+    return str(path)
 
-    # --------------------------------------------------------------------
-    # Aucun `_internal` trouvé → on utilise une profondeur fixe.
-    # Ici on suppose que le projet a la forme :
-    #   project/
-    #   ├─ app/
-    #   │   └─ base_path.py   <-- ce fichier
-    #   └─ data/ …
-    # => on remonte de 2 niveaux (app → project)
-    # Ajustez le nombre si votre arborescence diffère.
-    # --------------------------------------------------------------------
-    try:
-        return start.parents[2]          # 0 = fichier, 1 = app/, 2 = project/
-    except IndexError:
-        # Si la profondeur n’est pas suffisante, on renvoie simplement le
-        # répertoire du fichier lui‑même (fallback très sûr).
-        return start.parent
-    
-def get_abspath(path: str):
-    base_path = get_base_path()
-    final_path = base_path.joinpath(path)
-    return final_path.absolute()
+
+BASE_PATH = get_base_path()
+
+# Assets
+ASSETS_PATH = os.path.join(BASE_PATH, "assets")
+ICONS_PATH = os.path.join(ASSETS_PATH, "icons")
+DEFAULT_COVERS_PATH = os.path.join(ASSETS_PATH, "default")
+
+# Data
+DATA_PATH = os.path.join(BASE_PATH, "data")
+
+BOOKS_DATA_PATH = os.path.join(DATA_PATH, "books")
+BOOKS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "books_cover")
+SHELFS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "shelfs_covers")
+
+# Logs
+LOGS_PATH = os.path.join(BASE_PATH, "logs")
+
+# tmp
+TMP_DIR_PATH = ""
+
+all_paths = {
+    "base_path": BASE_PATH,
+    "assets_path": ASSETS_PATH,
+    "icons_path": ICONS_PATH,
+    "default_cover_path": DEFAULT_COVERS_PATH,
+    "data_path": DATA_PATH,
+    "books_data_path": BOOKS_DATA_PATH,
+    "books_covers_path": BOOKS_COVERS_PATH,
+    "shelfs_cover_path": SHELFS_COVERS_PATH,
+    "logs_path": LOGS_PATH,
+    "tmp_dir_path": None,
+}

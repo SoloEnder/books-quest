@@ -3,18 +3,26 @@ import os
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from app.src import book_stuff
+from app.ui import qt_signals_handler
 from app.utils import paths
 
 
 class ShelfsPage(QtWidgets.QWidget):
-    def __init__(self, parent: QtWidgets.QWidget | None, books_handler):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        books_handler: book_stuff.BooksHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
+        self.qt_signals_handler = qt_signals_handler
         self.main_layout = QtWidgets.QGridLayout(self)
         self.add_book_b = QtWidgets.QPushButton("Nouveau livre")
         self.add_book_b.clicked.connect(
-            lambda: self.parent().switch_page("book_creation_page")
+            lambda: qt_signals_handler.go_previous_page_sg.emit(True)
         )
         self.add_shelf_b = QtWidgets.QPushButton("Nouvelle étagère")
         self.shelfs_container = QtWidgets.QWidget(self)
@@ -33,39 +41,17 @@ class ShelfsPage(QtWidgets.QWidget):
         )
         self.main_layout.addWidget(self.scroll_area, 2, 0)
         self.shelfs_widgets = []
-        self.watchdog_timer = QtCore.QTimer(self)
-        self.watchdog_timer.timeout.connect(self.watchdog)
-        self.watchdog_timer.start(1000)
-
-    def watchdog(self):
-
-        if self.books_handler.shelfs_updated:
-            self.refresh()
-        self.books_handler.shelfs_updated = False
-
-    def refresh(self):
-
-        for shelf_widget in self.shelfs_widgets:
-            shelf_widget.setParent(None)
-            shelf_widget.deleteLater()
-
-        self.shelfs_widgets.clear()
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
             shelf_widget = ShelfWidget(shelf)
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(shelf_widget, index)
 
-    def create_shelf_widget(self, shelf):
-        self.shelf_widget = ShelfWidget(self)
-        self.shelfs_widgets.insert(4, self.shelf_widget)
-        return self.shelf_widget
-
 
 class ShelfWidget(QtWidgets.QWidget):
     def __init__(self, shelf):
         super().__init__()
-        self.icons_folder = paths.get_abspath("app/assets/icons")
+        self.icons_folder = paths.ICONS_PATH
         self.shelf = shelf
         # self.
         self.main_layout = QtWidgets.QGridLayout(self)

@@ -1,7 +1,7 @@
-
 from PySide6 import QtWidgets
 
-from app.src import book
+from app.src import book_stuff
+
 
 class ShelfViewPage(QtWidgets.QWidget):
     def __init__(self, parent: None | QtWidgets.QWidget, shelf) -> None:
@@ -15,18 +15,18 @@ class ShelfViewPage(QtWidgets.QWidget):
         self.actions_widget = QtWidgets.QWidget()
         self.edit_b = QtWidgets.QPushButton("Modifier")
         self.main_layout.addWidget(self.edit_b)
-        
+
+
 class ShelfActionsWidget(QtWidgets.QWidget):
-    
-    def __init__(self, parent: QtWidgets.QWidget|None, books_handler: book.BooksHandler) -> None:
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, books_handler: book_stuff.BooksHandler
+    ) -> None:
         super().__init__(parent)
         self.books_handler = books_handler
-        
-        #Main Layout
+
+        # Main Layout
         self.main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_layout)
-        
-        #Widgets
+
+        # Widgets
         self.edit_b = QtWidgets.QPushButton("Editer")
-        
-        
