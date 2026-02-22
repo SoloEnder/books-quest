@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+import os
 import shutil
 from pathlib import Path
 from typing import Literal
@@ -7,15 +8,22 @@ from typing import Literal
 from PIL import Image
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from app.ui import qt_signals_handler
 from app.utils import paths
 
 
 class BookCreationPage(QtWidgets.QWidget):
-    def __init__(self, parent, books_handler):
+    def __init__(
+        self,
+        parent,
+        books_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
         super().__init__(parent)
         self.books_handler = books_handler
+        self.qt_signals_handler = qt_signals_handler
         self.logger = logging.getLogger(__name__)
-        self.icons_folder = paths.get_abspath("app/assets/icons")
+        self.icons_folder = paths.ICONS_PATH
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
@@ -42,17 +50,22 @@ class BookCreationPage(QtWidgets.QWidget):
         # Exit Widget
         self.exit_b = QtWidgets.QPushButton("Fermer")
         self.exit_b.setIcon(
-            QtGui.QIcon(str(Path.joinpath(self.icons_folder, "close_ico.png")))
+            QtGui.QIcon(os.path.join(self.icons_folder, "close_ico.png"))
         )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.exit_b.clicked.connect(self.close_widget)
 
         # Cover widgets
-        self.cover_image = paths.get_abspath("app/assets/default_book_cover.png")
+        self.default_cover_img = os.path.join(
+            paths.DEFAULT_COVERS_PATH, "default_book_cover.png"
+        )
+        self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
         self.edit_cover_b = QtWidgets.QPushButton("Changer la couverture")
-        self.edit_cover_b.setIcon(QtGui.QIcon("app/assets/icons/edit_ico.png"))
+        self.edit_cover_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "edit_ico.png"))
+        )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.select_image)
 
@@ -213,7 +226,7 @@ class BookCreationPage(QtWidgets.QWidget):
         return text
 
     def set_default_cover(self):
-        self.cover_image = paths.get_abspath("app/assets/default_book_cover.png")
+        self.cover_image = self.default_cover_img
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def select_image(self):
@@ -241,7 +254,7 @@ class BookCreationPage(QtWidgets.QWidget):
         with Image.open(image_path) as img:
             res = self.resize_image(img)
             res = self.convert_img_to_png(res)
-            self.cover_image = paths.get_abspath("app/tmp/book_cover.png")
+            self.cover_image = os.path.join(paths.TMP_DIR_PATH, "book_cover.png")
             res.save(self.cover_image, "PNG")
 
         return (self.cover_image, res)
@@ -271,7 +284,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if self.cover_image:
             self.logger.info("Deleting temporary book cover...")
-            tmp_book_cover = Path(paths.get_abspath("app/tmp/book_cover.png"))
+            tmp_book_cover = Path(os.path.join(paths.TMP_DIR_PATH, "book_cover.png"))
 
             if tmp_book_cover.exists():
                 tmp_book_cover.unlink()
@@ -281,10 +294,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
             self.set_default_cover()
 
-        parent = self.parent()
-
-        if parent:
-            parent.go_back()
+            self.qt_signals_handler.switch_page_sg.emit()
 
     def get_book_infos(self):
         books_infos = {}
@@ -310,20 +320,20 @@ class BookCreationPage(QtWidgets.QWidget):
             dt.datetime.timestamp(dt.datetime.now())
         ).replace(".", "")
 
-        if str(self.cover_image) != str(
-            paths.get_abspath("app/assets/default_book_cover.png")
-        ):
+        if str(self.cover_image) != self.default_cover_img:
             cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
                 shutil.move(
                     self.cover_image,
-                    paths.get_abspath(
-                        f"app/data/books/books_covers/{books_infos['internal_id']}.png"
+                    os.path.join(
+                        paths.BOOKS_COVERS_PATH,
+                        f"app/data/books/books_covers/{books_infos['internal_id']}.png",
                     ),
                 )
-                self.cover_image = paths.get_abspath(
-                    f"app/data/books/books_covers/{books_infos['internal_id']}.png"
+                self.cover_image = os.path.join(
+                    paths.BOOKS_COVERS_PATH,
+                    f"app/data/books/books_covers/{books_infos['internal_id']}.png",
                 )
 
         books_infos["cover_img_path"] = str(self.cover_image)
