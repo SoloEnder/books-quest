@@ -148,7 +148,7 @@ class AppSystem:
             app_infos = {
                 "version": {
                     "readable": "Unknown",
-                    "true": "Unknown",
+                    "semantic": "Unknown",
                 },
                 "boot_count": 0,
             }
