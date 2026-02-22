@@ -4,7 +4,7 @@ from PySide6 import QtCore, QtWidgets
 
 from app.src import book_stuff
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelfs_pages
+from app.ui.pages import book_creation_page, shelf_creation_page, shelfs_pages
 
 
 class UI(QtWidgets.QWidget):
@@ -43,14 +43,19 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.shelfs_view_page = shelfs_pages.ShelfsPage(
             self, self.books_handler, self.qt_signals_handler
         )
+        self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
+            self, self.books_handler, self.qt_signals_handler
+        )
         self.pages = {
             "shelfs_page": self.shelfs_page,
-            "book_creation_page": self.book_creation_page,
             "shelfs_view_page": self.shelfs_view_page,
+            "book_creation_page": self.book_creation_page,
+            "shelf_creation_page": self.shelf_creation_page,
         }
         self.addWidget(self.shelfs_page)
         self.addWidget(self.book_creation_page)
         self.addWidget(self.shelfs_view_page)
+        self.addWidget(self.shelf_creation_page)
         self.history = []
         self.history.append(self.shelfs_page)
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
@@ -111,3 +116,12 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 )
                 self.pages["book_creation_page"] = self.book_creation_page
                 self.addWidget(self.book_creation_page)
+
+            elif to_update_page == "shelf_creation_page":
+                self.removeWidget(self.shelf_creation_page)
+                self.shelf_creation_page.setParent(None)
+                self.shelf_creation_page.deleteLater()
+                self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
+                    self, self.books_handler, self.qt_signals_handler
+                )
+                self.pages["shelf_creation_page"] = self.shelf_creation_page
