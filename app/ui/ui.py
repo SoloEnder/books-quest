@@ -4,7 +4,7 @@ from PySide6 import QtCore, QtWidgets
 
 from app.src import book_stuff
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelf_view_page, shelfs_pages
+from app.ui.pages import book_creation_page, shelfs_pages
 
 
 class UI(QtWidgets.QWidget):
@@ -26,7 +26,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self,
         parent: QtWidgets.QWidget | None,
         books_handler: book_stuff.BooksHandler,
-        qt_signals_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
@@ -54,6 +54,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.history = []
         self.history.append(self.shelfs_page)
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
+        self.qt_signals_handler.go_previous_page_sg.connect(self.go_back)
 
     @QtCore.Slot(str, bool, dict)
     def switch_page(self, page_name: str, refresh: bool = False, page_args={}):
@@ -65,13 +66,15 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             - refresh (bool): if true, the page will be refreshed. default to False
         """
 
+        self.logger.info(f"Switching to page <{page_name}>...")
         if page_name in self.pages.keys():
+            if refresh:
+                self.refresh(page_name, page_args)
+
             page_obj = self.pages[page_name]
             self.setCurrentWidget(page_obj)
 
-            if refresh:
-                self.refresh(page_name, page_args)
-            self.history.append(page_obj)
+            self.history.insert(0, page_name)
 
         else:
             self.logger.error(f"Page <{page_name} not found !>")
@@ -79,7 +82,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
         self.switch_page(
-            list(self.pages.keys())[self.indexOf(self.history[0])],
+            self.history[1] if len(self.history) > 2 else self.history[0],
             True if refresh else False,
         )
 
