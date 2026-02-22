@@ -22,7 +22,9 @@ class ShelfsPage(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QGridLayout(self)
         self.add_book_b = QtWidgets.QPushButton("Nouveau livre")
         self.add_book_b.clicked.connect(
-            lambda: qt_signals_handler.go_previous_page_sg.emit(True)
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "book_creation_page", True, {}
+            )
         )
         self.add_shelf_b = QtWidgets.QPushButton("Nouvelle étagère")
         self.shelfs_container = QtWidgets.QWidget(self)
