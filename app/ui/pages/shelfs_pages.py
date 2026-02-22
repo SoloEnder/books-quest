@@ -20,7 +20,17 @@ class ShelfsPage(QtWidgets.QWidget):
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
         self.main_layout = QtWidgets.QGridLayout(self)
+        self.go_back_b = QtWidgets.QPushButton("Fermer")
+        self.go_back_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "back_ico.png"))
+        )
+        self.go_back_b.clicked.connect(
+            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
+        )
         self.add_book_b = QtWidgets.QPushButton("Nouveau livre")
+        self.add_book_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "new_book_ico.png"))
+        )
         self.add_book_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
                 "book_creation_page", True, {}
@@ -36,18 +46,24 @@ class ShelfsPage(QtWidgets.QWidget):
 
         # Shelf books view
         self.main_layout.addWidget(
-            self.add_book_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.go_back_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_layout.addWidget(
-            self.add_shelf_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.add_book_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_layout.addWidget(self.scroll_area, 2, 0)
+        self.main_layout.addWidget(
+            self.add_shelf_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+        self.main_layout.addWidget(self.scroll_area, 3, 0)
         self.shelfs_widgets = []
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
             shelf_widget = ShelfWidget(shelf)
             self.shelfs_widgets.append(shelf_widget)
-            self.shelfs_container_layout.addWidget(shelf_widget, index)
+            self.shelfs_container_layout.addWidget(
+                shelf_widget, index, QtCore.Qt.AlignmentFlag.AlignTop
+            )
 
 
 class ShelfWidget(QtWidgets.QWidget):
