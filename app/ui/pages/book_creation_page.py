@@ -50,7 +50,7 @@ class BookCreationPage(QtWidgets.QWidget):
         # Exit Widget
         self.exit_b = QtWidgets.QPushButton("Fermer")
         self.exit_b.setIcon(
-            QtGui.QIcon(os.path.join(self.icons_folder, "close_ico.png"))
+            QtGui.QIcon(os.path.join(self.icons_folder, "back_ico.png"))
         )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.exit_b.clicked.connect(self.close_widget)
