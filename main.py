@@ -1,5 +1,5 @@
-from app import app
+from app import system
 
 if __name__ == "__main__":
-    system = app.AppSystem()
-    system.running()
+    app_system = system.AppSystem()
+    app_system.running()
