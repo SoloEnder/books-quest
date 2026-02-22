@@ -294,7 +294,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
             self.set_default_cover()
 
-            self.qt_signals_handler.switch_page_sg.emit()
+            self.qt_signals_handler.go_previous_page_sg.emit(True)
 
     def get_book_infos(self):
         books_infos = {}
