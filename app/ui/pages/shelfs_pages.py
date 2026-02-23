@@ -50,9 +50,9 @@ class ShelfsPage(QtWidgets.QWidget):
         self.scroll_area.setWidget(self.shelfs_container)
 
         # Shelf books view
-        self.main_layout.addWidget(
-            self.go_back_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
-        )
+        # self.main_layout.addWidget(
+        # self.go_back_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        # )
         self.main_layout.addWidget(
             self.add_book_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
@@ -97,7 +97,7 @@ class ShelfWidget(QtWidgets.QWidget):
         self.finished_books_count = 0
 
         for book in self.shelf.books.values():
-            ifbook.status == "unread":
+            if book.status == "unread":
                 self.unread_books_count += 1
 
             elif book.status == "on_reading":
