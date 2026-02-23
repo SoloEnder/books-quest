@@ -97,7 +97,7 @@ class ShelfWidget(QtWidgets.QWidget):
         self.finished_books_count = 0
 
         for book in self.shelf.books.values():
-            if book.status == "unread":
+            ifbook.status == "unread":
                 self.unread_books_count += 1
 
             elif book.status == "on_reading":
