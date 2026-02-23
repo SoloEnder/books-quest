@@ -300,7 +300,7 @@ class BookCreationPage(QtWidgets.QWidget):
         books_infos = {}
 
         for key, w in self.basic_book_info_ew.items():
-            if w.isinstance(QtWidgets.QLineEdit):
+            if isinstance(w, QtWidgets.QLineEdit):
                 text = w.text()
 
                 if key == "tot_pages":
@@ -310,7 +310,7 @@ class BookCreationPage(QtWidgets.QWidget):
                     if text:
                         books_infos[key] = text
 
-            elif w.isinstance(QtWidgets.QTextEdit):
+            elif isinstance(w, QtWidgets.QTextEdit):
                 text = w.toPlainText()
 
                 if text:
