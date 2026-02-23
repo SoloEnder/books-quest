@@ -82,16 +82,16 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.history.insert(0, page_name)
 
         else:
-            self.logger.error(f"Page <{page_name} not found !>")
+            self.logger.error(f"Page <{page_name}> not found !")
 
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
         self.switch_page(
-            self.history[1] if len(self.history) > 2 else self.history[0],
+            self.history[1] if len(self.history) >= 1 else self.history[0],
             True if refresh else False,
         )
 
-    def refresh(self, *pages_names, **kwargs):
+    def refresh(self, *pages_names, page_args: dict = {}):
         to_update = pages_names
 
         for to_update_page in to_update:
@@ -125,3 +125,4 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                     self, self.books_handler, self.qt_signals_handler
                 )
                 self.pages["shelf_creation_page"] = self.shelf_creation_page
+                self.addWidget(self.shelf_creation_page)
