@@ -83,12 +83,14 @@ class ShelfWidget(QtWidgets.QWidget):
         )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
-        self.name_lb = QtWidgets.QLabel(self.shelf.name)
+        self.name_lb = QtWidgets.QLabel(
+            self.shelf.name if self.shelf.name else "Unknown"
+        )
         self.name_lb.setStyleSheet("""
             font-weight: bold;
             font-size: 20px;
         """)
-        self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books)} livres")
+        self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books.keys())} livres")
         self.total_books.setStyleSheet("""
             font-size: 17px;
         """)
