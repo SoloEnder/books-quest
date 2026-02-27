@@ -62,12 +62,16 @@ class ShelfsPage(QtWidgets.QWidget):
 
         self.main_layout.addWidget(self.scroll_area, 3, 0)
         self.shelfs_widgets = []
+        self.default_shelf_widget = ShelfWidget(self.books_handler.default_shelf)
+        self.shelfs_container_layout.addWidget(
+            self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
+        )
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
             shelf_widget = ShelfWidget(shelf)
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(
-                shelf_widget, index, QtCore.Qt.AlignmentFlag.AlignTop
+                shelf_widget, index + 1, QtCore.Qt.AlignmentFlag.AlignTop
             )
 
 
