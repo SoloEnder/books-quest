@@ -12,15 +12,15 @@ class Book:
         """
         self.logger = logging.getLogger(__name__)
         self.kwargs = kwargs
-        self.title = kwargs.get("title", "Unknown")
-        self.authors = kwargs.get("authors", None)
-        self.edition = kwargs.get("edition", None)
-        self.summary = kwargs.get("summary", None)
-        self.isbn = kwargs.get("isbn", None)
-        self.cover_img_path = kwargs.get("cover_img_path", None)
-        self.starting_read_date = kwargs.get("starting_read_date", None)
-        self.end_read_date = kwargs.get("end_read_date", None)
-        self.status = kwargs.get("status", None)
+        self.title = kwargs.get("title")
+        self.authors = kwargs.get("authors")
+        self.edition = kwargs.get("edition")
+        self.summary = kwargs.get("summary")
+        self.isbn = kwargs.get("isbn")
+        self.cover_img_path = kwargs.get("cover_img_path")
+        self.starting_read_date = kwargs.get("starting_read_date")
+        self.end_read_date = kwargs.get("end_read_date")
+        self.status = kwargs.get("status")
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
         self.shelfs_ids = kwargs.get("shelfs_ids", [])
@@ -76,15 +76,14 @@ class BooksHandler:
         self.books[book_obj.internal_id] = book_obj
         self.shelfs_updated = True
 
-    def create_shelf(self, shelf_name: str, shelf_books: dict, shelf_id: str):
+    def create_shelf(self, **kwargs):
         """
         Create a book shelf
-
-        name (str): the name for the book shelf
-        books (dict): the books handled by the book shelf
         """
-        self.logger.info(f"Creating book shelf '{shelf_name}'...")
-        shelf = Shelf(name=shelf_name, books_ids=shelf_books, id=shelf_id)
+        self.logger.info(f"Creating book shelf '{kwargs.get('name', 'Unknown')}'...")
+        shelf = Shelf(
+            name=kwargs.get("name"), books=kwargs.get("books"), id=kwargs.get("id")
+        )
         self.add_shelf(shelf)
 
     def add_shelf(self, book_shelf):
@@ -165,7 +164,7 @@ class BooksHandler:
 
         return books_matchs
 
-    def get_shelf(self, event, **kwargs):
+    def get_shelf(self, **kwargs):
         """
         Get all the books who matches with filters given as args and return them
         """
@@ -256,9 +255,9 @@ class BooksHandler:
                         self.logger.warning(f"Book with id {book_id} doesn't exists !")
 
                 self.create_shelf(
-                    shelf_name=shelf_data["name"],
-                    shelf_books=shelf_books,
-                    shelf_id=shelf_data["id"],
+                    name=shelf_data["name"],
+                    books=shelf_books,
+                    id=shelf_data["id"],
                 )
 
     def convert_book_id(self, books_ids: list | tuple):
@@ -301,14 +300,21 @@ class Shelf:
         self.kwargs = kwargs
         self.logger = logging.getLogger(__name__)
         self.name = kwargs.get("name")
-        self.books = kwargs.get("books_ids", {})
+        self.books = kwargs.get("books", {})
         self.id = kwargs.get("id")
 
+        for book_obj in self.books.values():
+            if self.id not in book_obj.shelfs_ids:
+                book_obj.shelfs_ids.append(self.id)
+
     def add_book(self, book: Book):
-        self.logger.info(
-            f"Adding book with id '{book.internal_id}' to book shelf '{self.name}'..."
-        )
-        self.books[book.internal_id] = book
+
+        if book.internal_id not in self.books.keys():
+            self.logger.info(
+                f"Adding book with id '{book.internal_id}' to book shelf '{self.name}'..."
+            )
+            self.books[book.internal_id] = book
+            book.shelfs_ids = self.id
 
     def remove_book(self, book_id: str):
         self.logger.info(
