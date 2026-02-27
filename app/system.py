@@ -22,6 +22,8 @@ class AppSystem:
             paths.DATA_PATH,
             paths.ASSETS_PATH,
             paths.BOOKS_DATA_PATH,
+            paths.BOOKS_COVERS_PATH,
+            paths.SHELFS_COVERS_PATH,
             make=True,
         )
         paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
@@ -34,9 +36,9 @@ class AppSystem:
         self.books_handler = book_stuff.BooksHandler()
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
         self.books_handler.create_shelf(
-            "Tout les livres",
-            self.books_handler.books,
-            str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
+            name="Tout les livres",
+            books=self.books_handler.books,
+            id=str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
         )
         self.books_handler.load_shelfs(
             os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json")
