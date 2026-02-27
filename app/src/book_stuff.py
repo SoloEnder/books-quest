@@ -1,6 +1,5 @@
 import datetime as dt
 import logging
-import typing
 
 from app.utils import json_file_manager as jfm
 
@@ -38,8 +37,8 @@ class BooksHandler:
         self.logger = logging.getLogger(__name__)
         self.books = books if books else {}
         self.books_shelfs = {}
-        self.changes_on_shelfs = []
         self.shelfs_updated = False
+        self.default_shelf = Shelf(name="All", books=self.books)
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -86,6 +85,14 @@ class BooksHandler:
         )
         self.add_shelf(shelf)
 
+    def edit_default_shelf(self, **kwargs):
+        """
+        Edit the attributes of the default shelf.
+        """
+        for arg_name, arg_value in kwargs.items():
+            if hasattr(self.default_shelf, arg_name):
+                setattr(self.default_shelf, arg_name, arg_value)
+
     def add_shelf(self, book_shelf):
         """
         Add a book shelf
@@ -125,7 +132,7 @@ class BooksHandler:
 
         for shelf_id in new_book.shelfs_ids:
             if shelf_id in self.books_shelfs.keys():
-                self.action_on_shelf(shelf_id, action="edited")
+                self.books_shelfs[shelf_id] = new_book
 
             else:
                 self.logger.warning(
@@ -148,7 +155,7 @@ class BooksHandler:
 
             for filter_name, filter in filters.items():
                 if hasattr(book_obj, filter_name):
-                    if getattr(book_obj, filter_name).lower() == filter.lower():
+                    if filter.lower() in getattr(book_obj, filter_name).lower():
                         filter_matchs.append(True)
 
                     else:
@@ -226,14 +233,13 @@ class BooksHandler:
         data = []
 
         for shelf in self.books_shelfs.values():
-            if not shelf.name == "Tout les livres":
-                data.append(
-                    {
-                        "name": shelf.name,
-                        "id": shelf.id,
-                        "books_ids": list(shelf.books.keys()),
-                    }
-                )
+            data.append(
+                {
+                    "name": shelf.name,
+                    "id": shelf.id,
+                    "books_ids": list(shelf.books.keys()),
+                }
+            )
 
         jfm.write_json(filepath=filepath, data=data)
 
@@ -275,16 +281,6 @@ class BooksHandler:
 
         return books_objs
 
-    def action_on_shelf(
-        self, shelf_id: int, action: typing.Literal["created", "edited", "deleted"]
-    ):
-        self.changes_on_shelfs.append({"shelf_id": shelf_id, "action": action})
-
-    def remove_action_on_shelf(self, index):
-
-        if 0 <= index < len(self.changes_on_shelfs):
-            del self.changes_on_shelfs[index]
-
 
 class Session:
     def __init__(self, **kwargs):
@@ -301,7 +297,9 @@ class Shelf:
         self.logger = logging.getLogger(__name__)
         self.name = kwargs.get("name")
         self.books = kwargs.get("books", {})
-        self.id = kwargs.get("id")
+        self.id = kwargs.get(
+            "id", str(dt.datetime.timestamp(dt.datetime.now())).replace(".", "")
+        )
 
         for book_obj in self.books.values():
             if self.id not in book_obj.shelfs_ids:
