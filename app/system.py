@@ -35,11 +35,7 @@ class AppSystem:
         self.logger.info("Initialising application...")
         self.books_handler = book_stuff.BooksHandler()
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
-        self.books_handler.create_shelf(
-            name="Tout les livres",
-            books=self.books_handler.books,
-            id=str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
-        )
+        self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelfs(
             os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json")
         )
