@@ -61,7 +61,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
-        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
         self.edit_cover_b = QtWidgets.QPushButton("Changer la couverture")
         self.edit_cover_b.setIcon(
             QtGui.QIcon(os.path.join(paths.ICONS_PATH, "edit_ico.png"))
@@ -227,7 +227,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
     def set_default_cover(self):
         self.cover_image = self.default_cover_img
-        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
 
     def select_image(self):
         """Open a file selecter window for enable user to select an image"""
@@ -239,30 +239,35 @@ class BookCreationPage(QtWidgets.QWidget):
         )
 
         if self.selected_image[0]:
-            self.cover_image = self.selected_image[0]
-            self.book_cover_lb.setPixmap(
-                QtGui.QPixmap(self.prepare_image(self.cover_image)[0])
-            )
+            final_image_infos = self.prepare_image(self.selected_image[0])
 
-    def prepare_image(self, image_path: str | Path):
+            if final_image_infos:
+                self.cover_image = final_image_infos[0]
+                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+
+    def prepare_image(self, image_path: str | Path) -> tuple | None:
         """
         Convert <image_path> to PNG format, resize it and save it in the temporary directory and return the path
         """
 
         image_path = Path(image_path)
+        if image_path.exists():
+            with Image.open(image_path) as img:
+                res = self.resize_image(img)
+                res = self.convert_img_to_png(res)
+                res_path = os.path.join(paths.TMP_DIR_PATH, "book_cover.png")
+                res.save(res_path, "PNG")
+                self.cover_image = res_path
 
-        with Image.open(image_path) as img:
-            res = self.resize_image(img)
-            res = self.convert_img_to_png(res)
-            self.cover_image = os.path.join(paths.TMP_DIR_PATH, "book_cover.png")
-            res.save(self.cover_image, "PNG")
+            return (self.cover_image, res)
 
-        return (self.cover_image, res)
+        else:
+            self.logger.error(f"Unable to select cover image at {image_path.resolve()}")
 
     def resize_image(self, img):
         img_width, img_height = img.size
         resized_img = img.resize(
-            (int(img_width / (img_width / 140)), int(img_height / (img_height / 200)))
+            (int(img_width * (170 / img_width)), int(img_height * (250 / img_height)))
         )
 
         return resized_img
@@ -292,8 +297,6 @@ class BookCreationPage(QtWidgets.QWidget):
             else:
                 self.logger.warning("Temporary cover file not found !")
 
-            self.set_default_cover()
-
             self.qt_signals_handler.go_previous_page_sg.emit(True)
 
     def get_book_infos(self):
@@ -321,20 +324,21 @@ class BookCreationPage(QtWidgets.QWidget):
         ).replace(".", "")
 
         if str(self.cover_image) != self.default_cover_img:
+            self.final_cover_image = os.path.join(
+                paths.BOOKS_COVERS_PATH,
+                f"{books_infos['internal_id']}.png",
+            )
             cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
-                shutil.move(
+                os.rename(
                     self.cover_image,
                     os.path.join(
                         paths.BOOKS_COVERS_PATH,
-                        f"app/data/books/books_covers/{books_infos['internal_id']}.png",
+                        f"{books_infos['internal_id']}.png",
                     ),
                 )
-                self.cover_image = os.path.join(
-                    paths.BOOKS_COVERS_PATH,
-                    f"app/data/books/books_covers/{books_infos['internal_id']}.png",
-                )
+                # shutil.move(self.cover_image, paths.BOOKS_COVERS_PATH)
 
         books_infos["cover_img_path"] = str(self.cover_image)
 
