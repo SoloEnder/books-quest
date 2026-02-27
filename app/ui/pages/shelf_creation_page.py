@@ -46,34 +46,21 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         # Books selection widgets
         self.books_selection_lb = QtWidgets.QLabel("Livres : ")
-        self.books_tree = QtWidgets.QTreeView()
-        self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels(("Titre", "Auteur", "Edition"))
-        self.books_tree.setModel(self.books_tree_model)
-        self.books_title_items = []
-
-        # Books items
-
-        for book in self.books_handler.books.values():
-            book_title_item = QtGui.QStandardItem(book.title)
-            book_title_item.setData(book)
-            book_title_item.setCheckable(True)
-            book_author_item = QtGui.QStandardItem(book.authors)
-            book_edition_item = QtGui.QStandardItem(book.edition)
-            self.books_tree_model.appendRow(
-                (book_title_item, book_author_item, book_edition_item)
-            )
-            self.books_title_items.append(book_title_item)
-
-        self.books_tree.setColumnWidth(0, 150)
-        self.books_tree.setColumnWidth(1, 150)
-        self.books_tree.setColumnWidth(2, 150)
-        self.books_tree.setEditTriggers(
-            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        self.book_research_e = QtWidgets.QLineEdit()
+        self.book_research_e.setMinimumWidth(300)
+        self.book_research_b = QtWidgets.QPushButton()
+        self.book_research_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "magnifier_ico.png"))
         )
+        self.book_research_b.clicked.connect(self.search_book)
+
+        self.draw_books_tree(self.books_handler.books)
 
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton("Terminé")
+        self.confirm_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "done_ico.png"))
+        )
         self.confirm_b.clicked.connect(self.create_shelf)
 
         # Add the widgets tot the layout
@@ -86,9 +73,14 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_widget_lyt.addWidget(
             self.books_selection_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(self.books_tree, 3, 0)
         self.main_widget_lyt.addWidget(
-            self.confirm_b, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.book_research_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.main_widget_lyt.addWidget(
+            self.book_research_b, 3, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.main_widget_lyt.addWidget(
+            self.confirm_b, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
     def get_shelf_infos(self) -> dict | None:
@@ -106,8 +98,62 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 "id": str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
             }
 
-        else:
-            return
+    def draw_books_tree(self, sequence: dict):
+
+        if hasattr(self, "books_tree"):
+            self.main_widget_lyt.removeWidget(self.books_tree)
+            self.books_tree.setParent(None)
+            self.books_tree.deleteLater()
+
+        if hasattr(self, "books_tree_model"):
+            self.books_tree_model.setParent(None)
+            self.books_tree_model.deleteLater()
+
+        self.books_tree = QtWidgets.QTreeView()
+        self.books_tree_model = QtGui.QStandardItemModel()
+        self.books_tree_model.setHorizontalHeaderLabels(("Titre", "Auteur", "Edition"))
+        self.books_tree.setModel(self.books_tree_model)
+        self.books_title_items = []
+
+        # Books items
+
+        for book in sequence.values():
+            book_title_item = QtGui.QStandardItem(book.title)
+            book_title_item.setData(book)
+            book_title_item.setCheckable(True)
+            book_author_item = QtGui.QStandardItem(book.authors)
+            book_edition_item = QtGui.QStandardItem(book.edition)
+            self.books_tree_model.appendRow(
+                (book_title_item, book_author_item, book_edition_item)
+            )
+            self.books_title_items.append(book_title_item)
+
+        self.books_tree.setColumnWidth(0, 150)
+        self.books_tree.setColumnWidth(1, 150)
+        self.books_tree.setColumnWidth(2, 150)
+        self.books_tree.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+
+        self.main_widget_lyt.addWidget(self.books_tree, 4, 0, 1, 2)
+
+    def search_book(self):
+        self.book_research_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "hourglass_ico.png"))
+        )
+        query = self.book_research_e.text()
+
+        if query:
+            query_results = self.books_handler.get_book(title=query)
+            matches = {}
+
+            for result in query_results:
+                matches[result.internal_id] = result
+
+            self.draw_books_tree(matches)
+        self.book_research_b.setIcon(
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "magnifier_ico.png"))
+        )
 
     def create_shelf(self):
         shelf_infos = self.get_shelf_infos()
