@@ -261,7 +261,12 @@ class BookCreationPage(QtWidgets.QWidget):
             return (self.cover_image, res)
 
         else:
-            self.logger.error(f"Unable to select cover image at {image_path.resolve()}")
+            self.logger.error(
+                f"Unable to select cover image at {image_path.resolve()} : File not Found"
+            )
+            raise FileNotFoundError(
+                f"Book cover image at {image_path.resolve()} not found !"
+            )
 
     def resize_image(self, img):
         img_width, img_height = img.size
@@ -283,8 +288,6 @@ class BookCreationPage(QtWidgets.QWidget):
         """
         If possible, switch to the previous page
         """
-
-        self.logger.info("Book creation canceled !")
 
         if self.cover_image:
             self.logger.info("Deleting temporary book cover...")

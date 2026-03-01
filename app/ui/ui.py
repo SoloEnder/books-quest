@@ -5,6 +5,7 @@ from PySide6 import QtCore, QtWidgets
 from app.src import book_stuff
 from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelfs_pages
+from app.utils import my_exceptions
 
 
 class UI(QtWidgets.QWidget):
@@ -83,6 +84,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         else:
             self.logger.error(f"Page <{page_name}> not found !")
+            raise my_exceptions.PageNotFoundError(page_name)
 
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
