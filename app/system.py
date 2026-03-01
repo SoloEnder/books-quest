@@ -91,14 +91,26 @@ class AppSystem:
                     if not x.exists():
                         try:
                             x.mkdir()
-                            self.books_handler.save_books(
-                                os.path.join(paths.BOOKS_DATA_PATH, "books.json")
-                            )
 
                         except Exception:
                             self.logger.error(
                                 f"Unable to make folder {x.resolve()} : Unknown error"
                             )
+                            raise
+
+                try:
+                    self.books_handler.save_books(
+                        os.path.join(paths.BOOKS_DATA_PATH, "books.json")
+                    )
+                    self.books_handler.save_shelfs(
+                        os.path.join(paths.SHELFS_COVERS_PATH, "shelfs.json")
+                    )
+
+                except Exception:
+                    self.logger.error(
+                        f"Unable to make folder {x.resolve()} : Unknown error"
+                    )
+                    raise
 
     def check_folder(self, *folders, make: bool = False):
         """
