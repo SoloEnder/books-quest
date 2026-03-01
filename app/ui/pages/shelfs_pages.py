@@ -62,13 +62,19 @@ class ShelfsPage(QtWidgets.QWidget):
 
         self.main_layout.addWidget(self.scroll_area, 3, 0)
         self.shelfs_widgets = []
-        self.default_shelf_widget = ShelfWidget(self.books_handler.default_shelf)
+        self.default_shelf_widget = DefaultShelfWidget(
+            self.books_handler.default_shelf,
+            self.books_handler,
+            self.qt_signals_handler,
+        )
         self.shelfs_container_layout.addWidget(
             self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
         )
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
-            shelf_widget = ShelfWidget(shelf)
+            shelf_widget = ShelfWidget(
+                shelf, self.books_handler, self.qt_signals_handler
+            )
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(
                 shelf_widget, index + 1, QtCore.Qt.AlignmentFlag.AlignTop
@@ -76,11 +82,18 @@ class ShelfsPage(QtWidgets.QWidget):
 
 
 class ShelfWidget(QtWidgets.QWidget):
-    def __init__(self, shelf):
+    def __init__(
+        self,
+        shelf: book_stuff.Shelf,
+        books_handler: book_stuff.BooksHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
         super().__init__()
         self.icons_folder = paths.ICONS_PATH
         self.shelf = shelf
-        # self.
+        self.books_handler = books_handler
+        self.qt_signals_handler = qt_signals_handler
+
         self.main_layout = QtWidgets.QGridLayout(self)
         self.cover_pm = QtGui.QPixmap(
             os.path.join(paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png")
@@ -135,14 +148,45 @@ class ShelfWidget(QtWidgets.QWidget):
         )
         self.view_b.setSizePolicy(self.button_size)
 
+        self.edit_b = QtWidgets.QPushButton("Modifier")
+        self.edit_b.setIcon(
+            QtGui.QIcon(os.path.join(self.icons_folder, "edit_ico.png"))
+        )
+        self.edit_b.setSizePolicy(self.button_size)
+
+        self.delete_b = QtWidgets.QPushButton("Supprimer")
+        self.delete_b.setIcon(
+            QtGui.QIcon(os.path.join(self.icons_folder, "cross_ico.png"))
+        )
+        self.delete_b.setSizePolicy(self.button_size)
+        self.delete_b.clicked.connect(self.delete_shelf)
+
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_layout.addWidget(self.name_lb, 0, 0, 1, 2)
-        self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
+        self.main_layout.addWidget(self.cover_lb, 1, 0, 8, 1)
         self.main_layout.addWidget(self.total_books, 1, 1)
         self.main_layout.addWidget(self.unread_books_lb, 2, 1)
         self.main_layout.addWidget(self.on_reading_books_lb, 3, 1)
         self.main_layout.addWidget(self.finished_books_lb, 4, 1)
         self.main_layout.addWidget(self.view_b, 5, 1)
+        self.main_layout.addWidget(self.edit_b, 6, 1)
+        self.main_layout.addWidget(self.delete_b, 7, 1)
+
+    def delete_shelf(self):
+        self.books_handler.remove_shelf(self.shelf.id)
+        self.qt_signals_handler.switch_page_sg.emit("shelfs_page", True, {})
+
+
+class DefaultShelfWidget(ShelfWidget):
+    def __init__(
+        self,
+        shelf: book_stuff.Shelf,
+        books_handler: book_stuff.BooksHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
+        super().__init__(shelf, books_handler, qt_signals_handler)
+        self.edit_b.hide()
+        self.delete_b.hide()
 
 
 class BookWidget(QtWidgets.QWidget):
