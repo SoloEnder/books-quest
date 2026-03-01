@@ -108,7 +108,7 @@ class AppSystem:
 
                 except Exception:
                     self.logger.error(
-                        f"Unable to make folder {x.resolve()} : Unknown error"
+                        "Unable to make file books save file or shelfs save file: Unknown error"
                     )
                     raise
 
