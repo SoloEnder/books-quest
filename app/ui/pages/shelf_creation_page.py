@@ -144,7 +144,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         query = self.book_research_e.text()
 
         if query:
-            query_results = self.books_handler.get_book(title=query)
+            query_results = self.books_handler.get_book(title=(query, False))
             matches = {}
 
             for result in query_results:
