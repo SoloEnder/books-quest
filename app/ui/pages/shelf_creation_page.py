@@ -88,10 +88,15 @@ class ShelfCreationPage(QtWidgets.QWidget):
         shelfs_books = {}
 
         for book_title_item in self.books_title_items:
-            book_obj = book_title_item.data()
-            shelfs_books[book_obj.internal_id] = book_obj
+            if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
+                book_obj = book_title_item.data()
+                shelfs_books[book_obj.internal_id] = book_obj
 
-        if shelf_name.lower() != "tout les livres":
+        if (
+            shelf_name.lower() != self.books_handler.default_shelf.name.lower()
+            if self.books_handler.default_shelf.name
+            else "All"
+        ):
             return {
                 "name": shelf_name,
                 "books": shelfs_books,
