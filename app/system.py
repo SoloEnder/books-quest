@@ -81,19 +81,24 @@ class AppSystem:
 
         if self.app_infos:
             if self.app_infos["boot_count"] == 1:
-                path = pathlib.Path(paths.BOOKS_DATA_PATH)
+                to_make = (
+                    pathlib.Path(paths.BOOKS_DATA_PATH),
+                    pathlib.Path(paths.BOOKS_COVERS_PATH),
+                    pathlib.Path(paths.SHELFS_COVERS_PATH),
+                )
 
-                if not path.exists():
-                    try:
-                        path.mkdir()
-                        self.books_handler.save_books(
-                            os.path.join(paths.BOOKS_DATA_PATH, "books.json")
-                        )
+                for x in to_make:
+                    if not x.exists():
+                        try:
+                            x.mkdir()
+                            self.books_handler.save_books(
+                                os.path.join(paths.BOOKS_DATA_PATH, "books.json")
+                            )
 
-                    except Exception:
-                        self.logger.error(
-                            f"Unable to make folder {path} : Unknown error"
-                        )
+                        except Exception:
+                            self.logger.error(
+                                f"Unable to make folder {x.resolve()} : Unknown error"
+                            )
 
     def check_folder(self, *folders, make: bool = False):
         """
