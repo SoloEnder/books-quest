@@ -1,6 +1,5 @@
 # app/base_path.py
 import os
-import sys
 import typing
 from pathlib import Path
 
