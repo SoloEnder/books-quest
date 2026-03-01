@@ -103,7 +103,7 @@ class AppSystem:
                         os.path.join(paths.BOOKS_DATA_PATH, "books.json")
                     )
                     self.books_handler.save_shelfs(
-                        os.path.join(paths.SHELFS_COVERS_PATH, "shelfs.json")
+                        os.path.join(paths.BOOKS_COVERS_PATH, "shelfs.json")
                     )
 
                 except Exception:
