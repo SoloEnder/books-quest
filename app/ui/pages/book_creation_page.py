@@ -184,7 +184,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.main_layout.addWidget(self.scroll_area)
 
-    def set_book_status(self, status: Literal["finished", "on_read", "unread"]):
+    def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
         """
         Set the book status and draw the appriopriate widgets
 
@@ -196,7 +196,7 @@ class BookCreationPage(QtWidgets.QWidget):
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(True)
 
-        elif status == "on_read":
+        elif status == "on_reading":
             self.alr_read_pages_le.setEnabled(True)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(False)
