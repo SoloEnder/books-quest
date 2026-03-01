@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 
 from app.utils import json_file_manager as jfm
+from app.utils import my_exceptions
 
 
 class Book:
@@ -44,11 +45,12 @@ class BooksHandler:
         book_id = book_id
 
         if book_id in self.books.keys():
-            self.logger.info(f"Deleting book with id '{book_id}'")
+            self.logger.info("Deleting book...")
             del self.books[book_id]
 
         else:
             self.logger.error(f"Unknown book id : {book_id}")
+            raise my_exceptions.BookNotFoundError(book_id)
 
     def create_book(self, **kwargs):
         """
@@ -60,7 +62,7 @@ class BooksHandler:
         return book
 
     def add_book(self, book_obj):
-        self.logger.info(f"Adding new book with id : {book_obj.internal_id}...")
+        self.logger.info("Adding book...")
 
         for shelf_id in book_obj.shelfs_ids:
             if shelf_id in self.books_shelfs.keys():
@@ -68,8 +70,11 @@ class BooksHandler:
                 shelf.add_book(book_obj)
 
             else:
-                self.logger.warning(
-                    f"Shelf with id {shelf_id} not found ! Perhaps it has been deleted ?"
+                self.logger.error(
+                    f"Unable to add book to shelf with the ID {shelf_id} : This shelf is not in the shelfs dictionary ! Has it been deleted ?"
+                )
+                raise KeyError(
+                    f"Unable to add book to shelf with the ID {shelf_id} : This shelf is not in the shelfs dictionary ! Has it been deleted ?"
                 )
 
         self.books[book_obj.internal_id] = book_obj
@@ -79,7 +84,7 @@ class BooksHandler:
         """
         Create a book shelf
         """
-        self.logger.info(f"Creating book shelf '{kwargs.get('name', 'Unknown')}'...")
+        self.logger.info("Creating book shelf...")
         shelf = Shelf(
             name=kwargs.get("name"), books=kwargs.get("books"), id=kwargs.get("id")
         )
@@ -101,30 +106,24 @@ class BooksHandler:
         """
 
         if book_shelf.id not in self.books_shelfs.keys():
-            self.logger.info(f"Adding book shelf '{book_shelf.name}'")
+            self.logger.info("Adding book shelf...")
             self.books_shelfs[book_shelf.id] = book_shelf
 
-            if book_shelf.id in self.books_shelfs.keys():
-                self.shelfs_updated = True
-
-            else:
-                self.logger.warning(
-                    f"Book shelf with id {book_shelf.id} doesn't exists ! Perhaps it has been deleted ?"
-                )
-
         else:
-            self.logger.warning(
-                f"A book shelf with the id {book_shelf.id} already exists"
+            self.logger.error(
+                f"A book shelf with the id {book_shelf.id} already exists !"
             )
+            raise my_exceptions.BooksShelfExistsError(book_shelf.id)
 
-    def remove_shelf(self, name: str):
-        self.logger.info(f"Removing book shelf '{name}'")
+    def remove_shelf(self, id: str):
+        self.logger.info("Removing book shelf...")
 
-        if name in self.books_shelfs.keys():
-            del self.books_shelfs[name]
+        if id in self.books_shelfs.keys():
+            del self.books_shelfs[id]
 
         else:
-            self.logger.error(f"Unknown book shelf : {name}")
+            self.logger.error(f"Unknown book shelf : {id}")
+            raise my_exceptions.BooksShelfNotFoundError(id)
 
     def edit_book(self, event, book_id: str, new_book: Book):
         self.logger.info(f"Editing book with id {book_id}...")
@@ -135,71 +134,108 @@ class BooksHandler:
                 self.books_shelfs[shelf_id] = new_book
 
             else:
-                self.logger.warning(
+                self.logger.error(
                     f"Book shelf with id {shelf_id} doesn't exists ! Perhaps it has been deleted ?"
                 )
+                raise my_exceptions.BooksShelfNotFoundError(shelf_id)
 
     def get_book(self, **kwargs):
         """
-        Get all the books who matches with filters given as args and return them
+        Get all the books which matches with filters
+        Each argument must following this syntax :
+            <filter_name> = <(filter_value, full_match, case_sensitive)>
+        - filter_name: an attribute of the Book class
+        In the tuple:
+            - filter_value: the value to check
+            - full_match (bool, optionnal): if True, then match is allowed if filter_value partially match, else match is allowed only if filter_value full match. default to True.
+            - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
         """
+
+        def compare(value_a, value_b, full_match: bool):
+            """
+            Arguments:
+
+            - value_a: the value to compare to value_b
+
+            - value_b: the value against which value_b is compared
+
+            - complete_match (Boolean): indicates whether a partial match is allowed
+
+            Compare value_a to value_b.
+
+            If complete_match is set to True:
+
+            - True is returned if value_a is equal to value_b, otherwise False
+
+            If complete_match is set to False:
+
+            - True is returned if value_a is present in value_b, otherwise False
+            """
+
+            if full_match:
+                if value_a == value_b:
+                    return True
+
+                else:
+                    return False
+
+            elif not full_match:
+                if value_a in value_b:
+                    return True
+
+                else:
+                    return False
+
         filters = {}
         books_matchs = []
 
-        for filter_name, filter in kwargs.items():
-            if filter:
-                filters[filter_name] = filter
+        for filter_name, filter_infos in kwargs.items():
+            if filter_infos:
+                filters[filter_name] = filter_infos
 
         for book_obj in self.books.values():
             filter_matchs = []
 
-            for filter_name, filter in filters.items():
+            for filter_name, filter_infos in filters.items():
                 if hasattr(book_obj, filter_name):
-                    if filter.lower() in getattr(book_obj, filter_name).lower():
-                        filter_matchs.append(True)
+                    filter_value = filter_infos[0]
+                    full_match = filter_infos[1] if len(filter_infos) > 1 else True
+                    case_sensitive = filter_infos[2] if len(filter_infos) > 2 else False
+
+                    if type(getattr(book_obj, filter_name)) is type(filter_value):
+                        if type(filter_value) is str and not case_sensitive:
+                            filter_value = filter_value.lower()
+
+                        if compare(
+                            filter_value,
+                            getattr(book_obj, filter_name)
+                            if case_sensitive
+                            else getattr(book_obj, filter_name).lower(),
+                            full_match,
+                        ):
+                            filter_matchs.append(True)
+
+                        else:
+                            filter_matchs.append(False)
 
                     else:
-                        filter_matchs.append(False)
+                        self.logger.error(
+                            f"Comparaison between type ({type(filter_value)} and type ({type(getattr(book_obj, filter_name))}) aren't allowed !"
+                        )
+                        raise TypeError(
+                            f"Comparaison between type ({type(filter_value)} and type ({type(getattr(book_obj, filter_name))}) aren't allowed !"
+                        )
 
                 else:
-                    self.logger.warning(
+                    self.logger.error(
+                        f"Book shelf object with id <{book_obj.internal_id}> has not attribute <{filter_name}> !"
+                    )
+                    raise AttributeError(
                         f"Book shelf object with id <{book_obj.internal_id}> has not attribute <{filter_name}> !"
                     )
 
             if all(filter_matchs):
                 books_matchs.append(book_obj)
-
-        return books_matchs
-
-    def get_shelf(self, **kwargs):
-        """
-        Get all the books who matches with filters given as args and return them
-        """
-        filters = {}
-        books_matchs = []
-
-        for filter_name, filter in kwargs.items():
-            if filter:
-                filters[filter_name] = filter
-
-        for book_shelf in self.books_shelfs.values():
-            filter_matchs = []
-
-            for filter_name, filter in filters.items():
-                if hasattr(book_shelf, filter_name):
-                    if getattr(book_shelf, filter_name).lower() == filter.lower():
-                        filter_matchs.append(True)
-
-                    else:
-                        filter_matchs.append(False)
-
-                else:
-                    self.logger.warning(
-                        f"Book shelf object with id <{book_shelf.id}> has not attribute <{filter_name}> !"
-                    )
-
-            if all(filter_matchs):
-                books_matchs.append(book_shelf)
 
         return books_matchs
 
@@ -258,7 +294,8 @@ class BooksHandler:
                         shelf_books[book_id] = book_obj
 
                     else:
-                        self.logger.warning(f"Book with id {book_id} doesn't exists !")
+                        self.logger.error(f"Book with id {book_id} doesn't exists !")
+                        raise my_exceptions.BookNotFoundError(book_id)
 
                 self.create_shelf(
                     name=shelf_data["name"],
@@ -324,3 +361,4 @@ class Shelf:
 
         else:
             self.logger.error(f"Unknown book id : {book_id}")
+            raise my_exceptions.BookNotFoundError(book_id)
