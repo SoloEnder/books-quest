@@ -27,7 +27,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         self.basic_book_infos = {
             "title": "Titre : ",
-            "author": "Auteur : ",
+            "authors": "Auteur : ",
             "edition": "Edition : ",
             "summary": "Résumé : ",
             "tot_pages": "Pages totales : ",
@@ -145,11 +145,10 @@ class BookCreationPage(QtWidgets.QWidget):
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
-            shelf_cb = QtWidgets.QCheckBox(shelf.name)
+            shelf_cb = QtWidgets.QCheckBox(
+                shelf.name if shelf.name else "[Untitled Shelf]"
+            )
             self.shelfs_selection_cbs[shelf.id] = shelf_cb
-
-            if shelf.name != "Tout les livres":
-                self.shelfs_selection_layout.addWidget(shelf_cb, index)
 
         self.add_b = QtWidgets.QPushButton("Ajouter")
         self.add_b.clicked.connect(self.add_book)
