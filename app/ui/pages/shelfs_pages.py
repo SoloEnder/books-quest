@@ -187,6 +187,8 @@ class DefaultShelfWidget(ShelfWidget):
         super().__init__(shelf, books_handler, qt_signals_handler)
         self.edit_b.hide()
         self.delete_b.hide()
+        self.main_layout.removeWidget(self.cover_lb)
+        self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
 
 
 class BookWidget(QtWidgets.QWidget):
