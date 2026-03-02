@@ -18,20 +18,22 @@ class AppSystem:
         self.app_ui = QtWidgets.QApplication([])
         begin = dt.datetime.now()
         self.logger = logging.getLogger(__name__)
-        self.check_folder(
-            paths.DATA_PATH,
-            paths.ASSETS_PATH,
-            paths.BOOKS_DATA_PATH,
-            paths.BOOKS_COVERS_PATH,
-            paths.SHELFS_COVERS_PATH,
-            make=True,
-        )
-        paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         self.app_infos = self.load_app_infos(
             os.path.join(paths.DATA_PATH, "app_infos.json")
         )
         self.app_infos["boot_count"] += 1
-        self.check_fisrt_boot()
+        first_boot = self.check_first_boot()
+        if first_boot:
+            self.first_boot_operations()
+
+        else:
+            self.check_folder(
+                paths.DATA_PATH,
+                paths.ASSETS_PATH,
+                paths.BOOKS_DATA_PATH,
+                paths.BOOKS_COVERS_PATH,
+                paths.SHELFS_COVERS_PATH,
+            )
         self.logger.info("Initialising application...")
         self.books_handler = book_stuff.BooksHandler()
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
@@ -41,6 +43,7 @@ class AppSystem:
         )
         self.app_ui.aboutToQuit.connect(self.close_app)
         self.ui = ui.UI(self.books_handler)
+        paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
 
@@ -77,42 +80,47 @@ class AppSystem:
                 )
         tmp_path.rmdir()
 
-    def check_fisrt_boot(self):
-
+    def check_first_boot(self):
         if self.app_infos:
             if self.app_infos["boot_count"] == 1:
-                to_make = (
-                    pathlib.Path(paths.BOOKS_DATA_PATH),
-                    pathlib.Path(paths.BOOKS_COVERS_PATH),
-                    pathlib.Path(paths.SHELFS_COVERS_PATH),
+                return True
+
+    def first_boot_operations(self):
+        folder_to_make = (
+            paths.BOOKS_DATA_PATH,
+            paths.BOOKS_COVERS_PATH,
+            paths.SHELFS_COVERS_PATH,
+        )
+        file_to_make = (
+            os.path.join(paths.BOOKS_DATA_PATH, "books.json"),
+            os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json"),
+        )
+
+        for folder in folder_to_make:
+            try:
+                os.mkdir(folder)
+
+            except FileExistsError:
+                self.logger.error(
+                    f"Failed to make folder '{folder}' : Folder already exists !"
+                )
+                raise
+
+            except FileNotFoundError:
+                self.logger.error(
+                    f"Failed to make folder '{folder}' : A parent directory is missing !"
+                )
+                raise
+
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to make folder '{folder}' dues to exception : {e}"
                 )
 
-                for x in to_make:
-                    if not x.exists():
-                        try:
-                            x.mkdir()
+        for file in file_to_make:
+            jfm.write_json(file, [])
 
-                        except Exception:
-                            self.logger.error(
-                                f"Unable to make folder {x.resolve()} : Unknown error"
-                            )
-                            raise
-
-                try:
-                    self.books_handler.save_books(
-                        os.path.join(paths.BOOKS_DATA_PATH, "books.json")
-                    )
-                    self.books_handler.save_shelfs(
-                        os.path.join(paths.BOOKS_COVERS_PATH, "shelfs.json")
-                    )
-
-                except Exception:
-                    self.logger.error(
-                        "Unable to make file books save file or shelfs save file: Unknown error"
-                    )
-                    raise
-
-    def check_folder(self, *folders, make: bool = False):
+    def check_folder(self, *folders):
         """
         Check the existence of a folder send an logging.ERROR message else
         """
@@ -123,32 +131,6 @@ class AppSystem:
 
             if not folder.exists():
                 self.logger.error(f"Folder {folder} not found !")
-
-                if make:
-                    self.logger.info(f"Attempting to create {folder}...")
-
-                    try:
-                        os.mkdir(folder)
-
-                    except FileExistsError:
-                        self.logger.error(
-                            f"Failed to make directory <{folder}> : This directory already exists !"
-                        )
-
-                    except FileNotFoundError:
-                        self.logger.error(
-                            f"Failed to make directory <{folder}> : A parent directory is missing !"
-                        )
-
-                    except PermissionError:
-                        self.logger.error(
-                            f"Failed to make directory <{folder}> : Permission denied !"
-                        )
-
-                    except Exception:
-                        self.logger.error(
-                            f"Failed to make directory <{folder}> : Unknown Exception !"
-                        )
 
     def load_app_infos(self, filepath: str | pathlib.Path) -> dict:
         """
