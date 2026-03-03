@@ -8,7 +8,7 @@ from PIL import Image
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.ui import qt_signals_handler
-from app.utils import paths
+from app.utils import images_tools, paths
 
 
 class BookCreationPage(QtWidgets.QWidget):
@@ -52,7 +52,9 @@ class BookCreationPage(QtWidgets.QWidget):
             QtGui.QIcon(os.path.join(self.icons_folder, "back_ico.png"))
         )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
-        self.exit_b.clicked.connect(self.close_widget)
+        self.exit_b.clicked.connect(
+            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
+        )
 
         # Cover widgets
         self.default_cover_img = os.path.join(
@@ -66,7 +68,7 @@ class BookCreationPage(QtWidgets.QWidget):
             QtGui.QIcon(os.path.join(paths.ICONS_PATH, "edit_ico.png"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
-        self.edit_cover_b.clicked.connect(self.select_image)
+        self.edit_cover_b.clicked.connect(self.set_book_cover)
 
         # Book infos widgets
         row = 3
@@ -227,78 +229,19 @@ class BookCreationPage(QtWidgets.QWidget):
         self.cover_image = self.default_cover_img
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
 
-    def select_image(self):
-        """Open a file selecter window for enable user to select an image"""
-        self.selected_image = QtWidgets.QFileDialog.getOpenFileName(
-            self,
-            "Select Image",
-            str(Path.home()),
-            "Supported Formats (*.png *.jpeg);;PNG Images (*.png);;JPEG Images (*.jpeg)",
-        )
+    def set_book_cover(self):
+        infos = images_tools.select_image()
 
-        if self.selected_image[0]:
-            final_image_infos = self.prepare_image(self.selected_image[0])
-
-            if final_image_infos:
-                self.cover_image = final_image_infos[0]
+        if infos:
+            if infos[0]:
+                final_infos = images_tools.prepare_image(
+                    infos[0], os.path.join(paths.TMP_DIR_PATH, "book_cover.png")
+                )
+                self.cover_image = final_infos[0]
                 self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
-    def prepare_image(self, image_path: str | Path) -> tuple | None:
-        """
-        Convert <image_path> to PNG format, resize it and save it in the temporary directory and return the path
-        """
-
-        image_path = Path(image_path)
-        if image_path.exists():
-            with Image.open(image_path) as img:
-                res = self.resize_image(img)
-                res = self.convert_img_to_png(res)
-                res_path = os.path.join(paths.TMP_DIR_PATH, "book_cover.png")
-                res.save(res_path, "PNG")
-                self.cover_image = res_path
-
-            return (self.cover_image, res)
-
-        else:
-            self.logger.error(
-                f"Unable to select cover image at {image_path.resolve()} : File not Found"
-            )
-            raise FileNotFoundError(
-                f"Book cover image at {image_path.resolve()} not found !"
-            )
-
-    def resize_image(self, img):
-        img_width, img_height = img.size
-        resized_img = img.resize(
-            (int(img_width * (170 / img_width)), int(img_height * (250 / img_height)))
-        )
-
-        return resized_img
-
-    def convert_img_to_png(self, img: Image.Image):
-        """
-        Convert <img> to PNG format and return it
-        """
-        img_rgb = img.convert(mode="RGB")
-
-        return img_rgb
-
-    def close_widget(self):
-        """
-        If possible, switch to the previous page
-        """
-
-        if self.cover_image:
-            self.logger.info("Deleting temporary book cover...")
-            tmp_book_cover = Path(os.path.join(paths.TMP_DIR_PATH, "book_cover.png"))
-
-            if tmp_book_cover.exists():
-                tmp_book_cover.unlink()
-
-            else:
-                self.logger.warning("Temporary cover file not found !")
-
-            self.qt_signals_handler.go_previous_page_sg.emit(True)
+    def set_cover_lb_pixmap(self, new_path):
+        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def get_book_infos(self):
         books_infos = {}
@@ -339,7 +282,7 @@ class BookCreationPage(QtWidgets.QWidget):
                         f"{books_infos['internal_id']}.png",
                     ),
                 )
-                # shutil.move(self.cover_image, paths.BOOKS_COVERS_PATH)
+                self.set_cover_lb_pixmap(self.cover_image)
 
         books_infos["cover_img_path"] = str(self.cover_image)
 
@@ -370,3 +313,4 @@ class BookCreationPage(QtWidgets.QWidget):
     def add_book(self):
         books_infos = self.get_book_infos()
         self.books_handler.create_book(**books_infos)
+        QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
