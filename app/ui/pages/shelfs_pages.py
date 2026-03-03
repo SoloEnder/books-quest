@@ -95,8 +95,11 @@ class ShelfWidget(QtWidgets.QWidget):
         self.qt_signals_handler = qt_signals_handler
 
         self.main_layout = QtWidgets.QGridLayout(self)
+        self.default_cover = os.path.join(
+            paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png"
+        )
         self.cover_pm = QtGui.QPixmap(
-            os.path.join(paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png")
+            self.shelf.cover_path if self.shelf.cover_path else self.default_cover
         )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
@@ -107,7 +110,7 @@ class ShelfWidget(QtWidgets.QWidget):
             font-weight: bold;
             font-size: 20px;
         """)
-        self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books.keys())} livres")
+        self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books_ids)} livres")
         self.total_books.setStyleSheet("""
             font-size: 17px;
         """)
@@ -115,7 +118,8 @@ class ShelfWidget(QtWidgets.QWidget):
         self.on_reading_books_count = 0
         self.finished_books_count = 0
 
-        for book in self.shelf.books.values():
+        for book_id in self.shelf.books_ids:
+            book = self.books_handler.books[book_id]
             if book.status == "unread":
                 self.unread_books_count += 1
 
@@ -171,6 +175,8 @@ class ShelfWidget(QtWidgets.QWidget):
         self.main_layout.addWidget(self.view_b, 5, 1)
         self.main_layout.addWidget(self.edit_b, 6, 1)
         self.main_layout.addWidget(self.delete_b, 7, 1)
+
+        # The book creation information
 
     def delete_shelf(self):
         self.books_handler.remove_shelf(self.shelf.id)
