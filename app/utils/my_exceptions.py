@@ -20,6 +20,12 @@ class BookNotFoundError(Exception):
         )
 
 
+class BookExistsError(Exception):
+    def __init__(self, book_id: str):
+        self.book_id = book_id
+        super().__init__(f"Book with ID {book_id} arleady exists in this sequence !")
+
+
 class PageNotFoundError(Exception):
     def __init__(self, page_name: str):
         self.page_name = page_name
