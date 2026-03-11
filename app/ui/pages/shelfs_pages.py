@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 import os
 
@@ -39,7 +40,7 @@ class ShelfsPage(QtWidgets.QWidget):
         self.add_shelf_b = QtWidgets.QPushButton("Nouvelle étagère")
         self.add_shelf_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "shelf_creation_page", True, {}
+                "shelf_creation_page", True, {"mode": "creation"}
             )
         )
         self.shelfs_container = QtWidgets.QWidget(self)
@@ -70,11 +71,22 @@ class ShelfsPage(QtWidgets.QWidget):
         self.shelfs_container_layout.addWidget(
             self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
         )
-
+        names = set()
         for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
             shelf_widget = ShelfWidget(
                 shelf, self.books_handler, self.qt_signals_handler
             )
+
+            displayed_name = shelf_widget.name_lb.text()
+            matches_count = 0
+            for name in names:
+                if name == displayed_name and not shelf.name:
+                    matches_count += 1
+
+            if matches_count:
+                shelf_widget.name_lb.setText(f"{displayed_name} ({str(matches_count)})")
+
+            names.add(displayed_name)
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(
                 shelf_widget, index + 1, QtCore.Qt.AlignmentFlag.AlignTop
@@ -103,8 +115,11 @@ class ShelfWidget(QtWidgets.QWidget):
         )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
+        self.creation_date = dt.datetime.fromtimestamp(float(self.shelf.id))
         self.name_lb = QtWidgets.QLabel(
-            self.shelf.name if self.shelf.name else "Unknown"
+            self.shelf.name
+            if self.shelf.name
+            else f"[Unnamed]-{self.creation_date.date()}"
         )
         self.name_lb.setStyleSheet("""
             font-weight: bold;
@@ -155,6 +170,11 @@ class ShelfWidget(QtWidgets.QWidget):
         self.edit_b = QtWidgets.QPushButton("Modifier")
         self.edit_b.setIcon(
             QtGui.QIcon(os.path.join(self.icons_folder, "edit_ico.png"))
+        )
+        self.edit_b.clicked.connect(
+            self.qt_signals_handler.switch_page_sg.emit(
+                "shelf_creation_page", True, {"mode": "edition", "shelf": self.shelf}
+            )
         )
         self.edit_b.setSizePolicy(self.button_size)
 
