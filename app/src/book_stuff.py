@@ -26,7 +26,7 @@ class Book:
         self.shelfs_ids = kwargs.get("shelfs_ids", [])
         self.internal_id = kwargs.get(
             "internal_id",
-            str(dt.datetime.timestamp(dt.datetime.now())).replace(".", ""),
+            str(dt.datetime.timestamp(dt.datetime.now())),
         )
 
 
@@ -45,12 +45,15 @@ class BooksHandler:
         book_id = book_id
 
         if book_id in self.books.keys():
-            self.logger.info("Deleting book...")
+            self.logger.debug(f"Deleting book with ID '{book_id}'...")
             del self.books[book_id]
+            return True
 
         else:
-            self.logger.error(f"Unknown book id : {book_id}")
-            raise my_exceptions.BookNotFoundError(book_id)
+            self.logger.warning(
+                f"Couldn't delete book with ID '{book_id}' : book doesn't exists !"
+            )
+            return False
 
     def create_book(self, **kwargs):
         """
@@ -58,21 +61,23 @@ class BooksHandler:
         """
 
         book = Book(**kwargs)
-        self.add_book(book)
         return book
 
-    def add_book(self, book_obj):
+    def new_book(self, **kwargs):
+        """Create and add an instance of Book" to the books handler"""
+        book_obj = self.create_book(**kwargs)
+        self.add_book(book_obj)
+
+    def add_book(self, book_obj: Book):
         for shelf_id in book_obj.shelfs_ids:
             if shelf_id in self.books_shelfs.keys():
-                shelf = self.books_shelfs[shelf_id]
-                shelf.add_book(book_obj)
+                if book_obj.internal_id not in self.books.keys():
+                    shelf = self.books_shelfs[shelf_id]
+                    shelf.add_book(book_obj)
 
             else:
-                self.logger.error(
-                    f"Unable to add book to shelf with the ID {shelf_id} : This shelf is not in the shelfs dictionary ! Has it been deleted ?"
-                )
-                raise KeyError(
-                    f"Unable to add book to shelf with the ID {shelf_id} : This shelf is not in the shelfs dictionary ! Has it been deleted ?"
+                self.logger.warning(
+                    f"Couldn't to add book to shelf with the ID {shelf_id} : Shelf doesn't exists !"
                 )
 
         self.books[book_obj.internal_id] = book_obj
@@ -94,11 +99,8 @@ class BooksHandler:
                 setattr(self.default_shelf, arg_name, arg_value)
 
             else:
-                self.logger.error(
-                    f"Unable to set attribute {arg_name} of shelf object {self.default_shelf}"
-                )
-                raise AttributeError(
-                    f"Unable to set attribute {arg_name} of shelf object {self.default_shelf}"
+                self.logger.warning(
+                    f"Couldn't set attribute {arg_name} of the default shelf: Unknown attribute !"
                 )
 
     def add_shelf(self, book_shelf):
@@ -107,27 +109,31 @@ class BooksHandler:
 
         book_shelf: an instance of a BookShelf object
         """
+        self.logger.info(
+            f"Adding shelf with ID '{book_shelf.id}' to books_handler '{self}'"
+        )
 
         if book_shelf.id not in self.books_shelfs.keys():
             self.books_shelfs[book_shelf.id] = book_shelf
 
         else:
-            self.logger.error(
-                f"Unable to add book shelf object with ID : '{book_shelf.id}' to books_handler '{self}' : A book shelf with the id {book_shelf.id} already exists !"
+            self.logger.warning(
+                f"Failed to add book shelf with ID : '{book_shelf.id}' to books_handler '{self}' : ID arleady exists !"
             )
-            raise my_exceptions.BooksShelfExistsError(book_shelf.id)
 
     def remove_shelf(self, id: str):
-        self.logger.info("Removing book shelf...")
+        self.logger.debug(f"Removing book shelf with ID : '{id}'...")
 
         if id in self.books_shelfs.keys():
             del self.books_shelfs[id]
 
         else:
-            self.logger.error(f"Unknown book shelf : {id}")
+            self.logger.warning(
+                f"Couldn't delete book shelf with ID '{id}' : Book shelf doesn't exists"
+            )
             raise my_exceptions.BooksShelfNotFoundError(id)
 
-    def edit_book(self, event, book_id: str, new_book: Book):
+    def edit_book(self, book_id: str, new_book: Book):
         self.logger.info(f"Editing book with id {book_id}...")
         self.books[book_id] = new_book
 
@@ -136,10 +142,9 @@ class BooksHandler:
                 self.books_shelfs[shelf_id] = new_book
 
             else:
-                self.logger.error(
-                    f"Book shelf with id {shelf_id} doesn't exists ! Perhaps it has been deleted ?"
+                self.logger.warning(
+                    f"Failed to add on editing book with id '{new_book.internal_id}' to shelf with ID '{shelf_id}' : Shelf doesn't exists !"
                 )
-                raise my_exceptions.BooksShelfNotFoundError(shelf_id)
 
     def get_book(self, **kwargs):
         """
@@ -161,7 +166,7 @@ class BooksHandler:
 
             - value_b: the value against which value_b is compared
 
-            - complete_match (Boolean): indicates whether a partial match is allowed
+            - full_match: (Boolean): indicates whether a partial match is allowed
 
             Compare value_a to value_b.
 
@@ -212,7 +217,11 @@ class BooksHandler:
                             filter_value,
                             getattr(book_obj, filter_name)
                             if case_sensitive
-                            else getattr(book_obj, filter_name).lower(),
+                            else (
+                                getattr(book_obj, filter_name).lower()
+                                if type(filter_value) is str
+                                else getattr(book_obj, filter_name)
+                            ),
                             full_match,
                         ):
                             filter_matchs.append(True)
@@ -220,24 +229,14 @@ class BooksHandler:
                         else:
                             filter_matchs.append(False)
 
-                    else:
-                        self.logger.error(
-                            f"Comparaison between type ({type(filter_value)} and type ({type(getattr(book_obj, filter_name))}) aren't allowed !"
-                        )
-                        raise TypeError(
-                            f"Comparaison between type ({type(filter_value)} and type ({type(getattr(book_obj, filter_name))}) aren't allowed !"
-                        )
-
                 else:
-                    self.logger.error(
-                        f"Book shelf object with id <{book_obj.internal_id}> has not attribute <{filter_name}> !"
-                    )
                     raise AttributeError(
-                        f"Book shelf object with id <{book_obj.internal_id}> has not attribute <{filter_name}> !"
+                        f"Couldn't perform comparison: Book (id='{book_obj.internal_id}') has no attribute '{filter_name}'."
                     )
 
-            if all(filter_matchs):
-                books_matchs.append(book_obj)
+            if len(filter_matchs) == len(filters):
+                if all(filter_matchs):
+                    books_matchs.append(book_obj)
 
         return books_matchs
 
@@ -289,8 +288,9 @@ class BooksHandler:
                         books_ids.append(book_id)
 
                     else:
-                        self.logger.error(f"Book with id {book_id} doesn't exists !")
-                        raise my_exceptions.BookNotFoundError(book_id)
+                        self.logger.error(
+                            f"Couldn't add book (ID: '{book_id}') to shelf (ID: '{shelf_data.get('internal_id')}') : Book doesn't exists !"
+                        )
 
                 self.create_shelf(
                     name=shelf_data["name"],
@@ -330,9 +330,7 @@ class Shelf:
         self.name = kwargs.get("name")
         self.books_ids = kwargs.get("books_ids", [])
         self.cover_path = kwargs.get("cover_path")
-        self.id = kwargs.get(
-            "id", str(dt.datetime.timestamp(dt.datetime.now())).replace(".", "")
-        )
+        self.id = kwargs.get("id", str(dt.datetime.timestamp(dt.datetime.now())))
 
     def add_book(self, book: Book):
 
@@ -341,18 +339,28 @@ class Shelf:
 
         else:
             self.logger.error(
-                f"Book with ID {book.internal_id} arleady exists in this shelf ! (ID : {self.id})"
+                f"Book with ID {book.internal_id} arleady exists in the shelfID : {self.id})"
             )
-            raise my_exceptions.BookExistsError(book.internal_id)
 
-    def remove_book(self, book_id: str):
+    def remove_book(self, book_id: str) -> bool:
+        """Remove book specified by <book_id> from this shelf"""
         self.logger.info(
-            f"Removing book with id '{book_id}' from book shelf '{self.name}'..."
+            f"Removing book with ID : '{book_id}' from book shelf with ID : '{self.id}'..."
         )
 
         if book_id in self.books_ids:
             del self.books_ids[self.books_ids.index(book_id)]
+            return True
 
         else:
-            self.logger.error(f"Unknown book id : {book_id}")
-            raise my_exceptions.BookNotFoundError(book_id)
+            self.logger.warning(
+                f"Couldn't remove book with ID '{book_id}' from shelf with ID '{self.id}' : Book not exists in the shelf !"
+            )
+            return False
+
+    def has_book_with_id(self, id: str):
+        if id in self.books_ids:
+            return True
+
+        else:
+            return False
