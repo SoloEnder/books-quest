@@ -1,12 +1,14 @@
 import datetime as dt
 import logging
 import os
+import shutil
+import traceback
 from pathlib import Path
 from typing import Literal
 
-from PIL import Image
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from app.src import book_stuff
 from app.ui import qt_signals_handler
 from app.utils import images_tools, paths
 
@@ -14,8 +16,8 @@ from app.utils import images_tools, paths
 class BookCreationPage(QtWidgets.QWidget):
     def __init__(
         self,
-        parent,
-        books_handler,
+        parent: QtWidgets.QWidget,
+        books_handler: book_stuff.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)
@@ -152,8 +154,15 @@ class BookCreationPage(QtWidgets.QWidget):
             )
             self.shelfs_selection_cbs[shelf.id] = shelf_cb
 
+        self.existence_msgbox = QtWidgets.QMessageBox()
+        self.existence_msgbox.setStandardButtons(
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
+        )
+        self.existence_msgbox.setText("Voulez vous vraiment ajouter ce livre ?")
+
         self.add_b = QtWidgets.QPushButton("Ajouter")
-        self.add_b.clicked.connect(self.add_book)
+        self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
         self.container_widget_layout.addWidget(self.exit_b, 0, 0)
@@ -243,6 +252,12 @@ class BookCreationPage(QtWidgets.QWidget):
     def set_cover_lb_pixmap(self, new_path):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
+    def check_existence(self, **kwargs):
+        """
+        Check if a book who match with the requirements specified iin kwargs exists in the current books handler, and return the standard output of the method <get_book> of the books handler
+        """
+        return self.books_handler.get_book(**kwargs)
+
     def get_book_infos(self):
         books_infos = {}
 
@@ -263,9 +278,29 @@ class BookCreationPage(QtWidgets.QWidget):
                 if text:
                     books_infos[key] = text
 
-        books_infos["internal_id"] = str(
-            dt.datetime.timestamp(dt.datetime.now())
-        ).replace(".", "")
+        try:
+            matches = self.check_existence(
+                title=(books_infos.get("title"), True, False),
+                authors=(books_infos.get("authors"), True, False),
+            )
+
+        except AttributeError:
+            self.logger.error(f"{traceback.format_exc()}")
+            return {}
+
+        if matches:
+            self.logger.debug(
+                f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
+            )
+            self.existence_msgbox.setInformativeText(
+                f"{len(matches)} livres ayant le même titre et/ou le même autheur que celui-ci ont été trouvés"
+            )
+            answer = self.existence_msgbox.exec()
+
+            if answer == QtWidgets.QMessageBox.StandardButton.No:
+                return
+
+        books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if str(self.cover_image) != self.default_cover_img:
             self.final_cover_image = os.path.join(
@@ -275,7 +310,7 @@ class BookCreationPage(QtWidgets.QWidget):
             cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
-                os.rename(
+                shutil.copy2(
                     self.cover_image,
                     os.path.join(
                         paths.BOOKS_COVERS_PATH,
@@ -310,7 +345,15 @@ class BookCreationPage(QtWidgets.QWidget):
 
         return books_infos
 
-    def add_book(self):
+    def create_book(self):
         books_infos = self.get_book_infos()
-        self.books_handler.create_book(**books_infos)
-        QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
+
+        if books_infos:
+            try:
+                self.books_handler.new_book(**books_infos)
+
+            except Exception:
+                self.logger.error(traceback.format_exc())
+
+            else:
+                QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
