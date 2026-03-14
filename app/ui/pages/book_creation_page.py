@@ -148,11 +148,26 @@ class BookCreationPage(QtWidgets.QWidget):
         self.shelfs_selection_scroll_area.setWidgetResizable(True)
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
-        for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
-            shelf_cb = QtWidgets.QCheckBox(
-                shelf.name if shelf.name else "[Untitled Shelf]"
-            )
+        shelfs_names = []
+        for shelf in self.books_handler.books_shelfs.values():
+            matches_count = 0
+            displayed_name = shelf.name
+            shelfs_names.append(shelf.name)
+
+            for name in shelfs_names:
+                if name == shelf.name and not shelf.name:
+                    displayed_name = (
+                        f"[Unnamed]-{dt.datetime.fromtimestamp(float(shelf.id)).date()}"
+                    )
+
+                    if matches_count:
+                        displayed_name += f" ({matches_count})"
+
+                    matches_count += 1
+
+            shelf_cb = QtWidgets.QCheckBox(displayed_name)
             self.shelfs_selection_cbs[shelf.id] = shelf_cb
+            self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
         self.existence_msgbox.setStandardButtons(
