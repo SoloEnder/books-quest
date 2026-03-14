@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+import shutil
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -15,11 +16,28 @@ class ShelfCreationPage(QtWidgets.QWidget):
         parent: QtWidgets.QWidget | None,
         books_handler: book_stuff.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        **kwargs,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.modes = ("edition", "creation")
+        self.current_mode = kwargs.get("mode")
+
+        if self.current_mode:
+            if self.current_mode not in self.modes:
+                self.logger.error(
+                    f"Mode '{self.current_mode}' is not a valid mode for Shelf Creation Page. Valids mode : {self.modes}"
+                )
+                raise ValueError(
+                    f"Mode '{self.current_mode}' is not a valid mode for Shelf Creation Page. Valids mode : {self.modes}"
+                )
+
+        else:
+            raise ValueError(
+                "No mode provided for Shelf Creation Page initialisation !"
+            )
 
         self.main_lyt = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_lyt)
@@ -67,6 +85,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
         self.book_research_e.returnPressed.connect(self.search_book)
+        self.stop_research_b = QtWidgets.QPushButton()
 
         self.draw_books_tree(self.books_handler.books)
 
@@ -103,6 +122,27 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
+        if self.current_mode == "edition":
+            if kwargs.get("shelf"):
+                self.shelf = kwargs.get("shelf")
+                self.edition_mode()
+
+            else:
+                self.logger.error(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
+                raise KeyError(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
+
+    def edition_mode(self):
+        if self.shelf:
+            self.name_e.setText(self.shelf.name)
+
+            for title_item in self.books_title_items:
+                if title_item.data() in self.shelf.books_ids:
+                    title_item.setCheckState(QtCore.Qt.CheckState.Checked)
+
     def set_shelf_cover(self):
         infos = images_tools.select_image()
 
@@ -118,7 +158,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
-    def draw_books_tree(self, sequence: dict):
+    def draw_books_tree(self, sequence: dict[str, book_stuff.Book]):
 
         if hasattr(self, "books_tree"):
             self.main_widget_lyt.removeWidget(self.books_tree)
@@ -139,11 +179,19 @@ class ShelfCreationPage(QtWidgets.QWidget):
         # Books items
 
         for book in sequence.values():
-            book_title_item = QtGui.QStandardItem(book.title)
+            book_title_item = QtGui.QStandardItem(
+                book.title
+                if book.title
+                else f"[Untitled]-{dt.datetime.fromtimestamp(float(book.internal_id))}"
+            )
             book_title_item.setData(book.internal_id)
             book_title_item.setCheckable(True)
-            book_author_item = QtGui.QStandardItem(book.authors)
-            book_edition_item = QtGui.QStandardItem(book.edition)
+            book_author_item = QtGui.QStandardItem(
+                book.authors if book.authors else "Unknown"
+            )
+            book_edition_item = QtGui.QStandardItem(
+                book.edition if book.edition else "Unknown"
+            )
             self.books_tree_model.appendRow(
                 (book_title_item, book_author_item, book_edition_item)
             )
@@ -159,7 +207,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_widget_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
 
     def get_shelf_infos(self) -> dict | None:
-        id = str(dt.datetime.timestamp(dt.datetime.now())).replace(".", "")
+        id = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(paths.SHELFS_COVERS_PATH, id)
@@ -189,7 +237,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
     def move_cover_img(self, dest_path):
 
         try:
-            os.rename(self.current_shelf_cover, dest_path)
+            shutil.copy2(self.current_shelf_cover, dest_path)
 
         except Exception as e:
             self.logger.error(
@@ -209,9 +257,21 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
             self.draw_books_tree(matches)
 
+        else:
+            self.draw_books_tree(self.books_handler.books)
+
     def create_shelf(self):
         shelf_infos = self.get_shelf_infos()
 
         if shelf_infos:
-            self.books_handler.create_shelf(**shelf_infos)
-            QtWidgets.QMessageBox.information(self, "Terminé", "Etagère crée")
+            if self.current_mode == "creation":
+                self.books_handler.new_shelf(**shelf_infos)
+                QtWidgets.QMessageBox.information(self, "Terminé", "Etagère crée")
+
+            elif self.current_mode == "edition":
+                if self.shelf:
+                    edited_shelf = self.books_handler.create_shelf(**shelf_infos)
+                    self.books_handler.edit_shelf(self.shelf.id, edited_shelf)
+                    QtWidgets.QMessageBox.information(
+                        self, "Terminé", "Etagère modifiée"
+                    )
