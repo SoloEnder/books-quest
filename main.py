@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import traceback
 
 from app import system
@@ -27,4 +26,4 @@ if __name__ == "__main__":
 
     except Exception:
         logger.critical(traceback.format_exc())
-        sys.exit()
+        raise
