@@ -172,7 +172,7 @@ class ShelfWidget(QtWidgets.QWidget):
             QtGui.QIcon(os.path.join(self.icons_folder, "edit_ico.png"))
         )
         self.edit_b.clicked.connect(
-            self.qt_signals_handler.switch_page_sg.emit(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
                 "shelf_creation_page", True, {"mode": "edition", "shelf": self.shelf}
             )
         )
