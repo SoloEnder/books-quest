@@ -85,9 +85,16 @@ class BooksHandler:
 
     def create_shelf(self, **kwargs):
         """
-        Create a book shelf
+        Create a Shelf object and return it
         """
         shelf = Shelf(**kwargs)
+        return shelf
+
+    def new_shelf(self, **kwargs):
+        """
+        Create a Shelf object and add it to the current handler
+        """
+        shelf = self.create_shelf(**kwargs)
         self.add_shelf(shelf)
 
     def edit_default_shelf(self, **kwargs):
@@ -145,6 +152,14 @@ class BooksHandler:
                 self.logger.warning(
                     f"Failed to add on editing book with id '{new_book.internal_id}' to shelf with ID '{shelf_id}' : Shelf doesn't exists !"
                 )
+
+    def edit_shelf(self, shelf_id: str, new_shelf):
+
+        if shelf_id in self.books_shelfs.keys():
+            self.books_shelfs[shelf_id] = new_shelf
+
+        else:
+            raise my_exceptions.BooksShelfNotFoundError(shelf_id)
 
     def get_book(self, **kwargs):
         """
@@ -292,7 +307,7 @@ class BooksHandler:
                             f"Couldn't add book (ID: '{book_id}') to shelf (ID: '{shelf_data.get('internal_id')}') : Book doesn't exists !"
                         )
 
-                self.create_shelf(
+                self.new_shelf(
                     name=shelf_data["name"],
                     books_ids=books_ids,
                     id=shelf_data["id"],
