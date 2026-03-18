@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+import traceback
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -23,7 +24,7 @@ class ShelfsPage(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QGridLayout(self)
         self.go_back_b = QtWidgets.QPushButton("Fermer")
         self.go_back_b.setIcon(
-            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "back_ico.png"))
+            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "cross_ico.png"))
         )
         self.go_back_b.clicked.connect(
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
@@ -105,14 +106,25 @@ class ShelfWidget(QtWidgets.QWidget):
         self.shelf = shelf
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.logger = logging.getLogger(__name__)
 
         self.main_layout = QtWidgets.QGridLayout(self)
         self.default_cover = os.path.join(
             paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png"
         )
-        self.cover_pm = QtGui.QPixmap(
-            self.shelf.cover_path if self.shelf.cover_path else self.default_cover
-        )
+
+        if self.shelf.cover_path:
+            if os.path.exists(self.shelf.cover_path):
+                self.displayed_cover = self.shelf.cover_path
+
+            else:
+                self.displayed_cover = self.default_cover
+                self.logger.warning(f"Couldn't found shelf cover file at {self.shelf.cover_path}, switching to default cover")
+
+        else:
+            self.displayed_cover = self.default_cover
+
+        self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
         self.creation_date = dt.datetime.fromtimestamp(float(self.shelf.id))
@@ -121,14 +133,9 @@ class ShelfWidget(QtWidgets.QWidget):
             if self.shelf.name
             else f"[Unnamed]-{self.creation_date.date()}"
         )
-        self.name_lb.setStyleSheet("""
-            font-weight: bold;
-            font-size: 20px;
-        """)
+        self.name_lb.setObjectName("name_lb")
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books_ids)} livres")
-        self.total_books.setStyleSheet("""
-            font-size: 17px;
-        """)
+        self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
         self.on_reading_books_count = 0
         self.finished_books_count = 0
@@ -152,10 +159,7 @@ class ShelfWidget(QtWidgets.QWidget):
             f"{self.finished_books_count} terminés"
         )
         self.total_pages = QtWidgets.QLabel("600 pages")
-        self.total_pages.setStyleSheet("""
-            font-style: italic;
-            font-size: 16px;
-        """)
+        self.total_pages.setObjectName("total_pages_lb")
         self.unread_books_lb.setIndent(10)
         self.on_reading_books_lb.setIndent(10)
         self.finished_books_lb.setIndent(10)
@@ -195,8 +199,19 @@ class ShelfWidget(QtWidgets.QWidget):
         self.main_layout.addWidget(self.view_b, 5, 1)
         self.main_layout.addWidget(self.edit_b, 6, 1)
         self.main_layout.addWidget(self.delete_b, 7, 1)
+        self.set_mystyle(os.path.join(paths.QSS_FILES_PATH, "shelf_widget.qss"))
 
         # The book creation information
+
+    def set_mystyle(self, filepath: str):
+
+        try:
+            with open(filepath, "r") as f:
+                self.setStyleSheet(f.read())
+
+        except Exception as e:
+            self.logger.exception(f"Unable to load style from file '{filepath}'")
+
 
     def delete_shelf(self):
         self.books_handler.remove_shelf(self.shelf.id)
