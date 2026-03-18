@@ -142,7 +142,12 @@ class BooksHandler:
 
     def edit_book(self, book_id: str, new_book: Book):
         self.logger.info(f"Editing book with id {book_id}...")
-        self.books[book_id] = new_book
+
+        if book_id != new_book.internal_id:
+            raise my_exceptions.BookNotFoundError(book_id)
+
+        else:
+            self.books[book_id] = new_book
 
         for shelf_id in new_book.shelfs_ids:
             if shelf_id in self.books_shelfs.keys():
@@ -156,6 +161,7 @@ class BooksHandler:
     def edit_shelf(self, shelf_id: str, new_shelf):
 
         if shelf_id in self.books_shelfs.keys():
+            new_shelf.id = shelf_id
             self.books_shelfs[shelf_id] = new_shelf
 
         else:
@@ -307,11 +313,7 @@ class BooksHandler:
                             f"Couldn't add book (ID: '{book_id}') to shelf (ID: '{shelf_data.get('internal_id')}') : Book doesn't exists !"
                         )
 
-                self.new_shelf(
-                    name=shelf_data["name"],
-                    books_ids=books_ids,
-                    id=shelf_data["id"],
-                )
+                self.new_shelf(**shelf_data)
 
     def convert_book_id(self, books_ids: list | tuple):
         """
