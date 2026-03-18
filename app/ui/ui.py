@@ -5,7 +5,6 @@ from PySide6 import QtCore, QtWidgets
 from app.src import book_stuff
 from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelfs_pages
-from app.utils import my_exceptions
 
 
 class UI(QtWidgets.QWidget):
@@ -45,7 +44,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self, self.books_handler, self.qt_signals_handler
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
-            self, self.books_handler, self.qt_signals_handler, mode="creation"
+            self, self.books_handler, self.qt_signals_handler, mode="creation",
         )
         self.pages = {
             "shelfs_page": self.shelfs_page,
@@ -75,7 +74,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.logger.info(f"Switching to page <{page_name}>...")
         if page_name in self.pages.keys():
             if refresh:
-                self.refresh(page_name, page_args=page_args)
+                self.refresh(page_name, page_args)
 
             page_obj = self.pages[page_name]
             self.setCurrentWidget(page_obj)
@@ -84,7 +83,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         else:
             self.logger.error(f"Page <{page_name}> not found !")
-            raise my_exceptions.PageNotFoundError(page_name)
 
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
@@ -93,35 +91,39 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             True if refresh else False,
         )
 
-    def refresh(self, page_name, page_args):
-        if page_name == "shelfs_page":
-            self.removeWidget(self.shelfs_page)
-            self.shelfs_page.setParent(None)
-            self.shelfs_page.deleteLater()
-            self.shelfs_page = shelfs_pages.ShelfsPage(
-                self,
-                self.books_handler,
-                self.qt_signals_handler,
-            )
-            self.pages["shelfs_page"] = self.shelfs_page
-            self.addWidget(self.shelfs_page)
+    def refresh(self, page_name, page_args: dict = {}):
+        to_update = page_name
+        self.logger.debug(f"Refreshing {page_name} with kwargs {[page_args]}")
 
-        elif page_name == "book_creation_page":
-            self.removeWidget(self.book_creation_page)
-            self.book_creation_page.setParent(None)
-            self.book_creation_page.deleteLater()
-            self.book_creation_page = book_creation_page.BookCreationPage(
-                self, self.books_handler, self.qt_signals_handler
-            )
-            self.pages["book_creation_page"] = self.book_creation_page
-            self.addWidget(self.book_creation_page)
+        for to_update_page in to_update:
+            if to_update_page == "shelfs_page":
+                self.removeWidget(self.shelfs_page)
+                self.shelfs_page.setParent(None)
+                self.shelfs_page.deleteLater()
+                self.shelfs_page = shelfs_pages.ShelfsPage(
+                    self,
+                    self.books_handler,
+                    self.qt_signals_handler,
+                )
+                self.pages["shelfs_page"] = self.shelfs_page
+                self.addWidget(self.shelfs_page)
 
-        elif page_name == "shelf_creation_page":
-            self.removeWidget(self.shelf_creation_page)
-            self.shelf_creation_page.setParent(None)
-            self.shelf_creation_page.deleteLater()
-            self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
-                self, self.books_handler, self.qt_signals_handler, **page_args
-            )
-            self.pages["shelf_creation_page"] = self.shelf_creation_page
-            self.addWidget(self.shelf_creation_page)
+            elif to_update_page == "book_creation_page":
+                self.removeWidget(self.book_creation_page)
+                self.book_creation_page.setParent(None)
+                self.book_creation_page.deleteLater()
+                self.book_creation_page = book_creation_page.BookCreationPage(
+                    self, self.books_handler, self.qt_signals_handler
+                )
+                self.pages["book_creation_page"] = self.book_creation_page
+                self.addWidget(self.book_creation_page)
+
+            elif to_update_page == "shelf_creation_page":
+                self.removeWidget(self.shelf_creation_page)
+                self.shelf_creation_page.setParent(None)
+                self.shelf_creation_page.deleteLater()
+                self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
+                    self, self.books_handler, self.qt_signals_handler, **page_args
+                )
+                self.pages["shelf_creation_page"] = self.shelf_creation_page
+                self.addWidget(self.shelf_creation_page)
