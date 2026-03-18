@@ -30,6 +30,7 @@ BASE_PATH = get_base_path()
 ASSETS_PATH = os.path.join(BASE_PATH, "assets")
 ICONS_PATH = os.path.join(ASSETS_PATH, "icons")
 DEFAULT_COVERS_PATH = os.path.join(ASSETS_PATH, "default")
+QSS_FILES_PATH = os.path.join(ASSETS_PATH, "qss")
 
 # Data
 DATA_PATH = os.path.join(BASE_PATH, "data")
@@ -54,5 +55,6 @@ all_paths = {
     "books_covers_path": BOOKS_COVERS_PATH,
     "shelfs_cover_path": SHELFS_COVERS_PATH,
     "logs_path": LOGS_PATH,
-    "tmp_dir_path": None,
+    "tmp_dir_path": TMP_DIR_PATH,
+    "qss_files_dir":QSS_FILES_PATH,
 }
