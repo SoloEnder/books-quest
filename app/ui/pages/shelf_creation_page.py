@@ -210,7 +210,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
         id = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if self.current_shelf_cover != self.default_shelf_cover:
-            final_img_path = os.path.join(paths.SHELFS_COVERS_PATH, id)
+            final_img_path = os.path.join(
+                paths.SHELFS_COVERS_PATH, f"{id.replace('.', '_')}.png"
+            )
             self.move_cover_img(final_img_path)
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(self.current_shelf_cover)
@@ -231,7 +233,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 "name": shelf_name,
                 "books_ids": books_ids,
                 "id": id,
-                "cover_path": self.current_shelf_cover,
+                "cover_path": self.current_shelf_cover
+                if self.current_shelf_cover != self.default_shelf_cover
+                else None,
             }
 
     def move_cover_img(self, dest_path):
