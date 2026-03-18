@@ -51,7 +51,7 @@ class BookCreationPage(QtWidgets.QWidget):
         # Exit Widget
         self.exit_b = QtWidgets.QPushButton("Fermer")
         self.exit_b.setIcon(
-            QtGui.QIcon(os.path.join(self.icons_folder, "back_ico.png"))
+            QtGui.QIcon(os.path.join(self.icons_folder, "cross_ico.png"))
         )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.exit_b.clicked.connect(
@@ -180,7 +180,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
-        self.container_widget_layout.addWidget(self.exit_b, 0, 0)
+        self.main_layout.addWidget(self.exit_b, 0)
         self.container_widget_layout.addWidget(self.book_cover_lb, 1, 0)
         self.container_widget_layout.addWidget(self.edit_cover_b, 2, 0)
         self.container_widget_layout.addWidget(
@@ -207,7 +207,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.container_widget_layout.addWidget(
             self.add_b, self.container_widget_layout.rowCount() + 1, 0
         )
-        self.main_layout.addWidget(self.scroll_area)
+        self.main_layout.addWidget(self.scroll_area, 1)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
         """
@@ -318,20 +318,20 @@ class BookCreationPage(QtWidgets.QWidget):
         books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if str(self.cover_image) != self.default_cover_img:
-            self.final_cover_image = os.path.join(
+            final_cover_image = os.path.join(
                 paths.BOOKS_COVERS_PATH,
-                f"{books_infos['internal_id']}.png",
+                f"{books_infos['internal_id'].replace('.', '_')}.png",
             )
-            cover_img_path = Path(self.cover_image)
 
             if cover_img_path.exists():
                 shutil.copy2(
                     self.cover_image,
                     os.path.join(
                         paths.BOOKS_COVERS_PATH,
-                        f"{books_infos['internal_id']}.png",
+                        final_cover_image,
                     ),
                 )
+                self.cover_image = final_cover_image
                 self.set_cover_lb_pixmap(self.cover_image)
 
         books_infos["cover_img_path"] = str(self.cover_image)
