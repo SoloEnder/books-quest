@@ -63,7 +63,6 @@ class ShelfsPage(QtWidgets.QWidget):
         )
 
         self.main_layout.addWidget(self.scroll_area, 3, 0)
-        self.shelfs_widgets = []
         self.default_shelf_widget = DefaultShelfWidget(
             self.books_handler.default_shelf,
             self.books_handler,
@@ -72,11 +71,34 @@ class ShelfsPage(QtWidgets.QWidget):
         self.shelfs_container_layout.addWidget(
             self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
         )
+        self.shelfs_widgets = []
+        self.generate_shelfs_widgets(self.books_handler.books_shelfs)
+
+    def load_shelfs_widgets_ss(self):
+        filepath = os.path.join(paths.QSS_FILES_PATH, "shelf_widget.qss")
+
+        try:
+            with open(filepath, "r") as f:
+                return f.read()
+
+        except:
+            self.logger.exception(f"Couldn't load shelfs widgets stylesheet from file {filepath}")
+
+    def generate_shelfs_widgets(self, shelfs: dict|None=None):
+        stylesheet = self.load_shelfs_widgets_ss()
+
+        if not shelfs:
+            shelfs = self.books_handler.books_shelfs
+
+        self.shelfs_widgets.clear()
         names = set()
-        for index, shelf in enumerate(self.books_handler.books_shelfs.values()):
+
+        for index, shelf in enumerate(shelfs.values()):
             shelf_widget = ShelfWidget(
                 shelf, self.books_handler, self.qt_signals_handler
             )
+            if stylesheet:
+                shelf_widget.setStyleSheet(stylesheet)
 
             displayed_name = shelf_widget.name_lb.text()
             matches_count = 0
@@ -92,7 +114,6 @@ class ShelfsPage(QtWidgets.QWidget):
             self.shelfs_container_layout.addWidget(
                 shelf_widget, index + 1, QtCore.Qt.AlignmentFlag.AlignTop
             )
-
 
 class ShelfWidget(QtWidgets.QWidget):
     def __init__(
@@ -183,6 +204,7 @@ class ShelfWidget(QtWidgets.QWidget):
         self.edit_b.setSizePolicy(self.button_size)
 
         self.delete_b = QtWidgets.QPushButton("Supprimer")
+        self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
             QtGui.QIcon(os.path.join(self.icons_folder, "cross_ico.png"))
         )
@@ -199,19 +221,8 @@ class ShelfWidget(QtWidgets.QWidget):
         self.main_layout.addWidget(self.view_b, 5, 1)
         self.main_layout.addWidget(self.edit_b, 6, 1)
         self.main_layout.addWidget(self.delete_b, 7, 1)
-        self.set_mystyle(os.path.join(paths.QSS_FILES_PATH, "shelf_widget.qss"))
 
         # The book creation information
-
-    def set_mystyle(self, filepath: str):
-
-        try:
-            with open(filepath, "r") as f:
-                self.setStyleSheet(f.read())
-
-        except Exception as e:
-            self.logger.exception(f"Unable to load style from file '{filepath}'")
-
 
     def delete_shelf(self):
         self.books_handler.remove_shelf(self.shelf.id)
