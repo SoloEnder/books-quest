@@ -322,8 +322,9 @@ class BookCreationPage(QtWidgets.QWidget):
                 paths.BOOKS_COVERS_PATH,
                 f"{books_infos['internal_id'].replace('.', '_')}.png",
             )
+            self.logger.debug(f"Final book cover path : {final_cover_image}")
 
-            if cover_img_path.exists():
+            if os.path.exists(self.cover_image):
                 shutil.copy2(
                     self.cover_image,
                     os.path.join(
