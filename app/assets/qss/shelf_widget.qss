@@ -8,11 +8,6 @@ QLabel#total_books_lb {
     font-size: 17px;
 }
 
-QLabel#total_pages_lb {
-    font-style: italic;
-    font-size: 16px;
-}
-
 QPushButton[role="delete_b"] {
     color: red;
 }
