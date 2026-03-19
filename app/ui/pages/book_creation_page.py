@@ -8,7 +8,7 @@ from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.utils import images_tools, paths
 
@@ -17,7 +17,7 @@ class BookCreationPage(QtWidgets.QWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget,
-        books_handler: book_stuff.BooksHandler,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)

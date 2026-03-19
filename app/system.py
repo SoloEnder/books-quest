@@ -7,7 +7,7 @@ import tempfile
 
 from PySide6 import QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 from app.ui import ui
 from app.utils import json_file_manager as jfm
 from app.utils import paths
@@ -35,7 +35,7 @@ class AppSystem:
                 paths.SHELFS_COVERS_PATH,
             )
         self.logger.info("Initialising application...")
-        self.books_handler = book_stuff.BooksHandler()
+        self.books_handler = book_sys.BooksHandler()
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelfs(

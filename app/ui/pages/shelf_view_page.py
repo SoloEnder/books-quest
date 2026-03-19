@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 
 
 class ShelfViewPage(QtWidgets.QWidget):
@@ -19,7 +19,7 @@ class ShelfViewPage(QtWidgets.QWidget):
 
 class ShelfActionsWidget(QtWidgets.QWidget):
     def __init__(
-        self, parent: QtWidgets.QWidget | None, books_handler: book_stuff.BooksHandler
+        self, parent: QtWidgets.QWidget | None, books_handler: book_sys.BooksHandler
     ) -> None:
         super().__init__(parent)
         self.books_handler = books_handler

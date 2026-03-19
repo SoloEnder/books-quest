@@ -2,7 +2,7 @@ import logging
 
 from PySide6 import QtCore, QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelfs_pages
 
@@ -25,7 +25,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        books_handler: book_stuff.BooksHandler,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)

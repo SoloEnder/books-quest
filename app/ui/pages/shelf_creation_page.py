@@ -5,7 +5,7 @@ import shutil
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.utils import images_tools, paths
 
@@ -14,7 +14,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        books_handler: book_stuff.BooksHandler,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         **kwargs,
     ):
@@ -46,12 +46,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_widget.setLayout(self.main_widget_lyt)
 
         # Back button
-        self.back_b = QtWidgets.QPushButton("Fermer")
-        self.back_b.setIcon(QtGui.QIcon(os.path.join(paths.ICONS_PATH, "back_ico.png")))
-        self.back_b.clicked.connect(
+        self.close_b = QtWidgets.QPushButton("Fermer")
+        self.close_b.setIcon(QtGui.QIcon(os.path.join(paths.ICONS_PATH, "cross_ico.png")))
+        self.close_b.clicked.connect(
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
         )
-        self.main_lyt.addWidget(self.back_b, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(self.close_b, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         # Scroll area
         self.scroll_area = QtWidgets.QScrollArea()
@@ -158,7 +158,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
-    def draw_books_tree(self, sequence: dict[str, book_stuff.Book]):
+    def draw_books_tree(self, sequence: dict[str, book_sys.Book]):
 
         if hasattr(self, "books_tree"):
             self.main_widget_lyt.removeWidget(self.books_tree)
