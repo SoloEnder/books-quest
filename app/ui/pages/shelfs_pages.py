@@ -5,7 +5,7 @@ import traceback
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_stuff
+from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.utils import paths
 
@@ -14,7 +14,7 @@ class ShelfsPage(QtWidgets.QWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        books_handler: book_stuff.BooksHandler,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)
@@ -118,8 +118,8 @@ class ShelfsPage(QtWidgets.QWidget):
 class ShelfWidget(QtWidgets.QWidget):
     def __init__(
         self,
-        shelf: book_stuff.Shelf,
-        books_handler: book_stuff.BooksHandler,
+        shelf: book_sys.Shelf,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__()
@@ -179,8 +179,6 @@ class ShelfWidget(QtWidgets.QWidget):
         self.finished_books_lb = QtWidgets.QLabel(
             f"{self.finished_books_count} terminés"
         )
-        self.total_pages = QtWidgets.QLabel("600 pages")
-        self.total_pages.setObjectName("total_pages_lb")
         self.unread_books_lb.setIndent(10)
         self.on_reading_books_lb.setIndent(10)
         self.finished_books_lb.setIndent(10)
@@ -232,8 +230,8 @@ class ShelfWidget(QtWidgets.QWidget):
 class DefaultShelfWidget(ShelfWidget):
     def __init__(
         self,
-        shelf: book_stuff.Shelf,
-        books_handler: book_stuff.BooksHandler,
+        shelf: book_sys.Shelf,
+        books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(shelf, books_handler, qt_signals_handler)
@@ -243,21 +241,4 @@ class DefaultShelfWidget(ShelfWidget):
         self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
 
 
-class BookWidget(QtWidgets.QWidget):
-    def __init__(self, book):
-        super().__init__()
-        self.setStyleSheet("""
-            border-style: solid;
-            border-width: 56px;
-        """)
-        self.book = book
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.book_cover_lb = QtWidgets.QLabel(self)
-        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_img_path))
-        self.book_title_lb = QtWidgets.QLabel(self.book.title)
-        self.book_title_lb.setStyleSheet("""
-            font-size: 18px;
-            font-weight: bold;
-        """)
-        self.main_layout.addWidget(self.book_cover_lb, 0)
-        self.main_layout.addWidget(self.book_title_lb, 1)
+
