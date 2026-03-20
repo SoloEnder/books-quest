@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 import os
-import traceback
+from app.utils import utils_funcs
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -148,11 +148,10 @@ class ShelfWidget(QtWidgets.QWidget):
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
-        self.creation_date = dt.datetime.fromtimestamp(float(self.shelf.id))
         self.name_lb = QtWidgets.QLabel(
             self.shelf.name
             if self.shelf.name
-            else f"[Unnamed]-{self.creation_date.date()}"
+            else utils_funcs.unknown_shelf_name_fmt(self.shelf)
         )
         self.name_lb.setObjectName("name_lb")
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books_ids)} livres")
@@ -189,6 +188,7 @@ class ShelfWidget(QtWidgets.QWidget):
             QtGui.QIcon(os.path.join(self.icons_folder, "view_books_ico.png"))
         )
         self.view_b.setSizePolicy(self.button_size)
+        self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("shelf_details_page", True, {"shelf":self.shelf}))
 
         self.edit_b = QtWidgets.QPushButton("Modifier")
         self.edit_b.setIcon(
