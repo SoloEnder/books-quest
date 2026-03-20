@@ -7,7 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.utils import images_tools, paths
+from app.utils import images_tools, paths, utils_funcs
 
 
 class ShelfCreationPage(QtWidgets.QWidget):
@@ -182,7 +182,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             book_title_item = QtGui.QStandardItem(
                 book.title
                 if book.title
-                else f"[Untitled]-{dt.datetime.fromtimestamp(float(book.internal_id))}"
+                else utils_funcs.unknown_book_title_fmt(book)
             )
             book_title_item.setData(book.internal_id)
             book_title_item.setCheckable(True)
