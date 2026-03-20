@@ -68,6 +68,11 @@ class ShelfsPage(QtWidgets.QWidget):
             self.books_handler,
             self.qt_signals_handler,
         )
+        self.shelf_widget_stylesheet = self.load_shelfs_widgets_ss()
+
+        if self.shelf_widget_stylesheet:
+            self.default_shelf_widget.setStyleSheet(self.shelf_widget_stylesheet)
+            
         self.shelfs_container_layout.addWidget(
             self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
         )
