@@ -67,7 +67,7 @@ class BookWidget(QtWidgets.QWidget):
         self.qss_filepath = os.path.join(paths.QSS_FILES_PATH, "book_widget.qss")
         utils_funcs.load_and_set_ss(self.qss_filepath, self, self.logger)
         self.book = book
-        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
 
         if self.book.cover_img_path:
@@ -82,8 +82,23 @@ class BookWidget(QtWidgets.QWidget):
         else:
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
 
+        self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.book_title_lb = QtWidgets.QLabel(self.book.title if self.book.title else utils_funcs.unknown_book_title_fmt(self.book))
         self.book_title_lb.setObjectName("book_title_lb")
-        self.main_layout.addWidget(self.book_title_lb, 1)
-        self.main_layout.addWidget(self.book_cover_lb, 0)
+        self.book_authors_lb = QtWidgets.QLabel(self.book.authors if self.book.authors else "Unknown")
+        self.book_authors_lb.setObjectName("book_authors_lb")
+        self.book_summary_te = QtWidgets.QTextEdit()
+        self.book_summary_te.setText(self.book.summary if self.book.summary else "")
+        self.book_summary_te.setReadOnly(True)
+        self.book_summary_te.setObjectName("book_summary_te")
+        self.edit_b = QtWidgets.QPushButton("Modifier")
+        self.edit_b.setObjectName("edit_b")
+        self.delete_b = QtWidgets.QPushButton("Supprimer")
+        self.delete_b.setObjectName("delete_b")
+        self.main_layout.addWidget(self.book_title_lb, 0, 0)
+        self.main_layout.addWidget(self.book_authors_lb, 1, 1)
+        self.main_layout.addWidget(self.book_summary_te, 2, 1)
+        self.main_layout.addWidget(self.edit_b, 3, 1)
+        self.main_layout.addWidget(self.delete_b, 4, 1)
+        self.main_layout.addWidget(self.book_cover_lb, 1, 0, self.main_layout.rowCount(), 1)
 
