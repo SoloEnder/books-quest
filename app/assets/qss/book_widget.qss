@@ -1,0 +1,5 @@
+
+QLabel#book_title_lb {
+    font-size: 18px;
+    font-weight: bold;
+}
