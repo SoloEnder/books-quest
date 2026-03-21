@@ -37,7 +37,8 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.books_container_sa.setWidget(self.books_container_widget)
 
         #books widgets
-        self.generate_books_widgets(self.books_handler.books)
+        self.books = self.books_handler.convert_book_id(self.shelf.books_ids)
+        self.generate_books_widgets(self.books)
 
         #Adding widgets to layout
         self.main_lyt.addWidget(self.close_b, 0, 0)
@@ -46,11 +47,15 @@ class ShelfDetailsPage(QtWidgets.QWidget):
     def generate_books_widgets(self, books: dict|None=None):
         self.books_widgets.clear()
 
-        if not books:
+        if books is None:
             books = self.books_handler.books
+
+        base_displayed_titles = []
 
         for index, book in enumerate(books.values()):
             book_widget = BookWidget(book)
+            base_displayed_titles.append(book_widget.book_title_lb.text())
+            book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
             self.books_widgets.append(book_widget)
             self.books_container_lyt.addWidget(book_widget, index, 0)
 
@@ -70,11 +75,17 @@ class BookWidget(QtWidgets.QWidget):
         self.book_cover_lb = QtWidgets.QLabel(self)
 
         if self.book.cover_img_path:
-            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_img_path))
+
+            if os.path.exists(self.book.cover_img_path):
+                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_img_path))
+
+            else:
+                self.logger.warning(f"Couldn't found cover file for book with ID={self.book.internal_id}, switching to default cover")
+                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
 
         else:
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
-            
+
         self.book_title_lb = QtWidgets.QLabel(self.book.title if self.book.title else utils_funcs.unknown_book_title_fmt(self.book))
         self.book_title_lb.setObjectName("book_title_lb")
         self.main_layout.addWidget(self.book_title_lb, 1)
