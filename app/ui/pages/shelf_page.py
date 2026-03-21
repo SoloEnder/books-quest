@@ -81,23 +81,14 @@ class ShelfsPage(QtWidgets.QWidget):
             shelfs = self.books_handler.books_shelfs
 
         self.shelfs_widgets.clear()
-        names = set()
+        base_displayed_names = []
 
         for index, shelf in enumerate(shelfs.values()):
             shelf_widget = ShelfWidget(
                 shelf, self.books_handler, self.qt_signals_handler
             )
-
-            displayed_name = shelf_widget.name_lb.text()
-            matches_count = 0
-            for name in names:
-                if name == displayed_name and not shelf.name:
-                    matches_count += 1
-
-            if matches_count:
-                shelf_widget.name_lb.setText(f"{displayed_name} ({str(matches_count)})")
-
-            names.add(displayed_name)
+            base_displayed_names.append(shelf_widget.name_lb.text())
+            shelf_widget.name_lb.setText(utils_funcs.set_displayed_names(base_displayed_names)[index])
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(
                 shelf_widget, index + 1, QtCore.Qt.AlignmentFlag.AlignTop
@@ -229,6 +220,3 @@ class DefaultShelfWidget(ShelfWidget):
         self.delete_b.hide()
         self.main_layout.removeWidget(self.cover_lb)
         self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
-
-
-
