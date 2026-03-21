@@ -4,7 +4,7 @@ from PySide6 import QtCore, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_page
+from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelf_page
 
 
 class UI(QtWidgets.QWidget):
@@ -32,7 +32,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
-        self.shelfs_page = shelfs_page.ShelfsPage(
+        self.shelfs_page = shelf_page.ShelfsPage(
             self, self.books_handler, self.qt_signals_handler
         )
         self.book_creation_page = book_creation_page.BookCreationPage(
@@ -40,7 +40,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.books_handler,
             self.qt_signals_handler,
         )
-        self.shelfs_view_page = shelfs_page.ShelfsPage(
+        self.shelfs_view_page = shelf_page.ShelfsPage(
             self, self.books_handler, self.qt_signals_handler
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
@@ -101,7 +101,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.removeWidget(self.shelfs_page)
             self.shelfs_page.setParent(None)
             self.shelfs_page.deleteLater()
-            self.shelfs_page = shelfs_page.ShelfsPage(
+            self.shelfs_page = shelf_page.ShelfsPage(
                 self,
                 self.books_handler,
                 self.qt_signals_handler,
