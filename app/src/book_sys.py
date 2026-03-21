@@ -39,7 +39,7 @@ class BooksHandler:
         self.books = books if books else {}
         self.books_shelfs = {}
         self.shelfs_updated = False
-        self.default_shelf = Shelf(name="All", books=self.books)
+        self.default_shelf = Shelf(name="All", books_ids=self.books.keys())
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -81,7 +81,6 @@ class BooksHandler:
                 )
 
         self.books[book_obj.internal_id] = book_obj
-        self.shelfs_updated = True
 
     def create_shelf(self, **kwargs):
         """
@@ -170,13 +169,11 @@ class BooksHandler:
     def get_book(self, **kwargs):
         """
         Get all the books which matches with filters
-        Each argument must following this syntax :
-            <filter_name> = <(filter_value, full_match, case_sensitive)>
+        Each argument must following this syntax : <filter_name> = <(filter_value, full_match, case_sensitive)>
         - filter_name: an attribute of the Book class
-        In the tuple:
-            - filter_value: the value to check
-            - full_match (bool, optionnal): if True, then match is allowed if filter_value partially match, else match is allowed only if filter_value full match. default to True.
-            - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
+        - filter_value: the value to check
+        - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
+        - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
         """
 
         def compare(value_a, value_b, full_match: bool):
