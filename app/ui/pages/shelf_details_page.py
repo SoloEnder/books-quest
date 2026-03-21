@@ -62,10 +62,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 class BookWidget(QtWidgets.QWidget):
     def __init__(self, book: book_sys.Book):
         super().__init__()
-        #self.setStyleSheet("""
-        #    border-style: solid;
-        #    border-width: 56px;
-        #""")
         self.logger = logging.getLogger(__name__)
         self.default_cover_path = os.path.join(paths.DEFAULT_COVERS_PATH, "default_book_cover.png")
         self.qss_filepath = os.path.join(paths.QSS_FILES_PATH, "book_widget.qss")
