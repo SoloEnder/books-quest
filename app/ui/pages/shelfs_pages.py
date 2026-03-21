@@ -68,29 +68,14 @@ class ShelfsPage(QtWidgets.QWidget):
             self.books_handler,
             self.qt_signals_handler,
         )
-        self.shelf_widget_stylesheet = self.load_shelfs_widgets_ss()
 
-        if self.shelf_widget_stylesheet:
-            self.default_shelf_widget.setStyleSheet(self.shelf_widget_stylesheet)
-            
         self.shelfs_container_layout.addWidget(
             self.default_shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
         )
         self.shelfs_widgets = []
         self.generate_shelfs_widgets(self.books_handler.books_shelfs)
 
-    def load_shelfs_widgets_ss(self):
-        filepath = os.path.join(paths.QSS_FILES_PATH, "shelf_widget.qss")
-
-        try:
-            with open(filepath, "r") as f:
-                return f.read()
-
-        except:
-            self.logger.exception(f"Couldn't load shelfs widgets stylesheet from file {filepath}")
-
     def generate_shelfs_widgets(self, shelfs: dict|None=None):
-        stylesheet = self.load_shelfs_widgets_ss()
 
         if not shelfs:
             shelfs = self.books_handler.books_shelfs
@@ -102,8 +87,6 @@ class ShelfsPage(QtWidgets.QWidget):
             shelf_widget = ShelfWidget(
                 shelf, self.books_handler, self.qt_signals_handler
             )
-            if stylesheet:
-                shelf_widget.setStyleSheet(stylesheet)
 
             displayed_name = shelf_widget.name_lb.text()
             matches_count = 0
@@ -135,6 +118,8 @@ class ShelfWidget(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__)
 
         self.main_layout = QtWidgets.QGridLayout(self)
+        self.qss_filepath = os.path.join(paths.QSS_FILES_PATH, "shelf_widget.qss")
+        utils_funcs.load_and_set_ss(self.qss_filepath, self, self.logger)
         self.default_cover = os.path.join(
             paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png"
         )
