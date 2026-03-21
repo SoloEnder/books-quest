@@ -5,6 +5,7 @@ from app.ui import qt_signals_handler
 from app.utils import utils_funcs
 from PySide6 import QtWidgets, QtCore, QtGui
 import os
+import logging
 
 class ShelfDetailsPage(QtWidgets.QWidget):
 
@@ -60,7 +61,10 @@ class BookWidget(QtWidgets.QWidget):
         #    border-style: solid;
         #    border-width: 56px;
         #""")
+        self.logger = logging.getLogger(__name__)
         self.default_cover_path = os.path.join(paths.DEFAULT_COVERS_PATH, "default_book_cover.png")
+        self.qss_filepath = os.path.join(paths.QSS_FILES_PATH, "book_widget.qss")
+        utils_funcs.load_and_set_ss(self.qss_filepath, self, self.logger)
         self.book = book
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
@@ -70,11 +74,9 @@ class BookWidget(QtWidgets.QWidget):
 
         else:
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
+            
         self.book_title_lb = QtWidgets.QLabel(self.book.title if self.book.title else utils_funcs.unknown_book_title_fmt(self.book))
-        self.book_title_lb.setStyleSheet("""
-            font-size: 18px;
-            font-weight: bold;
-        """)
+        self.book_title_lb.setObjectName("book_title_lb")
         self.main_layout.addWidget(self.book_title_lb, 1)
         self.main_layout.addWidget(self.book_cover_lb, 0)
 
