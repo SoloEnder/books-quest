@@ -94,7 +94,7 @@ class BookCreationPage(QtWidgets.QWidget):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel("status : ")
+        self.book_status_lb = QtWidgets.QLabel("Statut : ")
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
         self.book_status_combob.addItem("En cours", "on_reading")
