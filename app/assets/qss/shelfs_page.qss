@@ -1,4 +1,5 @@
 
+
 QLabel#name_lb {
     font-weight: bold;
     font-size: 20px;
@@ -6,10 +7,6 @@ QLabel#name_lb {
 
 QLabel#total_books_lb {
     font-size: 17px;
-}
-
-QPushButton[role="delete_b"] {
-    color: red;
 }
 
 /* QPushButton:hover{
