@@ -14,8 +14,14 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.shelf = shelf
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+
+        #logger
+        self.logger = logging.getLogger(__name__)
         
         #Widgets
+        self.gen_qss_filepath = os.path.join(paths.QSS_FILES_PATH, "general.qss")
+        self.page_qss_filepath = os.path.join(paths.QSS_FILES_PATH, "shelf_details_page.qss")
+        utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
@@ -64,8 +70,6 @@ class BookWidget(QtWidgets.QWidget):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.default_cover_path = os.path.join(paths.DEFAULT_COVERS_PATH, "default_book_cover.png")
-        self.qss_filepath = os.path.join(paths.QSS_FILES_PATH, "book_widget.qss")
-        utils_funcs.load_and_set_ss(self.qss_filepath, self, self.logger)
         self.book = book
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
