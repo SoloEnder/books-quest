@@ -34,6 +34,10 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
         )
 
+        self.nothing_to_show_lb = QtWidgets.QLabel("Aucun livre ici, pourquoi ne pas en ajouter un ?")
+        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
+        self.nothing_to_show_lb.hide()
+
         #books widgets containers
         self.books_container_widget = QtWidgets.QWidget()
         self.books_container_lyt = QtWidgets.QGridLayout()
@@ -41,6 +45,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.books_container_sa = QtWidgets.QScrollArea()
         self.books_container_sa.setWidgetResizable(True)
         self.books_container_sa.setWidget(self.books_container_widget)
+        self.books_container_lyt.addWidget(self.nothing_to_show_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
 
         #books widgets
         self.books = self.books_handler.convert_book_id(self.shelf.books_ids)
@@ -64,6 +69,9 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
             self.books_widgets.append(book_widget)
             self.books_container_lyt.addWidget(book_widget, index, 0)
+
+        if len(self.books_widgets) == 0:
+            self.nothing_to_show_lb.show()
 
 class BookWidget(QtWidgets.QWidget):
     def __init__(self, book: book_sys.Book):
