@@ -126,15 +126,24 @@ class ShelfWidget(QtWidgets.QWidget):
         else:
             self.displayed_cover = self.default_cover
 
+
+        self.name_lb = QtWidgets.QLabel(
+            self.shelf.name
+           if self.shelf.name
+            else utils_funcs.unknown_shelf_name_fmt(self.shelf))
+        self.name_lb.setObjectName("name_lb")
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
-        self.name_lb = QtWidgets.QLabel(
-            self.shelf.name
-            if self.shelf.name
-            else utils_funcs.unknown_shelf_name_fmt(self.shelf)
-        )
-        self.name_lb.setObjectName("name_lb")
+        self.name_w_sa = QtWidgets.QScrollArea()
+        self.name_w_sa.setWidgetResizable(True)
+        #self.name_w = ShelfNameWidget(
+        #    self, 
+        #    self.shelf.name
+        #    if self.shelf.name
+        #    else utils_funcs.unknown_shelf_name_fmt(self.shelf))
+
+        #self.name_w_sa.setWidget(self.name_w)
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books_ids)} livres")
         self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
@@ -220,3 +229,14 @@ class DefaultShelfWidget(ShelfWidget):
         self.delete_b.hide()
         self.main_layout.removeWidget(self.cover_lb)
         self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
+
+class ShelfNameWidget(QtWidgets.QWidget):
+
+    def __init__(self, parent: QtWidgets.QWidget|None, label_text: str, label_name: str="name_lb"):
+        super().__init__(parent)
+
+        self.main_lyt = QtWidgets.QVBoxLayout()
+        self.setLayout(self.main_lyt)
+        self.label = QtWidgets.QLabel(label_text)
+        self.label.setObjectName(label_name)
+        self.main_lyt.addWidget(self.label)
