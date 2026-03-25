@@ -1,0 +1,9 @@
+
+QPushButton[role="delete_b"] {
+    color: red;
+}
+
+QLabel[role=title_lb] {
+    font-weight: bold;
+    font-size: 20px;
+}
