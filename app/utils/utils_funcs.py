@@ -39,14 +39,20 @@ def set_displayed_names(names: list|tuple) -> list:
 
     return displayed_names
 
-def load_and_set_ss(filepath: str, widget: QtWidgets.QWidget, logger: logging.Logger|None=None):
-    try: 
-        with open(filepath, "r") as f:
-            ss = f.read()
+def load_and_set_ss(*filepaths, widget: QtWidgets.QWidget, logger: logging.Logger|None=None):
+    combined_ss = ""
 
-        widget.setStyleSheet(ss)
+    for filepath in filepaths:
+        try: 
+            with open(filepath, "r") as f:
+                ss = f.read()
 
-    except:
+        except:
 
-        if logger:
-            logger.exception(f"Couldn't set stylesheet for widget {widget}")
+            if logger:
+                logger.exception(f"Couldn't load style file at {filepath}, skipping it (see logs for more infos)")
+
+        else:
+            combined_ss += f"\n{ss}"
+
+    widget.setStyleSheet(combined_ss)
