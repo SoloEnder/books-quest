@@ -1,11 +1,13 @@
 import logging
 
 from PySide6 import QtCore, QtWidgets
+import os
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelf_page
-
+from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_page
+from app.utils import utils_funcs
+from app.utils import paths
 
 class UI(QtWidgets.QWidget):
     def __init__(self, books_handler):
@@ -18,6 +20,8 @@ class UI(QtWidgets.QWidget):
             self, self.books_handler, self.qt_signals_handler
         )
         self.main_layout.addWidget(self.my_stacked_widgets)
+        self.gen_qss_filepath = os.path.join(paths.QSS_FILES_PATH, "general.qss")
+        utils_funcs.load_and_set_ss(self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger)
         self.my_stacked_widgets.switch_page("shelfs_page")
 
 
@@ -32,7 +36,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
-        self.shelfs_page = shelf_page.ShelfsPage(
+        self.shelfs_page = shelfs_page.ShelfsPage(
             self, self.books_handler, self.qt_signals_handler
         )
         self.book_creation_page = book_creation_page.BookCreationPage(
@@ -40,7 +44,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.books_handler,
             self.qt_signals_handler,
         )
-        self.shelfs_view_page = shelf_page.ShelfsPage(
+        self.shelfs_view_page = shelfs_page.ShelfsPage(
             self, self.books_handler, self.qt_signals_handler
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
@@ -101,7 +105,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.removeWidget(self.shelfs_page)
             self.shelfs_page.setParent(None)
             self.shelfs_page.deleteLater()
-            self.shelfs_page = shelf_page.ShelfsPage(
+            self.shelfs_page = shelfs_page.ShelfsPage(
                 self,
                 self.books_handler,
                 self.qt_signals_handler,
