@@ -3,3 +3,17 @@ QLabel#book_title_lb {
     font-size: 18px;
     font-weight: bold;
 }
+
+QLabel#book_authors_lb {
+    font-size: 15px;
+    font-style: italic;
+}
+
+QLabel#book_authors_lb {
+    font-size: 15px;
+    font-style: italic;
+}
+
+QPushButton#delete_b{
+    color: red;
+}
