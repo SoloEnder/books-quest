@@ -26,4 +26,4 @@ if __name__ == "__main__":
 
     except Exception:
         logger.critical(traceback.format_exc())
-        raise
+        #raise
