@@ -49,6 +49,11 @@ class AppSystem:
 
     def running(self):
         self.logger.info("Showing main window...")
+
+        if self.app_infos:
+            if self.app_infos["version"]["semantic"] == "indev":
+                self.ui.show_indev_warn()
+                
         self.ui.show()
         sys.exit(self.app_ui.exec())
 
