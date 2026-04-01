@@ -7,3 +7,7 @@ QLabel[role=title_lb] {
     font-weight: bold;
     font-size: 20px;
 }
+
+QLabel[role="nothing_to_show_lb"] {
+    color: rgb(166, 166, 166);
+}
