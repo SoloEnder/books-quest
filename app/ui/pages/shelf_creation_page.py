@@ -270,12 +270,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
         if shelf_infos:
             if self.current_mode == "creation":
                 self.books_handler.new_shelf(**shelf_infos)
-                QtWidgets.QMessageBox.information(self, "Terminé", "Etagère crée")
+                #QtWidgets.QMessageBox.information(self, "Terminé", "Etagère crée")
 
             elif self.current_mode == "edition":
                 if self.shelf:
                     edited_shelf = self.books_handler.create_shelf(**shelf_infos)
                     self.books_handler.edit_shelf(self.shelf.id, edited_shelf)
-                    QtWidgets.QMessageBox.information(
-                        self, "Terminé", "Etagère modifiée"
-                    )
+                    #QtWidgets.QMessageBox.information(
+                    #    self, "Terminé", "Etagère modifiée"
+                    #)
