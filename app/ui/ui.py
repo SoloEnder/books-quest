@@ -1,11 +1,11 @@
 import logging
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
 import os
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_pages
+from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
 from app.utils import utils_funcs
 from app.utils import paths
 
@@ -15,6 +15,10 @@ class UI(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.main_layout = QtWidgets.QVBoxLayout(self)
+
+        #Indev warning window
+        #self.indev_warning_w = QtWidgets.QMessageBox()
+
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
         self.my_stacked_widgets = MyStackedWidgets(
             self, self.books_handler, self.qt_signals_handler
@@ -22,10 +26,15 @@ class UI(QtWidgets.QWidget):
         self.main_layout.addWidget(self.my_stacked_widgets)
         self.gen_qss_filepath = os.path.join(paths.QSS_FILES_PATH, "general.qss")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger)
-        self.my_stacked_widgets.switch_page("shelfs_pages_view")
+        self.my_stacked_widgets.switch_page("shelfs_view_page")
 
     def show_indev_warn(self):
-        QtWidgets.QMessageBox.information(self, "In develloppement warning", "This program is in developement !\nIf you see any bug which is not already reported, please report it at https://github.com/SoloEnder/books-quest/issues")
+        """
+        Show the in devellepoment warning window
+        """
+        
+        #self.indev_warning_w.show()
+        QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
@@ -38,9 +47,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
-        self.shelfs_pages_view = shelfs_pages.ShelfsPagesView(
+        self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
             self, self.books_handler, self.qt_signals_handler
         )
+        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, self.books_handler.default_shelf, self.books_handler, self.qt_signals_handler)
         self.book_creation_page = book_creation_page.BookCreationPage(
             self,
             self.books_handler,
@@ -49,21 +59,18 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
             self, self.books_handler, self.qt_signals_handler, mode="creation",
         )
-        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, self.books_handler.default_shelf, self.books_handler, self.qt_signals_handler)
         self.pages = {
-            "shelfs_pages_view": self.shelfs_pages_view,
+            "shelfs_view_page": self.shelfs_view_page,
+            "shelf_details_page": self.shelf_details_page,
             "book_creation_page": self.book_creation_page,
             "shelf_creation_page": self.shelf_creation_page,
-            "shelf_details_page": self.shelf_details_page,
-
         }
-        self.addWidget(self.shelfs_pages_view)
+        self.addWidget(self.shelfs_view_page)
         self.addWidget(self.book_creation_page)
-        self.addWidget(self.shelfs_pages_view)
+        self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
-        self.addWidget(self.shelf_details_page)
         self.history = []
-        self.history.append(self.shelfs_pages_view)
+        self.history.append(self.shelfs_view_page)
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.go_previous_page_sg.connect(self.go_back)
 
@@ -99,17 +106,17 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
     def refresh(self, page_name, page_args: dict = {}):
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
-        if page_name == "shelfs_page":
-            self.removeWidget(self.shelfs_page)
-            self.shelfs_page.setParent(None)
-            self.shelfs_page.deleteLater()
-            self.shelfs_page = shelfs_pages.ShelfsPagesView(
+        if page_name == "shelfs_view_page":
+            self.removeWidget(self.shelfs_view_page)
+            self.shelfs_view_page.setParent(None)
+            self.shelfs_view_page.deleteLater()
+            self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
                 self,
                 self.books_handler,
                 self.qt_signals_handler,
             )
-            self.pages["shelfs_page"] = self.shelfs_page
-            self.addWidget(self.shelfs_page)
+            self.pages["shelfs_view_page"] = self.shelfs_view_page
+            self.addWidget(self.shelfs_view_page)
 
         elif page_name == "book_creation_page":
             self.removeWidget(self.book_creation_page)
@@ -143,4 +150,17 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 )
             self.pages["shelf_details_page"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
+
+class IndevWarnWidget(QtWidgets.QMessageBox):
+
+    def __init__(self, parent: QtWidgets.QWidget|None):
+        super().__init__(parent)
+
+        #Setting window title
+        self.setWindowTitle("Indev Warning")
+
+        #Setting text
+        self.setText("This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
+    
+
 

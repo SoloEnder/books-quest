@@ -9,6 +9,10 @@ QLabel#total_books_lb {
     font-size: 17px;
 }
 
+QPushButton {
+    justify-content: start;
+}
+
 /* QPushButton:hover{
     background-color: aquamarine;
     color:black;
