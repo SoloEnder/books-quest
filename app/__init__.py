@@ -21,6 +21,6 @@ logs_streamhandler.name = "stream_handler"
 logger.addHandler(logs_streamhandler)
 logger.addHandler(logs_filehandler)
 logger.setLevel(logging.DEBUG)
-logs_filehandler.addFilter(my_logging_stuff.ErrorsFilter())
+#logs_filehandler.addFilter(my_logging_stuff.ErrorsFilter())
 logs_filehandler.addFilter(my_logging_stuff.SensitiveInfoFilter())
 logs_streamhandler.addFilter(my_logging_stuff.SensitiveInfoFilter())
