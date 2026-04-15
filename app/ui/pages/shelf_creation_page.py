@@ -16,12 +16,15 @@ class ShelfCreationPage(QtWidgets.QWidget):
         parent: QtWidgets.QWidget | None,
         books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        settings_handler,
         **kwargs,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.settings_handler = settings_handler
+        
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
 

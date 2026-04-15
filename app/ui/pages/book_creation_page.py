@@ -19,10 +19,13 @@ class BookCreationPage(QtWidgets.QWidget):
         parent: QtWidgets.QWidget,
         books_handler: book_sys.BooksHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        settings_handler,
     ):
         super().__init__(parent)
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.settings_handler = settings_handler
+        
         self.logger = logging.getLogger(__name__)
         self.icons_folder = paths.ICONS_PATH
         self.today_date_dt = dt.date.today()

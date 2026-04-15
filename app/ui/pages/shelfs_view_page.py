@@ -39,12 +39,13 @@ def dynamic_pages_loader(func):
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
-    def __init__(self, parent: QtWidgets.QWidget|None, books_handler: book_sys.BooksHandler, qt_signals_handler: qt_signals_handler.QtSignalsHandler):
+    def __init__(self, parent: QtWidgets.QWidget|None, books_handler: book_sys.BooksHandler, qt_signals_handler: qt_signals_handler.QtSignalsHandler, settings_handler,):
         super().__init__(parent)
 
         #Assingning arguments to attr
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.settings_handler = settings_handler
 
         #Logger setup
         self.logger = logging.getLogger(__name__+":ShelfsViewPage")

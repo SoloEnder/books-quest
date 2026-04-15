@@ -9,11 +9,19 @@ import logging
 
 class ShelfDetailsPage(QtWidgets.QWidget):
 
-    def __init__(self, parent: QtWidgets.QWidget|None, shelf: book_sys.Shelf, books_handler: book_sys.BooksHandler, qt_signals_handler: qt_signals_handler.QtSignalsHandler):
+    def __init__(
+        self, 
+        parent: QtWidgets.QWidget|None, 
+        shelf: book_sys.Shelf, books_handler: book_sys.BooksHandler, 
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        settings_handler,
+        ):
+        
         super().__init__(parent)
         self.shelf = shelf
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
+        self.settings_handler = settings_handler
 
         #logger
         self.logger = logging.getLogger(__name__)

@@ -11,7 +11,7 @@ from app.src import book_sys
 from app.ui import ui
 from app.utils import json_file_manager as jfm
 from app.utils import paths
-
+from app.src import settings_handler
 
 class AppSystem:
     def __init__(self):
@@ -42,17 +42,18 @@ class AppSystem:
             os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json")
         )
         self.app_ui.aboutToQuit.connect(self.close_app)
-        self.ui = ui.UI(self.books_handler)
+        self.settings_handler = settings_handler.SettingsHandler()
+        self.settings_handler.load_from_file(paths.SETTINGS_FILEPATH)
+        self.ui = ui.UI(self.books_handler, self.settings_handler,)
         paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
 
     def running(self):
         self.logger.info("Showing main window...")
-
-        if self.app_infos:
-            if self.app_infos["version"]["semantic"] == "indev":
-                self.ui.show_indev_warn()
+        
+        if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
+            self.ui.show_indev_warn()
                 
         self.ui.show()
         sys.exit(self.app_ui.exec())
@@ -67,6 +68,7 @@ class AppSystem:
         )
         self.logger.info("Deleting files in temporary folder...")
         self.empty_tmp_folder(paths.TMP_DIR_PATH)
+        self.settings_handler.save_in_file(paths.SETTINGS_FILEPATH)
         self.logger.info("Exiting app...")
 
     def empty_tmp_folder(self, dir_path):
