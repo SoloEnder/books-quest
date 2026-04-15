@@ -1,5 +1,6 @@
 
 from app.utils import json_file_manager as jfm
+from app.utils import my_exceptions
 
 class SettingsHandler:
 
@@ -18,10 +19,36 @@ class SettingsHandler:
         path_sections = setting_path.split(".")
         current_setting = self.settings.copy()
 
-        for key in path_sections:
-            current_setting = current_setting[key]
+        try:
+            for key in path_sections:
+                current_setting = current_setting[key]
 
-        return current_setting
+        except KeyError:
+            raise my_exceptions.InvalidSettingPathError(setting_path)
+        
+        else:
+            return current_setting
+    
+    def edit_setting_value(self, setting_path, setting_value):
+        """
+        Replace the value of a setting by <setting_value>
+        setting path must have the following format:
+        keyA.keyAA.keyAAA, etc. For exemple : 
+        {"general":{"ui":{"theme":"dark"}}
+        in this case, the setting path of "theme" will be :
+        "general.ui.theme", and this method will return "dark"
+        """
+        path_sections = setting_path.split(".")
+        current_setting = self.settings.copy()
+
+        try:
+            for key in path_sections[:-1]:
+                current_setting = current_setting[key]
+
+            current_setting[path_sections[-1]] = setting_value
+
+        except KeyError:
+            raise my_exceptions.InvalidSettingPathError(setting_path)
 
     def load_from_file(self, filepath):
         """
@@ -34,14 +61,3 @@ class SettingsHandler:
         """
         Save a settings dictionnary in a JSON file
         """
-
-    def edit_setting_value(self, setting_path, setting_value):
-        path_sections = setting_path.split(".")
-        current_setting = self.settings.copy()
-
-        for key in path_sections[:-1]:
-            current_setting = current_setting[key]
-
-        current_setting[path_sections[-1]] = setting_value
-
-
