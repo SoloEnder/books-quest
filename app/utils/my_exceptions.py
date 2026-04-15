@@ -58,3 +58,13 @@ class ShelfPageNotLoadedError(Exception):
 
     def __str__(self) -> str:
         return self.msg
+    
+class InvalidSettingPathError(Exception):
+
+    def __init__(self, setting_path):
+        self.setting_path = setting_path
+        self.msg = f"Setting {self.setting_path} isn't a valid setting path !"
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
