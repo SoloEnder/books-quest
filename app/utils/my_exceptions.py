@@ -43,7 +43,17 @@ class BookExistsError(Exception):
 class PageNotFoundError(Exception):
     def __init__(self, page_name: str):
         self.page_name = page_name
-        self.msg = f"Page '{page_name}' does't exists !" if not msg else msg
+        self.msg = f"Page '{page_name}' doesn't exists !"
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
+    
+class ShelfPageNotLoadedError(Exception):
+
+    def __init__(self, page_obj):
+        self.page_obj = page_obj
+        self.msg = f"Page '{page_obj}' doesn't loaded !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
