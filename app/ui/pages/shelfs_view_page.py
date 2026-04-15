@@ -2,12 +2,40 @@ import datetime as dt
 import logging
 import os
 from app.utils import utils_funcs
+from app.utils import my_exceptions
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.utils import paths
+
+def dynamic_pages_switching(func):
+
+    def wrapper(self: ShelfsPagesWidget, page_index):
+
+        if not self.pages_virtual_row[page_index]:
+            self.new_page(self.shelfs_pages_handler.shelfs_pages_data[page_index])
+
+        func(self, page_index)
+        exceeding_pages = self.loaded_pages[self.max_loadable_pages_count:]
+
+        if  exceeding_pages:
+            self.logger.info(f"Unloading {len(exceeding_pages)} shelfs page...")
+            
+            for exceeding_page in exceeding_pages:
+                self.unload_page(exceeding_page)
+
+        print(self.pages_virtual_row)
+
+    return wrapper
+
+def dynamic_pages_loader(func):
+
+    def wrapper(self: ShelfsPagesWidget):
+        func(self, self.shelfs_pages_handler.shelfs_pages_data[:2])
+
+    return wrapper
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
@@ -23,7 +51,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
 
         #Loading custom QSS
         utils_funcs.load_and_set_ss(
-            os.path.join(paths.QSS_FILES_PATH, "shelfs_pages_view.qss"),
+            os.path.join(paths.QSS_FILES_PATH, "shelfs_view_page.qss"),
             os.path.join(paths.QSS_FILES_PATH, "general.qss"),
             widget=self, 
             logger=self.logger,
@@ -85,11 +113,13 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         #Assigning arguments to attr
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
-        self.shelfs_by_pages_count = 6
+        self.shelfs_by_pages_count = 10
 
         self.shelfs_pages_handler = ShelfsPagesDataHandler(self.books_handler, self.shelfs_by_pages_count)
         self.shelfs_pages_handler.setup_shelfs_pages()
         self.pages_virtual_row = [] #Used for making a virtual row representatio of the shelfs pages
+        self.max_loadable_pages_count = 4
+        self.loaded_pages = []
 
         #Setup logger
         self.logger = logging.getLogger(__name__+":ShelfsPagesWidgets")
@@ -103,9 +133,12 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
 
         self.prefill_virtual_row()
 
+    @dynamic_pages_switching
     def switch_current_page(self, page_index: int):
         page_obj = self.pages_virtual_row[page_index]
-        self.setCurrentWidget(page_obj)
+
+        if page_obj != self.currentWidget():
+            self.setCurrentWidget(page_obj)
     
     def prefill_virtual_row(self):
         """
@@ -139,9 +172,10 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         if self.pages_virtual_row[page_obj.virtual_index]:
 
             if self.widget(page_obj.virtual_index) == self.pages_virtual_row[page_obj.virtual_index]:
-                self.removeWidget(self.pages_virtual_row[page_obj.virtual_index])
+                self.unload_page(page_obj)
                 self.insertWidget(page_obj.virtual_index, page_obj)
                 self.pages_virtual_row[page_obj.virtual_index] = page_obj
+                self.loaded_pages.insert(0, page_obj)
 
             else:
                 self.logger.error("the shelf page in the virtual row and the shelf page in the stacked widget are different !")
@@ -150,7 +184,21 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
             self.pages_virtual_row[page_obj.virtual_index] = page_obj
             self.insertWidget(page_obj.virtual_index, page_obj)
             page_obj.widget_index = self.indexOf(page_obj) # type: ignore
+            self.loaded_pages.insert(0, page_obj)
+            
+    def unload_page(self, page_obj: ShelfsPage):
+        self.logger.debug(f"Unloading page, object={page_obj}, index={page_obj.virtual_index}")
 
+        if page_obj in self.pages_virtual_row:
+            self.pages_virtual_row[page_obj.virtual_index] = None
+            self.removeWidget(page_obj)
+            self.loaded_pages.remove(page_obj)
+            page_obj.deleteLater()
+
+        else:
+            raise my_exceptions.ShelfPageNotLoadedError(page_obj)
+
+    @dynamic_pages_loader
     def create_pages_from_data(self, pages_data: list|tuple|None=None):
         """
         Create and add ShelfsPage objects from a list|tuple of data
