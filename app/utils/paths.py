@@ -34,7 +34,7 @@ QSS_FILES_PATH = os.path.join(ASSETS_PATH, "qss")
 
 # Data
 DATA_PATH = os.path.join(BASE_PATH, "data")
-
+SETTINGS_FILEPATH = os.path.join(DATA_PATH, "settings.json")
 BOOKS_DATA_PATH = os.path.join(DATA_PATH, "books")
 BOOKS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "books_cover")
 SHELFS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "shelfs_covers")
@@ -51,6 +51,7 @@ all_paths = {
     "icons_path": ICONS_PATH,
     "default_cover_path": DEFAULT_COVERS_PATH,
     "data_path": DATA_PATH,
+    "settings_path":SETTINGS_FILEPATH,
     "books_data_path": BOOKS_DATA_PATH,
     "books_covers_path": BOOKS_COVERS_PATH,
     "shelfs_cover_path": SHELFS_COVERS_PATH,
