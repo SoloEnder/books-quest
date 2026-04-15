@@ -115,7 +115,7 @@ class BooksHandler:
 
         book_shelf: an instance of a BookShelf object
         """
-        self.logger.info(
+        self.logger.debug(
             f"Adding shelf with ID '{book_shelf.id}' to books_handler '{self}'"
         )
 
@@ -134,9 +134,6 @@ class BooksHandler:
             del self.books_shelfs[id]
 
         else:
-            self.logger.warning(
-                f"Couldn't delete book shelf with ID '{id}' : Book shelf doesn't exists"
-            )
             raise my_exceptions.BooksShelfNotFoundError(id)
 
     def edit_book(self, book_id: str, new_book: Book):
