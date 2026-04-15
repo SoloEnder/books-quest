@@ -4,8 +4,8 @@ dist/
 tests/
 logs/
 app/data/books
+app/data/settings.json
 app/data/app_infos.json
 *.pyc
 *.spec
 *.log
-
