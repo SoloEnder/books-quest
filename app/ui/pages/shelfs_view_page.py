@@ -109,20 +109,45 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.pages_numbers_pb.clear()
         self.shelfs_pages_widget.create_pages_from_data()
 
+        #buttons for the five first shelfs pages
         for i in range(len(self.shelfs_pages_widget.pages_virtual_row[:5])):
             b = QtWidgets.QPushButton(str(i+1))
             b.clicked.connect(lambda qt_arg, page_index=i: self.shelfs_pages_widget.switch_current_page(page_index))
             self.pages_numbers_lyt.addWidget(b, 0, i, QtCore.Qt.AlignmentFlag.AlignCenter)
             self.pages_numbers_pb.append(b)
             
+        #lb = QtWidgets.QLabel(". . .")
+        #self.pages_numbers_lyt.addWidget(lb, 0, 6, QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+        #button for the last shelfs page
         last_page_index = len(self.shelfs_pages_widget.pages_virtual_row) - 1
-        b = QtWidgets.QPushButton(str(last_page_index+1))
+        b = QtWidgets.QPushButton(". . . "+str(last_page_index+1))
+        b.setProperty("role", "page_b")
         b.clicked.connect(lambda qt_arg, page_index=last_page_index: self.shelfs_pages_widget.switch_current_page(page_index))
-        self.pages_numbers_lyt.addWidget(b, 0, 6, QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.pages_numbers_lyt.addWidget(b, 0, 7, QtCore.Qt.AlignmentFlag.AlignCenter)
         self.pages_numbers_pb.append(b)
+        
+        page_selector_lb = QtWidgets.QLabel("Aller à : ")
+        self.pages_numbers_lyt.addWidget(page_selector_lb, 0, 8, QtCore.Qt.AlignmentFlag.AlignCenter)
+        page_selector_le = QtWidgets.QLineEdit()
+        page_selector_le.returnPressed.connect(lambda: self._search_shelfs_page(page_selector_le.text()))
+        self.pages_numbers_lyt.addWidget(page_selector_le, 0, 9, QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+    @QtCore.Slot(int)         
+    def _search_shelfs_page(self, page_index: int|str):
+        
+        if isinstance(page_index, str) and page_index.isdigit():
+            page_index = int(page_index)
             
+        else:
+            self.qt_signals_handler.raise_error_msg_sg.emit("Cette page n'existe pas")
+            return
             
+        if isinstance(page_index, int) and page_index > 0 and page_index <= (len(self.shelfs_pages_widget.pages_virtual_row)):
+            self.shelfs_pages_widget.switch_current_page(page_index-1)
             
+        else:
+            self.qt_signals_handler.raise_error_msg_sg.emit("Cette page n'existe pas")
             
     @QtCore.Slot(int)
     def _unload_empty_page(self, page_index):
