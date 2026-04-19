@@ -53,7 +53,7 @@ class ShelfPageNotLoadedError(Exception):
 
     def __init__(self, page_obj):
         self.page_obj = page_obj
-        self.msg = f"Page '{page_obj}' doesn't loaded !"
+        self.msg = f"Page '{page_obj}' not loaded ! (index={page_obj.virtual_index})"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
@@ -64,6 +64,16 @@ class InvalidSettingPathError(Exception):
     def __init__(self, setting_path):
         self.setting_path = setting_path
         self.msg = f"Setting {self.setting_path} isn't a valid setting path !"
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
+    
+class ShelfWidgetNotFoundError(Exception):
+
+    def __init__(self, shelf_widget, shelfs_page):
+        self.shelf_widget = shelf_widget
+        self.msg = f"ShelfWidget '{self.shelf_widget}' isn't in ShelfPage 'shelfs_page' !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
