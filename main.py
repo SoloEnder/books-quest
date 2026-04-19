@@ -1,6 +1,5 @@
 import logging
 import os
-import traceback
 
 from app import system
 from app.src import my_logging_stuff
@@ -25,5 +24,4 @@ if __name__ == "__main__":
         app_system.running()
 
     except Exception:
-        logger.critical(traceback.format_exc())
-        #raise
+        logger.exception("Oh no, Book Quest has crashed ! Check logs for more info.")
