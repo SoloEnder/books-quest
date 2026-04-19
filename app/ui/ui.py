@@ -1,6 +1,5 @@
 import logging
 
-from typing import Literal
 from PySide6 import QtCore, QtWidgets, QtGui
 import os
 
