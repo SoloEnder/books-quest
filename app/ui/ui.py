@@ -43,7 +43,11 @@ class UI(QtWidgets.QWidget):
     def show_error(self, error_msg: str|None):
         
         if not error_msg:
-            QtWidgets.QMessageBox.warning(self, "Error", "Une erreur est survenue, veuillez réessayer")
+            error_msg = "Une erreur est survenue, veuillez réessayer"
+        
+        QtWidgets.QMessageBox.warning(self, "Error", error_msg)
+            
+        
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
