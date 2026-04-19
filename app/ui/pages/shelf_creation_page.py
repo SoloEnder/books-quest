@@ -24,7 +24,6 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.books_handler = books_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
-        
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
 
