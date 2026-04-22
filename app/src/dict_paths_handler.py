@@ -9,11 +9,11 @@ class DictPathHandler:
 
     def get_value(self, dict_path: str):
         """
-        Get the value of a setting by it's setting path and return it.
+        Get the value of a dict value tting by it's dict path and return it.
         setting path must have the following format:
         keyA.keyAA.keyAAA, etc. For exemple : 
         {"general":{"ui":{"theme":"dark"}}
-        in this case, the setting path of "theme" will be :
+        in this case, the dict path path of "theme" will be :
         "general.ui.theme", and this method will return "dark"
         """
         path_sections = dict_path.split(".")
@@ -31,12 +31,12 @@ class DictPathHandler:
     
     def edit_value(self, dict_path, new_value):
         """
-        Replace the value of a setting by <setting_value>
-        setting path must have the following format:
+        Replace the value of a key in the dict by <new_value>
+        dict_path must have the following format:
         keyA.keyAA.keyAAA, etc. For exemple : 
         {"general":{"ui":{"theme":"dark"}}
-        in this case, the setting path of "theme" will be :
-        "general.ui.theme", and this method will return "dark"
+        in this case, the dict path of "theme" will be :
+        "general.ui.theme"
         """
         path_sections = dict_path.split(".")
         current_value = self.base_dict.copy()
@@ -52,13 +52,13 @@ class DictPathHandler:
 
     def load_from_file(self, filepath):
         """
-        Load a settings dictionnary from a JSON file, and replace the current settings by it
+        Load a dictionnary from a JSON file, and replace the current settings by it
         """
         new_base_dict = jfm.read_json(filepath)
         self.base_dict = new_base_dict
 
     def save_in_file(self, filepath):
         """
-        Save a settings dictionnary in a JSON file
+        Save a dictionnary in a JSON file
         """
         jfm.write_json(filepath, self.base_dict)

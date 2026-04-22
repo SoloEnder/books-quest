@@ -26,7 +26,7 @@ class SettingsHandler(dict_paths_handler.DictPathHandler):
         SettingA.SettingAA.SettingAAA, etc. For exemple : 
         {"general":{"ui":{"theme":"dark"}}
         in this case, the setting path of "theme" will be :
-        "general.ui.theme", and this method will return "dark"
+        "general.ui.theme"
         """
         
         return super().edit_value(setting_path, new_value)
