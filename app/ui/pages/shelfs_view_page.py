@@ -15,7 +15,7 @@ def dynamic_pages_switching(func):
     def wrapper(self: ShelfsPagesWidget, page_index):
 
         if not self.pages_virtual_row[page_index]:
-            self.new_page(self.shelfs_pages_handler.shelfs_pages_data[page_index])
+            self.new_page(self.shelfs_pages_data_handler.shelfs_pages_data[page_index])
 
         func(self, page_index)
         exceeding_pages = self.loaded_pages[self.max_loadable_pages_count:]
@@ -33,7 +33,7 @@ def dynamic_pages_switching(func):
 def dynamic_pages_loader(func):
 
     def wrapper(self: ShelfsPagesWidget):
-        func(self, self.shelfs_pages_handler.shelfs_pages_data[:2])
+        func(self, self.shelfs_pages_data_handler.shelfs_pages_data[:2])
 
     return wrapper
 
@@ -69,12 +69,23 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.main_sa = QtWidgets.QScrollArea()
         self.main_sa.setWidget(self.main_widget)
         self.main_sa.setWidgetResizable(True)
-
+        
+        #icons
+        self.book_creation_ico = QtGui.QIcon(os.path.join(paths.ICONS_PATH, "new_book_ico.png"))
+        
         #Books and Shelfs creation buttons
         self.book_creation_b = QtWidgets.QPushButton("Nouveau livre")
         self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("book_creation_page", True, {}))
+        self.book_creation_b.setIcon(self.book_creation_ico)
         self.shelf_creation_b = QtWidgets.QPushButton("Nouvelle étagère")
         self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
+        
+        #Shelf research widgets
+        self.search_lb = QtWidgets.QLabel("Rechercher : ")
+        self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setClearButtonEnabled(True)
+        self.search_le.textChanged.connect(self.exit_search)
+        self.search_le.returnPressed.connect(lambda: self.search_shelfs(name=(self.search_le.text(), False)))
 
         #Shelfs pages widgets handler
         self.shelfs_pages_widget = ShelfsPagesWidget(self, self.books_handler, self.qt_signals_handler, self)
@@ -84,24 +95,52 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.pages_numbers_widget.setObjectName("pages_numbers_widget")
         self.pages_numbers_lyt = QtWidgets.QGridLayout()
         self.pages_numbers_widget.setLayout(self.pages_numbers_lyt)
+        
+        self.page_selector_lb = QtWidgets.QLabel("Aller à : ")
+        self.page_selector_le = QtWidgets.QLineEdit()
+        self.page_selector_le.returnPressed.connect(lambda: self._jump_to_shelfs_page(self.page_selector_le.text()))
+        
+        self.pages_numbers_lyt.addWidget(self.page_selector_lb, 0, 8, QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.pages_numbers_lyt.addWidget(self.page_selector_le, 0, 9, QtCore.Qt.AlignmentFlag.AlignCenter)
 
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_widget_lyt.addWidget(self.shelf_creation_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_widget_lyt.addWidget(self.shelfs_pages_widget, 2, 0)
-        self.main_widget_lyt.addWidget(self.pages_numbers_widget, 3, 0)
+        self.main_widget_lyt.addWidget(self.search_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+        self.main_widget_lyt.addWidget(self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight)
+        self.main_widget_lyt.addWidget(self.shelfs_pages_widget, 2, 0, 1, 3)
+        self.main_widget_lyt.addWidget(self.pages_numbers_widget, 3, 0, 1, 3)
         self.main_lyt.addWidget(self.main_sa)
         self.pages_numbers_pb = []
 
         self.generate_shelfs_pages()
+        
+    @QtCore.Slot()
+    def exit_search(self):
+        
+        if self.search_le.text() == "":
+            self.shelfs_pages_widget.search_shelfs(list(self.books_handler.books_shelfs.values()), True)
+            self.generate_shelfs_pages()
+        
+    def search_shelfs(self, **query):
+        
+        self.logger.debug(f"Searching shelfs ({query=})...")
+
+        try:
+            result = self.books_handler.get_shelfs(**query)
+            self.logger.debug(f"shelfs search {result=}")
+            
+        except ValueError:
+            self.logger.exception(f"Unable to get shelfs ! (query='{query}')")
+            self.qt_signals_handler.raise_error_msg_sg.emit("")
+            
+        else:
+            self.shelfs_pages_widget.search_shelfs(result)
+            self.generate_shelfs_pages()
 
     def generate_shelfs_pages(self, reset_shelfs_data: bool=True):
-
-        if reset_shelfs_data:
-            self.shelfs_pages_widget.shelfs_pages_handler.setup_shelfs_pages()
-            self.shelfs_pages_widget.prefill_virtual_row()
-            
         
+        #Destroying old widgets
         for button in self.pages_numbers_pb:
             self.pages_numbers_lyt.removeWidget(button)
             button.deleteLater()
@@ -120,21 +159,17 @@ class ShelfsViewPage(QtWidgets.QWidget):
         #self.pages_numbers_lyt.addWidget(lb, 0, 6, QtCore.Qt.AlignmentFlag.AlignCenter)
         
         #button for the last shelfs page
-        last_page_index = len(self.shelfs_pages_widget.pages_virtual_row) - 1
-        b = QtWidgets.QPushButton(". . . "+str(last_page_index+1))
-        b.setProperty("role", "page_b")
-        b.clicked.connect(lambda qt_arg, page_index=last_page_index: self.shelfs_pages_widget.switch_current_page(page_index))
-        self.pages_numbers_lyt.addWidget(b, 0, 7, QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.pages_numbers_pb.append(b)
         
-        page_selector_lb = QtWidgets.QLabel("Aller à : ")
-        self.pages_numbers_lyt.addWidget(page_selector_lb, 0, 8, QtCore.Qt.AlignmentFlag.AlignCenter)
-        page_selector_le = QtWidgets.QLineEdit()
-        page_selector_le.returnPressed.connect(lambda: self._search_shelfs_page(page_selector_le.text()))
-        self.pages_numbers_lyt.addWidget(page_selector_le, 0, 9, QtCore.Qt.AlignmentFlag.AlignCenter)
+        if len(self.shelfs_pages_widget.pages_virtual_row) > 1:
+            last_page_index = len(self.shelfs_pages_widget.pages_virtual_row) - 1
+            b = QtWidgets.QPushButton(". . . "+str(last_page_index+1))
+            b.setObjectName("last_page_b")
+            b.clicked.connect(lambda qt_arg, page_index=last_page_index: self.shelfs_pages_widget.switch_current_page(page_index))
+            self.pages_numbers_lyt.addWidget(b, 0, 7, QtCore.Qt.AlignmentFlag.AlignCenter)
+            self.pages_numbers_pb.append(b)
         
     @QtCore.Slot(int)         
-    def _search_shelfs_page(self, page_index: int|str):
+    def _jump_to_shelfs_page(self, page_index: int|str):
         
         if isinstance(page_index, str) and page_index.isdigit():
             page_index = int(page_index)
@@ -170,8 +205,8 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         
         self.shelfs_by_pages_count = 10
 
-        self.shelfs_pages_handler = ShelfsPagesDataHandler(self.books_handler, self.shelfs_by_pages_count)
-        self.shelfs_pages_handler.setup_shelfs_pages()
+        self.shelfs_pages_data_handler = ShelfsPagesDataHandler(self.books_handler, self.shelfs_by_pages_count)
+        self.shelfs_pages_data_handler.setup_shelfs_pages()
         self.pages_virtual_row = [] #Used for making a virtual row representatio of the shelfs pages
         self.max_loadable_pages_count = 4
         self.loaded_pages = []
@@ -181,10 +216,15 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
 
         #Object name (for things like QSS stuff)
         self.setObjectName("shelfs_pages_widget")
-
-        #Setup main layout
-        self.main_lyt = QtWidgets.QGridLayout()
-        self.setLayout(self.main_lyt)
+        
+        self.nothing_to_show_widget = QtWidgets.QWidget()
+        self.nothing_to_show_widget_lyt = QtWidgets.QHBoxLayout()
+        self.nothing_to_show_widget.setLayout(self.nothing_to_show_widget_lyt)
+        self.nothing_to_show_lb = QtWidgets.QLabel(self)
+        self.nothing_to_show_lb.setText("Votre recherche ne correpond à rien dans votre bibliothèque. Essayez avec un autre terme.")
+        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
+        self.nothing_to_show_widget_lyt.addWidget(self.nothing_to_show_lb, QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.addWidget(self.nothing_to_show_widget)
 
         self.prefill_virtual_row()     
 
@@ -202,13 +242,17 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         """
         self.pages_virtual_row.clear()
 
-        for i in range(len(self.shelfs_pages_handler.shelfs_pages_data)):
+        for i in range(len(self.shelfs_pages_data_handler.shelfs_pages_data)):
             self.pages_virtual_row.append(None)
 
-    def new_page(self, page_data: list):
+    def new_page(self, page_data: list, skip_blank_pages=True):
         """
         Create a ShelfsPage object and add it to this widget
         """
+        
+        if not page_data[1:] and skip_blank_pages:
+            return
+        
         page_obj = self.create_page(page_data)
         self.add_page(page_obj)
 
@@ -246,8 +290,9 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
 
         if page_obj in self.loaded_pages:
             self.removeWidget(page_obj)
-            self.loaded_pages.remove(page_obj)
             self.pages_virtual_row[page_obj.virtual_index] = None
+            self.shelfs_pages_data_handler.delete_data(page_obj.virtual_index)
+            self.loaded_pages.remove(page_obj)
             page_obj.deleteLater()
 
         else:
@@ -259,18 +304,37 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         Create and add ShelfsPage objects from a list|tuple of data
 
         Args:
-        - pages_data (list|tuple): a list|tuple of pages data. the shelf pages handler 
+        - pages_data (list|tuple): a list|tuple of pages data. the shelf pages handler
+        - reset ()
         """
 
-        if not pages_data:
-            pages_data = self.shelfs_pages_handler.shelfs_pages_data
+        if pages_data is None:
+            pages_data = self.shelfs_pages_data_handler.shelfs_pages_data
+            
+        self.logger.debug(f"Generating shelfs pages widgets with {pages_data=}")
 
         for page_data in pages_data:
             self.new_page(page_data)
             
+        if pages_data:
+            self.switch_current_page(0)
+            
     def delete_shelfs_page(self, shelfs_page:ShelfsPage):
         self.shelfs_view_page._unload_empty_page(shelfs_page.virtual_index)
-
+        
+    def search_shelfs(self, shelfs: list[book_sys.Shelf], include_default_shelf: bool=False):
+        self.logger.debug(f"{self.loaded_pages=}")
+        
+        for page in self.loaded_pages:
+            self.unload_page(page)
+            
+        self.loaded_pages.clear()            
+        self.shelfs_pages_data_handler.setup_shelfs_pages(shelfs, include_default_shelf)
+        self.prefill_virtual_row()
+        
+        if not shelfs:
+            self.setCurrentWidget(self.nothing_to_show_widget)
+            
 class ShelfsPagesDataHandler:
 
     def __init__(self, books_handler: book_sys.BooksHandler, shelfs_by_pages_count: int):
@@ -281,16 +345,21 @@ class ShelfsPagesDataHandler:
         self.shelfs_by_pages_count = shelfs_by_pages_count
         self.shelfs_pages_data = []
 
-    def setup_shelfs_pages(self):
+    def setup_shelfs_pages(self, shelfs: list|None=None, include_default_shelf: bool=True):
         """
         Distribute the items from the shelves on different pages.
+        
+        - shelfs: An list of Shelfs objects. If not given or equal to None, then <books_handler.books_shelfs> is used.
         """
+        
+        if shelfs is None:
+            shelfs = self.books_handler.books_shelfs.values() # type: ignore
+            
         self.shelfs_pages_data.clear()
-        shelfs_objs = self.books_handler.books_shelfs
-        shelfs_left = list(shelfs_objs.values())
-        current_page_shelfs = [0, self.books_handler.default_shelf]
+        shelfs_left = shelfs
+        current_page_shelfs = [0, self.books_handler.default_shelf] if include_default_shelf else [0, ]
 
-        for shelf_obj in shelfs_left:
+        for shelf_obj in shelfs_left: # type: ignore
 
             if len(current_page_shelfs[1:]) == self.shelfs_by_pages_count:
                 self.shelfs_pages_data.append(current_page_shelfs.copy())
@@ -299,8 +368,14 @@ class ShelfsPagesDataHandler:
 
             current_page_shelfs.append(shelf_obj)
 
-        if current_page_shelfs:
+        if current_page_shelfs[1:]:
             self.shelfs_pages_data.append(current_page_shelfs.copy())
+            
+    def delete_data(self, *indexes):
+        
+        for page_data in self.shelfs_pages_data:
+            if self.shelfs_pages_data[0] in indexes:
+                self.shelfs_pages_data.remove(page_data)
         
 class ShelfsPage(QtWidgets.QWidget):
     def __init__(
@@ -348,7 +423,7 @@ class ShelfsPage(QtWidgets.QWidget):
 
     def generate_shelfs_widgets(self, shelfs_objs: list|None=None, clear_lyt: bool=True):
 
-        if not shelfs_objs:
+        if shelfs_objs is None:
             shelfs_objs = self.shelfs_objs
             
         if clear_lyt:
