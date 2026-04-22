@@ -162,12 +162,37 @@ class BooksHandler:
 
         else:
             raise my_exceptions.BooksShelfNotFoundError(shelf_id)
-
-    def get_book(self, **kwargs):
+        
+    def get_books(self, **kwargs):
         """
         Get all the books which matches with filters
         Each argument must following this syntax : <filter_name> = <(filter_value, full_match, case_sensitive)>
         - filter_name: an attribute of the Book class
+        - filter_value: the value to check
+        - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
+        - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
+        """
+        
+        return self.get_obj(self.books.values(), **kwargs)
+    
+    
+    def get_shelfs(self, **kwargs):
+        """
+        Get all the shelfs which matches with filters
+        Each argument must following this syntax : <filter_name> = <(filter_value, full_match, case_sensitive)>
+        - filter_name: an attribute of the Shelf class
+        - filter_value: the value to check
+        - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
+        - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
+        """
+        return self.get_obj(self.books_shelfs.values(), **kwargs)
+        
+
+    def get_obj(self, sequence, **kwargs):
+        """
+        Get all the objects in sequence which matches with filters
+        Each argument must following this syntax : filter_name = (filter_value, full_match, case_sensitive)
+        - filter_name: an attribute of the object class
         - filter_value: the value to check
         - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
         - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
@@ -182,16 +207,6 @@ class BooksHandler:
             - value_b: the value against which value_b is compared
 
             - full_match: (Boolean): indicates whether a partial match is allowed
-
-            Compare value_a to value_b.
-
-            If complete_match is set to True:
-
-            - True is returned if value_a is equal to value_b, otherwise False
-
-            If complete_match is set to False:
-
-            - True is returned if value_a is present in value_b, otherwise False
             """
 
             if full_match:
@@ -215,27 +230,27 @@ class BooksHandler:
             if filter_infos:
                 filters[filter_name] = filter_infos
 
-        for book_obj in self.books.values():
+        for obj in sequence:
             filter_matchs = []
 
             for filter_name, filter_infos in filters.items():
-                if hasattr(book_obj, filter_name):
+                if hasattr(obj, filter_name):
                     filter_value = filter_infos[0]
                     full_match = filter_infos[1] if len(filter_infos) > 1 else True
                     case_sensitive = filter_infos[2] if len(filter_infos) > 2 else False
 
-                    if type(getattr(book_obj, filter_name)) is type(filter_value):
+                    if type(getattr(obj, filter_name)) is type(filter_value):
                         if type(filter_value) is str and not case_sensitive:
                             filter_value = filter_value.lower()
 
                         if compare(
                             filter_value,
-                            getattr(book_obj, filter_name)
+                            getattr(obj, filter_name)
                             if case_sensitive
                             else (
-                                getattr(book_obj, filter_name).lower()
+                                getattr(obj, filter_name).lower()
                                 if type(filter_value) is str
-                                else getattr(book_obj, filter_name)
+                                else getattr(obj, filter_name)
                             ),
                             full_match,
                         ):
@@ -246,12 +261,12 @@ class BooksHandler:
 
                 else:
                     raise AttributeError(
-                        f"Couldn't perform comparison: Book (id='{book_obj.internal_id}') has no attribute '{filter_name}'."
+                        f"Couldn't perform comparison: Book/Shelf (id='{obj.internal_id}') has no attribute '{filter_name}'."
                     )
 
             if len(filter_matchs) == len(filters):
                 if all(filter_matchs):
-                    books_matchs.append(book_obj)
+                    books_matchs.append(obj)
 
         return books_matchs
 
