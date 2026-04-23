@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 import tempfile
+from tkinter.messagebox import showerror
 
 from PySide6 import QtWidgets
 
@@ -16,6 +17,8 @@ from app.src import settings_handler
 class AppSystem:
     def __init__(self):
         self.app_ui = QtWidgets.QApplication([])
+        self.check_lock()
+        self.add_session_lock()
         begin = dt.datetime.now()
         self.logger = logging.getLogger(__name__)
         self.jfm = json_file_manager.JsonFileManager()
@@ -49,7 +52,7 @@ class AppSystem:
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         end = dt.datetime.now()
-        self.logger.info(f"Initialising app in {end - begin}")
+        self.logger.info(f"Loaded app in {end - begin}")
 
     def running(self):
         self.logger.info("Showing main window...")
@@ -62,6 +65,8 @@ class AppSystem:
 
     def close_app(self):
         self.logger.info("Closing window...")
+        self.logger.info("Removing session lock...")
+        self.remove_session_lock()
         self.logger.info("Saving data...")
         self.save_app_infos(os.path.join(paths.DATA_PATH, "app_infos.json"))
         self.books_handler.save_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
@@ -72,6 +77,20 @@ class AppSystem:
         self.empty_tmp_folder(paths.TMP_DIR_PATH)
         self.settings_handler.save_in_file(paths.SETTINGS_FILEPATH)
         self.logger.info("Exiting app...")
+        
+    def add_session_lock(self):
+        
+        with open(os.path.join(paths.BASE_PATH, "session.lock"), "w") as f:
+            f.write("")
+            
+    def remove_session_lock(self):
+        pathlib.Path.unlink(pathlib.Path(os.path.join(paths.BASE_PATH, "session.lock")))
+        
+    def check_lock(self):
+        if os.path.exists(os.path.join(paths.BASE_PATH, "session.lock")):
+            showerror("Instance checker", "Another instance of Book Quest is running, please close all active instance and retry !")
+            exit()
+            
 
     def empty_tmp_folder(self, dir_path):
         """
