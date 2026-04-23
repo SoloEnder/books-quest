@@ -16,10 +16,9 @@ from app.src import settings_handler
 
 class AppSystem:
     def __init__(self):
+        begin = dt.datetime.now()
         self.app_ui = QtWidgets.QApplication([])
         self.check_lock()
-        self.add_session_lock()
-        begin = dt.datetime.now()
         self.logger = logging.getLogger(__name__)
         self.jfm = json_file_manager.JsonFileManager()
         self.app_infos = self.load_app_infos(
@@ -48,9 +47,9 @@ class AppSystem:
         self.app_ui.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.settings_handler.load_from_file(paths.SETTINGS_FILEPATH)
+        self.empty_tmp_folder(paths.TMP_DIR_PATH)
         self.ui = ui.UI(self.books_handler, self.settings_handler,)
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
-        paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         end = dt.datetime.now()
         self.logger.info(f"Loaded app in {end - begin}")
 
@@ -61,6 +60,7 @@ class AppSystem:
             self.ui.show_indev_warn()
                 
         self.ui.show()
+        self.add_session_lock()
         sys.exit(self.app_ui.exec())
 
     def close_app(self):
@@ -91,7 +91,6 @@ class AppSystem:
             showerror("Instance checker", "Another instance of Book Quest is running, please close all active instance and retry !")
             exit()
             
-
     def empty_tmp_folder(self, dir_path):
         """
         Erase all the files in the tmp directory
@@ -104,9 +103,8 @@ class AppSystem:
                     element.unlink()
             except Exception:
                 self.logger.error(
-                    f"Unable to destroy file <{element}> in the temporary folder !"
+                    f"Unable to destroy file '{element}' in the temporary folder !"
                 )
-        tmp_path.rmdir()
 
     def check_first_boot(self):
         if self.app_infos:
@@ -119,8 +117,10 @@ class AppSystem:
             paths.BOOKS_COVERS_PATH,
             paths.BOOKSHELVES_DATA_PATH,
             paths.BOOKSHELVES_COVERS_PATH,
+            paths.TMP_DIR_PATH,
         )
         file_to_make = (
+            os.path.join(paths.TMP_DIR_PATH, "bq"),
             os.path.join(paths.BOOKS_DATA_PATH, "books.json"),
             os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json"),
         )
@@ -150,8 +150,13 @@ class AppSystem:
             if os.path.exists(file):
                 self.logger.warning(f"File {file} already exists, skipping its creation")
                 continue
+            
+            if file.endswith(".json"):
+                self.jfm.write_json(file, [], catch_error=False)
                 
-            self.jfm.write_json(file, [], catch_error=False)
+            else:
+                with open(file, "w") as f:
+                    f.write("")
 
     def check_folder(self, *folders):
         """
