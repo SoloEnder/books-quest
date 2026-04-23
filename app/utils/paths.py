@@ -44,7 +44,7 @@ BOOKSHELVES_COVERS_PATH = os.path.join(BOOKSHELVES_DATA_PATH, "covers")
 LOGS_PATH = os.path.join(BASE_PATH, "logs")
 
 # tmp
-TMP_DIR_PATH = ""
+TMP_DIR_PATH = os.path.join(BASE_PATH, "tmp")
 
 all_paths = {
     "base_path": BASE_PATH,
