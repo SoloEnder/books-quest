@@ -19,8 +19,6 @@ def dynamic_pages_switching(func):
 
         func(self, page_index)
         exceeding_pages = self.loaded_pages[self.max_loadable_pages_count:]
-        
-        self.logger.debug(f"{self.loaded_pages=}")
 
         if exceeding_pages:
             self.logger.info(f"Unloading {len(exceeding_pages)} shelfs page...")
@@ -124,15 +122,15 @@ class ShelfsViewPage(QtWidgets.QWidget):
         
     def search_shelfs(self, **query):
         
-        self.logger.debug(f"Searching shelfs ({query=})...")
+        self.logger.debug(f"searching shelfs ({query=})...")
 
         try:
             result = self.books_handler.get_shelfs(**query)
-            self.logger.debug(f"shelfs search {result=}")
+            self.logger.debug(f"shelves search {result=}")
             
         except ValueError:
             self.logger.exception(f"Unable to get shelfs ! (query='{query}')")
-            self.qt_signals_handler.raise_error_msg_sg.emit("")
+            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
             
         else:
             self.shelfs_pages_widget.search_shelfs(result)
@@ -175,22 +173,22 @@ class ShelfsViewPage(QtWidgets.QWidget):
             page_index = int(page_index)
             
         else:
-            self.qt_signals_handler.raise_error_msg_sg.emit("Cette page n'existe pas")
+            self.qt_signals_handler.notify_sg.emit("error", "", "Cette page n'existe pas", "")
             return
             
         if isinstance(page_index, int) and page_index > 0 and page_index <= (len(self.shelfs_pages_widget.pages_virtual_row)):
             self.shelfs_pages_widget.switch_current_page(page_index-1)
             
         else:
-            self.qt_signals_handler.raise_error_msg_sg.emit("Cette page n'existe pas")
-            
-    @QtCore.Slot(int)
+            self.qt_signals_handler.notify_sg.emit("error", "", "Cette page n'existe pas", "")
+        
     def _unload_empty_page(self, page_index):
         shelfs_page_widget = self.shelfs_pages_widget.pages_virtual_row[page_index]
         
         if shelfs_page_widget:
             self.shelfs_pages_widget.unload_page(shelfs_page_widget) 
             shelfs_page_widget.deleteLater()
+            self.shelfs_pages_widget.shelfs_pages_data_handler.delete_data(page_index)
             self.generate_shelfs_pages()
 
 class ShelfsPagesWidget(QtWidgets.QStackedWidget):
@@ -249,7 +247,6 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         """
         Create a ShelfsPage object and add it to this widget
         """
-        
         if not page_data[1:] and skip_blank_pages:
             return
         
@@ -260,6 +257,7 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         """
         Create a new ShelfsPage object and return it
         """
+        self.logger.debug(f"Creating shelves pages with index={page_data[:1]} shelves_count={len(page_data[1:])}")
         shelf_page = ShelfsPage(self, self.books_handler, self.qt_signals_handler, page_data[1:], page_data[0], self)
         return shelf_page
 
@@ -291,7 +289,6 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         if page_obj in self.loaded_pages:
             self.removeWidget(page_obj)
             self.pages_virtual_row[page_obj.virtual_index] = None
-            self.shelfs_pages_data_handler.delete_data(page_obj.virtual_index)
             self.loaded_pages.remove(page_obj)
             page_obj.deleteLater()
 
@@ -323,7 +320,6 @@ class ShelfsPagesWidget(QtWidgets.QStackedWidget):
         self.shelfs_view_page._unload_empty_page(shelfs_page.virtual_index)
         
     def search_shelfs(self, shelfs: list[book_sys.Shelf], include_default_shelf: bool=False):
-        self.logger.debug(f"{self.loaded_pages=}")
         
         for page in self.loaded_pages:
             self.unload_page(page)
@@ -374,7 +370,7 @@ class ShelfsPagesDataHandler:
     def delete_data(self, *indexes):
         
         for page_data in self.shelfs_pages_data:
-            if self.shelfs_pages_data[0] in indexes:
+            if page_data[0] in indexes:
                 self.shelfs_pages_data.remove(page_data)
         
 class ShelfsPage(QtWidgets.QWidget):
@@ -432,20 +428,24 @@ class ShelfsPage(QtWidgets.QWidget):
                 shelf_widget.deleteLater()
     
         self.shelfs_widgets.clear()
-        base_displayed_names = []
-
-        for book_obj in self.books_handler.books.values():
-            base_displayed_names.append(book_obj.title)
         
         for shelf in shelfs_objs:
-            shelf_widget = ShelfWidget(
-                shelf, 
-                self.books_handler, 
-                self.qt_signals_handler,
-                self,
-            )
-            base_displayed_names.append(shelf_widget.name_lb.text())
-            #shelf_widget.name_lb.setText(utils_funcs.set_displayed_names(base_displayed_names)[from_index+i])
+            
+            if shelf == self.books_handler.default_shelf:
+                shelf_widget = DefaultShelfWidget(                shelf, 
+                    self.books_handler, 
+                    self.qt_signals_handler,
+                    self,
+                )
+                
+            else:
+                shelf_widget = ShelfWidget(
+                    shelf, 
+                    self.books_handler, 
+                    self.qt_signals_handler,
+                    self,
+                )
+                
             self.shelfs_widgets.append(shelf_widget)
             self.shelfs_container_layout.addWidget(
                 shelf_widget, QtCore.Qt.AlignmentFlag.AlignTop
@@ -594,7 +594,7 @@ class ShelfWidget(QtWidgets.QWidget):
             
         except my_exceptions.ShelfWidgetNotFoundError:
             self.logger.exception("Unable to delete shelf !")
-            self.qt_signals_handler.raise_error_msg_sg.emit(None)
+            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
 
 class DefaultShelfWidget(ShelfWidget):
     def __init__(
