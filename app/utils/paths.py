@@ -38,7 +38,7 @@ SETTINGS_FILEPATH = os.path.join(DATA_PATH, "settings.json")
 BOOKS_DATA_PATH = os.path.join(DATA_PATH, "books_data")
 BOOKSHELVES_DATA_PATH = os.path.join(DATA_PATH, "bookshelves_data")
 BOOKS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "covers")
-BOOKSHELVES_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "covers")
+BOOKSHELVES_COVERS_PATH = os.path.join(BOOKSHELVES_DATA_PATH, "covers")
 
 # Logs
 LOGS_PATH = os.path.join(BASE_PATH, "logs")
