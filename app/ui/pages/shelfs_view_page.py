@@ -136,7 +136,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             self.shelfs_pages_widget.search_shelfs(result)
             self.generate_shelfs_pages()
 
-    def generate_shelfs_pages(self, reset_shelfs_data: bool=True):
+    def generate_shelfs_pages(self):
         
         #Destroying old widgets
         for button in self.pages_numbers_pb:
