@@ -32,14 +32,14 @@ class AppSystem:
                 paths.ASSETS_PATH,
                 paths.BOOKS_DATA_PATH,
                 paths.BOOKS_COVERS_PATH,
-                paths.SHELFS_COVERS_PATH,
+                paths.BOOKSHELVES_DATA_PATH,
             )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler()
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelfs(
-            os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json")
+            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
         )
         self.app_ui.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler()
@@ -64,7 +64,7 @@ class AppSystem:
         self.save_app_infos(os.path.join(paths.DATA_PATH, "app_infos.json"))
         self.books_handler.save_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
         self.books_handler.save_shelfs(
-            os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json")
+            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
         )
         self.logger.info("Deleting files in temporary folder...")
         self.empty_tmp_folder(paths.TMP_DIR_PATH)
@@ -96,11 +96,11 @@ class AppSystem:
         folder_to_make = (
             paths.BOOKS_DATA_PATH,
             paths.BOOKS_COVERS_PATH,
-            paths.SHELFS_COVERS_PATH,
+            paths.BOOKSHELVES_COVERS_PATH,
         )
         file_to_make = (
             os.path.join(paths.BOOKS_DATA_PATH, "books.json"),
-            os.path.join(paths.BOOKS_DATA_PATH, "shelfs.json"),
+            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json"),
         )
 
         for folder in folder_to_make:

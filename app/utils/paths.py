@@ -35,9 +35,10 @@ QSS_FILES_PATH = os.path.join(ASSETS_PATH, "qss")
 # Data
 DATA_PATH = os.path.join(BASE_PATH, "data")
 SETTINGS_FILEPATH = os.path.join(DATA_PATH, "settings.json")
-BOOKS_DATA_PATH = os.path.join(DATA_PATH, "books")
-BOOKS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "books_cover")
-SHELFS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "shelfs_covers")
+BOOKS_DATA_PATH = os.path.join(DATA_PATH, "books_data")
+BOOKSHELVES_DATA_PATH = os.path.join(DATA_PATH, "bookshelves_data")
+BOOKS_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "covers")
+BOOKSHELVES_COVERS_PATH = os.path.join(BOOKS_DATA_PATH, "covers")
 
 # Logs
 LOGS_PATH = os.path.join(BASE_PATH, "logs")
@@ -54,7 +55,7 @@ all_paths = {
     "settings_path":SETTINGS_FILEPATH,
     "books_data_path": BOOKS_DATA_PATH,
     "books_covers_path": BOOKS_COVERS_PATH,
-    "shelfs_cover_path": SHELFS_COVERS_PATH,
+    "shelves_cover_path": BOOKSHELVES_COVERS_PATH,
     "logs_path": LOGS_PATH,
     "tmp_dir_path": TMP_DIR_PATH,
     "qss_files_dir":QSS_FILES_PATH,
