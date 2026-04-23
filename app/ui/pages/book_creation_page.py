@@ -274,7 +274,7 @@ class BookCreationPage(QtWidgets.QWidget):
         """
         Check if a book who match with the requirements specified iin kwargs exists in the current books handler, and return the standard output of the method <get_book> of the books handler
         """
-        return self.books_handler.get_book(**kwargs)
+        return self.books_handler.get_books(**kwargs)
 
     def get_book_infos(self):
         books_infos = {}
@@ -303,7 +303,7 @@ class BookCreationPage(QtWidgets.QWidget):
             )
 
         except AttributeError:
-            self.logger.error(f"{traceback.format_exc()}")
+            self.logger.exception(f"an error occured while checking the existence of book name {books_infos.get("title")}")
             return {}
 
         if matches:
