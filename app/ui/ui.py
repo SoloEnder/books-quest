@@ -6,6 +6,7 @@ import os
 from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
+from app.ui import notification_service
 from app.utils import utils_funcs
 from app.utils import paths
 from app.src import settings_handler
@@ -22,7 +23,8 @@ class UI(QtWidgets.QWidget):
         #self.indev_warning_w = QtWidgets.QMessageBox()
 
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
-        self.qt_signals_handler.raise_error_msg_sg.connect(self.show_error)
+        self.notification_service = notification_service.NotificationService(self)
+        self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
         self.my_stacked_widgets = MyStackedWidgets(
             self, self.books_handler, self.qt_signals_handler, self.settings_handler,
         )
@@ -38,16 +40,6 @@ class UI(QtWidgets.QWidget):
         
         #self.indev_warning_w.show()
         QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
-        
-    @QtCore.Slot(str)
-    def show_error(self, error_msg: str|None):
-        
-        if not error_msg:
-            error_msg = "Une erreur est survenue, veuillez réessayer"
-        
-        QtWidgets.QMessageBox.warning(self, "Error", error_msg)
-            
-        
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
