@@ -88,6 +88,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.book_research_e.setMinimumWidth(300)
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
+        self.existence_msgbox = QtWidgets.QMessageBox()
+        self.existence_msgbox.setStandardButtons(
+            QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
+        )
+        self.existence_msgbox.setText("Voulez vous vraiment ajouter cette étagère ?")
 
         self.draw_books_tree(self.books_handler.books)
 
@@ -207,49 +213,71 @@ class ShelfCreationPage(QtWidgets.QWidget):
         )
 
         self.main_widget_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
+        
+    def check_name_existence(self, name):
+        return self.books_handler.get_shelfs(name=(name, True, False))
 
     def get_shelf_infos(self) -> dict | None:
         id = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
-                paths.SHELFS_COVERS_PATH, f"{id.replace('.', '_')}.png"
+                paths.BOOKSHELVES_COVERS_PATH, f"{id.replace('.', '_')}.png"
             )
             self.move_cover_img(final_img_path)
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(self.current_shelf_cover)
 
         shelf_name = self.name_e.text()
+        
+        if not shelf_name.lower() or shelf_name.lower() == self.books_handler.default_shelf.name.lower(): # type: ignore
+            self.qt_signals_handler.notify_sg.emit("error", "", "Nom d'étagère invalide", "")
+            return
+        
+        try:
+            names_matches = self.check_name_existence(shelf_name)
+            
+        except AttributeError:
+            self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
+            return
+        
+        else:
+            if names_matches:
+                self.existence_msgbox.setInformativeText(f"{len(names_matches)} étagères ayant le même nom que celle-ci ont été trouvées\nVoulez vous quand même l'ajouter ?\nElle sera ajouté sous le nom de {shelf_name} ({len(names_matches)})")
+                answer = self.existence_msgbox.exec()
+                
+                if answer == QtWidgets.QMessageBox.StandardButton.Yes:
+                    shelf_name = f"{shelf_name} ({len(names_matches)})"
+                
+                else:
+                    return
+                    
+                              
         books_ids = []
 
         for book_title_item in self.books_title_items:
             if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
                 books_ids.append(book_title_item.data())
 
-        if (
-            shelf_name.lower() != self.books_handler.default_shelf.name.lower()
-            if self.books_handler.default_shelf.name
-            else "All"
-        ):
-            return {
-                "name": shelf_name,
-                "books_ids": books_ids,
-                "id": id,
-                "cover_path": self.current_shelf_cover
-                if self.current_shelf_cover != self.default_shelf_cover
-                else None,
-            }
+        return {
+            "name": shelf_name,
+            "books_ids": books_ids,
+            "id": id,
+            "cover_path": self.current_shelf_cover
+            if self.current_shelf_cover != self.default_shelf_cover
+            else None,
+        }
 
     def move_cover_img(self, dest_path):
 
         try:
             shutil.copy2(self.current_shelf_cover, dest_path)
 
-        except Exception as e:
-            self.logger.error(
-                f"Unable to move cover file from tmp path to '{dest_path}' due to error : {e}"
+        except Exception:
+            self.logger.exception(
+                f"Unable to move cover file from tmp path to '{dest_path}' due to error : "
             )
-            raise
+            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
 
     def search_book(self):
         query = self.book_research_e.text()
