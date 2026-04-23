@@ -4,7 +4,8 @@ from app.utils import my_exceptions
 
 class DictPathHandler:
 
-    def __init__(self, base_dict: dict|None=None):
+    def __init__(self, jfm: jfm.JsonFileManager, base_dict: dict|None=None):
+        self.jfm = jfm
         self.base_dict = base_dict if base_dict else {}
 
     def get_value(self, dict_path: str):
@@ -54,11 +55,11 @@ class DictPathHandler:
         """
         Load a dictionnary from a JSON file, and replace the current settings by it
         """
-        new_base_dict = jfm.read_json(filepath)
+        new_base_dict = self.jfm.read_json(filepath)
         self.base_dict = new_base_dict
 
     def save_in_file(self, filepath):
         """
         Save a dictionnary in a JSON file
         """
-        jfm.write_json(filepath, self.base_dict)
+        self.jfm.write_json(filepath, self.base_dict)

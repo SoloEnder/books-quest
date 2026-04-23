@@ -31,7 +31,7 @@ class Book:
 
 
 class BooksHandler:
-    def __init__(self, books: dict | None = None):
+    def __init__(self, jfm: jfm.JsonFileManager, books: dict | None = None):
         """
         Handle and manage books data
         """
@@ -40,6 +40,7 @@ class BooksHandler:
         self.books_shelfs = {}
         self.shelfs_updated = False
         self.default_shelf = Shelf(name="All", books_ids=self.books.keys())
+        self.jfm = jfm
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -277,12 +278,12 @@ class BooksHandler:
         for book in self.books.values():
             data.append(book.kwargs)
 
-        jfm.write_json(filepath, data)
+        self.jfm.write_json(filepath, data, catch_error=False)
 
     def load_books(self, filepath: str):
         self.logger.info(f"Loading books data from {filepath}...")
 
-        data = jfm.read_json(filepath)
+        data = self.jfm.read_json(filepath, catch_error=False) 
 
         if data:
             for book_data in data:
@@ -302,12 +303,12 @@ class BooksHandler:
         for shelf in self.books_shelfs.values():
             data.append(shelf.kwargs)
 
-        jfm.write_json(filepath=filepath, data=data)
+        self.jfm.write_json(filepath=filepath, data=data, catch_error=False)
 
     def load_shelfs(self, filepath):
         self.logger.info(f"Loading shelf data from  {filepath}...")
 
-        data = jfm.read_json(filepath)
+        data = self.jfm.read_json(filepath)
 
         if data:
             for shelf_data in data:

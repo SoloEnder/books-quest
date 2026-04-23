@@ -9,7 +9,7 @@ from PySide6 import QtWidgets
 
 from app.src import book_sys
 from app.ui import ui
-from app.utils import json_file_manager as jfm
+from app.utils import json_file_manager
 from app.utils import paths
 from app.src import settings_handler
 
@@ -18,6 +18,7 @@ class AppSystem:
         self.app_ui = QtWidgets.QApplication([])
         begin = dt.datetime.now()
         self.logger = logging.getLogger(__name__)
+        self.jfm = json_file_manager.JsonFileManager()
         self.app_infos = self.load_app_infos(
             os.path.join(paths.DATA_PATH, "app_infos.json")
         )
@@ -35,16 +36,17 @@ class AppSystem:
                 paths.BOOKSHELVES_DATA_PATH,
             )
         self.logger.info("Initialising application...")
-        self.books_handler = book_sys.BooksHandler()
+        self.books_handler = book_sys.BooksHandler(self.jfm)
         self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelfs(
             os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
         )
         self.app_ui.aboutToQuit.connect(self.close_app)
-        self.settings_handler = settings_handler.SettingsHandler()
+        self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.settings_handler.load_from_file(paths.SETTINGS_FILEPATH)
         self.ui = ui.UI(self.books_handler, self.settings_handler,)
+        self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         paths.TMP_DIR_PATH = tempfile.mkdtemp(prefix="tmp", dir=paths.BASE_PATH)
         end = dt.datetime.now()
         self.logger.info(f"Initialising app in {end - begin}")
@@ -96,6 +98,7 @@ class AppSystem:
         folder_to_make = (
             paths.BOOKS_DATA_PATH,
             paths.BOOKS_COVERS_PATH,
+            paths.BOOKSHELVES_DATA_PATH,
             paths.BOOKSHELVES_COVERS_PATH,
         )
         file_to_make = (
@@ -104,14 +107,13 @@ class AppSystem:
         )
 
         for folder in folder_to_make:
+            
+            if os.path.exists(folder):
+                self.logger.warning(f"Folder {folder} already exists, skipping its creation")
+                continue
+                
             try:
                 os.mkdir(folder)
-
-            except FileExistsError:
-                self.logger.error(
-                    f"Failed to make folder '{folder}' : Folder already exists !"
-                )
-                raise
 
             except FileNotFoundError:
                 self.logger.error(
@@ -119,13 +121,18 @@ class AppSystem:
                 )
                 raise
 
-            except Exception as e:
-                self.logger.error(
-                    f"Failed to make folder '{folder}' dues to exception : {e}"
+            except Exception:
+                self.logger.exception(
+                    f"Failed to make folder '{folder}' dues to unhandled exception :"
                 )
 
         for file in file_to_make:
-            jfm.write_json(file, [])
+            
+            if os.path.exists(file):
+                self.logger.warning(f"File {file} already exists, skipping its creation")
+                continue
+                
+            self.jfm.write_json(file, [], catch_error=False)
 
     def check_folder(self, *folders):
         """
@@ -146,7 +153,7 @@ class AppSystem:
         Args:
         - filepath (str, pathlib.Path): the app infos file path
         """
-        app_infos = jfm.read_json(filepath)
+        app_infos = self.jfm.read_json(filepath, catch_error=False)
 
         if not app_infos:
             app_infos = {
@@ -162,4 +169,4 @@ class AppSystem:
         return app_infos
 
     def save_app_infos(self, filepath: str | pathlib.Path):
-        jfm.write_json(filepath, data=self.app_infos)
+        self.jfm.write_json(filepath, data=self.app_infos, catch_error=False)

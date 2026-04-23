@@ -4,8 +4,8 @@ from app.src import dict_paths_handler
 
 class SettingsHandler(dict_paths_handler.DictPathHandler):
 
-    def __init__(self, settings: dict|None=None):
-        super().__init__(settings)
+    def __init__(self, jfm: jfm.JsonFileManager, settings: dict|None=None):
+        super().__init__(jfm, settings)
         self.settings = self.base_dict
 
     def get_setting_value(self, setting_path: str):
