@@ -14,7 +14,8 @@ class Book:
         """
         self.logger = logging.getLogger(__name__)
         self.kwargs = kwargs
-        self.title = kwargs.get("title")
+        self.title = kwargs["title"]
+        self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
         self.edition = kwargs.get("edition")
         self.summary = kwargs.get("summary")
@@ -380,7 +381,8 @@ class Shelf:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.logger = logging.getLogger(__name__)
-        self.name = kwargs.get("name")
+        self.name = kwargs["name"]
+        self.name_suffix = kwargs.get("name_suffix")
         self.books_ids = kwargs.get("books_ids", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", str(dt.datetime.timestamp(dt.datetime.now())))
