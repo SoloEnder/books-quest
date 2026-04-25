@@ -3,7 +3,8 @@ build/
 dist/
 tests/
 logs/
-app/data/books
+app/data/books_data
+app/data/bookshelves_data
 app/data/settings.json
 app/data/app_infos.json
 *.pyc
