@@ -188,9 +188,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         for book in sequence.values():
             book_title_item = QtGui.QStandardItem(
-                book.title
-                if book.title
-                else utils_funcs.unknown_book_title_fmt(book)
+                book.title + (f" ({book.title_suffix})" if book.title_suffix else "")
             )
             book_title_item.setData(book.internal_id)
             book_title_item.setCheckable(True)
@@ -220,15 +218,8 @@ class ShelfCreationPage(QtWidgets.QWidget):
     def get_shelf_infos(self) -> dict | None:
         id = str(dt.datetime.timestamp(dt.datetime.now()))
 
-        if self.current_shelf_cover != self.default_shelf_cover:
-            final_img_path = os.path.join(
-                paths.BOOKSHELVES_COVERS_PATH, f"{id.replace('.', '_')}.png"
-            )
-            self.move_cover_img(final_img_path)
-            self.current_shelf_cover = final_img_path
-            self.set_cover_lb_pixmap(self.current_shelf_cover)
-
         shelf_name = self.name_e.text()
+        name_suffix = None
         
         if not shelf_name.lower() or shelf_name.lower() == self.books_handler.default_shelf.name.lower(): # type: ignore
             self.qt_signals_handler.notify_sg.emit("error", "", "Nom d'étagère invalide", "")
@@ -247,7 +238,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 answer = self.existence_msgbox.exec()
                 
                 if answer == QtWidgets.QMessageBox.StandardButton.Yes:
-                    shelf_name = f"{shelf_name} ({len(names_matches)})"
+                    name_suffix = len(names_matches)
                 
                 else:
                     return
@@ -258,9 +249,24 @@ class ShelfCreationPage(QtWidgets.QWidget):
         for book_title_item in self.books_title_items:
             if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
                 books_ids.append(book_title_item.data())
+                
+                final_img_path = self.current_shelf_cover 
+
+        if self.current_shelf_cover != self.default_shelf_cover:
+            final_img_path = os.path.join(
+                paths.BOOKSHELVES_COVERS_PATH, f"{id.replace('.', '_')}.png"
+            )
+            done = self.move_cover_img(final_img_path)
+            
+            if not done:
+                return
+            
+            self.current_shelf_cover = final_img_path
+            self.set_cover_lb_pixmap(final_img_path)
 
         return {
             "name": shelf_name,
+            "name_suffix": name_suffix,
             "books_ids": books_ids,
             "id": id,
             "cover_path": self.current_shelf_cover
@@ -278,6 +284,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 f"Unable to move cover file from tmp path to '{dest_path}' due to error : "
             )
             self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+            
+        else:
+            return True
 
     def search_book(self):
         query = self.book_research_e.text()
