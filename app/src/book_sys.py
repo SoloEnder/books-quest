@@ -1,5 +1,7 @@
 import datetime as dt
 import logging
+import os
+import pathlib
 
 from app.utils import json_file_manager as jfm
 from app.utils import my_exceptions
@@ -17,7 +19,7 @@ class Book:
         self.edition = kwargs.get("edition")
         self.summary = kwargs.get("summary")
         self.isbn = kwargs.get("isbn")
-        self.cover_img_path = kwargs.get("cover_img_path")
+        self.cover_path = kwargs.get("cover_path")
         self.starting_read_date = kwargs.get("starting_read_date")
         self.end_read_date = kwargs.get("end_read_date")
         self.status = kwargs.get("status")
@@ -47,14 +49,28 @@ class BooksHandler:
 
         if book_id in self.books.keys():
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
+            book_obj = self.books[book_id]
+            
+            if book_obj.cover_img_path:
+                
+                try:
+                    self._delete_cover(book_obj.cover_img_path)
+                
+                except FileNotFoundError:
+                    self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.internal_id}) : File not found !")
+                    
             del self.books[book_id]
-            return True
 
         else:
-            self.logger.warning(
-                f"Couldn't delete book with ID '{book_id}' : book doesn't exists !"
-            )
-            return False
+            raise my_exceptions.BookNotFoundError(book_id)
+        
+    def _delete_cover(self, cover_path):
+        
+        if os.path.exists(cover_path):
+            pathlib.Path(cover_path).unlink()
+            
+        else:
+            raise FileNotFoundError(f"Counldn't delete cover at {cover_path} : File not found !")
 
     def create_book(self, **kwargs):
         """
@@ -132,6 +148,16 @@ class BooksHandler:
         self.logger.debug(f"Removing book shelf with ID : '{id}'...")
 
         if id in self.books_shelfs.keys():
+            bookshelf_obj = self.books_shelfs[id]
+            
+            if bookshelf_obj.cover_path:
+                
+                try:
+                    self._delete_cover(bookshelf_obj.cover_path)
+                    
+                except FileNotFoundError:
+                    self.logger.error(f"Couldn't delete cover file for shelf (ID={bookshelf_obj.id}) : File not found !")
+                    
             del self.books_shelfs[id]
 
         else:

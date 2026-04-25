@@ -90,10 +90,10 @@ class BookWidget(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
 
-        if self.book.cover_img_path:
+        if self.book.cover_path:
 
-            if os.path.exists(self.book.cover_img_path):
-                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_img_path))
+            if os.path.exists(self.book.cover_path):
+                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_path))
 
             else:
                 self.logger.warning(f"Couldn't found cover file for book with ID={self.book.internal_id}, switching to default cover")
