@@ -296,6 +296,10 @@ class BookCreationPage(QtWidgets.QWidget):
                 if text:
                     books_infos[key] = text
 
+        if not books_infos.get("title"):
+            self.qt_signals_handler.notify_sg.emit("error", "", "Nom de livre invalide", "")
+            return
+        
         try:
             matches = self.check_existence(
                 title=(books_infos.get("title"), True, False),
@@ -304,18 +308,21 @@ class BookCreationPage(QtWidgets.QWidget):
 
         except AttributeError:
             self.logger.exception(f"an error occured while checking the existence of book name {books_infos.get("title")}")
-            return {}
+            return
 
         if matches:
             self.logger.debug(
                 f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{len(matches)} livres ayant le même titre et/ou le même autheur que celui-ci ont été trouvés"
+                f"{len(matches)} livres ayant le même titre et/ou le même autheur que celui-ci ont été trouvés\n Si vous l'ajoutez, il sera renommé en {books_infos["title"]} ({len(matches)})"
             )
             answer = self.existence_msgbox.exec()
 
-            if answer == QtWidgets.QMessageBox.StandardButton.No:
+            if answer == QtWidgets.QMessageBox.StandardButton.Yes :
+                books_infos["title"] = f"{books_infos["title"]} ({len(matches)})"
+                
+            else:
                 return
 
         books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now()))
