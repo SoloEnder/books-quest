@@ -153,8 +153,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
     def set_shelf_cover(self):
         infos = images_tools.select_image()
+        self.logger.debug(f"Shelf cover infos={infos}")
 
-        if infos:
+        if infos and infos[0]:
             img_path = infos[0]
             final_infos = images_tools.prepare_image(
                 img_path, os.path.join(paths.TMP_DIR_PATH, "shelf_cover.png")
