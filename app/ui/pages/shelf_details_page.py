@@ -104,7 +104,7 @@ class BookWidget(QtWidgets.QWidget):
 
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.fixed_sp = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        self.book_title_lb = QtWidgets.QLabel(self.book.title if self.book.title else utils_funcs.unknown_book_title_fmt(self.book))
+        self.book_title_lb = QtWidgets.QLabel(self.book.title + (f" ({str(self.book.title_suffix)})" if self.book.title_suffix else ""))
         self.book_title_lb.setObjectName("book_title_lb")
         self.book_authors_lb = QtWidgets.QLabel(self.book.authors if self.book.authors else "Unknown")
         self.book_authors_lb.setObjectName("book_authors_lb")

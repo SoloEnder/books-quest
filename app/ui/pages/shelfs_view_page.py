@@ -499,10 +499,7 @@ class ShelfWidget(QtWidgets.QWidget):
             self.displayed_cover = self.default_cover
 
 
-        self.name_lb = QtWidgets.QLabel(
-            self.shelf.name
-           if self.shelf.name
-            else utils_funcs.unknown_shelf_name_fmt(self.shelf))
+        self.name_lb = QtWidgets.QLabel(self.shelf.name + (f" ({self.shelf.name_suffix})" if self.shelf.name_suffix else ""))
         
         self.name_lb.setWordWrap(True)
         self.name_lb.setObjectName("name_lb")

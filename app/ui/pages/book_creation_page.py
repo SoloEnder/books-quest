@@ -320,7 +320,7 @@ class BookCreationPage(QtWidgets.QWidget):
             answer = self.existence_msgbox.exec()
 
             if answer == QtWidgets.QMessageBox.StandardButton.Yes :
-                books_infos["title"] = f"{books_infos["title"]} ({len(matches)})"
+                books_infos["title_suffix"] = len(matches)
                 
             else:
                 return
@@ -345,7 +345,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 self.cover_image = final_cover_image
                 self.set_cover_lb_pixmap(self.cover_image)
 
-        books_infos["cover_img_path"] = str(self.cover_image)
+        books_infos["cover_path"] = str(self.cover_image)
 
         books_infos["status"] = self.book_status_combob.currentData()
 
