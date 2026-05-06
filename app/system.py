@@ -6,7 +6,7 @@ import sys
 import tempfile
 from tkinter.messagebox import showerror
 
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 
 from app.src import book_sys
 from app.ui import ui
@@ -15,10 +15,10 @@ from app.utils import paths
 from app.src import settings_handler
 
 class AppSystem:
-    def __init__(self):
+    def __init__(self, qt_app):
         begin = dt.datetime.now()
-        self.app_ui = QtWidgets.QApplication([])
-        self.check_lock()
+        self.qt_app = qt_app
+        self.instance_locker = None
         self.logger = logging.getLogger(__name__)
         self.jfm = json_file_manager.JsonFileManager()
         self.app_infos = self.load_app_infos(
@@ -44,29 +44,30 @@ class AppSystem:
         self.books_handler.load_shelfs(
             os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
         )
-        self.app_ui.aboutToQuit.connect(self.close_app)
+        self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.settings_handler.load_from_file(paths.SETTINGS_FILEPATH)
         self.empty_tmp_folder(paths.TMP_DIR_PATH)
-        self.ui = ui.UI(self.books_handler, self.settings_handler,)
-        self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         end = dt.datetime.now()
         self.logger.info(f"Loaded app in {end - begin}")
 
-    def running(self):
+    def start(self):
         self.logger.info("Showing main window...")
+        self.start_ui()
+        
+    def start_ui(self):
+        self.logger.info("Initialising GUI...")
+        self.ui = ui.UI(self.books_handler, self.settings_handler,)
+        self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
                 
         self.ui.show()
-        self.add_session_lock()
-        sys.exit(self.app_ui.exec())
 
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Removing session lock...")
-        self.remove_session_lock()
         self.logger.info("Saving data...")
         self.save_app_infos(os.path.join(paths.DATA_PATH, "app_infos.json"))
         self.books_handler.save_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
@@ -78,18 +79,10 @@ class AppSystem:
         self.settings_handler.save_in_file(paths.SETTINGS_FILEPATH)
         self.logger.info("Exiting app...")
         
-    def add_session_lock(self):
         
-        with open(os.path.join(paths.BASE_PATH, "session.lock"), "w") as f:
-            f.write("")
-            
-    def remove_session_lock(self):
-        pathlib.Path.unlink(pathlib.Path(os.path.join(paths.BASE_PATH, "session.lock")))
-        
-    def check_lock(self):
-        if os.path.exists(os.path.join(paths.BASE_PATH, "session.lock")):
-            showerror("Instance checker", "Another instance of Book Quest is running, please close all active instance and retry !")
-            exit()
+    def set_instance_locker(self, instance_locker: QtCore.QLockFile):
+        self.instance_locker = instance_locker
+
             
     def empty_tmp_folder(self, dir_path):
         """
