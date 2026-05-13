@@ -2,10 +2,11 @@ import logging
 import os
 import sys
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 from app import system
 from app.src import my_logging_stuff
 from app.utils import paths
+import time
 
 fmter = logging.Formatter(
     fmt="[{asctime}] - [{name}/{levelname}] : {message}", style="{"
@@ -44,9 +45,13 @@ if __name__ == "__main__":
         sys.exit()
         
     try:
+        splash_screen = QtWidgets.QSplashScreen(QtGui.QPixmap(os.path.join(paths.ASSETS_PATH, "splashscreen/splashscreen.png")))
+        splash_screen.showMessage("Initialising Books Quest...", QtCore.Qt.AlignmentFlag.AlignBottom, QtGui.QColor("white"))
+        splash_screen.show()
         app_system = system.AppSystem(qt_app)
         app_system.set_instance_locker(instance_locker)
         app_system.start()
+        splash_screen.finish(app_system.ui)
         sys.exit(qt_app.exec())
 
     except Exception:
