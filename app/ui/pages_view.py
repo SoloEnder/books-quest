@@ -128,17 +128,22 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             self._generate_pages_buttons([x for x in range(len(self.pages_data[:5]))])
             
         self.logger.debug(f"{self.pages_switch_history}")
-        last_i = self.pages_switch_history[0]
+        pages_data_count = len(self.pages_data)
         
-        if page_destroyed:
+        if page_destroyed and  pages_data_count > 1:
+            first_i = self.pages_switch_history[0]
             
             for i in self.pages_switch_history:
                 
-                if i != last_i:
+                if i != first_i:
                     self.switch_to_page(i)
                     break
-        else:
+        elif pages_data_count > 1:
             self.switch_to_page(self.pages_switch_history[0])
+            
+        else:
+            self.switch_to_page(0)
+            
             
     def remove_page(self, page_index, re_setup: bool=True):
         """
