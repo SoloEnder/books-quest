@@ -12,6 +12,7 @@ from app.src import book_sys
 from app.ui import ui
 from app.utils import json_file_manager
 from app.utils import paths
+from app.src import my_logging_stuff
 from app.src import settings_handler
 
 class AppSystem:
@@ -62,12 +63,11 @@ class AppSystem:
         
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
-                
+            
         self.ui.show()
 
     def close_app(self):
         self.logger.info("Closing window...")
-        self.logger.info("Removing session lock...")
         self.logger.info("Saving data...")
         self.save_app_infos(os.path.join(paths.DATA_PATH, "app_infos.json"))
         self.books_handler.save_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
