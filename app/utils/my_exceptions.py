@@ -49,11 +49,17 @@ class PageNotFoundError(Exception):
     def __str__(self) -> str:
         return self.msg
     
-class ShelfPageNotLoadedError(Exception):
+class PageNotLoadedError(Exception):
 
-    def __init__(self, page_obj):
-        self.page_obj = page_obj
-        self.msg = f"Page '{page_obj}' not loaded ! (index={page_obj.virtual_index})"
+    def __init__(self, index):
+        """
+        Exception usualy raised when trying to do something on a page which is not loaded yet
+        
+        Args:
+        - index: the page virtual index
+        """
+        self.index = index
+        self.msg = f"Page at virtual index '{index} not loaded !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
@@ -69,11 +75,14 @@ class InvalidSettingPathError(Exception):
     def __str__(self) -> str:
         return self.msg
     
-class ShelfWidgetNotFoundError(Exception):
+class InvalidWidgetIndexError(Exception):
 
-    def __init__(self, shelf_widget, shelfs_page):
-        self.shelf_widget = shelf_widget
-        self.msg = f"ShelfWidget '{self.shelf_widget}' isn't in ShelfPage 'shelfs_page' !"
+    def __init__(self, widget):
+        """
+        Exception usually raised when the index of a 'InPageWidget' instance is not valid
+        """
+        self.widget = widget
+        self.msg = f"Invalid index for widget '{self.widget}' : {widget.index} !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
