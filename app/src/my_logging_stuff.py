@@ -1,7 +1,7 @@
 import logging.handlers
 import os
 import pathlib
-from tkinter.messagebox import showerror
+from PySide6 import QtWidgets
 
 
 class MyRotatingFileHandler(logging.handlers.RotatingFileHandler):
@@ -41,11 +41,10 @@ class SensitiveInfoFilter(logging.Filter):
 
         return True
 
-
 class ErrorsFilter(logging.Filter):
     def filter(self, record):
 
         if record.levelname == "ERROR" or record.levelname == "CRITICAL":
-            showerror(title="Error", message=record.getMessage())
+            QtWidgets.QMessageBox.warning(None, "Error", record.getMessage())
 
         return True
