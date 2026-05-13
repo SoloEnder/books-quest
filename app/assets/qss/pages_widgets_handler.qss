@@ -1,0 +1,4 @@
+
+QPushButton#last_page_b {
+    font-weight: bold;
+}
