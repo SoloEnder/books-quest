@@ -17,7 +17,6 @@ logs_filehandler.setLevel(logging.INFO)
 logs_streamhandler = logging.StreamHandler()
 logs_streamhandler.setFormatter(log_msg_formatter)
 logs_streamhandler.setLevel(logging.DEBUG)
-logs_streamhandler.name = "stream_handler"
 logger.addHandler(logs_streamhandler)
 logger.addHandler(logs_filehandler)
 logger.setLevel(logging.DEBUG)
