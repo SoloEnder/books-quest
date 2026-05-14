@@ -45,6 +45,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
 
         #Assigning arguments to attr
         self.qt_signals_handler = qt_signals_handler
+        self.notify_sg = self.qt_signals_handler.notify_sg
         self.widgets_by_page_count = widgets_by_page_count
         self.max_loadables_pages_count = max_loadables_pages_count
         self.widgets = widgets
@@ -58,6 +59,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.pages_switch_history = []
         
         self.setObjectName("pages_widgets_handler")
+        self.fixed_size_policy = QtWidgets.QSizePolicy()
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
         
@@ -220,6 +222,8 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         else:
             self._generate_pages_buttons([i for i in range(pages_data_count)])
             
+        self._create_page_jump_widget()
+            
         self.switch_to_page(0)
         
     def _generate_pages_buttons(self, pages_indexes: list|tuple, format_last_button: bool=True):
@@ -240,13 +244,43 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         for index in pages_indexes:
             button = QtWidgets.QPushButton(f"{index+1}")
             button.clicked.connect(lambda qt_arg, i=index: self.switch_to_page(i))
+            button.setSizePolicy(self.fixed_size_policy)
             
             if format_last_button and index == pages_indexes[-1]:
-                button.setText(f". . .{index+1}")
+                button.setText(f". . . {index+1}")
                 button.setObjectName("last_page_b")
                 
             self.pages_numbers_widget_lyt.addWidget(button)
             self.pages_numbers_buttons.append(button)
+            
+    def _create_page_jump_widget(self):
+        self.jump_to_page_lb = QtWidgets.QLabel("Aller à : ")
+        self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
+        self.jump_to_page_e = QtWidgets.QLineEdit("")
+        self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)
+        self.jump_to_page_e.returnPressed.connect(lambda: self._jump_to_page(self.jump_to_page_e.text()))
+        
+        
+        if hasattr(self, "pages_numbers_widget_lyt"):
+            self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_lb)
+            self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_e)
+            
+    def _jump_to_page(self, given_input):
+        
+        given_input = given_input.strip()
+        
+        if given_input.isdigit():
+            given_input = int(given_input)
+            
+            if given_input >= 0 and given_input <= len(self.pages_data):
+                self.switch_to_page(given_input-1)
+                
+            else:
+                self.notify_sg.emit("error", "Page invalide", "Cette page n'existe pas !", "")
+                
+        else:
+            self.notify_sg.emit("error", "Page invalide", "Numéro de page invalide !", "")
+                                
         
     def get_widgets_with_slice(self, slice: tuple[int, int]) -> list[InPageWidget]:
         """
