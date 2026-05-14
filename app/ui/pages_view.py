@@ -102,7 +102,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.widgets = widgets
         
     def delete_widget(self, widget: InPageWidget, destroy: bool=True):
-        page_destroyed = False
+        page_destroyed_index = None
             
         for page in self.loaded_pages.copy():
             self.unload_page(page)
@@ -122,7 +122,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             self._shift_slice(-1, -1, "RIGHT")
             
         if self.pages_data[-1][1][0] == self.pages_data[-1][1][1]:
-            page_destroyed = True
+            page_destroyed_index = self.pages_data[-1][0]
             self.logger.debug(f"Removing page with virtual index={self.pages_data[-1][0]}")
             self.remove_page(self.pages_data[-1][0], False)
             self._generate_pages_buttons([x for x in range(len(self.pages_data[:5]))])
@@ -130,14 +130,14 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.logger.debug(f"{self.pages_switch_history}")
         pages_data_count = len(self.pages_data)
         
-        if page_destroyed and  pages_data_count > 1:
-            first_i = self.pages_switch_history[0]
+        if page_destroyed_index is not None and pages_data_count > 1:
             
             for i in self.pages_switch_history:
                 
-                if i != first_i:
+                if i != page_destroyed_index:
                     self.switch_to_page(i)
                     break
+                
         elif pages_data_count > 1:
             self.switch_to_page(self.pages_switch_history[0])
             
