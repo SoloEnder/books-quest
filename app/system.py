@@ -60,11 +60,10 @@ class AppSystem:
         self.logger.info("Initialising GUI...")
         self.ui = ui.UI(self.books_handler, self.settings_handler,)
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
+        self.ui.show()
         
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
-            
-        self.ui.show()
 
     def close_app(self):
         self.logger.info("Closing window...")
