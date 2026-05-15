@@ -1,0 +1,15 @@
+
+
+QLabel#name_lb {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+QLabel#total_books_lb {
+    font-size: 17px;
+}
+
+/* QPushButton:hover{
+    background-color: aquamarine;
+    color:black;
+}/*
