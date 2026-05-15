@@ -194,7 +194,7 @@ class BooksHandler:
     def get_books(self, **kwargs):
         """
         Get all the books which matches with filters
-        Each argument must following this syntax : <filter_name> = <(filter_value, full_match, case_sensitive)>
+        Each argument must following this syntax : filter_name = (filter_value, full_match, case_sensitive)
         - filter_name: an attribute of the Book class
         - filter_value: the value to check
         - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
@@ -207,7 +207,7 @@ class BooksHandler:
     def get_shelfs(self, **kwargs):
         """
         Get all the shelfs which matches with filters
-        Each argument must following this syntax : <filter_name> = <(filter_value, full_match, case_sensitive)>
+        Each argument must following this syntax : filter_name = (filter_value, full_match, case_sensitive)
         - filter_name: an attribute of the Shelf class
         - filter_value: the value to check
         - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
