@@ -65,25 +65,34 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         
         #The stacked widget which handle the widgets
         self.pages_widgets_sw = QtWidgets.QStackedWidget(self)
+        self.nothing_page = NothingToShowPage(None)
+        self.pages_widgets_sw.addWidget(self.nothing_page)
+        
+        #Loading page
+        self.loading_page = LoadingPage(None)
+        self.pages_widgets_sw.addWidget(self.loading_page)
         
         #Widgets for pages numbers buttons
         self.pages_numbers_widget = QtWidgets.QWidget(self)
         self.pages_numbers_widget_lyt = QtWidgets.QHBoxLayout(self.pages_numbers_widget)
         self.pages_numbers_widget.setLayout(self.pages_numbers_widget_lyt)
-        self.pages_numbers_buttons = []
+        self.pages_numbers_lyt_widgets = []
+        
+        #Widgets for jump to a specific page by giving its index
+        self.jump_to_page_lb = QtWidgets.QLabel("Aller à : ")
+        self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
+        self.jump_to_page_e = QtWidgets.QLineEdit("")
+        self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)
+        self.jump_to_page_e.returnPressed.connect(lambda: self._jump_to_page(self.jump_to_page_e.text()))
+        
+        self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_lb)
+        self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_e)
         
         self.main_lyt.addWidget(self.pages_widgets_sw, 0, 0)
         self.main_lyt.addWidget(self.pages_numbers_widget, 1, 0)
-        
-        self.nothing_to_show_widget = QtWidgets.QWidget()
-        self.nothing_to_show_widget_lyt = QtWidgets.QHBoxLayout()
-        self.nothing_to_show_widget.setLayout(self.nothing_to_show_widget_lyt)
-        self.nothing_to_show_lb = QtWidgets.QLabel(self)
-        self.nothing_to_show_lb.setText("Il n'y a rien ici")
-        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
-        self.nothing_to_show_widget_lyt.addWidget(self.nothing_to_show_lb, QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.pages_widgets_sw.addWidget(self.nothing_to_show_widget)
+    
         utils_funcs.load_and_set_ss(os.path.join(paths.QSS_FILES_PATH, "pages_widgets_handler.qss"), widget=self, logger=self.logger)
+        self.generate_pages()
         
     def _fill_virt_row(self):
         """
@@ -96,12 +105,18 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         for page_data in self.pages_data:
             self.pages_virtual_row.append(None)
         
-        
     def set_widgets(self, widgets: list[InPageWidget]):
         """
         Set the attribute 'widgets' to 'widgets'
         """
+        
+        for page_data in self.pages_data.copy():
+            self.remove_page(page_data[0])
+            
+        self.pages_switch_history.clear()
         self.widgets = widgets
+        self.logger.debug(f"{self.widgets=}")
+        self.generate_pages()
         
     def delete_widget(self, widget: InPageWidget, destroy: bool=True):
         page_destroyed_index = None
@@ -127,7 +142,12 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             page_destroyed_index = self.pages_data[-1][0]
             self.logger.debug(f"Removing page with virtual index={self.pages_data[-1][0]}")
             self.remove_page(self.pages_data[-1][0], False)
-            self._generate_pages_buttons([x for x in range(len(self.pages_data[:5]))])
+            
+            if len(self.pages_data) > 5:
+                self._generate_pages_buttons([0, 1, 2, 3, 4, len(self.pages_data)-1])
+                
+            else:
+                self._generate_pages_buttons([i for i in range(len(self.pages_data))])
             
         self.logger.debug(f"{self.pages_switch_history}")
         pages_data_count = len(self.pages_data)
@@ -146,17 +166,23 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         else:
             self.switch_to_page(0)
             
-            
-    def remove_page(self, page_index, re_setup: bool=True):
+    def remove_page(self, page_index, re_setup: bool=True, ignore_unload_error: bool=True):
         """
         Removes the page and his data at 'page_index' in the 'virtual_row' attribute
         
         Args:
         - page_index: the page index
-        - re_setup: Wether or not call the 'setup_pages_slices' method after deleting the page. You should call it by yourself otherwise
+        - re_setup: Wether or not call the 'setup_pages_slices' method after deleting the page.You should call it by yourself otherwise
+        - ignore_unload_error: Whether ignore the my_exception.PageNotLoaded exception raised by the 'unload_page_with_index' method. Default to True
         """
         
-        self.unload_page_with_index(page_index)
+        try:
+            self.unload_page_with_index(page_index)
+            
+        except my_exceptions.PageNotLoadedError:
+            if not ignore_unload_error:
+                raise
+            
         del self.pages_data[page_index]
         del self.pages_virtual_row[page_index]
         
@@ -182,6 +208,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         slice_end = 0
         page_data = []
         widgets_count = len(self.widgets)
+        self.pages_data.clear()
         self.pages_virtual_row.clear()
         
         for index, widget in enumerate(self.widgets):
@@ -209,12 +236,19 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         You should call the 'setup_pages_slices' method once before call this method
         """
         
+        self.logger.debug(f"Loaded pages indexes={[page.virtual_index for page in self.loaded_pages]}")
+        for page in self.loaded_pages.copy():
+            self.unload_page(page)
+            
+        self.setup_pages_slices()
+        
         self.logger.debug(f"Generating {self.max_loadables_pages_count} pages...")
         
         for page_data in self.pages_data[:self.max_loadables_pages_count]:
             self.new_page(page_data)
         
         pages_data_count = len(self.pages_data)
+        self.logger.debug(f"{pages_data_count=}")
         
         if pages_data_count > 5:
             self._generate_pages_buttons([0, 1, 2, 3, 4, pages_data_count-1])
@@ -222,9 +256,8 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         else:
             self._generate_pages_buttons([i for i in range(pages_data_count)])
             
-        self._create_page_jump_widget()
-            
-        self.switch_to_page(0)
+        if len(self.pages_data) > 0:
+            self.switch_to_page(0)
         
     def _generate_pages_buttons(self, pages_indexes: list|tuple, format_last_button: bool=True):
         """
@@ -235,11 +268,11 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         format_last_button: if True, a specific style will be applied to the last button
         """
         
-        for widget in self.pages_numbers_buttons:
+        for widget in self.pages_numbers_lyt_widgets:
             self.pages_numbers_widget_lyt.removeWidget(widget)
             widget.deleteLater()
             
-        self.pages_numbers_buttons.clear()
+        self.pages_numbers_lyt_widgets.clear()
         
         for index in pages_indexes:
             button = QtWidgets.QPushButton(f"{index+1}")
@@ -251,21 +284,18 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
                 button.setObjectName("last_page_b")
                 
             self.pages_numbers_widget_lyt.addWidget(button)
-            self.pages_numbers_buttons.append(button)
-            
-    def _create_page_jump_widget(self):
-        self.jump_to_page_lb = QtWidgets.QLabel("Aller à : ")
-        self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
-        self.jump_to_page_e = QtWidgets.QLineEdit("")
-        self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)
-        self.jump_to_page_e.returnPressed.connect(lambda: self._jump_to_page(self.jump_to_page_e.text()))
-        
-        
-        if hasattr(self, "pages_numbers_widget_lyt"):
-            self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_lb)
-            self.pages_numbers_widget_lyt.addWidget(self.jump_to_page_e)
+            self.pages_numbers_lyt_widgets.append(button)
             
     def _jump_to_page(self, given_input):
+        """
+        Switch to the page given in 'given_input'\n
+        Unlike switch_to_page(), this method takes a string as parameter, and evaluate if its a valid input\n
+        Valid input requirements:
+        - digit characters only
+        - no space between characters
+        - > 0 and < to 'pages_data' attribute
+        Trying to call this method with an argument which doesn't follow these rule will result in a error window message raises
+        """
         
         given_input = given_input.strip()
         
@@ -330,7 +360,6 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         dest_page = self.pages_virtual_row[index]
         
         if dest_page:
-            self.pages_widgets_sw.addWidget(dest_page)
             self.pages_widgets_sw.setCurrentWidget(dest_page)
             self.pages_switch_history.insert(0, dest_page.virtual_index)
             
@@ -353,7 +382,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         page = self.pages_virtual_row[index]
         
         if page == None:
-            my_exceptions.PageNotLoadedError(index)
+            raise my_exceptions.PageNotLoadedError(index)
             
         else:
             self.unload_page(page)
@@ -372,6 +401,12 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.pages_widgets_sw.removeWidget(page)
         self.pages_virtual_row[page.virtual_index] = None
         page.deleteLater()
+        
+    def show_nothing_page(self):
+        self.pages_widgets_sw.setCurrentWidget(self.nothing_page)
+        
+    def show_loading_page(self):
+        self.pages_widgets_sw.setCurrentWidget(self.loading_page)
                       
 class Page(QtWidgets.QWidget):
     def __init__(
@@ -423,6 +458,33 @@ class Page(QtWidgets.QWidget):
             widget.setParent(None)
         
         return super().deleteLater()
+        
+class NothingToShowPage(QtWidgets.QWidget):
+    
+    def __init__(self, parent: QtWidgets.QWidget|None):
+        super().__init__(parent)
+        self.nothing_to_show_widget_lyt = QtWidgets.QHBoxLayout()
+        self.setLayout(self.nothing_to_show_widget_lyt)
+        self.nothing_to_show_lb = QtWidgets.QLabel(self)
+        self.nothing_to_show_lb.setText("Il n'y a rien ici")
+        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
+        self.nothing_to_show_widget_lyt.addWidget(self.nothing_to_show_lb, QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+    def set_label_text(self, new_text: str):
+        self.nothing_to_show_lb.setText(new_text)
+        
+class LoadingPage(QtWidgets.QWidget):
+    
+    def __init__(self, parent: QtWidgets.QWidget|None):
+        super().__init__(parent)
+        self.lyt = QtWidgets.QHBoxLayout()
+        self.setLayout(self.lyt)
+        self.loading_lb = QtWidgets.QLabel(self)
+        self.loading_lb.setText("Chargement...")
+        self.lyt.addWidget(self.loading_lb, QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+    def set_label_text(self, new_text: str):
+        self.loading_lb.setText(new_text)
         
 class InPageWidget(QtWidgets.QWidget):
     
