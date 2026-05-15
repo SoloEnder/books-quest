@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+import shiboken6
 from app.utils import utils_funcs
 from app.utils import my_exceptions
 
@@ -56,16 +57,16 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
         
         #Shelf research widgets
+        self.search_result_widgets = []
         self.search_lb = QtWidgets.QLabel("Rechercher : ")
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setClearButtonEnabled(True)
-        # self.search_le.textChanged.connect(self.exit_search)
-        # self.search_le.returnPressed.connect(lambda: self.search_shelfs(name=(self.search_le.text(), False)))
+        self.search_le.returnPressed.connect(lambda: self.search_shelfs(self.search_le.text()))
+        self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
         self.logger.debug(f"Assigning pages handler to self...")
         self.pages_view_handler = pages_view.PagesWidgetsHandler(self, self.qt_signals_handler, 5, 10, [])
-        self.pages_view_handler.nothing_to_show_lb.setText("Il n'y a aucune étagère ici, pourquoi ne pas en créer une ?")
 
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -75,58 +76,68 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.logger.debug(f"Adding pages handler to layout...")
         self.main_widget_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
         self.main_lyt.addWidget(self.main_sa)
-        self.generate_shelfs_pages()
+        self.generate_shelves_pages()
         
-    # @QtCore.Slot()
-    # def exit_search(self):
+    @QtCore.Slot(str)
+    def search_shelfs(self, given_input: str):
         
-    #     if self.search_le.text() == "":
-    #         self.shelfs_pages_widget.search_shelfs(list(self.books_handler.books_shelfs.values()), True)
-    #         self.generate_shelfs_pages()
-        
-    # def search_shelfs(self, **query):
-        
-    #     self.logger.debug(f"searching shelfs ({query=})...")
-
-    #     try:
-    #         result = self.books_handler.get_shelfs(**query)
-    #         self.logger.debug(f"shelves search {result=}")
+        if given_input:
+            matches = self.books_handler.get_shelfs(name=(given_input, False, False))
+            self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
             
-    #     except ValueError:
-    #         self.logger.exception(f"Unable to get shelfs ! (query='{query}')")
-    #         self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+            if matches:
+                self.search_result_widgets = self.create_shelves_widgets(matches, False)
+                self.pages_view_handler.set_widgets(self.search_result_widgets.copy())
+                
+            else:
+                self.pages_view_handler.set_widgets([])
+                self.logger.debug(f"{self.shelves_widgets=}")
+                self.pages_view_handler.show_nothing_page()
             
-    #     else:
-    #         self.shelfs_pages_widget.search_shelfs(result)
-    #         self.generate_shelfs_pages()
+    @QtCore.Slot()
+    def exit_search(self):
+        
+        if not self.search_le.text():
+            self.pages_view_handler.show_loading_page()
+            
+            for widget in self.shelves_widgets:
+               if shiboken6.isValid(widget):
+                    widget.deleteLater()
+                
+            self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.books_shelfs.values()))
+            self.pages_view_handler.set_widgets(self.shelves_widgets)
+            
+            for widget in self.search_result_widgets:
+                widget.deleteLater()
+                    
+            self.search_result_widgets.clear()
 
-    def create_shelves_widgets(self, shelves: list|tuple|None=None, include_default_shelf: bool=True):
+    def create_shelves_widgets(self, shelves: list|tuple, include_default_shelf: bool=True):
         """
-        Create shelfs widgets
+        Create shelves widgets with 'shelves' and return them
         
         Args:
         - shelves: A sequence of shelf objects, if equal to None, the shelves object in the book handler will be used instead, default to None
         - include_default_shelf: Whether or not to create a shelf widget for the default book handler shel, default to True
         """
         
-        shelves_values = shelves if shelves else self.books_handler.books_shelfs.values()
+        shelves_values = shelves
         
-        self.shelves_widgets.clear()
+        shelves_widgets = []
         
         if include_default_shelf:
-            self.shelves_widgets.append(DefaultShelfWidget(self.books_handler.default_shelf, self.books_handler, self.qt_signals_handler))
+            shelves_widgets.append(DefaultShelfWidget(self.books_handler.default_shelf, self.books_handler, self.qt_signals_handler))
         
         self.logger.debug(f"Creating {len(shelves_values)+1 if include_default_shelf else len(shelves_values)} shelves widgets...")
         for shelf in shelves_values:
             shelf_widget = ShelfWidget(shelf, self.books_handler, self.qt_signals_handler)
-            self.shelves_widgets.append(shelf_widget) 
+            shelves_widgets.append(shelf_widget)
             
+        return shelves_widgets
             
-    def generate_shelfs_pages(self):
-        self.create_shelves_widgets()
-        self.pages_view_handler.set_widgets(self.shelves_widgets)
-        self.pages_view_handler.setup_pages_slices()
-        self.pages_view_handler.generate_pages()
+    def generate_shelves_pages(self):
+        self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.books_shelfs.values()))
+        self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
                 
 class ShelfWidget(pages_view.InPageWidget):
     def __init__(
