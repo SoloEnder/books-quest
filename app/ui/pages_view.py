@@ -9,7 +9,6 @@ from app.utils import my_exceptions
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.utils import paths
 
 def dynamic_pages_switching(func):
     """
@@ -40,10 +39,11 @@ def dynamic_pages_loader(func):
        
 class PagesWidgetsHandler(QtWidgets.QWidget):        
         
-    def __init__(self, parent: QtWidgets.QWidget|None, qt_signals_handler,  max_loadables_pages_count: int, widgets_by_page_count: int, widgets: list[InPageWidget],):
+    def __init__(self, parent: QtWidgets.QWidget|None, res_handler, qt_signals_handler,  max_loadables_pages_count: int, widgets_by_page_count: int, widgets: list[InPageWidget],):
         super().__init__(parent)
 
         #Assigning arguments to attr
+        self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.notify_sg = self.qt_signals_handler.notify_sg
         self.widgets_by_page_count = widgets_by_page_count
@@ -91,7 +91,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.main_lyt.addWidget(self.pages_widgets_sw, 0, 0)
         self.main_lyt.addWidget(self.pages_numbers_widget, 1, 0)
     
-        utils_funcs.load_and_set_ss(os.path.join(paths.QSS_FILES_PATH, "pages_widgets_handler.qss"), widget=self, logger=self.logger)
+        utils_funcs.load_and_set_ss(self.res_handler.get_ress("assets.qss.pages_widgets_handler"), widget=self, logger=self.logger)
         self.generate_pages()
         
     def _fill_virt_row(self):
@@ -115,7 +115,6 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             
         self.pages_switch_history.clear()
         self.widgets = widgets
-        self.logger.debug(f"{self.widgets=}")
         self.generate_pages()
         
     def delete_widget(self, widget: InPageWidget, destroy: bool=True):
@@ -149,7 +148,6 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             else:
                 self._generate_pages_buttons([i for i in range(len(self.pages_data))])
             
-        self.logger.debug(f"{self.pages_switch_history}")
         pages_data_count = len(self.pages_data)
         
         if page_destroyed_index is not None and pages_data_count > 1:
@@ -242,13 +240,12 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
             
         self.setup_pages_slices()
         
-        self.logger.debug(f"Generating {self.max_loadables_pages_count} pages...")
+        self.logger.info(f"Generating {self.max_loadables_pages_count} pages...")
         
         for page_data in self.pages_data[:self.max_loadables_pages_count]:
             self.new_page(page_data)
         
         pages_data_count = len(self.pages_data)
-        self.logger.debug(f"{pages_data_count=}")
         
         if pages_data_count > 5:
             self._generate_pages_buttons([0, 1, 2, 3, 4, pages_data_count-1])

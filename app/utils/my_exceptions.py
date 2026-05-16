@@ -65,11 +65,20 @@ class PageNotLoadedError(Exception):
     def __str__(self) -> str:
         return self.msg
     
-class InvalidSettingPathError(Exception):
+class InvalidDictPathError(Exception):
 
-    def __init__(self, setting_path):
-        self.setting_path = setting_path
-        self.msg = f"Setting {self.setting_path} isn't a valid setting path !"
+    def __init__(self, dict_path):
+        self.dict_path = dict_path
+        self.msg = f"Dict path '{self.dict_path}' isn't a valid dict path !"
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
+    
+class RessBasePathNotFound(Exception):
+    def __init__(self, dict_path):
+        self.dict_path = dict_path
+        self.msg = f"Unable to make path with dict path '{self.dict_path}' : no valid _base_ key found !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:

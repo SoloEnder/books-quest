@@ -14,6 +14,7 @@ from app.utils import json_file_manager
 from app.utils import paths
 from app.src import my_logging_stuff
 from app.src import settings_handler
+from app.src import resources_handler
 
 class AppSystem:
     def __init__(self, qt_app):
@@ -22,9 +23,9 @@ class AppSystem:
         self.instance_locker = None
         self.logger = logging.getLogger(__name__)
         self.jfm = json_file_manager.JsonFileManager()
-        self.app_infos = self.load_app_infos(
-            os.path.join(paths.DATA_PATH, "app_infos.json")
-        )
+        self.res_handler = resources_handler.RessourcesHandler(self.jfm, {}, paths.BASE_PATH)
+        self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
+        self.app_infos = self.load_app_infos(self.res_handler.get_ress("app_infos"))
         self.app_infos["boot_count"] += 1
         first_boot = self.check_first_boot()
         if first_boot:
@@ -32,23 +33,22 @@ class AppSystem:
 
         else:
             self.check_folder(
-                paths.DATA_PATH,
-                paths.ASSETS_PATH,
-                paths.BOOKS_DATA_PATH,
-                paths.BOOKS_COVERS_PATH,
-                paths.BOOKSHELVES_DATA_PATH,
+                self.res_handler.get_ress("data"),
+                self.res_handler.get_ress("assets"),
+                self.res_handler.get_ress("data.books"),
+                self.res_handler.get_ress("data.books.covers"),
+                self.res_handler.get_ress("data.bookshelves"),
+                self.res_handler.get_ress("data.bookshelves.covers")
             )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler(self.jfm)
-        self.books_handler.load_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
+        self.books_handler.load_books(self.res_handler.get_ress("data.books.books"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
-        self.books_handler.load_shelfs(
-            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
-        )
+        self.books_handler.load_shelfs(self.res_handler.get_ress("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
-        self.settings_handler.load_from_file(paths.SETTINGS_FILEPATH)
-        self.empty_tmp_folder(paths.TMP_DIR_PATH)
+        self.settings_handler.load_from_file(self.res_handler.get_ress("data.settings"))
+        self.empty_tmp_folder(self.res_handler.get_ress("tmp"))
         end = dt.datetime.now()
         self.logger.info(f"Loaded app in {end - begin}")
 
@@ -58,25 +58,22 @@ class AppSystem:
         
     def start_ui(self):
         self.logger.info("Initialising GUI...")
-        self.ui = ui.UI(self.books_handler, self.settings_handler,)
+        self.ui = ui.UI(self.books_handler, self.res_handler, self.settings_handler,)
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
+        self.ui.show()
         
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
-            
-        self.ui.show()
 
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.save_app_infos(os.path.join(paths.DATA_PATH, "app_infos.json"))
-        self.books_handler.save_books(os.path.join(paths.BOOKS_DATA_PATH, "books.json"))
-        self.books_handler.save_shelfs(
-            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json")
-        )
+        self.save_app_infos(self.res_handler.get_ress("app_infos"))
+        self.books_handler.save_books(self.res_handler.get_ress("data.books.books"))
+        self.books_handler.save_shelfs(self.res_handler.get_ress("data.bookshelves.bookshelves"))
         self.logger.info("Deleting files in temporary folder...")
-        self.empty_tmp_folder(paths.TMP_DIR_PATH)
-        self.settings_handler.save_in_file(paths.SETTINGS_FILEPATH)
+        self.empty_tmp_folder(self.res_handler.get_ress("tmp"))
+        self.settings_handler.save_in_file(self.res_handler.get_ress("data.settings"))
         self.logger.info("Exiting app...")
         
         
@@ -106,16 +103,17 @@ class AppSystem:
 
     def first_boot_operations(self):
         folder_to_make = (
-            paths.BOOKS_DATA_PATH,
-            paths.BOOKS_COVERS_PATH,
-            paths.BOOKSHELVES_DATA_PATH,
-            paths.BOOKSHELVES_COVERS_PATH,
-            paths.TMP_DIR_PATH,
+            self.res_handler.get_ress("data"),
+            self.res_handler.get_ress("assets"),
+            self.res_handler.get_ress("data.books"),
+            self.res_handler.get_ress("data.books.covers"),
+            self.res_handler.get_ress("data.bookshelves"),
+            self.res_handler.get_ress("data.bookshelves.covers"),
+            self.res_handler.get_ress("tmp")
         )
         file_to_make = (
-            os.path.join(paths.TMP_DIR_PATH, "bq"),
-            os.path.join(paths.BOOKS_DATA_PATH, "books.json"),
-            os.path.join(paths.BOOKSHELVES_DATA_PATH, "shelves.json"),
+            self.res_handler.get_ress("data.books.books"),
+            self.res_handler.get_ress("data.bookshelves.bookshelves"),
         )
 
         for folder in folder_to_make:

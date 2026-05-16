@@ -25,7 +25,7 @@ class DictPathHandler:
                 current_value = current_value[key]
 
         except KeyError:
-            raise my_exceptions.InvalidSettingPathError(dict_path)
+            raise my_exceptions.InvalidDictPathError(dict_path)
         
         else:
             return current_value
@@ -46,10 +46,10 @@ class DictPathHandler:
             for key in path_sections[:-1]:
                 current_value = current_value[key]
 
-            current_value[path_sections[-1]] = dict_path
+            current_value[path_sections[-1]] = new_value
 
         except KeyError:
-            raise my_exceptions.InvalidSettingPathError(dict_path)
+            raise my_exceptions.InvalidDictPathError(dict_path)
 
     def load_from_file(self, filepath):
         """

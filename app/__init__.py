@@ -10,7 +10,7 @@ log_msg_formatter = logging.Formatter(
     fmt="[{asctime}] - [{name}/{levelname}] : {message}", style="{"
 )
 logs_filehandler = my_logging_stuff.MyRotatingFileHandler(
-    os.path.join(paths.LOGS_PATH, "app.log"), maxBytes=1000000, backupCount=5
+    os.path.join(paths.BASE_PATH, "logs", "app.log"), maxBytes=1000000, backupCount=5
 )
 logs_filehandler.setFormatter(log_msg_formatter)
 logs_filehandler.setLevel(logging.INFO)
