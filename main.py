@@ -45,7 +45,7 @@ if __name__ == "__main__":
         sys.exit()
         
     try:
-        splash_screen = QtWidgets.QSplashScreen(QtGui.QPixmap(os.path.join(paths.BASE_PATH, "splashscreen", "splashscreen.png")))
+        splash_screen = QtWidgets.QSplashScreen(QtGui.QPixmap(os.path.join(paths.BASE_PATH, "assets", "splashscreen", "splashscreen.png")))
         splash_screen.showMessage("Initialising Books Quest...", QtCore.Qt.AlignmentFlag.AlignBottom, QtGui.QColor("white"))
         splash_screen.show()
         app_system = system.AppSystem(qt_app)
