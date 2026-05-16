@@ -39,11 +39,11 @@ def dynamic_pages_loader(func):
        
 class PagesWidgetsHandler(QtWidgets.QWidget):        
         
-    def __init__(self, parent: QtWidgets.QWidget|None, ress_handler, qt_signals_handler,  max_loadables_pages_count: int, widgets_by_page_count: int, widgets: list[InPageWidget],):
+    def __init__(self, parent: QtWidgets.QWidget|None, res_handler, qt_signals_handler,  max_loadables_pages_count: int, widgets_by_page_count: int, widgets: list[InPageWidget],):
         super().__init__(parent)
 
         #Assigning arguments to attr
-        self.ress_handler = ress_handler
+        self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.notify_sg = self.qt_signals_handler.notify_sg
         self.widgets_by_page_count = widgets_by_page_count
@@ -91,7 +91,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.main_lyt.addWidget(self.pages_widgets_sw, 0, 0)
         self.main_lyt.addWidget(self.pages_numbers_widget, 1, 0)
     
-        utils_funcs.load_and_set_ss(self.ress_handler.get_ress("assets.qss.pages_widgets_handler"), widget=self, logger=self.logger)
+        utils_funcs.load_and_set_ss(self.res_handler.get_ress("assets.qss.pages_widgets_handler"), widget=self, logger=self.logger)
         self.generate_pages()
         
     def _fill_virt_row(self):

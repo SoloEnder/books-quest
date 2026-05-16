@@ -14,7 +14,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         parent: QtWidgets.QWidget|None, 
         shelf: book_sys.Shelf, 
         books_handler: book_sys.BooksHandler,
-        ress_handler,
+        res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
         ):
@@ -22,7 +22,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         super().__init__(parent)
         self.shelf = shelf
         self.books_handler = books_handler
-        self.ress_handler = ress_handler
+        self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
 
@@ -30,8 +30,8 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__)
         
         #Widgets
-        self.gen_qss_filepath = self.ress_handler.get_ress("assets.qss.general")
-        self.page_qss_filepath = self.ress_handler.get_ress("assets.qss.shelf_details_page")
+        self.gen_qss_filepath = self.res_handler.get_ress("assets.qss.general")
+        self.page_qss_filepath = self.res_handler.get_ress("assets.qss.shelf_details_page")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
@@ -40,7 +40,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 
         #close button
         self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.ress_handler.get_ress("assets.icons.exit")))
+        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit")))
         self.close_b.clicked.connect(
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
         )
@@ -75,7 +75,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         base_displayed_titles = []
 
         for index, book in enumerate(books.values()):
-            book_widget = BookWidget(book, self.ress_handler)
+            book_widget = BookWidget(book, self.res_handler)
             base_displayed_titles.append(book_widget.book_title_lb.text())
             book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
             self.books_widgets.append(book_widget)
@@ -85,11 +85,11 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             self.nothing_to_show_lb.show()
 
 class BookWidget(QtWidgets.QWidget):
-    def __init__(self, book: book_sys.Book, ress_handler):
+    def __init__(self, book: book_sys.Book, res_handler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.ress_handler = ress_handler
-        self.default_cover_path = self.ress_handler.get_ress("assets.defaults_covers.book")
+        self.res_handler = res_handler
+        self.default_cover_path = self.res_handler.get_ress("assets.defaults_covers.book")
         self.book = book
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
