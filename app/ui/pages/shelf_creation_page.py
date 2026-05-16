@@ -7,7 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.utils import images_tools, paths, utils_funcs
+from app.utils import images_tools
 
 
 class ShelfCreationPage(QtWidgets.QWidget):
@@ -15,6 +15,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self,
         parent: QtWidgets.QWidget | None,
         books_handler: book_sys.BooksHandler,
+        ress_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
         **kwargs,
@@ -22,6 +23,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
+        self.ress_handler = ress_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.modes = ("edition", "creation")
@@ -49,7 +51,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         # Back button
         self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(os.path.join(paths.ICONS_PATH, "cross_ico.png")))
+        self.close_b.setIcon(QtGui.QIcon(self.ress_handler.get_ress("assets.icons.exit")))
         self.close_b.clicked.connect(
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
         )
@@ -62,16 +64,14 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_lyt.addWidget(self.scroll_area, 1)
 
         # Shelf cover
-        self.default_shelf_cover = os.path.join(
-            paths.DEFAULT_COVERS_PATH, "default_shelf_cover.png"
-        )
+        self.default_shelf_cover = self.ress_handler.get_ress("assets.defaults_covers.shelf")
         self.current_shelf_cover = self.default_shelf_cover
         self.shelf_cover_pm = QtGui.QPixmap(self.current_shelf_cover)
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
         self.cover_selection_b = QtWidgets.QPushButton("Modifier")
         self.cover_selection_b_ico = QtGui.QIcon(
-            os.path.join(paths.ICONS_PATH, "edit_ico.png")
+            self.ress_handler.get_ress("assets.icons.edit")
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
@@ -100,7 +100,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton("Terminé")
         self.confirm_b.setIcon(
-            QtGui.QIcon(os.path.join(paths.ICONS_PATH, "done_ico.png"))
+            QtGui.QIcon(self.ress_handler.get_ress("assets.icons.done"))
         )
         self.confirm_b.clicked.connect(self.create_shelf)
 
@@ -158,7 +158,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         if infos and infos[0]:
             img_path = infos[0]
             final_infos = images_tools.prepare_image(
-                img_path, os.path.join(paths.TMP_DIR_PATH, "shelf_cover.png")
+                img_path, os.path.join(self.ress_handler.get_ress("tmp"), "shelf_cover.png")
             )
             self.current_shelf_cover = final_infos[0]
             self.set_cover_lb_pixmap(self.current_shelf_cover)
@@ -233,16 +233,16 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
             return
         
-        else:
-            if names_matches:
-                self.existence_msgbox.setInformativeText(f"{len(names_matches)} étagères ayant le même nom que celle-ci ont été trouvées\nVoulez vous quand même l'ajouter ?\nElle sera ajouté sous le nom de {shelf_name} ({len(names_matches)})")
-                answer = self.existence_msgbox.exec()
+        # else:
+        #     if names_matches:
+        #         self.existence_msgbox.setInformativeText(f"{len(names_matches)} étagères ayant le même nom que celle-ci ont été trouvées\nVoulez vous quand même l'ajouter ?\nElle sera ajouté sous le nom de {shelf_name} ({len(names_matches)})")
+        #         answer = self.existence_msgbox.exec()
                 
-                if answer == QtWidgets.QMessageBox.StandardButton.Yes:
-                    name_suffix = len(names_matches)
+        #         if answer == QtWidgets.QMessageBox.StandardButton.Yes:
+        name_suffix = len(names_matches)
                 
-                else:
-                    return
+        #         else:
+        #             return
                     
                               
         books_ids = []
@@ -255,7 +255,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
-                paths.BOOKSHELVES_COVERS_PATH, f"{id.replace('.', '_')}.png"
+                self.ress_handler.get_ress("data.bookshelves.covers"), f"{id.replace('.', '_')}.png"
             )
             done = self.move_cover_img(final_img_path)
             

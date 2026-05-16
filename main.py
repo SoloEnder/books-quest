@@ -12,7 +12,7 @@ fmter = logging.Formatter(
     fmt="[{asctime}] - [{name}/{levelname}] : {message}", style="{"
 )
 logger = logging.getLogger(__name__)
-mrfh = my_logging_stuff.MyRotatingFileHandler(os.path.join(paths.LOGS_PATH, "main.log"))
+mrfh = my_logging_stuff.MyRotatingFileHandler(os.path.join(paths.BASE_PATH, "logs", "main.log"))
 mrfh.setFormatter(fmter)
 sh = logging.StreamHandler()
 sh.setFormatter(fmter)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         sys.exit()
         
     try:
-        splash_screen = QtWidgets.QSplashScreen(QtGui.QPixmap(os.path.join(paths.ASSETS_PATH, "splashscreen/splashscreen.png")))
+        splash_screen = QtWidgets.QSplashScreen(QtGui.QPixmap(os.path.join(paths.BASE_PATH, "splashscreen", "splashscreen.png")))
         splash_screen.showMessage("Initialising Books Quest...", QtCore.Qt.AlignmentFlag.AlignBottom, QtGui.QColor("white"))
         splash_screen.show()
         app_system = system.AppSystem(qt_app)
