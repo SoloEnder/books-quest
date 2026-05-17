@@ -1,11 +1,14 @@
 
-from app.src import book_sys
-from app.utils import paths
-from app.ui import qt_signals_handler
-from app.utils import utils_funcs
-from PySide6 import QtWidgets, QtCore, QtGui
 import os
 import logging
+from PySide6 import QtWidgets, QtCore, QtGui
+
+from app.src import book_sys
+from app.ui import qt_signals_handler
+from app.ui import pages_view
+from app.utils import utils_funcs
+
+
 
 class ShelfDetailsPage(QtWidgets.QWidget):
 
@@ -30,8 +33,8 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__)
         
         #Widgets
-        self.gen_qss_filepath = self.res_handler.get_ress("assets.qss.general")
-        self.page_qss_filepath = self.res_handler.get_ress("assets.qss.shelf_details_page")
+        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
+        self.page_qss_filepath = self.res_handler.get_res("assets.qss.shelf_details_page")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
@@ -40,7 +43,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 
         #close button
         self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit")))
+        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.exit")))
         self.close_b.clicked.connect(
             lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
         )
@@ -89,7 +92,7 @@ class BookWidget(QtWidgets.QWidget):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.res_handler = res_handler
-        self.default_cover_path = self.res_handler.get_ress("assets.defaults_covers.book")
+        self.default_cover_path = self.res_handler.get_res("assets.defaults_covers.book")
         self.book = book
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)

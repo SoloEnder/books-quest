@@ -29,7 +29,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.settings_handler = settings_handler
         
         self.logger = logging.getLogger(__name__)
-        self.icons_folder = self.res_handler.get_ress("assets.icons")
+        self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
@@ -56,7 +56,7 @@ class BookCreationPage(QtWidgets.QWidget):
         # Exit Widget
         self.exit_b = QtWidgets.QPushButton("Fermer")
         self.exit_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.go_back"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back"))
         )
         self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.exit_b.clicked.connect(
@@ -65,14 +65,14 @@ class BookCreationPage(QtWidgets.QWidget):
 
         # Cover widgets
         self.default_cover_img = os.path.join(
-            self.res_handler.get_ress("assets.defaults_covers.book")
+            self.res_handler.get_res("assets.defaults_covers.book")
         )
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
         self.edit_cover_b = QtWidgets.QPushButton("Changer la couverture")
         self.edit_cover_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.edit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
@@ -264,7 +264,7 @@ class BookCreationPage(QtWidgets.QWidget):
         if infos:
             if infos[0]:
                 final_infos = images_tools.prepare_image(
-                    infos[0], os.path.join(self.res_handler.get_ress("tmp"), "book_cover.png")
+                    infos[0], os.path.join(self.res_handler.get_res("tmp"), "book_cover.png")
                 )
                 self.cover_image = final_infos[0]
                 self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
@@ -331,7 +331,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
-                self.res_handler.get_ress("data.books.covers"),
+                self.res_handler.get_res("data.books.covers"),
                 f"{books_infos['internal_id'].replace('.', '_')}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
@@ -340,7 +340,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 shutil.copy2(
                     self.cover_image,
                     os.path.join(
-                        self.res_handler.get_ress("data.books.covers"),
+                        self.res_handler.get_res("data.books.covers"),
                         final_cover_image,
                     ),
                 )

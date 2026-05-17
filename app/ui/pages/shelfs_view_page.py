@@ -27,8 +27,8 @@ class ShelfsViewPage(QtWidgets.QWidget):
 
         #Loading custom QSS
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_ress("assets.qss.shelfs_view_page"),
-            self.res_handler.get_ress("assets.qss.general"),
+            self.res_handler.get_res("assets.qss.shelfs_view_page"),
+            self.res_handler.get_res("assets.qss.general"),
             widget=self, 
             logger=self.logger,
             )
@@ -47,7 +47,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.main_sa.setWidgetResizable(True)
         
         #icons
-        self.book_creation_ico = QtGui.QIcon(self.res_handler.get_ress("assets.icons.new_book"))
+        self.book_creation_ico = QtGui.QIcon(self.res_handler.get_res("assets.icons.new_book"))
         
         #Books and Shelfs creation buttons
         self.book_creation_b = QtWidgets.QPushButton("Nouveau livre")
@@ -153,7 +153,7 @@ class ShelfWidget(pages_view.InPageWidget):
 
         self.setProperty("role", "shelf_widget")
         self.main_layout = QtWidgets.QGridLayout(self)
-        self.default_cover = self.res_handler.get_ress("assets.defaults_covers.shelf")
+        self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
 
         if self.shelf.cover_path:
             if os.path.exists(self.shelf.cover_path):
@@ -214,14 +214,14 @@ class ShelfWidget(pages_view.InPageWidget):
         self.button_size = QtWidgets.QSizePolicy()
         self.view_b = QtWidgets.QPushButton("Voir les livres")
         self.view_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.view_books"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
         self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("shelf_details_page", True, {"shelf":self.shelf}))
 
         self.edit_b = QtWidgets.QPushButton("Modifier")
         self.edit_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.edit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -233,7 +233,7 @@ class ShelfWidget(pages_view.InPageWidget):
         self.delete_b = QtWidgets.QPushButton("Supprimer")
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
         )
         self.delete_b.setSizePolicy(self.button_size)
         self.delete_b.clicked.connect(self.delete_shelf)

@@ -25,7 +25,7 @@ class AppSystem:
         self.jfm = json_file_manager.JsonFileManager()
         self.res_handler = resources_handler.RessourcesHandler(self.jfm, {}, paths.BASE_PATH)
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
-        self.app_infos = self.load_app_infos(self.res_handler.get_ress("app_infos"))
+        self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
         self.app_infos["boot_count"] += 1
         first_boot = self.check_first_boot()
         if first_boot:
@@ -33,22 +33,22 @@ class AppSystem:
 
         else:
             self.check_folder(
-                self.res_handler.get_ress("data"),
-                self.res_handler.get_ress("assets"),
-                self.res_handler.get_ress("data.books"),
-                self.res_handler.get_ress("data.books.covers"),
-                self.res_handler.get_ress("data.bookshelves"),
-                self.res_handler.get_ress("data.bookshelves.covers")
+                self.res_handler.get_res("data"),
+                self.res_handler.get_res("assets"),
+                self.res_handler.get_res("data.books"),
+                self.res_handler.get_res("data.books.covers"),
+                self.res_handler.get_res("data.bookshelves"),
+                self.res_handler.get_res("data.bookshelves.covers")
             )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler(self.jfm)
-        self.books_handler.load_books(self.res_handler.get_ress("data.books.books"))
+        self.books_handler.load_books(self.res_handler.get_res("data.books.books"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
-        self.books_handler.load_shelfs(self.res_handler.get_ress("data.bookshelves.bookshelves"))
+        self.books_handler.load_shelfs(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
-        self.settings_handler.load_from_file(self.res_handler.get_ress("data.settings"))
-        self.empty_tmp_folder(self.res_handler.get_ress("tmp"))
+        self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
+        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         end = dt.datetime.now()
         self.logger.info(f"Loaded app in {end - begin}")
 
@@ -68,12 +68,12 @@ class AppSystem:
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.save_app_infos(self.res_handler.get_ress("app_infos"))
-        self.books_handler.save_books(self.res_handler.get_ress("data.books.books"))
-        self.books_handler.save_shelfs(self.res_handler.get_ress("data.bookshelves.bookshelves"))
+        self.save_app_infos(self.res_handler.get_res("app_infos"))
+        self.books_handler.save_books(self.res_handler.get_res("data.books.books"))
+        self.books_handler.save_shelfs(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.logger.info("Deleting files in temporary folder...")
-        self.empty_tmp_folder(self.res_handler.get_ress("tmp"))
-        self.settings_handler.save_in_file(self.res_handler.get_ress("data.settings"))
+        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
+        self.settings_handler.save_in_file(self.res_handler.get_res("data.settings"))
         self.logger.info("Exiting app...")
         
         
@@ -103,17 +103,17 @@ class AppSystem:
 
     def first_boot_operations(self):
         folder_to_make = (
-            self.res_handler.get_ress("data"),
-            self.res_handler.get_ress("assets"),
-            self.res_handler.get_ress("data.books"),
-            self.res_handler.get_ress("data.books.covers"),
-            self.res_handler.get_ress("data.bookshelves"),
-            self.res_handler.get_ress("data.bookshelves.covers"),
-            self.res_handler.get_ress("tmp")
+            self.res_handler.get_res("data"),
+            self.res_handler.get_res("assets"),
+            self.res_handler.get_res("data.books"),
+            self.res_handler.get_res("data.books.covers"),
+            self.res_handler.get_res("data.bookshelves"),
+            self.res_handler.get_res("data.bookshelves.covers"),
+            self.res_handler.get_res("tmp")
         )
         file_to_make = (
-            self.res_handler.get_ress("data.books.books"),
-            self.res_handler.get_ress("data.bookshelves.bookshelves"),
+            self.res_handler.get_res("data.books.books"),
+            self.res_handler.get_res("data.bookshelves.bookshelves"),
         )
 
         for folder in folder_to_make:

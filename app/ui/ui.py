@@ -11,14 +11,13 @@ from app.utils import utils_funcs
 from app.utils import paths
 from app.src import settings_handler
 
-class UI(QtWidgets.QWidget):
+class UI(QtWidgets.QMainWindow):
     def __init__(self, books_handler, res_handler, settings_handler: settings_handler.SettingsHandler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.settings_handler = settings_handler
-        self.main_layout = QtWidgets.QVBoxLayout(self)
 
         #Indev warning window
         #self.indev_warning_w = QtWidgets.QMessageBox()
@@ -29,10 +28,12 @@ class UI(QtWidgets.QWidget):
         self.my_stacked_widgets = MyStackedWidgets(
             self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler,
         )
-        self.main_layout.addWidget(self.my_stacked_widgets)
-        self.gen_qss_filepath = self.res_handler.get_ress("assets.qss.general")
+        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger)
         self.my_stacked_widgets.switch_page("shelfs_view_page")
+        self.setCentralWidget(self.my_stacked_widgets)
+        self.setWindowTitle("Books Quest")
+        self.setWindowIcon(QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen")))
 
     def show_indev_warn(self):
         """
@@ -187,5 +188,7 @@ class IndevWarnWidget(QtWidgets.QMessageBox):
         #Setting text
         self.setText("This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
     
-
-
+class ToolBar(QtWidgets.QToolBar):
+    
+    def __init__(self, parent: QtWidgets.QWidget|None):
+        super().__init__(parent)

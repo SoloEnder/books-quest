@@ -91,7 +91,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.main_lyt.addWidget(self.pages_widgets_sw, 0, 0)
         self.main_lyt.addWidget(self.pages_numbers_widget, 1, 0)
     
-        utils_funcs.load_and_set_ss(self.res_handler.get_ress("assets.qss.pages_widgets_handler"), widget=self, logger=self.logger)
+        utils_funcs.load_and_set_ss(self.res_handler.get_res("assets.qss.pages_widgets_handler"), widget=self, logger=self.logger)
         self.generate_pages()
         
     def _fill_virt_row(self):
