@@ -8,10 +8,10 @@ from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
 from app.ui import notification_service
 from app.utils import utils_funcs
-from app.src import settings_handler
+from app.src import dict_paths_handler
 
 class UI(QtWidgets.QMainWindow):
-    def __init__(self, books_handler, res_handler, settings_handler: settings_handler.SettingsHandler):
+    def __init__(self, books_handler, res_handler, settings_handler: dict_paths_handler.DictPathHandler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
@@ -124,13 +124,15 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
-        self.logger.debug(f"{self.history=}")
+        
         if len(self.history) >= 1:
-            self.switch_page(
-                self.history[1],
-                True if refresh else False,
-                self.pages[self.history[1]].variables_kw
-            )
+            
+            if self.history[0] != self.history[1]:
+                self.switch_page(
+                    self.history[1],
+                    True if refresh else False,
+                    self.pages[self.history[1]].variables_kw
+                )
 
     def refresh(self, page_name, page_args):
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
