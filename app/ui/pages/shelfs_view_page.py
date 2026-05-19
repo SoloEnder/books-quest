@@ -21,6 +21,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.variables_kw = {}
 
         #Logger setup
         self.logger = logging.getLogger(__name__+":ShelfsViewPage")

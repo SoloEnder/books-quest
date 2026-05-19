@@ -28,6 +28,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.variables_kw = {"shelf":self.shelf}
 
         #logger
         self.logger = logging.getLogger(__name__)
@@ -40,13 +41,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
         self.books_widgets = []
-
-        #close button
-        self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.exit")))
-        self.close_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
 
         self.nothing_to_show_lb = QtWidgets.QLabel("Aucun livre ici, pourquoi ne pas en ajouter un ?")
         self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
@@ -66,8 +60,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.generate_books_widgets(self.books)
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.close_b, 0, 0)
-        self.main_lyt.addWidget(self.books_container_sa, 1, 0)
+        self.main_lyt.addWidget(self.books_container_sa, 0, 0)
 
     def generate_books_widgets(self, books: dict|None=None):
         self.books_widgets.clear()

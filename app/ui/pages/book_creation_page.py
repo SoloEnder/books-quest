@@ -27,6 +27,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.variables_kw = {}
         
         self.logger = logging.getLogger(__name__)
         self.icons_folder = self.res_handler.get_res("assets.icons")
@@ -52,16 +53,6 @@ class BookCreationPage(QtWidgets.QWidget):
         self.scroll_area = QtWidgets.QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.container_widget)
-
-        # Exit Widget
-        self.exit_b = QtWidgets.QPushButton("Fermer")
-        self.exit_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back"))
-        )
-        self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
-        self.exit_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
 
         # Cover widgets
         self.default_cover_img = os.path.join(
@@ -185,9 +176,8 @@ class BookCreationPage(QtWidgets.QWidget):
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
-        self.main_layout.addWidget(self.exit_b, 0)
-        self.container_widget_layout.addWidget(self.book_cover_lb, 1, 0)
-        self.container_widget_layout.addWidget(self.edit_cover_b, 2, 0)
+        self.container_widget_layout.addWidget(self.book_cover_lb, 0, 0)
+        self.container_widget_layout.addWidget(self.edit_cover_b, 1, 0)
         self.container_widget_layout.addWidget(
             self.book_status_lb, self.container_widget_layout.rowCount() + 1, 0
         )

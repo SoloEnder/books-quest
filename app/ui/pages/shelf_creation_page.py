@@ -2,7 +2,6 @@ import datetime as dt
 import logging
 import os
 import shutil
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
@@ -28,6 +27,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.settings_handler = settings_handler
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
+        self.variables_kw = {**kwargs}
 
         if self.current_mode:
             if self.current_mode not in self.modes:
@@ -48,14 +48,6 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_widget = QtWidgets.QWidget()
         self.main_widget_lyt = QtWidgets.QGridLayout()
         self.main_widget.setLayout(self.main_widget_lyt)
-
-        # Back button
-        self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.exit")))
-        self.close_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
-        self.main_lyt.addWidget(self.close_b, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         # Scroll area
         self.scroll_area = QtWidgets.QScrollArea()
