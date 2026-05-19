@@ -2,18 +2,14 @@ import datetime as dt
 import logging
 import os
 import pathlib
-import sys
-import tempfile
-from tkinter.messagebox import showerror
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore
 
 from app.src import book_sys
 from app.ui import ui
 from app.utils import json_file_manager
 from app.utils import paths
-from app.src import my_logging_stuff
-from app.src import settings_handler
+from app.src import dict_paths_handler
 from app.src import resources_handler
 
 class AppSystem:
@@ -46,7 +42,7 @@ class AppSystem:
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelfs(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
-        self.settings_handler = settings_handler.SettingsHandler(self.jfm)
+        self.settings_handler = dict_paths_handler.DictPathHandler(self.jfm)
         self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         end = dt.datetime.now()
@@ -62,7 +58,7 @@ class AppSystem:
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         self.ui.show()
         
-        if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_setting_value("developer_settings.show_indev_warning") == True:
+        if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
 
     def close_app(self):
