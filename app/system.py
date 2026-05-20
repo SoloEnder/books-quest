@@ -44,6 +44,8 @@ class AppSystem:
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = dict_paths_handler.DictPathHandler(self.jfm)
         self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
+        self.langs_handler = dict_paths_handler.DictPathHandler(self.jfm)
+        self.langs_handler.load_from_file(self.res_handler.get_res(f"assets.langs.{self.settings_handler.get_value("general.language.current")}"))
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         end = dt.datetime.now()
         self.logger.info(f"Loaded app in {end - begin}")
@@ -54,7 +56,7 @@ class AppSystem:
         
     def start_ui(self):
         self.logger.info("Initialising GUI...")
-        self.ui = ui.UI(self.books_handler, self.res_handler, self.settings_handler,)
+        self.ui = ui.UI(self.books_handler, self.res_handler, self.settings_handler, self.langs_handler)
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         self.ui.show()
         

@@ -17,6 +17,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
         **kwargs,
     ):
         super().__init__(parent)
@@ -25,6 +26,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
         self.variables_kw = {**kwargs}
@@ -43,6 +45,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 "No mode provided for Shelf Creation Page initialisation !"
             )
 
+        self.lang_data = self.langs_handler.get_value("pages.shelf_creation_page")
         self.main_lyt = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
@@ -61,7 +64,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_pm = QtGui.QPixmap(self.current_shelf_cover)
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
-        self.cover_selection_b = QtWidgets.QPushButton("Modifier")
+        self.cover_selection_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
         self.cover_selection_b_ico = QtGui.QIcon(
             self.res_handler.get_res("assets.icons.edit")
         )
@@ -69,13 +72,13 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.name_lb = QtWidgets.QLabel("Nom : ")
+        self.name_lb = QtWidgets.QLabel(self.lang_data["name"])
         self.name_e = QtWidgets.QLineEdit()
         self.name_e.setMinimumWidth(300)
 
         # Books selection widgets
-        self.books_selection_lb = QtWidgets.QLabel("Livres : ")
-        self.book_research_lb = QtWidgets.QLabel("Rechercher : ")
+        self.books_selection_lb = QtWidgets.QLabel(self.lang_data["books_selection_lb"])
+        self.book_research_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
         self.book_research_e.returnPressed.connect(self.search_book)
@@ -85,12 +88,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
             QtWidgets.QMessageBox.StandardButton.Yes
             | QtWidgets.QMessageBox.StandardButton.No,
         )
-        self.existence_msgbox.setText("Voulez vous vraiment ajouter cette étagère ?")
+        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm"))
 
         self.draw_books_tree(self.books_handler.books)
 
         # Confirm widgets
-        self.confirm_b = QtWidgets.QPushButton("Terminé")
+        self.confirm_b = QtWidgets.QPushButton(self.langs_handler.get_value("done_b"))
         self.confirm_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.done"))
         )

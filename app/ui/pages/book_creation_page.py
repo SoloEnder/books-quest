@@ -21,12 +21,14 @@ class BookCreationPage(QtWidgets.QWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
     ):
         super().__init__(parent)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
         self.variables_kw = {}
         
         self.logger = logging.getLogger(__name__)
@@ -61,7 +63,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
-        self.edit_cover_b = QtWidgets.QPushButton("Changer la couverture")
+        self.edit_cover_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
         self.edit_cover_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
@@ -90,7 +92,7 @@ class BookCreationPage(QtWidgets.QWidget):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel("Statut : ")
+        self.book_status_lb = QtWidgets.QLabel(self.langs_handler.get_value("status_lb"))
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
         self.book_status_combob.addItem("En cours", "on_reading")
@@ -101,7 +103,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget = QtWidgets.QWidget(self)
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
-        self.alr_read_pages_lb = QtWidgets.QLabel("Pages lues : ")
+        self.alr_read_pages_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.alr_read_pages_lb"))
         self.alr_read_pages_le = QtWidgets.QLineEdit()
         self.alr_read_pages_le.textEdited.connect(
             lambda: self.check_int(
@@ -112,12 +114,12 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date = QtCore.QDate(
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
-        self.starting_read_date_lb = QtWidgets.QLabel("Commencé le : ")
+        self.starting_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.starting_read_date_lb"))
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
-        self.end_read_date_lb = QtWidgets.QLabel("Terminé le : ")
+        self.end_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.end_read_date_lb"))
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
@@ -131,7 +133,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         # Shelfs widgets
-        self.shelfs_selection_lb = QtWidgets.QLabel("Etageres : ")
+        self.shelfs_selection_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.shelfs_selection_lb"))
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
         self.shelfs_selection_layout = QtWidgets.QVBoxLayout(
@@ -172,7 +174,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.existence_msgbox.setText("Voulez vous vraiment ajouter ce livre ?")
 
-        self.add_b = QtWidgets.QPushButton("Ajouter")
+        self.add_b = QtWidgets.QPushButton(self.langs_handler.get_value("add_b"))
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets

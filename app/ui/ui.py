@@ -11,21 +11,19 @@ from app.utils import utils_funcs
 from app.src import dict_paths_handler
 
 class UI(QtWidgets.QMainWindow):
-    def __init__(self, books_handler, res_handler, settings_handler: dict_paths_handler.DictPathHandler):
+    def __init__(self, books_handler, res_handler, settings_handler: dict_paths_handler.DictPathHandler, langs_handler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.settings_handler = settings_handler
-
-        #Indev warning window
-        #self.indev_warning_w = QtWidgets.QMessageBox()
+        self.langs_handler = langs_handler
 
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
         self.notification_service = notification_service.NotificationService(self)
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
         self.my_stacked_widgets = MyStackedWidgets(
-            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler,
+            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, self.langs_handler,
         )
         self.toolbar = ToolBar(self, self.res_handler)
         self.addToolBar(self.toolbar)
@@ -61,6 +59,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
@@ -68,19 +67,39 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
         self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
-            self, self.books_handler, res_handler, self.qt_signals_handler, self.settings_handler, 
+            self, 
+            self.books_handler, 
+            res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler, 
+            self.langs_handler
         )
-        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, self.books_handler.default_shelf, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler,)
+        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, 
+            self.books_handler.default_shelf, 
+            self.books_handler, 
+            self.res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler,
+            self.langs_handler,
+            )
         self.book_creation_page = book_creation_page.BookCreationPage(
             self,
             self.books_handler,
             self.res_handler,
             self.qt_signals_handler,
             self.settings_handler,
+            self.langs_handler,
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
-            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, mode="creation",
+            self, 
+            self.books_handler, 
+            self.res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler,
+            self.langs_handler,
+            mode="creation",
         )
         self.pages = {
             "shelfs_view_page": self.shelfs_view_page,
@@ -146,6 +165,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler,
                 self.settings_handler,
+                self.langs_handler,
             )
             self.pages["shelfs_view_page"] = self.shelfs_view_page
             self.addWidget(self.shelfs_view_page)
@@ -160,6 +180,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler, 
                 self.settings_handler,
+                self.langs_handler,
             )
             self.pages["book_creation_page"] = self.book_creation_page
             self.addWidget(self.book_creation_page)
@@ -174,6 +195,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler, 
                 self.settings_handler,
+                self.langs_handler,
                 **page_args,
             )
             self.pages["shelf_creation_page"] = self.shelf_creation_page
@@ -190,6 +212,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler,
                 self.settings_handler,
+                self.langs_handler,
                 )
             self.pages["shelf_details_page"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
