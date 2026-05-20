@@ -41,5 +41,14 @@
     },
     "pages_view": {
         "jump_to_page_lb": "Go to :"
+    },
+    "notification_service": {
+        "error": {
+            "title":"Warning",
+            "msg":"An error has occured, please try again"
+        },
+        "info": {
+            "title":"Information"
+        }
     }
 }

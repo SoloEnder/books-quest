@@ -41,5 +41,14 @@
     },
     "pages_view": {
         "jump_to_page_lb": "Aller à:"
+    },
+    "notification_service": {
+        "error_msg": {
+            "title":"Avertissement",
+            "msg":"Une erreur est survenue, veuillez réessayer"
+        },
+        "info_msg": {
+            "title":"Information"
+        }
     }
 }

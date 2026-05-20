@@ -20,7 +20,10 @@ class UI(QtWidgets.QMainWindow):
         self.langs_handler = langs_handler
 
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
-        self.notification_service = notification_service.NotificationService(self)
+        self.notification_service = notification_service.NotificationService(
+            self, 
+            self.langs_handler
+            )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
         self.my_stacked_widgets = MyStackedWidgets(
             self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, self.langs_handler,
