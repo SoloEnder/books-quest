@@ -1,0 +1,35 @@
+{
+    "nothing_to_show_lb": "There is nothing here",
+    "research_lb": "Search",
+    "loading_lb": "Loading...",
+    "add_b":"Add",
+    "add_confirm": "Do you really want to add this element ?",
+    "edit_b":"Edit",
+    "delete_b":"Delete",
+    "status_lb":"Status",
+    "done_b":"Done",
+    "edit_cover_b":"Edit cover",
+
+    "pages": {
+        "book_creation_page": {
+            "alr_read_pages_lb": "Read pages : ",
+            "starting_read_date_lb": "Started reading on : ",
+            "end_read_date_lb": "Finished reading on : ",
+            "shelfs_selection_lb": "Bookshelves : "
+        },
+        "shelf_creation_page": {
+            "name": "Name : ",
+            "books_selection_lb": "Book to add to this shelf : "
+        },
+        "shelfs_view_page": {
+            "book_creation_b":"New book",
+            "shelf_creation_b":"New shelf",
+            "view_b":"See books"
+        },
+        "shelf_details_page": {
+        }
+    },
+    "pages_view": {
+        "jump_to_page_lb": "Go to :"
+    }
+}

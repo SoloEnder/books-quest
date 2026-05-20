@@ -1,6 +1,5 @@
-{   
-    "app_infos":"app_infos.json",
-
+{
+    "app_infos": "app_infos.json",
     "logs": {
         "_base_": "logs",
         "main": "main.log",
@@ -33,6 +32,11 @@
         "splashscreen": {
             "_base_": "splashscreen",
             "splashscreen": "splashscreen.png"
+        },
+        "langs": {
+            "_base_": "lang",
+            "fr": "fr.json",
+            "en":"en.json"
         }
     },
     "data": {

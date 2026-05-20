@@ -1,0 +1,35 @@
+{
+    "nothing_to_show_lb": "Il n'y a rien ici",
+    "research_lb": "Rechercher : ",
+    "loading_lb": "Chargement...",
+    "add_b":"Ajouter",
+    "add_confirm": "Voulez vraiment ajouter cet élément ?",
+    "edit_b":"Modifier",
+    "delete_b":"Supprimer",
+    "status_lb":"Statut",
+    "done_b":"Terminé",
+    "edit_cover_b":"Changer la couverture",
+
+    "pages": {
+        "book_creation_page": {
+            "alr_read_pages_lb": "Pages lues : ",
+            "starting_read_date_lb": "Commencé le : ",
+            "end_read_date_lb": "Terminé le : ",
+            "shelfs_selection_lb": "Etagères : "
+        },
+        "shelf_creation_page": {
+            "name": "Nom : ",
+            "books_selection_lb": "Livres à ajouter à l'étagère :"
+        },
+        "shelfs_view_page": {
+            "book_creation_b":"Nouveau livre",
+            "shelf_creation_b":"Nouvelle étagère",
+            "view_b":"Voir les livres"
+        },
+        "shelf_details_page": {
+        }
+    },
+    "pages_view": {
+        "jump_to_page_lb": "Aller à:"
+    }
+}
