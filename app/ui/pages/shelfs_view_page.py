@@ -74,7 +74,15 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
-        self.pages_view_handler = pages_view.PagesWidgetsHandler(self, res_handler, self.qt_signals_handler, 5, 10, [])
+        self.pages_view_handler = pages_view.PagesWidgetsHandler(
+            self, 
+            res_handler, 
+            self.qt_signals_handler,
+            self.langs_handler, 
+            5, 
+            10, 
+            [],
+            )
 
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)

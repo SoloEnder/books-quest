@@ -25,7 +25,7 @@ class UI(QtWidgets.QMainWindow):
         self.my_stacked_widgets = MyStackedWidgets(
             self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, self.langs_handler,
         )
-        self.toolbar = ToolBar(self, self.res_handler)
+        self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
         self.addToolBar(self.toolbar)
         self.toolbar.go_back_act.triggered.connect(lambda: self.my_stacked_widgets.go_back(True))
         self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
@@ -128,7 +128,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
-            self.qt_signals_handler.edit_progress_msg.emit("Chargement de la page...")
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.get_value("loading_page_lb"))
             if refresh:
                 self.refresh(page_name, page_args)
 
@@ -230,9 +230,11 @@ class IndevWarnWidget(QtWidgets.QMessageBox):
     
 class ToolBar(QtWidgets.QToolBar):
     
-    def __init__(self, parent: QtWidgets.QWidget|None, res_handler):
+    def __init__(self, parent: QtWidgets.QWidget|None, res_handler, langs_handler):
         super().__init__(parent)
         self.res_handler = res_handler
-        self.go_back_act = QtGui.QAction("Retour")
+        self.langs_handler = langs_handler
+        
+        self.go_back_act = QtGui.QAction(self.langs_handler.get_value("toolbar.go_back_act"))
         self.go_back_act.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back")))
         self.addAction(self.go_back_act)

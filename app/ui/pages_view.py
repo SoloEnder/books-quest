@@ -39,12 +39,21 @@ def dynamic_pages_loader(func):
        
 class PagesWidgetsHandler(QtWidgets.QWidget):        
         
-    def __init__(self, parent: QtWidgets.QWidget|None, res_handler, qt_signals_handler,  max_loadables_pages_count: int, widgets_by_page_count: int, widgets: list[InPageWidget],):
+    def __init__(
+        self, 
+        parent: QtWidgets.QWidget|None, 
+        res_handler, 
+        qt_signals_handler,  
+        langs_handler,
+        max_loadables_pages_count: int, 
+        widgets_by_page_count: int, 
+        widgets: list[InPageWidget],):
         super().__init__(parent)
 
         #Assigning arguments to attr
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
+        self.langs_handler = langs_handler
         self.notify_sg = self.qt_signals_handler.notify_sg
         self.widgets_by_page_count = widgets_by_page_count
         self.max_loadables_pages_count = max_loadables_pages_count
@@ -79,7 +88,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.pages_numbers_lyt_widgets = []
         
         #Widgets for jump to a specific page by giving its index
-        self.jump_to_page_lb = QtWidgets.QLabel("Aller à : ")
+        self.jump_to_page_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages_view.jump_to_page_lb"))
         self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
         self.jump_to_page_e = QtWidgets.QLineEdit("")
         self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)

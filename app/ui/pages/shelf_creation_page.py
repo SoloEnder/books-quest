@@ -176,7 +176,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.books_tree = QtWidgets.QTreeView()
         self.books_tree.setMinimumHeight(400)
         self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels(("Titre", "Auteur", "Edition"))
+        self.books_tree_model.setHorizontalHeaderLabels((self.langs_handler.get_value("title_lb"), self.langs_handler.get_value("author_lb"), self.langs_handler.get_value("edition_lb")))
         self.books_tree.setModel(self.books_tree_model)
         self.books_title_items = []
 

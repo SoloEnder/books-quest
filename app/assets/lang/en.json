@@ -9,6 +9,16 @@
     "status_lb":"Status",
     "done_b":"Done",
     "edit_cover_b":"Edit cover",
+    "loading_page_lb":"Loading page...",
+    "title_lb":"Title : ",
+    "author_lb":"Author : ",
+    "edition_lb":"Edition : ",
+    "summary_lb":"Summary : ",
+    "pages_count_lb":"Total pages count : ",
+
+    "toolbar": {
+        "go_back_act":"Back"
+    },
 
     "pages": {
         "book_creation_page": {

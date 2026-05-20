@@ -36,11 +36,11 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title": "Titre : ",
-            "authors": "Auteur : ",
-            "edition": "Edition : ",
-            "summary": "Résumé : ",
-            "tot_pages": "Pages totales : ",
+            "title": self.langs_handler.get_value("title_lb"),
+            "authors": self.langs_handler.get_value("author_lb"),
+            "edition": self.langs_handler.get_value("edition_lb"),
+            "summary": self.langs_handler.get_value("summary_lb"),
+            "tot_pages": self.langs_handler.get_value("pages_count_lb"),
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
