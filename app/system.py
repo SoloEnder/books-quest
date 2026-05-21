@@ -101,8 +101,6 @@ class AppSystem:
 
     def first_boot_operations(self):
         folder_to_make = (
-            self.res_handler.get_res("data"),
-            self.res_handler.get_res("assets"),
             self.res_handler.get_res("data.books"),
             self.res_handler.get_res("data.books.covers"),
             self.res_handler.get_res("data.bookshelves"),
