@@ -32,6 +32,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.variables_kw = {}
         
         self.logger = logging.getLogger(__name__)
+        self.lang_data = self.langs_handler.get_value("pages.book_creation_page")
         self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
@@ -168,11 +169,9 @@ class BookCreationPage(QtWidgets.QWidget):
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.existence_msgbox.setStandardButtons(
-            QtWidgets.QMessageBox.StandardButton.Yes
-            | QtWidgets.QMessageBox.StandardButton.No,
-        )
-        self.existence_msgbox.setText("Voulez vous vraiment ajouter ce livre ?")
+        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
 
         self.add_b = QtWidgets.QPushButton(self.langs_handler.get_value("add_b"))
         self.add_b.clicked.connect(self.create_book)
@@ -309,11 +308,11 @@ class BookCreationPage(QtWidgets.QWidget):
                 f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{len(matches)} livres ayant le même titre et/ou le même autheur que celui-ci ont été trouvés\n Si vous l'ajoutez, il sera renommé en {books_infos["title"]} ({len(matches)})"
+                f"{self.lang_data["book_already_exists_lb"]} ({len(matches)})\n{self.langs_handler.get_value("rename_msg")} '{books_infos.get("title")} ({len(matches)})'"
             )
-            answer = self.existence_msgbox.exec()
+            self.existence_msgbox.exec()
 
-            if answer == QtWidgets.QMessageBox.StandardButton.Yes :
+            if self.existence_msgbox.clickedButton() == self.rename_b:
                 books_infos["title_suffix"] = len(matches)
                 
             else:

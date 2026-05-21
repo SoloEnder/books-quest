@@ -84,11 +84,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.existence_msgbox.setStandardButtons(
-            QtWidgets.QMessageBox.StandardButton.Yes
-            | QtWidgets.QMessageBox.StandardButton.No,
-        )
-        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm"))
+        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
 
         self.draw_books_tree(self.books_handler.books)
 
@@ -228,16 +226,16 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
             return
         
-        # else:
-        #     if names_matches:
-        #         self.existence_msgbox.setInformativeText(f"{len(names_matches)} étagères ayant le même nom que celle-ci ont été trouvées\nVoulez vous quand même l'ajouter ?\nElle sera ajouté sous le nom de {shelf_name} ({len(names_matches)})")
-        #         answer = self.existence_msgbox.exec()
+        else:
+            if names_matches:
+                self.existence_msgbox.setInformativeText(f"{self.lang_data["shelf_already_exists_lb"]} ({len(names_matches)})\n{self.langs_handler.get_value("rename_msg")} '{shelf_name} ({len(names_matches)})'")
+                self.existence_msgbox.exec()
                 
-        #         if answer == QtWidgets.QMessageBox.StandardButton.Yes:
-        name_suffix = len(names_matches)
+                if self.existence_msgbox.clickedButton() == self.rename_b:
+                    name_suffix = len(names_matches)
                 
-        #         else:
-        #             return
+                else:
+                    return
                     
                               
         books_ids = []

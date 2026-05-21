@@ -3,7 +3,7 @@
     "research_lb": "Rechercher : ",
     "loading_lb": "Chargement...",
     "add_b":"Ajouter",
-    "add_confirm": "Voulez vraiment ajouter cet élément ?",
+    "add_confirm_msg": "Voulez vraiment ajouter cet élément ?",
     "edit_b":"Modifier",
     "delete_b":"Supprimer",
     "status_lb":"Statut",
@@ -15,6 +15,9 @@
     "edition_lb":"Edition : ",
     "summary_lb":"Résumé : ",
     "pages_count_lb":"Nombre total de pages : ",
+    "rename_b":"Renommer",
+    "rename_msg":"Cet élément sera renommé en : ",
+    "cancel_b":"Annuler",
 
     "toolbar": {
         "go_back_act":"Retour"
@@ -25,11 +28,13 @@
             "alr_read_pages_lb": "Pages lues : ",
             "starting_read_date_lb": "Commencé le : ",
             "end_read_date_lb": "Terminé le : ",
-            "shelfs_selection_lb": "Etagères : "
+            "shelfs_selection_lb": "Etagères : ",
+            "book_already_exists_lb": "Un ou plusieurs autres livres avec ce nom ont été trouvés"
         },
         "shelf_creation_page": {
             "name": "Nom : ",
-            "books_selection_lb": "Livres à ajouter à l'étagère :"
+            "books_selection_lb": "Livres à ajouter à l'étagère :",
+            "shelf_already_exists_lb": "Un ou plusieurs autres étagères avec ce nom ont été trouvées"
         },
         "shelfs_view_page": {
             "book_creation_b":"Nouveau livre",

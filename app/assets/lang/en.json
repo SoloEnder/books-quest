@@ -3,7 +3,7 @@
     "research_lb": "Search",
     "loading_lb": "Loading...",
     "add_b":"Add",
-    "add_confirm": "Do you really want to add this element ?",
+    "add_confirm_msg": "Do you really want to add this element ?",
     "edit_b":"Edit",
     "delete_b":"Delete",
     "status_lb":"Status",
@@ -15,6 +15,9 @@
     "edition_lb":"Edition : ",
     "summary_lb":"Summary : ",
     "pages_count_lb":"Total pages count : ",
+    "rename_b":"Rename",
+    "rename_msg":"This element will be renamed as : ",
+    "cancel_b":"Cancel",
 
     "toolbar": {
         "go_back_act":"Back"
@@ -25,11 +28,13 @@
             "alr_read_pages_lb": "Read pages : ",
             "starting_read_date_lb": "Started reading on : ",
             "end_read_date_lb": "Finished reading on : ",
-            "shelfs_selection_lb": "Bookshelves : "
+            "shelfs_selection_lb": "Bookshelves : ",
+            "book_already_exists_lb": "Found one or several books with this name"
         },
         "shelf_creation_page": {
             "name": "Name : ",
-            "books_selection_lb": "Book to add to this shelf : "
+            "books_selection_lb": "Book to add to this shelf : ",
+            "shelf_already_exists_lb": "Found one or several shelves with this name"
         },
         "shelfs_view_page": {
             "book_creation_b":"New book",
