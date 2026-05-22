@@ -3,14 +3,13 @@ import logging
 import os
 import shutil
 import traceback
-from pathlib import Path
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.utils import images_tools, paths
+from app.utils import images_tools
 
 
 class BookCreationPage(QtWidgets.QWidget):
