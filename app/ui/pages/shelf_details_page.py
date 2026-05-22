@@ -1,11 +1,14 @@
 
-from app.src import book_sys
-from app.utils import paths
-from app.ui import qt_signals_handler
-from app.utils import utils_funcs
-from PySide6 import QtWidgets, QtCore, QtGui
 import os
 import logging
+from PySide6 import QtWidgets, QtCore, QtGui
+
+from app.src import book_sys
+from app.ui import qt_signals_handler
+from app.ui import pages_view
+from app.utils import utils_funcs
+
+
 
 class ShelfDetailsPage(QtWidgets.QWidget):
 
@@ -17,6 +20,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
         ):
         
         super().__init__(parent)
@@ -25,27 +29,23 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
+        self.variables_kw = {"shelf":self.shelf}
 
         #logger
         self.logger = logging.getLogger(__name__)
         
+        self.lang_data = self.langs_handler.get_value("pages.shelf_details_page")
         #Widgets
-        self.gen_qss_filepath = self.res_handler.get_ress("assets.qss.general")
-        self.page_qss_filepath = self.res_handler.get_ress("assets.qss.shelf_details_page")
+        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
+        self.page_qss_filepath = self.res_handler.get_res("assets.qss.shelf_details_page")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
         self.books_widgets = []
 
-        #close button
-        self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit")))
-        self.close_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
-
-        self.nothing_to_show_lb = QtWidgets.QLabel("Aucun livre ici, pourquoi ne pas en ajouter un ?")
+        self.nothing_to_show_lb = QtWidgets.QLabel(self.langs_handler.get_value("nothing_to_show_lb"))
         self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
         self.nothing_to_show_lb.hide()
 
@@ -63,8 +63,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.generate_books_widgets(self.books)
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.close_b, 0, 0)
-        self.main_lyt.addWidget(self.books_container_sa, 1, 0)
+        self.main_lyt.addWidget(self.books_container_sa, 0, 0)
 
     def generate_books_widgets(self, books: dict|None=None):
         self.books_widgets.clear()
@@ -75,7 +74,11 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         base_displayed_titles = []
 
         for index, book in enumerate(books.values()):
-            book_widget = BookWidget(book, self.res_handler)
+            book_widget = BookWidget(
+                book, 
+                self.res_handler,
+                self.langs_handler,
+                )
             base_displayed_titles.append(book_widget.book_title_lb.text())
             book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
             self.books_widgets.append(book_widget)
@@ -85,12 +88,18 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             self.nothing_to_show_lb.show()
 
 class BookWidget(QtWidgets.QWidget):
-    def __init__(self, book: book_sys.Book, res_handler):
+    def __init__(
+        self, 
+        book: book_sys.Book, 
+        res_handler,
+        langs_handler,
+        ):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.res_handler = res_handler
-        self.default_cover_path = self.res_handler.get_ress("assets.defaults_covers.book")
         self.book = book
+        self.res_handler = res_handler
+        self.langs_handler = langs_handler
+        self.default_cover_path = self.res_handler.get_res("assets.defaults_covers.book")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
 
@@ -116,10 +125,10 @@ class BookWidget(QtWidgets.QWidget):
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("book_summary_te")
-        self.edit_b = QtWidgets.QPushButton("Modifier")
+        self.edit_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_b"))
         self.edit_b.setObjectName("edit_b")
         self.edit_b.setSizePolicy(self.fixed_sp)
-        self.delete_b = QtWidgets.QPushButton("Supprimer")
+        self.delete_b = QtWidgets.QPushButton(self.langs_handler.get_value("delete_b"))
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")
         self.main_layout.addWidget(self.book_title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)

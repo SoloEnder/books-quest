@@ -1,0 +1,59 @@
+{
+    "nothing_to_show_lb": "There is nothing here",
+    "research_lb": "Search",
+    "loading_lb": "Loading...",
+    "add_b":"Add",
+    "add_confirm_msg": "Do you really want to add this element ?",
+    "edit_b":"Edit",
+    "delete_b":"Delete",
+    "status_lb":"Status",
+    "done_b":"Done",
+    "edit_cover_b":"Edit cover",
+    "loading_page_lb":"Loading page...",
+    "title_lb":"Title : ",
+    "author_lb":"Author : ",
+    "edition_lb":"Edition : ",
+    "summary_lb":"Summary : ",
+    "pages_count_lb":"Total pages count : ",
+    "rename_b":"Rename",
+    "rename_msg":"This element will be renamed as : ",
+    "cancel_b":"Cancel",
+
+    "toolbar": {
+        "go_back_act":"Back"
+    },
+
+    "pages": {
+        "book_creation_page": {
+            "alr_read_pages_lb": "Read pages : ",
+            "starting_read_date_lb": "Started reading on : ",
+            "end_read_date_lb": "Finished reading on : ",
+            "shelfs_selection_lb": "Bookshelves : ",
+            "book_already_exists_lb": "Found one or several books with this name"
+        },
+        "shelf_creation_page": {
+            "name": "Name : ",
+            "books_selection_lb": "Book to add to this shelf : ",
+            "shelf_already_exists_lb": "Found one or several shelves with this name"
+        },
+        "shelfs_view_page": {
+            "book_creation_b":"New book",
+            "shelf_creation_b":"New shelf",
+            "view_b":"See books"
+        },
+        "shelf_details_page": {
+        }
+    },
+    "pages_view": {
+        "jump_to_page_lb": "Go to :"
+    },
+    "notification_service": {
+        "error": {
+            "title":"Warning",
+            "msg":"An error has occured, please try again"
+        },
+        "info": {
+            "title":"Information"
+        }
+    }
+}

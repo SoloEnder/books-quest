@@ -9,7 +9,7 @@ class RessourcesHandler(dict_paths_handler.DictPathHandler):
         super().__init__(jfm, base_dict)
         self.base_path = base_path
         
-    def get_ress(self, ress_dict_path: str):
+    def get_res(self, ress_dict_path: str):
         sections = ress_dict_path.split(".")
         ress_path = self.base_path
         current_value = self.base_dict.copy()

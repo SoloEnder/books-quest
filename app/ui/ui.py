@@ -1,46 +1,58 @@
 import logging
+from typing import Sequence
 
 from PySide6 import QtCore, QtWidgets, QtGui
-import os
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
 from app.ui import notification_service
 from app.utils import utils_funcs
-from app.utils import paths
-from app.src import settings_handler
+from app.src import dict_paths_handler
 
-class UI(QtWidgets.QWidget):
-    def __init__(self, books_handler, res_handler, settings_handler: settings_handler.SettingsHandler):
+class UI(QtWidgets.QMainWindow):
+    def __init__(self, books_handler, res_handler, settings_handler: dict_paths_handler.DictPathHandler, langs_handler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.settings_handler = settings_handler
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-
-        #Indev warning window
-        #self.indev_warning_w = QtWidgets.QMessageBox()
+        self.langs_handler = langs_handler
 
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
-        self.notification_service = notification_service.NotificationService(self)
+        self.notification_service = notification_service.NotificationService(
+            self, 
+            self.langs_handler
+            )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
         self.my_stacked_widgets = MyStackedWidgets(
-            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler,
+            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, self.langs_handler,
         )
-        self.main_layout.addWidget(self.my_stacked_widgets)
-        self.gen_qss_filepath = self.res_handler.get_ress("assets.qss.general")
+        self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
+        self.addToolBar(self.toolbar)
+        self.toolbar.go_back_act.triggered.connect(lambda: self.my_stacked_widgets.go_back(True))
+        self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
+        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger)
         self.my_stacked_widgets.switch_page("shelfs_view_page")
+        self.setCentralWidget(self.my_stacked_widgets)
+        self.setWindowTitle("Books Quest")
+        self.setWindowIcon(QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen")))
+        self.progress_info_lb = QtWidgets.QLabel()
+        self.statusBar().addPermanentWidget(self.progress_info_lb)
+        self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
+        
+    def set_progress_msg(self, msg: str):
+        self.progress_info_lb.setText(msg)
+        QtWidgets.QApplication.processEvents()
 
     def show_indev_warn(self):
         """
-        Show the in devellepoment warning window
+        Show the in develepoment warning window
         """
         
         #self.indev_warning_w.show()
-        QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
+        QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
@@ -50,6 +62,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
@@ -57,19 +70,39 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
         self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
-            self, self.books_handler, res_handler, self.qt_signals_handler, self.settings_handler, 
+            self, 
+            self.books_handler, 
+            res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler, 
+            self.langs_handler
         )
-        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, self.books_handler.default_shelf, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler,)
+        self.shelf_details_page = shelf_details_page.ShelfDetailsPage(self, 
+            self.books_handler.default_shelf, 
+            self.books_handler, 
+            self.res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler,
+            self.langs_handler,
+            )
         self.book_creation_page = book_creation_page.BookCreationPage(
             self,
             self.books_handler,
             self.res_handler,
             self.qt_signals_handler,
             self.settings_handler,
+            self.langs_handler,
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
-            self, self.books_handler, self.res_handler, self.qt_signals_handler, self.settings_handler, mode="creation",
+            self, 
+            self.books_handler, 
+            self.res_handler, 
+            self.qt_signals_handler, 
+            self.settings_handler,
+            self.langs_handler,
+            mode="creation",
         )
         self.pages = {
             "shelfs_view_page": self.shelfs_view_page,
@@ -82,7 +115,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
         self.history = []
-        self.history.append(self.shelfs_view_page)
+        self.history.append("shelfs_view_page")
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.go_previous_page_sg.connect(self.go_back)
 
@@ -96,8 +129,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             - refresh (bool): if true, the page will be refreshed. default to False
         """
 
-        self.logger.info(f"Switching to page <{page_name}>...")
+        self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.get_value("loading_page_lb"))
             if refresh:
                 self.refresh(page_name, page_args)
 
@@ -105,18 +139,24 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.history.insert(0, page_name)
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
             self.logger.error(f"Page <{page_name}> not found !")
 
     @QtCore.Slot(bool)
     def go_back(self, refresh: bool):
-        self.switch_page(
-            self.history[1] if len(self.history) >= 1 else self.history[0],
-            True if refresh else False,
-        )
+        
+        if len(self.history) >= 1:
+            
+            if self.history[0] != self.history[1]:
+                self.switch_page(
+                    self.history[1],
+                    True if refresh else False,
+                    self.pages[self.history[1]].variables_kw
+                )
 
-    def refresh(self, page_name, page_args: dict = {}):
+    def refresh(self, page_name, page_args):
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
         if page_name == "shelfs_view_page":
             self.removeWidget(self.shelfs_view_page)
@@ -128,6 +168,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler,
                 self.settings_handler,
+                self.langs_handler,
             )
             self.pages["shelfs_view_page"] = self.shelfs_view_page
             self.addWidget(self.shelfs_view_page)
@@ -142,6 +183,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler, 
                 self.settings_handler,
+                self.langs_handler,
             )
             self.pages["book_creation_page"] = self.book_creation_page
             self.addWidget(self.book_creation_page)
@@ -156,6 +198,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler, 
                 self.settings_handler,
+                self.langs_handler,
                 **page_args,
             )
             self.pages["shelf_creation_page"] = self.shelf_creation_page
@@ -172,6 +215,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.res_handler,
                 self.qt_signals_handler,
                 self.settings_handler,
+                self.langs_handler,
                 )
             self.pages["shelf_details_page"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
@@ -187,5 +231,13 @@ class IndevWarnWidget(QtWidgets.QMessageBox):
         #Setting text
         self.setText("This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
     
-
-
+class ToolBar(QtWidgets.QToolBar):
+    
+    def __init__(self, parent: QtWidgets.QWidget|None, res_handler, langs_handler):
+        super().__init__(parent)
+        self.res_handler = res_handler
+        self.langs_handler = langs_handler
+        
+        self.go_back_act = QtGui.QAction(self.langs_handler.get_value("toolbar.go_back_act"))
+        self.go_back_act.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back")))
+        self.addAction(self.go_back_act)

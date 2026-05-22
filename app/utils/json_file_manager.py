@@ -50,7 +50,6 @@ def catch_reading_error(func):
             return func(self, filepath)
         
     return wrapper
-       
                 
 class JsonFileManager:
     
@@ -61,13 +60,13 @@ class JsonFileManager:
     @catch_writing_error
     def write_json(self, filepath: str | pathlib.Path, data, catch_error: bool=True, **msg_infos):
         
-        with open(filepath, "w") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     @catch_reading_error
     def read_json(self, filepath: str | pathlib.Path, catch_error: bool=True, **msg_infos):
         
-        with open(filepath, "r") as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         return data

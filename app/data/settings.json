@@ -1,10 +1,1 @@
-
-{
-    "general":{
-    },
-
-    "developer_settings":{
-        "show_indev_warning":true
-    }
-  
-}
+{"general": {"language": {"current": "en", "choices": ["fr", "en"]}}, "developer_settings": {"show_indev_warning": true}}

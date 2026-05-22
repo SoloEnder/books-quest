@@ -13,7 +13,14 @@ from app.ui import pages_view
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
-    def __init__(self, parent: QtWidgets.QWidget|None, books_handler: book_sys.BooksHandler, res_handler, qt_signals_handler: qt_signals_handler.QtSignalsHandler, settings_handler,):
+    def __init__(
+        self, 
+        parent: QtWidgets.QWidget|None, 
+        books_handler: book_sys.BooksHandler, 
+        res_handler, qt_signals_handler: qt_signals_handler.QtSignalsHandler, 
+        settings_handler,
+        langs_handler,
+        ):
         super().__init__(parent)
 
         #Assingning arguments to attr
@@ -21,14 +28,16 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
+        self.variables_kw = {}
 
         #Logger setup
         self.logger = logging.getLogger(__name__+":ShelfsViewPage")
 
         #Loading custom QSS
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_ress("assets.qss.shelfs_view_page"),
-            self.res_handler.get_ress("assets.qss.general"),
+            self.res_handler.get_res("assets.qss.shelfs_view_page"),
+            self.res_handler.get_res("assets.qss.general"),
             widget=self, 
             logger=self.logger,
             )
@@ -47,25 +56,33 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.main_sa.setWidgetResizable(True)
         
         #icons
-        self.book_creation_ico = QtGui.QIcon(self.res_handler.get_ress("assets.icons.new_book"))
+        self.book_creation_ico = QtGui.QIcon(self.res_handler.get_res("assets.icons.new_book"))
         
         #Books and Shelfs creation buttons
-        self.book_creation_b = QtWidgets.QPushButton("Nouveau livre")
+        self.book_creation_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.book_creation_b"))
         self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("book_creation_page", True, {}))
         self.book_creation_b.setIcon(self.book_creation_ico)
-        self.shelf_creation_b = QtWidgets.QPushButton("Nouvelle étagère")
+        self.shelf_creation_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.shelf_creation_b"))
         self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
         
         #Shelf research widgets
         self.search_result_widgets = []
-        self.search_lb = QtWidgets.QLabel("Rechercher : ")
+        self.search_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setClearButtonEnabled(True)
         self.search_le.returnPressed.connect(lambda: self.search_shelfs(self.search_le.text()))
         self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
-        self.pages_view_handler = pages_view.PagesWidgetsHandler(self, res_handler, self.qt_signals_handler, 5, 10, [])
+        self.pages_view_handler = pages_view.PagesWidgetsHandler(
+            self, 
+            res_handler, 
+            self.qt_signals_handler,
+            self.langs_handler, 
+            5, 
+            10, 
+            [],
+            )
 
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -123,11 +140,25 @@ class ShelfsViewPage(QtWidgets.QWidget):
         shelves_widgets = []
         
         if include_default_shelf:
-            shelves_widgets.append(DefaultShelfWidget(self.books_handler.default_shelf, self.books_handler, self.res_handler, self.qt_signals_handler))
+            shelves_widgets.append(
+                DefaultShelfWidget(
+                    self.books_handler.default_shelf, 
+                    self.books_handler, 
+                    self.res_handler, 
+                    self.qt_signals_handler,
+                    self.langs_handler,
+                    )
+                )
         
         self.logger.debug(f"Creating {len(shelves_values)+1 if include_default_shelf else len(shelves_values)} shelves widgets...")
         for shelf in shelves_values:
-            shelf_widget = ShelfWidget(shelf, self.books_handler, self.res_handler, self.qt_signals_handler)
+            shelf_widget = ShelfWidget(
+                shelf, 
+                self.books_handler, 
+                self.res_handler, 
+                self.qt_signals_handler,
+                self.langs_handler
+                )
             shelves_widgets.append(shelf_widget)
             
         return shelves_widgets
@@ -143,17 +174,19 @@ class ShelfWidget(pages_view.InPageWidget):
         books_handler: book_sys.BooksHandler,
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        langs_handler,
     ):
         super().__init__(None, None)
         self.shelf = shelf
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
+        self.langs_handler = langs_handler
         self.logger = logging.getLogger(__name__)
 
         self.setProperty("role", "shelf_widget")
         self.main_layout = QtWidgets.QGridLayout(self)
-        self.default_cover = self.res_handler.get_ress("assets.defaults_covers.shelf")
+        self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
 
         if self.shelf.cover_path:
             if os.path.exists(self.shelf.cover_path):
@@ -212,16 +245,16 @@ class ShelfWidget(pages_view.InPageWidget):
         self.finished_books_lb.setIndent(10)
 
         self.button_size = QtWidgets.QSizePolicy()
-        self.view_b = QtWidgets.QPushButton("Voir les livres")
+        self.view_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.view_b"))
         self.view_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.view_books"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
         self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("shelf_details_page", True, {"shelf":self.shelf}))
 
-        self.edit_b = QtWidgets.QPushButton("Modifier")
+        self.edit_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_b"))
         self.edit_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.edit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -230,10 +263,10 @@ class ShelfWidget(pages_view.InPageWidget):
         )
         self.edit_b.setSizePolicy(self.button_size)
 
-        self.delete_b = QtWidgets.QPushButton("Supprimer")
+        self.delete_b = QtWidgets.QPushButton(self.langs_handler.get_value("delete_b"))
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
         )
         self.delete_b.setSizePolicy(self.button_size)
         self.delete_b.clicked.connect(self.delete_shelf)
@@ -274,8 +307,15 @@ class DefaultShelfWidget(ShelfWidget):
         books_handler: book_sys.BooksHandler,
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        langs_handler,
     ):
-        super().__init__(shelf, books_handler, res_handler, qt_signals_handler)
+        super().__init__(
+            shelf, 
+            books_handler, 
+            res_handler, 
+            qt_signals_handler,
+            langs_handler,
+            )
         self.edit_b.hide()
         self.delete_b.hide()
         self.main_layout.removeWidget(self.cover_lb)

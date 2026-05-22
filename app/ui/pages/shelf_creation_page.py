@@ -2,7 +2,6 @@ import datetime as dt
 import logging
 import os
 import shutil
-
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
@@ -18,6 +17,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
         **kwargs,
     ):
         super().__init__(parent)
@@ -26,8 +26,10 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
+        self.variables_kw = {**kwargs}
 
         if self.current_mode:
             if self.current_mode not in self.modes:
@@ -43,19 +45,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 "No mode provided for Shelf Creation Page initialisation !"
             )
 
+        self.lang_data = self.langs_handler.get_value("pages.shelf_creation_page")
         self.main_lyt = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
         self.main_widget_lyt = QtWidgets.QGridLayout()
         self.main_widget.setLayout(self.main_widget_lyt)
-
-        # Back button
-        self.close_b = QtWidgets.QPushButton("Fermer")
-        self.close_b.setIcon(QtGui.QIcon(self.res_handler.get_ress("assets.icons.exit")))
-        self.close_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
-        self.main_lyt.addWidget(self.close_b, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         # Scroll area
         self.scroll_area = QtWidgets.QScrollArea()
@@ -64,43 +59,41 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.main_lyt.addWidget(self.scroll_area, 1)
 
         # Shelf cover
-        self.default_shelf_cover = self.res_handler.get_ress("assets.defaults_covers.shelf")
+        self.default_shelf_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
         self.current_shelf_cover = self.default_shelf_cover
         self.shelf_cover_pm = QtGui.QPixmap(self.current_shelf_cover)
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
-        self.cover_selection_b = QtWidgets.QPushButton("Modifier")
+        self.cover_selection_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
         self.cover_selection_b_ico = QtGui.QIcon(
-            self.res_handler.get_ress("assets.icons.edit")
+            self.res_handler.get_res("assets.icons.edit")
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.name_lb = QtWidgets.QLabel("Nom : ")
+        self.name_lb = QtWidgets.QLabel(self.lang_data["name"])
         self.name_e = QtWidgets.QLineEdit()
         self.name_e.setMinimumWidth(300)
 
         # Books selection widgets
-        self.books_selection_lb = QtWidgets.QLabel("Livres : ")
-        self.book_research_lb = QtWidgets.QLabel("Rechercher : ")
+        self.books_selection_lb = QtWidgets.QLabel(self.lang_data["books_selection_lb"])
+        self.book_research_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.existence_msgbox.setStandardButtons(
-            QtWidgets.QMessageBox.StandardButton.Yes
-            | QtWidgets.QMessageBox.StandardButton.No,
-        )
-        self.existence_msgbox.setText("Voulez vous vraiment ajouter cette étagère ?")
+        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
 
         self.draw_books_tree(self.books_handler.books)
 
         # Confirm widgets
-        self.confirm_b = QtWidgets.QPushButton("Terminé")
+        self.confirm_b = QtWidgets.QPushButton(self.langs_handler.get_value("done_b"))
         self.confirm_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.done"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.done"))
         )
         self.confirm_b.clicked.connect(self.create_shelf)
 
@@ -158,7 +151,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         if infos and infos[0]:
             img_path = infos[0]
             final_infos = images_tools.prepare_image(
-                img_path, os.path.join(self.res_handler.get_ress("tmp"), "shelf_cover.png")
+                img_path, os.path.join(self.res_handler.get_res("tmp"), "shelf_cover.png")
             )
             self.current_shelf_cover = final_infos[0]
             self.set_cover_lb_pixmap(self.current_shelf_cover)
@@ -181,7 +174,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.books_tree = QtWidgets.QTreeView()
         self.books_tree.setMinimumHeight(400)
         self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels(("Titre", "Auteur", "Edition"))
+        self.books_tree_model.setHorizontalHeaderLabels((self.langs_handler.get_value("title_lb"), self.langs_handler.get_value("author_lb"), self.langs_handler.get_value("edition_lb")))
         self.books_tree.setModel(self.books_tree_model)
         self.books_title_items = []
 
@@ -226,24 +219,26 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.qt_signals_handler.notify_sg.emit("error", "", "Nom d'étagère invalide", "")
             return
         
-        try:
-            names_matches = self.check_name_existence(shelf_name)
-            
-        except AttributeError:
-            self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
-            return
+        if self.current_mode == "creation":
         
-        # else:
-        #     if names_matches:
-        #         self.existence_msgbox.setInformativeText(f"{len(names_matches)} étagères ayant le même nom que celle-ci ont été trouvées\nVoulez vous quand même l'ajouter ?\nElle sera ajouté sous le nom de {shelf_name} ({len(names_matches)})")
-        #         answer = self.existence_msgbox.exec()
+            try:
+                names_matches = self.check_name_existence(shelf_name)
                 
-        #         if answer == QtWidgets.QMessageBox.StandardButton.Yes:
-        name_suffix = len(names_matches)
-                
-        #         else:
-        #             return
+            except AttributeError:
+                self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
+                return
+            
+            else:
+                if names_matches:
+                    self.existence_msgbox.setInformativeText(f"{self.lang_data["shelf_already_exists_lb"]} ({len(names_matches)})\n{self.langs_handler.get_value("rename_msg")} '{shelf_name} ({len(names_matches)})'")
+                    self.existence_msgbox.exec()
                     
+                    if self.existence_msgbox.clickedButton() == self.rename_b:
+                        name_suffix = len(names_matches)
+                    
+                    else:
+                        return
+                        
                               
         books_ids = []
 
@@ -255,7 +250,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
-                self.res_handler.get_ress("data.bookshelves.covers"), f"{id.replace('.', '_')}.png"
+                self.res_handler.get_res("data.bookshelves.covers"), f"{id.replace('.', '_')}.png"
             )
             done = self.move_cover_img(final_img_path)
             

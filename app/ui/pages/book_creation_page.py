@@ -21,23 +21,27 @@ class BookCreationPage(QtWidgets.QWidget):
         res_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler,
+        langs_handler,
     ):
         super().__init__(parent)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
+        self.variables_kw = {}
         
         self.logger = logging.getLogger(__name__)
-        self.icons_folder = self.res_handler.get_ress("assets.icons")
+        self.lang_data = self.langs_handler.get_value("pages.book_creation_page")
+        self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title": "Titre : ",
-            "authors": "Auteur : ",
-            "edition": "Edition : ",
-            "summary": "Résumé : ",
-            "tot_pages": "Pages totales : ",
+            "title": self.langs_handler.get_value("title_lb"),
+            "authors": self.langs_handler.get_value("author_lb"),
+            "edition": self.langs_handler.get_value("edition_lb"),
+            "summary": self.langs_handler.get_value("summary_lb"),
+            "tot_pages": self.langs_handler.get_value("pages_count_lb"),
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -53,26 +57,16 @@ class BookCreationPage(QtWidgets.QWidget):
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.container_widget)
 
-        # Exit Widget
-        self.exit_b = QtWidgets.QPushButton("Fermer")
-        self.exit_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.go_back"))
-        )
-        self.exit_b.setSizePolicy(QtWidgets.QSizePolicy())
-        self.exit_b.clicked.connect(
-            lambda: self.qt_signals_handler.go_previous_page_sg.emit(True)
-        )
-
         # Cover widgets
         self.default_cover_img = os.path.join(
-            self.res_handler.get_ress("assets.defaults_covers.book")
+            self.res_handler.get_res("assets.defaults_covers.book")
         )
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
-        self.edit_cover_b = QtWidgets.QPushButton("Changer la couverture")
+        self.edit_cover_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
         self.edit_cover_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_ress("assets.icons.edit"))
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
@@ -99,7 +93,7 @@ class BookCreationPage(QtWidgets.QWidget):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel("Statut : ")
+        self.book_status_lb = QtWidgets.QLabel(self.langs_handler.get_value("status_lb"))
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
         self.book_status_combob.addItem("En cours", "on_reading")
@@ -110,7 +104,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget = QtWidgets.QWidget(self)
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
-        self.alr_read_pages_lb = QtWidgets.QLabel("Pages lues : ")
+        self.alr_read_pages_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.alr_read_pages_lb"))
         self.alr_read_pages_le = QtWidgets.QLineEdit()
         self.alr_read_pages_le.textEdited.connect(
             lambda: self.check_int(
@@ -121,12 +115,12 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date = QtCore.QDate(
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
-        self.starting_read_date_lb = QtWidgets.QLabel("Commencé le : ")
+        self.starting_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.starting_read_date_lb"))
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
-        self.end_read_date_lb = QtWidgets.QLabel("Terminé le : ")
+        self.end_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.end_read_date_lb"))
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
@@ -140,7 +134,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         # Shelfs widgets
-        self.shelfs_selection_lb = QtWidgets.QLabel("Etageres : ")
+        self.shelfs_selection_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.shelfs_selection_lb"))
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
         self.shelfs_selection_layout = QtWidgets.QVBoxLayout(
@@ -175,19 +169,16 @@ class BookCreationPage(QtWidgets.QWidget):
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.existence_msgbox.setStandardButtons(
-            QtWidgets.QMessageBox.StandardButton.Yes
-            | QtWidgets.QMessageBox.StandardButton.No,
-        )
-        self.existence_msgbox.setText("Voulez vous vraiment ajouter ce livre ?")
+        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
 
-        self.add_b = QtWidgets.QPushButton("Ajouter")
+        self.add_b = QtWidgets.QPushButton(self.langs_handler.get_value("add_b"))
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
-        self.main_layout.addWidget(self.exit_b, 0)
-        self.container_widget_layout.addWidget(self.book_cover_lb, 1, 0)
-        self.container_widget_layout.addWidget(self.edit_cover_b, 2, 0)
+        self.container_widget_layout.addWidget(self.book_cover_lb, 0, 0)
+        self.container_widget_layout.addWidget(self.edit_cover_b, 1, 0)
         self.container_widget_layout.addWidget(
             self.book_status_lb, self.container_widget_layout.rowCount() + 1, 0
         )
@@ -264,7 +255,7 @@ class BookCreationPage(QtWidgets.QWidget):
         if infos:
             if infos[0]:
                 final_infos = images_tools.prepare_image(
-                    infos[0], os.path.join(self.res_handler.get_ress("tmp"), "book_cover.png")
+                    infos[0], os.path.join(self.res_handler.get_res("tmp"), "book_cover.png")
                 )
                 self.cover_image = final_infos[0]
                 self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
@@ -317,11 +308,11 @@ class BookCreationPage(QtWidgets.QWidget):
                 f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{len(matches)} livres ayant le même titre et/ou le même autheur que celui-ci ont été trouvés\n Si vous l'ajoutez, il sera renommé en {books_infos["title"]} ({len(matches)})"
+                f"{self.lang_data["book_already_exists_lb"]} ({len(matches)})\n{self.langs_handler.get_value("rename_msg")} '{books_infos.get("title")} ({len(matches)})'"
             )
-            answer = self.existence_msgbox.exec()
+            self.existence_msgbox.exec()
 
-            if answer == QtWidgets.QMessageBox.StandardButton.Yes :
+            if self.existence_msgbox.clickedButton() == self.rename_b:
                 books_infos["title_suffix"] = len(matches)
                 
             else:
@@ -331,7 +322,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
-                self.res_handler.get_ress("data.books.covers"),
+                self.res_handler.get_res("data.books.covers"),
                 f"{books_infos['internal_id'].replace('.', '_')}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
@@ -340,7 +331,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 shutil.copy2(
                     self.cover_image,
                     os.path.join(
-                        self.res_handler.get_ress("data.books.covers"),
+                        self.res_handler.get_res("data.books.covers"),
                         final_cover_image,
                     ),
                 )
