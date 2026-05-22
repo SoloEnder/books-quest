@@ -1,11 +1,12 @@
 
 import os
+import typing
 import logging
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui import pages_view
+from app.ui import widgets_pages_view
 from app.utils import utils_funcs
 
 
@@ -49,31 +50,30 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
         self.nothing_to_show_lb.hide()
 
-        #books widgets containers
-        self.books_container_widget = QtWidgets.QWidget()
-        self.books_container_lyt = QtWidgets.QGridLayout()
-        self.books_container_widget.setLayout(self.books_container_lyt)
-        self.books_container_sa = QtWidgets.QScrollArea()
-        self.books_container_sa.setWidgetResizable(True)
-        self.books_container_sa.setWidget(self.books_container_widget)
-        self.books_container_lyt.addWidget(self.nothing_to_show_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
+        #widgets pages view handler
+        self.widgets_pages_view_handler = widgets_pages_view.PagesWidgetsHandler(
+            self,
+            self.res_handler,
+            self.qt_signals_handler,
+            self.langs_handler,
+            5,
+            10,
+            [],
+        )
 
         #books widgets
         self.books = self.books_handler.convert_book_id(self.shelf.books_ids)
-        self.generate_books_widgets(self.books)
+        self.generate_books_pages()
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.books_container_sa, 0, 0)
+        self.main_lyt.addWidget(self.widgets_pages_view_handler, 0, 0)
 
-    def generate_books_widgets(self, books: dict|None=None):
-        self.books_widgets.clear()
-
-        if books is None:
-            books = self.books_handler.books
+    def create_books_widgets(self, books: typing.Sequence[book_sys.Book]):
 
         base_displayed_titles = []
+        books_widgets = []
 
-        for index, book in enumerate(books.values()):
+        for index, book in enumerate(books):
             book_widget = BookWidget(
                 book, 
                 self.res_handler,
@@ -82,19 +82,22 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             base_displayed_titles.append(book_widget.book_title_lb.text())
             book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
             self.books_widgets.append(book_widget)
-            self.books_container_lyt.addWidget(book_widget, index, 0)
+            books_widgets.append(book_widget)
+            
+        return books_widgets
+    
+    def generate_books_pages(self):
+        self.books_widgets = self.create_books_widgets(list(self.books.values()))
+        self.widgets_pages_view_handler.set_widgets(self.books_widgets)
 
-        if len(self.books_widgets) == 0:
-            self.nothing_to_show_lb.show()
-
-class BookWidget(QtWidgets.QWidget):
+class BookWidget(widgets_pages_view.InPageWidget):
     def __init__(
         self, 
         book: book_sys.Book, 
         res_handler,
         langs_handler,
         ):
-        super().__init__()
+        super().__init__(None, None)
         self.logger = logging.getLogger(__name__)
         self.book = book
         self.res_handler = res_handler
