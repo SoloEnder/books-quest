@@ -219,24 +219,26 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.qt_signals_handler.notify_sg.emit("error", "", "Nom d'étagère invalide", "")
             return
         
-        try:
-            names_matches = self.check_name_existence(shelf_name)
-            
-        except AttributeError:
-            self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
-            return
+        if self.current_mode == "creation":
         
-        else:
-            if names_matches:
-                self.existence_msgbox.setInformativeText(f"{self.lang_data["shelf_already_exists_lb"]} ({len(names_matches)})\n{self.langs_handler.get_value("rename_msg")} '{shelf_name} ({len(names_matches)})'")
-                self.existence_msgbox.exec()
+            try:
+                names_matches = self.check_name_existence(shelf_name)
                 
-                if self.existence_msgbox.clickedButton() == self.rename_b:
-                    name_suffix = len(names_matches)
-                
-                else:
-                    return
+            except AttributeError:
+                self.logger.exception(f"Unable to check {shelf_name=} existence for on creating shelf !")
+                return
+            
+            else:
+                if names_matches:
+                    self.existence_msgbox.setInformativeText(f"{self.lang_data["shelf_already_exists_lb"]} ({len(names_matches)})\n{self.langs_handler.get_value("rename_msg")} '{shelf_name} ({len(names_matches)})'")
+                    self.existence_msgbox.exec()
                     
+                    if self.existence_msgbox.clickedButton() == self.rename_b:
+                        name_suffix = len(names_matches)
+                    
+                    else:
+                        return
+                        
                               
         books_ids = []
 
