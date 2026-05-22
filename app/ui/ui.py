@@ -48,11 +48,11 @@ class UI(QtWidgets.QMainWindow):
 
     def show_indev_warn(self):
         """
-        Show the in devellepoment warning window
+        Show the in develepoment warning window
         """
         
         #self.indev_warning_w.show()
-        QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
+        QtWidgets.QMessageBox.information(self, "Indev Warning", "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>")
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
