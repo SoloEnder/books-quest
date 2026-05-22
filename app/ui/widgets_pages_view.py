@@ -88,7 +88,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.pages_numbers_lyt_widgets = []
         
         #Widgets for jump to a specific page by giving its index
-        self.jump_to_page_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages_view.jump_to_page_lb"))
+        self.jump_to_page_lb = QtWidgets.QLabel(self.langs_handler.get_value("widgets_pages_view.jump_to_page_lb"))
         self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
         self.jump_to_page_e = QtWidgets.QLineEdit("")
         self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)

@@ -9,7 +9,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui import pages_view
+from app.ui import widgets_pages_view
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
@@ -74,7 +74,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
-        self.pages_view_handler = pages_view.PagesWidgetsHandler(
+        self.pages_view_handler = widgets_pages_view.PagesWidgetsHandler(
             self, 
             res_handler, 
             self.qt_signals_handler,
@@ -167,7 +167,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.books_shelfs.values()))
         self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
                 
-class ShelfWidget(pages_view.InPageWidget):
+class ShelfWidget(widgets_pages_view.InPageWidget):
     def __init__(
         self,
         shelf: book_sys.Shelf,
