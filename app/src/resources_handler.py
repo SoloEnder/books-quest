@@ -3,7 +3,7 @@ import os
 from app.src import dict_paths_handler
 from app.utils import my_exceptions
 
-class RessourcesHandler(dict_paths_handler.DictPathHandler):
+class RessourcesHandler(dict_paths_handler.JSONDictPathHandler):
     
     def __init__(self, jfm, base_dict: dict, base_path: str):
         super().__init__(jfm, base_dict)

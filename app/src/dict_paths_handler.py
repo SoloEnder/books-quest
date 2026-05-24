@@ -1,11 +1,12 @@
 
 from app.utils import json_file_manager as jfm
 from app.utils import my_exceptions
+import typing
 
-class DictPathHandler:
 
-    def __init__(self, jfm: jfm.JsonFileManager, base_dict: dict|None=None):
-        self.jfm = jfm
+class DictPathHandler():
+
+    def __init__(self, base_dict: dict|None=None):
         self.base_dict = base_dict if base_dict else {}
 
     def get_value(self, dict_path: str):
@@ -50,7 +51,13 @@ class DictPathHandler:
 
         except KeyError:
             raise my_exceptions.InvalidDictPathError(dict_path)
-
+        
+class JSONDictPathHandler(DictPathHandler):
+    
+    def __init__(self, jfm: jfm.JsonFileManager, base_dict: dict | None = None):
+        super().__init__(base_dict)
+        self.jfm = jfm
+                
     def load_from_file(self, filepath):
         """
         Load a dictionnary from a JSON file, and replace the current settings by it
