@@ -6,6 +6,11 @@ import pathlib
 from app.utils import json_file_manager as jfm
 from app.utils import my_exceptions
 
+type BooksList = list[Book]
+type BooksDict = dict[str, Book]
+
+type ShelfsList = list[Shelf]
+type ShelfsDict = dict[str, Shelf]
 
 class Book:
     def __init__(self, **kwargs):
@@ -52,10 +57,10 @@ class BooksHandler:
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
             book_obj = self.books[book_id]
             
-            if book_obj.cover_img_path:
+            if book_obj.cover_path:
                 
                 try:
-                    self._delete_cover(book_obj.cover_img_path)
+                    self._delete_cover(book_obj.cover_path)
                 
                 except FileNotFoundError:
                     self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.internal_id}) : File not found !")
