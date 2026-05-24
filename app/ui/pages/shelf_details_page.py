@@ -1,9 +1,11 @@
 
 import os
-import typing
 import logging
 from PySide6 import QtWidgets, QtCore, QtGui
 
+from app.src import resources_handler as res_handler
+from app.utils import my_exceptions
+from app.src import langs_handler
 from app.src import book_sys
 from app.ui import qt_signals_handler
 from app.ui import widgets_pages_view
@@ -68,16 +70,20 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         #Adding widgets to layout
         self.main_lyt.addWidget(self.widgets_pages_view_handler, 0, 0)
 
-    def create_books_widgets(self, books: typing.Sequence[book_sys.Book]):
-
+    def create_books_widgets(self, books: book_sys.BooksList):
+        """
+        Generate widget ('BookWidget') for every book ('book_sys.Book') in the books argument
+        """
         base_displayed_titles = []
         books_widgets = []
 
         for index, book in enumerate(books):
             book_widget = BookWidget(
-                book, 
+                book,
+                self.books_handler,
                 self.res_handler,
                 self.langs_handler,
+                self.qt_signals_handler,
                 )
             base_displayed_titles.append(book_widget.book_title_lb.text())
             book_widget.book_title_lb.setText(utils_funcs.set_displayed_names(base_displayed_titles)[index])
@@ -87,21 +93,29 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         return books_widgets
     
     def generate_books_pages(self):
+        """
+        Generate and place the books widget into a pagination view
+        """
+        
         self.books_widgets = self.create_books_widgets(list(self.books.values()))
         self.widgets_pages_view_handler.set_widgets(self.books_widgets)
 
 class BookWidget(widgets_pages_view.InPageWidget):
     def __init__(
         self, 
-        book: book_sys.Book, 
-        res_handler,
-        langs_handler,
+        book: book_sys.Book,
+        books_handler: book_sys.BooksHandler,
+        res_handler: res_handler.RessourcesHandler,
+        langs_handler: langs_handler.LangsHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler, 
         ):
         super().__init__(None, None)
         self.logger = logging.getLogger(__name__)
         self.book = book
+        self.books_handler = books_handler
         self.res_handler = res_handler
         self.langs_handler = langs_handler
+        self.qt_signals_handler = qt_signals_handler
         self.default_cover_path = self.res_handler.get_res("assets.defaults_covers.book")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
@@ -128,16 +142,32 @@ class BookWidget(widgets_pages_view.InPageWidget):
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("book_summary_te")
-        self.edit_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_b"))
+        self.edit_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_b")) #type: ignore
         self.edit_b.setObjectName("edit_b")
         self.edit_b.setSizePolicy(self.fixed_sp)
-        self.delete_b = QtWidgets.QPushButton(self.langs_handler.get_value("delete_b"))
+        self.delete_b = QtWidgets.QPushButton(self.langs_handler.get_value("delete_b")) #type: ignore
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")
+        self.delete_b.clicked.connect(self.delete_book)
         self.main_layout.addWidget(self.book_title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_layout.addWidget(self.book_authors_lb, 1, 1)
         self.main_layout.addWidget(self.book_summary_te, 2, 1)
         self.main_layout.addWidget(self.edit_b, 3, 1)
         self.main_layout.addWidget(self.delete_b, 4, 1)
         self.main_layout.addWidget(self.book_cover_lb, 1, 0, self.main_layout.rowCount(), 1)
-
+        
+    def delete_book(self):
+        
+        if self.pages_widgets_handler:
+            self.logger.info(f"Deleting book with ID={self.book.internal_id}")
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.tr("pages.shelf_details_page.book_deletion_progress_lb", count=1))
+            
+            try:
+                self.books_handler.delete_book(self.book.internal_id)
+                
+            except my_exceptions.BookNotFoundError:
+                self.logger.error(f"Failed to delete book with ID={self.book.internal_id}")
+                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+                
+            self.pages_widgets_handler.delete_widget(self)
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
