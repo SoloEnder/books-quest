@@ -9,7 +9,7 @@ from app.utils import my_exceptions
 type BooksList = list[Book]
 type BooksDict = dict[str, Book]
 
-type ShelfsList = list[Shelf]
+type ShelvesList = list[Shelf]
 type ShelfsDict = dict[str, Shelf]
 
 class Book:
@@ -17,8 +17,6 @@ class Book:
         """
         The base class for the books
         """
-        self.logger = logging.getLogger(__name__)
-        self.kwargs = kwargs
         self.title = kwargs["title"]
         self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
@@ -31,24 +29,84 @@ class Book:
         self.status = kwargs.get("status")
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
-        self.shelfs_ids = kwargs.get("shelfs_ids", [])
-        self.internal_id = kwargs.get(
-            "internal_id",
+        self.id = kwargs.get(
+            "id",
             str(dt.datetime.timestamp(dt.datetime.now())),
         )
-
-
+        self._parents_shelves: ShelvesList = kwargs.get("parents_shelves", [])
+        
+        for parent_shelf in self._parents_shelves:
+            self.check_parent_shelf(parent_shelf)
+            
+    def get_infos(self)-> dict:
+        return {
+            "id":self.id,
+            "title":self.title,
+            "authors":self.authors,
+            "cover_path":self.cover_path,
+            "edition":self.edition,
+            "summary":self.summary,
+            "isbn":self.isbn,
+            "status":self.status,
+            "starting_read_date":self.starting_read_date,
+            "end_read_date":self.end_read_date,
+            "tot_pages":self.tot_pages,
+            "alr_read_pages":self.alr_read_pages,
+            "parents_shelves":self._parents_shelves,
+        }
+        
+    def check_parent_shelf(self, parent_shelf: Shelf):
+        """
+        Checks if this book is in 'parent_shelf'\n
+        If this is not the case, add this book as a book of 'parent_shelf' and return False, otherwise, return False
+        
+        Args:
+        - parent_shelf: a valid instance of Shelf
+        """
+        
+        if parent_shelf.has_book(self):
+            return True
+        
+        else:
+            parent_shelf.add_book(self)
+            return False
+        
+    def has_parent(self, parent_shelf: Shelf)-> bool:
+        """
+        Return True if 'parent_shelf' is in the '_parents_shelves' attribute, otherwise return False
+        """
+        
+        if parent_shelf in self._parents_shelves:
+            return True
+        
+        else:
+            return False
+        
+    def delete_from_parents(self):
+        """
+        Remove this book from all his parents shelves
+        """
+        
+        for parent_shelf in self._parents_shelves:
+            parent_shelf.remove_book(self)
+        
 class BooksHandler:
-    def __init__(self, jfm: jfm.JsonFileManager, books: dict | None = None):
+    def __init__(
+        self, 
+        jfm: jfm.JsonFileManager,
+        default_cover_path: str,
+        books: dict | None = None, 
+        ):
         """
         Handle and manage books data
         """
         self.logger = logging.getLogger(__name__)
         self.books = books if books else {}
-        self.books_shelfs = {}
+        self.shelves = {}
         self.shelfs_updated = False
         self.default_shelf = Shelf(name="All", books_ids=self.books.keys())
         self.jfm = jfm
+        self.default_cover_path = default_cover_path
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -57,18 +115,18 @@ class BooksHandler:
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
             book_obj = self.books[book_id]
             
-            if book_obj.cover_path:
+            if book_obj.cover_path and book_obj.cover_path != self.default_cover_path:
                 
                 try:
                     self._delete_cover(book_obj.cover_path)
                 
                 except FileNotFoundError:
-                    self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.internal_id}) : File not found !")
+                    self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.id}) : File not found !")
                     
             del self.books[book_id]
 
         else:
-            raise my_exceptions.BookNotFoundError(book_id)
+            raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
         
     def _delete_cover(self, cover_path):
         
@@ -78,7 +136,7 @@ class BooksHandler:
         else:
             raise FileNotFoundError(f"Counldn't delete cover at {cover_path} : File not found !")
 
-    def create_book(self, **kwargs):
+    def create_book(self, **kwargs) -> Book:
         """
         Create a new instance of Book and return it
         """
@@ -92,20 +150,18 @@ class BooksHandler:
         self.add_book(book_obj)
 
     def add_book(self, book_obj: Book):
-        for shelf_id in book_obj.shelfs_ids:
-            if shelf_id in self.books_shelfs.keys():
-                if book_obj.internal_id not in self.books.keys():
-                    shelf = self.books_shelfs[shelf_id]
-                    shelf.add_book(book_obj)
+        """
+        Add 'book_obj' to this BooksHandler and to the default shelf 
+        """
+        
+        if not book_obj.id in self.books:
+            self.books[book_obj.id] = book_obj
+            self.default_shelf.add_book(book_obj)
+            
+        else:
+            raise my_exceptions.BookExistsError(book_obj.id, f"this BooksHandler ({self})")
 
-            else:
-                self.logger.warning(
-                    f"Couldn't to add book to shelf with the ID {shelf_id} : Shelf doesn't exists !"
-                )
-
-        self.books[book_obj.internal_id] = book_obj
-
-    def create_shelf(self, **kwargs):
+    def create_shelf(self, **kwargs) -> Shelf:
         """
         Create a Shelf object and return it
         """
@@ -132,29 +188,24 @@ class BooksHandler:
                     f"Couldn't set attribute {arg_name} of the default shelf: Unknown attribute !"
                 )
 
-    def add_shelf(self, book_shelf):
+    def add_shelf(self, shelf: Shelf):
         """
         Add a book shelf
 
         book_shelf: an instance of a BookShelf object
         """
-        self.logger.debug(
-            f"Adding shelf with ID '{book_shelf.id}' to books_handler '{self}'"
-        )
 
-        if book_shelf.id not in self.books_shelfs.keys():
-            self.books_shelfs[book_shelf.id] = book_shelf
+        if shelf.id not in self.shelves.keys():
+            self.shelves[shelf.id] = shelf
 
         else:
-            self.logger.warning(
-                f"Failed to add book shelf with ID : '{book_shelf.id}' to books_handler '{self}' : ID arleady exists !"
-            )
+            raise my_exceptions.BooksShelfExistsError(shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !")
 
     def remove_shelf(self, id: str):
         self.logger.debug(f"Removing book shelf with ID : '{id}'...")
 
-        if id in self.books_shelfs.keys():
-            bookshelf_obj = self.books_shelfs[id]
+        if id in self.shelves.keys():
+            bookshelf_obj = self.shelves[id]
             
             if bookshelf_obj.cover_path:
                 
@@ -164,38 +215,29 @@ class BooksHandler:
                 except FileNotFoundError:
                     self.logger.error(f"Couldn't delete cover file for shelf (ID={bookshelf_obj.id}) : File not found !")
                     
-            del self.books_shelfs[id]
+            del self.shelves[id]
 
         else:
             raise my_exceptions.BooksShelfNotFoundError(id)
 
     def edit_book(self, book_id: str, new_book: Book):
-        self.logger.info(f"Editing book with id {book_id}...")
+        self.logger.debug(f"Editing book with id {book_id}...")
 
-        if book_id != new_book.internal_id:
-            raise my_exceptions.BookNotFoundError(book_id)
+        if book_id != new_book.id:
+            raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
 
         else:
             self.books[book_id] = new_book
 
-        for shelf_id in new_book.shelfs_ids:
-            if shelf_id in self.books_shelfs.keys():
-                self.books_shelfs[shelf_id] = new_book
-
-            else:
-                self.logger.warning(
-                    f"Failed to add on editing book with id '{new_book.internal_id}' to shelf with ID '{shelf_id}' : Shelf doesn't exists !"
-                )
-
     def edit_shelf(self, shelf_id: str, new_shelf):
 
-        if shelf_id in self.books_shelfs.keys():
+        if shelf_id in self.shelves.keys():
             new_shelf.id = shelf_id
-            self.books_shelfs[shelf_id] = new_shelf
+            self.shelves[shelf_id] = new_shelf
 
         else:
             raise my_exceptions.BooksShelfNotFoundError(shelf_id)
-        
+
     def get_books(self, **kwargs):
         """
         Get all the books which matches with filters
@@ -218,7 +260,7 @@ class BooksHandler:
         - full_match (bool, optionnal): if True, then match is allowed only if filter_value full match, else match is allowed if filter_value partially match. default to True.
         - case_sensitive (bool, optionnal): if filter_value is a string and this parameter is set to True, then the match is case sensitive. default to False.
         """
-        return self.get_obj(self.books_shelfs.values(), **kwargs)
+        return self.get_obj(self.shelves.values(), **kwargs)
         
 
     def get_obj(self, sequence, **kwargs):
@@ -294,7 +336,7 @@ class BooksHandler:
 
                 else:
                     raise AttributeError(
-                        f"Couldn't perform comparison: Book/Shelf (id='{obj.internal_id}') has no attribute '{filter_name}'."
+                        f"Couldn't perform comparison: Book/Shelf (id='{obj.id}') has no attribute '{filter_name}'."
                     )
 
             if len(filter_matchs) == len(filters):
@@ -304,11 +346,20 @@ class BooksHandler:
         return books_matchs
 
     def save_books(self, filepath: str):
-        self.logger.info(f"Saving books data at {filepath}...")
+        self.logger.debug(f"Saving books data in {filepath}...")
         data = []
 
         for book in self.books.values():
-            data.append(book.kwargs)
+            book_data = book.get_infos()
+            book_data["parents_shelves_ids"] = []
+            
+            for shelf in book_data["parents_shelves"]:
+                
+                if shelf != self.default_shelf:
+                    book_data["parents_shelves_ids"].append(shelf.id)
+                
+            del book_data["parents_shelves"]
+            data.append(book_data)
 
         self.jfm.write_json(filepath, data, catch_error=False)
 
@@ -319,8 +370,7 @@ class BooksHandler:
 
         if data:
             for book_data in data:
-                book_obj = Book(**book_data)
-                self.books[book_obj.internal_id] = book_obj
+                self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):
         """
@@ -329,35 +379,37 @@ class BooksHandler:
         event: used if the function is called by the  handler. set it to None if you call this func manually
         filepath (str): the path of the file where the data will be saved
         """
-        self.logger.info(f"Saving book shelf data at {filepath}")
+        self.logger.debug(f"Saving shelves data in {filepath}")
         data = []
 
-        for shelf in self.books_shelfs.values():
-            data.append(shelf.kwargs)
+        for shelf in self.shelves.values():
+            shelf_data = shelf.get_infos()
+            shelf_data["books_ids"] = []
+            
+            for book in shelf_data["books"]:
+                shelf_data["books_ids"].append(book.id)
+                
+            del shelf_data["books"]
+                
+            data.append(shelf_data)
 
         self.jfm.write_json(filepath=filepath, data=data, catch_error=False)
 
-    def load_shelfs(self, filepath):
-        self.logger.info(f"Loading shelf data from  {filepath}...")
+    def load_shelves(self, filepath):
+        """
+        Create shelves from shelves data in 'filepath' and add them to this BooksHandler 
+        """
+        self.logger.debug(f"Loading shelves data from  {filepath}...")
 
-        data = self.jfm.read_json(filepath)
+        data: list = self.jfm.read_json(filepath)
 
         if data:
             for shelf_data in data:
-                books_ids = []
-
-                for book_id in shelf_data.get("books_ids", []):
-                    if book_id in self.books:
-                        books_ids.append(book_id)
-
-                    else:
-                        self.logger.error(
-                            f"Couldn't add book (ID: '{book_id}') to shelf (ID: '{shelf_data.get('internal_id')}') : Book doesn't exists !"
-                        )
-
+                books = self.convert_books_ids(shelf_data.get("books_ids", [])).values()
+                shelf_data["books"] = books
                 self.new_shelf(**shelf_data)
 
-    def convert_book_id(self, books_ids: list | tuple):
+    def convert_books_ids(self, books_ids: list | tuple):
         """
         Convert a list of books ids to a dict of books object
 
@@ -384,43 +436,48 @@ class Session:
 
 class Shelf:
     def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.logger = logging.getLogger(__name__)
         self.name = kwargs["name"]
         self.name_suffix = kwargs.get("name_suffix")
-        self.books_ids = kwargs.get("books_ids", [])
+        self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", str(dt.datetime.timestamp(dt.datetime.now())))
 
     def add_book(self, book: Book):
+        """
+        Define 'book' has a book of this shelf
+        """
 
-        if book.internal_id not in self.books_ids:
-            self.books_ids.append(book.internal_id)
-
-        else:
-            self.logger.error(
-                f"Book with ID {book.internal_id} arleady exists in the shelfID : {self.id})"
-            )
-
-    def remove_book(self, book_id: str) -> bool:
-        """Remove book specified by <book_id> from this shelf"""
-        self.logger.info(
-            f"Removing book with ID : '{book_id}' from book shelf with ID : '{self.id}'..."
-        )
-
-        if book_id in self.books_ids:
-            del self.books_ids[self.books_ids.index(book_id)]
-            return True
+        if book.id not in self._books:
+            self._books.append(book)
 
         else:
-            self.logger.warning(
-                f"Couldn't remove book with ID '{book_id}' from shelf with ID '{self.id}' : Book not exists in the shelf !"
-            )
-            return False
+            my_exceptions.BookExistsError(book.id, f"this Shelf ({self})")
+            
+    def remove_book(self, book: Book):
+        """Remove book specified by 'book_id' from this shelf"""
 
-    def has_book_with_id(self, id: str):
-        if id in self.books_ids:
+        if book.id in self._books:
+            self._books.remove(book)
+
+        else:
+            raise my_exceptions.BookNotFoundError(book.id, f"Book with (ID={book.id}) is not contained in Shelf (ID={self.id}) !")
+
+    def has_book(self, book: Book):
+        """
+        Return True if 'book' is in the '_books' attribute, otherwise return False
+        """
+        
+        if book in self._books:
             return True
 
         else:
             return False
+        
+    def get_infos(self)-> dict:
+        return {
+            "name": self.name,
+                "name_suffix": self.name_suffix,
+                "id": self.id,
+                "books": self._books,
+                "cover_path": self.cover_path,
+            }
