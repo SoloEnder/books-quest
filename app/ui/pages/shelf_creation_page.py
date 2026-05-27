@@ -292,7 +292,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             matches = {}
 
             for result in query_results:
-                matches[result.internal_id] = result
+                matches[result.id] = result
 
             self.draw_books_tree(matches)
 

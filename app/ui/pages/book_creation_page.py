@@ -288,7 +288,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if matches:
             self.logger.debug(
-                f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
+                f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
                 f"{self.lang_data["book_already_exists_lb"]} ({len(matches)})\n{self.langs_handler.get_value("rename_msg")} '{books_infos.get("title")} ({len(matches)})'"
@@ -301,12 +301,12 @@ class BookCreationPage(QtWidgets.QWidget):
             else:
                 return
 
-        books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now()))
+        books_infos["id"] = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
                 self.res_handler.get_res("data.books.covers"),
-                f"{books_infos['internal_id'].replace('.', '_')}.png",
+                f"{books_infos['id'].replace('.', '_')}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
 
