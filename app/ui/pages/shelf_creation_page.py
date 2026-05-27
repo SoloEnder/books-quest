@@ -125,7 +125,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         if self.current_mode == "edition":
             if kwargs.get("shelf"):
-                self.shelf = kwargs.get("shelf")
+                self.shelf: book_sys.Shelf|None = kwargs.get("shelf") 
                 self.edition_mode()
 
             else:
@@ -141,7 +141,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.name_e.setText(self.shelf.name)
 
             for title_item in self.books_title_items:
-                if title_item.data() in self.shelf.books_ids:
+                if self.shelf.has_book(title_item.data()):
                     title_item.setCheckState(QtCore.Qt.CheckState.Checked)
 
     def set_shelf_cover(self):
@@ -160,7 +160,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
-    def draw_books_tree(self, sequence: dict[str, book_sys.Book]):
+    def draw_books_tree(self, books_dict: book_sys.BooksDict):
 
         if hasattr(self, "books_tree"):
             self.main_widget_lyt.removeWidget(self.books_tree)
@@ -180,11 +180,11 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         # Books items
 
-        for book in sequence.values():
+        for book in books_dict.values():
             book_title_item = QtGui.QStandardItem(
                 book.title + (f" ({book.title_suffix})" if book.title_suffix else "")
             )
-            book_title_item.setData(book.internal_id)
+            book_title_item.setData(book)
             book_title_item.setCheckable(True)
             book_author_item = QtGui.QStandardItem(
                 book.authors if book.authors else "Unknown"
@@ -240,11 +240,11 @@ class ShelfCreationPage(QtWidgets.QWidget):
                         return
                         
                               
-        books_ids = []
+        books: book_sys.BooksList = []
 
         for book_title_item in self.books_title_items:
             if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
-                books_ids.append(book_title_item.data())
+                books.append(book_title_item.data())
                 
                 final_img_path = self.current_shelf_cover 
 
@@ -263,7 +263,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         return {
             "name": shelf_name,
             "name_suffix": name_suffix,
-            "books_ids": books_ids,
+            "books": books,
             "id": id,
             "cover_path": self.current_shelf_cover
             if self.current_shelf_cover != self.default_shelf_cover

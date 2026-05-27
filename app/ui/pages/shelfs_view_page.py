@@ -118,7 +118,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
                if shiboken6.isValid(widget):
                     widget.deleteLater()
                 
-            self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.books_shelfs.values()))
+            self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
             self.pages_view_handler.set_widgets(self.shelves_widgets)
             
             for widget in self.search_result_widgets:
@@ -164,7 +164,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         return shelves_widgets
             
     def generate_shelves_pages(self):
-        self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.books_shelfs.values()))
+        self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
         self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
                 
 class ShelfWidget(widgets_pages_view.InPageWidget):
@@ -209,21 +209,14 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
         self.cover_lb.setPixmap(self.cover_pm)
         self.name_w_sa = QtWidgets.QScrollArea()
         self.name_w_sa.setWidgetResizable(True)
-        #self.name_w = ShelfNameWidget(
-        #    self, 
-        #    self.shelf.name
-        #    if self.shelf.name
-        #    else utils_funcs.unknown_shelf_name_fmt(self.shelf))
-
-        #self.name_w_sa.setWidget(self.name_w)
-        self.total_books = QtWidgets.QLabel(f"{len(self.shelf.books_ids)} livres")
+        self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
+        self.logger.debug(f"Books of ShelfWidget {self} = {self.shelf._books}")
         self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
         self.on_reading_books_count = 0
         self.finished_books_count = 0
 
-        for book_id in self.shelf.books_ids:
-            book = self.books_handler.books[book_id]
+        for book in self.shelf._books:
             if book.status == "unread":
                 self.unread_books_count += 1
 

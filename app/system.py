@@ -15,7 +15,6 @@ from app.src import resources_handler
 
 class AppSystem:
     def __init__(self, qt_app):
-        begin = dt.datetime.now()
         self.qt_app = qt_app
         self.instance_locker = None
         self.logger = logging.getLogger(__name__)
@@ -38,21 +37,18 @@ class AppSystem:
                 self.res_handler.get_res("data.bookshelves.covers")
             )
         self.logger.info("Initialising application...")
-        self.books_handler = book_sys.BooksHandler(self.jfm)
+        self.books_handler = book_sys.BooksHandler(self.jfm, self.res_handler.get_res("assets.defaults_covers.book"))
         self.books_handler.load_books(self.res_handler.get_res("data.books.books"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
-        self.books_handler.load_shelfs(self.res_handler.get_res("data.bookshelves.bookshelves"))
+        self.books_handler.load_shelves(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = dict_paths_handler.JSONDictPathHandler(self.jfm)
         self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
         self.langs_handler.load_from_file(self.res_handler.get_res(f"assets.langs.{self.settings_handler.get_value("general.language.current")}"))
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
-        end = dt.datetime.now()
-        self.logger.info(f"Loaded app in {end - begin}")
 
     def start(self):
-        self.logger.info("Showing main window...")
         self.start_ui()
         
     def start_ui(self):

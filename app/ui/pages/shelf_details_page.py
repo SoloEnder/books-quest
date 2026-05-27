@@ -64,7 +64,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         )
 
         #books widgets
-        self.books = self.books_handler.convert_book_id(self.shelf.books_ids)
         self.generate_books_pages()
 
         #Adding widgets to layout
@@ -97,7 +96,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         Generate and place the books widget into a pagination view
         """
         
-        self.books_widgets = self.create_books_widgets(list(self.books.values()))
+        self.books_widgets = self.create_books_widgets(list(self.shelf._books))
         self.widgets_pages_view_handler.set_widgets(self.books_widgets)
 
 class BookWidget(widgets_pages_view.InPageWidget):
@@ -126,8 +125,12 @@ class BookWidget(widgets_pages_view.InPageWidget):
                 self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_path))
 
             else:
-                self.logger.warning(f"Couldn't found cover file for book with ID={self.book.internal_id}, switching to default cover")
-                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
+                if self.book.cover_path != self.res_handler.get_res("assets.defaults_covers.default_book_cover"):
+                    self.logger.warning(f"Couldn't found cover file for book with ID={self.book.id}, switching to default cover")
+                    self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
+                    
+                else:
+                    self.logger.error(f"Couldn't found a valid cover for BookWidget ({self}) !")
 
         else:
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
@@ -159,14 +162,14 @@ class BookWidget(widgets_pages_view.InPageWidget):
     def delete_book(self):
         
         if self.pages_widgets_handler:
-            self.logger.info(f"Deleting book with ID={self.book.internal_id}")
+            self.logger.info(f"Deleting book with ID={self.book.id}")
             self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.tr("pages.shelf_details_page.book_deletion_progress_lb", count=1))
             
             try:
-                self.books_handler.delete_book(self.book.internal_id)
+                self.books_handler.delete_book(self.book.id)
                 
             except my_exceptions.BookNotFoundError:
-                self.logger.error(f"Failed to delete book with ID={self.book.internal_id}")
+                self.logger.error(f"Failed to delete book with ID={self.book.id}")
                 self.qt_signals_handler.notify_sg.emit("error", "", "", "")
                 
             self.pages_widgets_handler.delete_widget(self)
