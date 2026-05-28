@@ -113,7 +113,7 @@ class BooksHandler:
 
         if book_id in self.books.keys():
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
-            book_obj = self.books[book_id]
+            book_obj: Book = self.books[book_id]
             
             if book_obj.cover_path and book_obj.cover_path != self.default_cover_path:
                 
@@ -123,7 +123,9 @@ class BooksHandler:
                 except FileNotFoundError:
                     self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.id}) : File not found !")
                     
-            del self.books[book_id]
+            del self.books[book_obj.id]
+            book_obj.delete_from_parents()
+            del book_obj
 
         else:
             raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
@@ -405,7 +407,7 @@ class BooksHandler:
 
         if data:
             for shelf_data in data:
-                books = self.convert_books_ids(shelf_data.get("books_ids", [])).values()
+                books = list(self.convert_books_ids(shelf_data.get("books_ids", [])).values())
                 shelf_data["books"] = books
                 self.new_shelf(**shelf_data)
 
@@ -419,7 +421,12 @@ class BooksHandler:
         books_objs = {}
 
         for book_id in books_ids:
-            book_obj = self.books[book_id]
+            
+            try:
+                book_obj = self.books[book_id]
+                
+            except KeyError:
+                raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
             books_objs[book_id] = book_obj
 
         return books_objs
@@ -444,19 +451,19 @@ class Shelf:
 
     def add_book(self, book: Book):
         """
-        Define 'book' has a book of this shelf
+        Defines 'book' as a book of this shelf
         """
 
-        if book.id not in self._books:
+        if book not in self._books:
             self._books.append(book)
 
         else:
             my_exceptions.BookExistsError(book.id, f"this Shelf ({self})")
             
     def remove_book(self, book: Book):
-        """Remove book specified by 'book_id' from this shelf"""
+        """Removes book specified by 'book_id' from this shelf"""
 
-        if book.id in self._books:
+        if book in self._books:
             self._books.remove(book)
 
         else:
