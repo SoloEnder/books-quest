@@ -169,7 +169,7 @@ class BookWidget(widgets_pages_view.InPageWidget):
                 self.books_handler.delete_book(self.book.id)
                 
             except my_exceptions.BookNotFoundError:
-                self.logger.error(f"Failed to delete book with ID={self.book.id}")
+                self.logger.error(f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books_handler}) !")
                 self.qt_signals_handler.notify_sg.emit("error", "", "", "")
                 
             self.pages_widgets_handler.delete_widget(self)
