@@ -5,7 +5,7 @@ from PySide6 import QtWidgets
 import logging
 
 def unknown_book_title_fmt(book: book_sys.Book):
-    creation_date = dt.datetime.fromtimestamp(float(book.internal_id))
+    creation_date = dt.datetime.fromtimestamp(float(book.id))
     return f"[Untitled]-{creation_date.date()}"
 
 def unknown_shelf_name_fmt(shelf: book_sys.Shelf):

@@ -42,9 +42,10 @@
             "view_b":"See books"
         },
         "shelf_details_page": {
+            "book_deletion_progress_lb":"Deleting /f:<count>/f book(s)..."
         }
     },
-    "pages_view": {
+    "widgets_pages_view": {
         "jump_to_page_lb": "Go to :"
     },
     "notification_service": {

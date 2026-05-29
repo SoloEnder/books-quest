@@ -88,7 +88,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         self.pages_numbers_lyt_widgets = []
         
         #Widgets for jump to a specific page by giving its index
-        self.jump_to_page_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages_view.jump_to_page_lb"))
+        self.jump_to_page_lb = QtWidgets.QLabel(self.langs_handler.get_value("widgets_pages_view.jump_to_page_lb"))
         self.jump_to_page_lb.setSizePolicy(self.fixed_size_policy)
         self.jump_to_page_e = QtWidgets.QLineEdit("")
         self.jump_to_page_e.setSizePolicy(self.fixed_size_policy)
@@ -308,7 +308,7 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         if given_input.isdigit():
             given_input = int(given_input)
             
-            if given_input >= 0 and given_input <= len(self.pages_data):
+            if given_input > 0 and given_input <= len(self.pages_data):
                 self.switch_to_page(given_input-1)
                 
             else:
@@ -363,6 +363,11 @@ class PagesWidgetsHandler(QtWidgets.QWidget):
         """
         
         self.logger.debug(f"Switching to page with index={index}")
+        
+        if not len(self.pages_virtual_row) or index+1 > len(self.pages_virtual_row):
+            self.show_nothing_page()
+            return
+        
         dest_page = self.pages_virtual_row[index]
         
         if dest_page:

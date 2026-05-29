@@ -3,14 +3,13 @@ import logging
 import os
 import shutil
 import traceback
-from pathlib import Path
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.utils import images_tools, paths
+from app.utils import images_tools
 
 
 class BookCreationPage(QtWidgets.QWidget):
@@ -147,24 +146,8 @@ class BookCreationPage(QtWidgets.QWidget):
         self.shelfs_selection_scroll_area.setWidgetResizable(True)
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
-        shelfs_names = []
-        for shelf in self.books_handler.books_shelfs.values():
-            matches_count = 0
-            displayed_name = shelf.name
-            shelfs_names.append(shelf.name)
-
-            for name in shelfs_names:
-                if name == shelf.name and not shelf.name:
-                    displayed_name = (
-                        f"[Unnamed]-{dt.datetime.fromtimestamp(float(shelf.id)).date()}"
-                    )
-
-                    if matches_count:
-                        displayed_name += f" ({matches_count})"
-
-                    matches_count += 1
-
-            shelf_cb = QtWidgets.QCheckBox(displayed_name)
+        for shelf in self.books_handler.shelves.values():
+            shelf_cb = QtWidgets.QCheckBox(shelf.name)
             self.shelfs_selection_cbs[shelf.id] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
@@ -305,7 +288,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if matches:
             self.logger.debug(
-                f"Found {len(matches)} {[x.internal_id for x in matches]} books which have the same authors and the same title that the on creating book !"
+                f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
                 f"{self.lang_data["book_already_exists_lb"]} ({len(matches)})\n{self.langs_handler.get_value("rename_msg")} '{books_infos.get("title")} ({len(matches)})'"
@@ -318,12 +301,12 @@ class BookCreationPage(QtWidgets.QWidget):
             else:
                 return
 
-        books_infos["internal_id"] = str(dt.datetime.timestamp(dt.datetime.now()))
+        books_infos["id"] = str(dt.datetime.timestamp(dt.datetime.now()))
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
                 self.res_handler.get_res("data.books.covers"),
-                f"{books_infos['internal_id'].replace('.', '_')}.png",
+                f"{books_infos['id'].replace('.', '_')}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
 
@@ -356,12 +339,6 @@ class BookCreationPage(QtWidgets.QWidget):
                 QtCore.Qt.DateFormat.ISODate
             )
 
-        books_infos["shelfs_ids"] = []
-
-        for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
-            if shelf_selection_cbs.isChecked():
-                books_infos["shelfs_ids"].append(shelf_id)
-
         return books_infos
 
     def create_book(self):
@@ -369,10 +346,16 @@ class BookCreationPage(QtWidgets.QWidget):
 
         if books_infos:
             try:
+                shelves = []
+                for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
+                    if shelf_selection_cbs.isChecked():
+                        shelves.append(self.books_handler.shelves[shelf_id])
+                
+                books_infos["parents_shelves"] = shelves
                 self.books_handler.new_book(**books_infos)
 
             except Exception:
-                self.logger.error(traceback.format_exc())
+                self.logger.exception("Failed to create valid book : ")
 
             else:
                 QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
