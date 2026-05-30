@@ -68,8 +68,7 @@ class AppSystem:
         self.logger.info("Deleting files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         self.settings_handler.save_in_file(self.res_handler.get_res("data.settings"))
-        self.logger.info("Exiting app...")
-        
+        self.logger.info("Exiting app...")    
         
     def set_instance_locker(self, instance_locker: QtCore.QLockFile):
         self.instance_locker = instance_locker
