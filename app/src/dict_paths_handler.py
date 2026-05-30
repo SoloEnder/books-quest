@@ -1,8 +1,6 @@
 
 from app.utils import json_file_manager as jfm
 from app.utils import my_exceptions
-import typing
-
 
 class DictPathHandler():
 
