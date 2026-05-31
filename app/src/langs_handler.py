@@ -1,7 +1,7 @@
 
-from app.src import dict_paths_handler
+from app.src import json_dicts_paths_handler
 
-class LangsHandler(dict_paths_handler.JSONDictPathHandler):
+class LangsHandler(json_dicts_paths_handler.JSONDictPathHandler):
     
     def __init__(self, jfm, base_dict):
         super().__init__(jfm, base_dict)

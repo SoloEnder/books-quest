@@ -3,12 +3,13 @@ import logging
 import os
 import pathlib
 from PySide6 import QtCore
+import dicts_paths_handler
 
 from app.src import book_sys
+from app.src import json_dicts_paths_handler
 from app.ui import ui
 from app.utils import json_file_manager
 from app.utils import paths
-from app.src import dict_paths_handler
 from app.src import langs_handler
 from app.src import resources_handler
 
@@ -24,6 +25,7 @@ class AppSystem:
         self.app_infos["boot_count"] += 1
         first_boot = self.check_first_boot()
         if first_boot:
+            self.logger.info("Processing first boot operations...")
             self.first_boot_operations()
 
         else:
@@ -36,12 +38,16 @@ class AppSystem:
                 self.res_handler.get_res("data.bookshelves.covers")
             )
         self.logger.info("Initialising application...")
-        self.books_handler = book_sys.BooksHandler(self.jfm, self.res_handler.get_res("assets.defaults_covers.book"))
+        self.books_handler = book_sys.BooksHandler(
+            self.jfm, 
+            self.res_handler.get_res("assets.defaults_covers.book"), 
+            self.res_handler.get_res("assets.defaults_covers.shelf")
+            )
         self.books_handler.load_books(self.res_handler.get_res("data.books.books"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelves(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
-        self.settings_handler = dict_paths_handler.JSONDictPathHandler(self.jfm)
+        self.settings_handler = json_dicts_paths_handler.JSONDictPathHandler(self.jfm)
         self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
         self.langs_handler.load_from_file(self.res_handler.get_res(f"assets.langs.{self.settings_handler.get_value("general.language.current")}"))

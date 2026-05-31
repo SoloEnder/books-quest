@@ -8,10 +8,10 @@ from app.ui import qt_signals_handler
 from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
 from app.ui import notification_service
 from app.utils import utils_funcs
-from app.src import dict_paths_handler
+from app.src import json_dicts_paths_handler
 
 class UI(QtWidgets.QMainWindow):
-    def __init__(self, books_handler, res_handler, settings_handler: dict_paths_handler.DictPathHandler, langs_handler):
+    def __init__(self, books_handler, res_handler, settings_handler: json_dicts_paths_handler.JSONDictPathHandler, langs_handler: json_dicts_paths_handler.JSONDictPathHandler):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
