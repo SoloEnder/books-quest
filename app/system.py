@@ -39,9 +39,8 @@ class AppSystem:
             )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler(
-            self.jfm, 
-            self.res_handler.get_res("assets.defaults_covers.book"), 
-            self.res_handler.get_res("assets.defaults_covers.shelf")
+            jfm=self.jfm, 
+            res_handler=self.res_handler, 
             )
         self.books_handler.load_books(self.res_handler.get_res("data.books.books"))
         self.books_handler.edit_default_shelf(name="Tout les livres")
