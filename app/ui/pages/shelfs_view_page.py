@@ -1,15 +1,15 @@
-import datetime as dt
+
 import logging
 import os
 import shiboken6
-from app.utils import utils_funcs
-from app.utils import my_exceptions
-
 from PySide6 import QtCore, QtGui, QtWidgets
+import widgets_pagination_view
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui import widgets_pages_view
+from app.ui import my_widgets_pagination_view
+from app.utils import utils_funcs
+from app.utils import my_exceptions
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
@@ -74,14 +74,14 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
-        self.pages_view_handler = widgets_pages_view.PagesWidgetsHandler(
-            self, 
-            res_handler, 
-            self.qt_signals_handler,
-            self.langs_handler, 
-            5, 
-            10, 
-            [],
+        self.pages_view_handler = my_widgets_pagination_view.MyWidgetsPaginationView(
+            parent=self, 
+            res_handler=res_handler,
+            qt_signals_handler=self.qt_signals_handler,
+            langs_handler=self.langs_handler, 
+            max_loadables_pages_count=5, 
+            widgets_by_page_count=10, 
+            widgets=[],
             )
 
         #Adding widgets to main layout
@@ -167,7 +167,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
         self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
                 
-class ShelfWidget(widgets_pages_view.InPageWidget):
+class ShelfWidget(widgets_pagination_view.InPageWidget):
     def __init__(
         self,
         shelf: book_sys.Shelf,
@@ -210,7 +210,6 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
         self.name_w_sa = QtWidgets.QScrollArea()
         self.name_w_sa.setWidgetResizable(True)
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
-        self.logger.debug(f"Books of ShelfWidget {self} = {self.shelf._books}")
         self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
         self.on_reading_books_count = 0

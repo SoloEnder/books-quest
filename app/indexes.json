@@ -10,7 +10,7 @@
         "qss": {
             "_base_": "qss",
             "general": "general.qss",
-            "pages_widgets_handler": "pages_widgets_handler.qss",
+            "widgets_pagination_view": "pages_widgets_handler.qss",
             "shelf_details_page": "shelf_details_page.qss",
             "shelfs_view_page": "shelfs_view_page.qss"
         },

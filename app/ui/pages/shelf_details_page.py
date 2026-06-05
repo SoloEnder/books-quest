@@ -2,13 +2,14 @@
 import os
 import logging
 from PySide6 import QtWidgets, QtCore, QtGui
+import widgets_pagination_view
 
 from app.src import resources_handler as res_handler
 from app.utils import my_exceptions
 from app.src import langs_handler
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui import widgets_pages_view
+from app.ui import my_widgets_pagination_view
 from app.utils import utils_funcs
 
 
@@ -53,21 +54,21 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.nothing_to_show_lb.hide()
 
         #widgets pages view handler
-        self.widgets_pages_view_handler = widgets_pages_view.PagesWidgetsHandler(
-            self,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.langs_handler,
-            5,
-            10,
-            [],
+        self.widgets_pagination_view_handler = my_widgets_pagination_view.MyWidgetsPaginationView(
+            parent=self,
+            res_handler=self.res_handler,
+            qt_signals_handler=self.qt_signals_handler,
+            langs_handler=self.langs_handler,
+            max_loadables_pages_count=5,
+            widgets_by_page_count=10,
+            widgets=[],
         )
 
         #books widgets
         self.generate_books_pages()
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.widgets_pages_view_handler, 0, 0)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 0, 0)
 
     def create_books_widgets(self, books: book_sys.BooksList):
         """
@@ -97,9 +98,9 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         """
         
         self.books_widgets = self.create_books_widgets(list(self.shelf._books))
-        self.widgets_pages_view_handler.set_widgets(self.books_widgets)
+        self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
 
-class BookWidget(widgets_pages_view.InPageWidget):
+class BookWidget(widgets_pagination_view.InPageWidget):
     def __init__(
         self, 
         book: book_sys.Book,

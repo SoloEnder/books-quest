@@ -45,7 +45,7 @@
             "book_deletion_progress_lb":"Suppression de /f:<count>/f livre(s)..."
         }
     },
-    "widgets_pages_view": {
+    "my_widgets_pagination_view": {
         "jump_to_page_lb": "Aller à:"
     },
     "notification_service": {

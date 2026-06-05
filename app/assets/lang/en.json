@@ -45,7 +45,7 @@
             "book_deletion_progress_lb":"Deleting /f:<count>/f book(s)..."
         }
     },
-    "widgets_pages_view": {
+    "my_widgets_pagination_view": {
         "jump_to_page_lb": "Go to :"
     },
     "notification_service": {
