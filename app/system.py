@@ -3,7 +3,6 @@ import logging
 import os
 import pathlib
 from PySide6 import QtCore
-import dicts_paths_handler
 
 from app.src import book_sys
 from app.src import json_dicts_paths_handler
