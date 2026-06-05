@@ -16,3 +16,5 @@ class LangsHandler(json_dicts_paths_handler.JSONDictPathHandler):
                 
             return text
         
+        return str(None)
+        
