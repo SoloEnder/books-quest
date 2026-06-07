@@ -39,3 +39,20 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             widget=self, 
             logger=self.logger
             )
+        
+    def _generate_pages_buttons(self, pages_indexes: list | tuple):
+        super()._generate_pages_buttons(pages_indexes)
+        
+        if len(self.pages_numbers_lyt_widgets) > 1:
+            last_button = self.pages_numbers_lyt_widgets[-1]
+            last_button.setText(f". . . {last_button.text()}")
+            last_button.setObjectName("last_page_b")
+            
+    def _jump_to_page(self, given_input):
+        
+        try:
+            super()._jump_to_page(given_input)
+            
+        except ValueError:
+            self.qt_qignals_handler.notify_sg.emit("error", "Page not found", self.langs_handler.tr("my_widgets_pagination_view.invalid_page_index_msg"), "")
+        
