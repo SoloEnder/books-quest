@@ -46,7 +46,8 @@
         }
     },
     "my_widgets_pagination_view": {
-        "jump_to_page_lb": "Aller à:"
+        "jump_to_page_lb": "Aller à:",
+        "invalid_page_index_msg": "Cette page n'existe pas !"
     },
     "notification_service": {
         "error_msg": {
