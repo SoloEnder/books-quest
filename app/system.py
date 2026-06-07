@@ -11,9 +11,11 @@ from app.utils import json_file_manager
 from app.utils import paths
 from app.src import langs_handler
 from app.src import resources_handler
+import time
 
 class AppSystem:
     def __init__(self, qt_app):
+        self.boot_start_time = time.time()
         self.qt_app = qt_app
         self.instance_locker = None
         self.logger = logging.getLogger(__name__)
@@ -59,6 +61,8 @@ class AppSystem:
         self.ui = ui.UI(self.books_handler, self.res_handler, self.settings_handler, self.langs_handler)
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         self.ui.show()
+        self.boot_end_time = time.time()
+        self.logger.info(f"Initialised app in {self.boot_end_time - self.boot_start_time:.3f}s")
         
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_value("developer_settings.show_indev_warning") == True:
             self.ui.show_indev_warn()
