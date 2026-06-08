@@ -97,6 +97,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
     def search_shelfs(self, given_input: str):
         
         if given_input:
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.tr("research_in_progress_msg"))
             matches = self.books_handler.get_shelfs(name=(given_input, False, False))
             self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
             
@@ -107,6 +108,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             else:
                 self.pages_view_handler.set_widgets([])
                 self.pages_view_handler.show_nothing_page()
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
             
     @QtCore.Slot()
     def exit_search(self):

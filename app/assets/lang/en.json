@@ -1,6 +1,7 @@
 {
     "nothing_to_show_lb": "There is nothing here",
     "research_lb": "Search",
+    "research_in_progress_msg":"Research in progress...",
     "loading_lb": "Loading...",
     "add_b":"Add",
     "add_confirm_msg": "Do you really want to add this element ?",
