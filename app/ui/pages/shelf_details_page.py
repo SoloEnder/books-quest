@@ -3,6 +3,7 @@ import os
 import logging
 from PySide6 import QtWidgets, QtCore, QtGui
 import widgets_pagination_view
+import shiboken6
 
 from app.src import resources_handler as res_handler
 from app.utils import my_exceptions
@@ -48,10 +49,12 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
         self.books_widgets = []
-
-        self.nothing_to_show_lb = QtWidgets.QLabel(self.langs_handler.get_value("nothing_to_show_lb"))
-        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
-        self.nothing_to_show_lb.hide()
+        self.research_result_widgets = []
+        self.search_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
+        self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setClearButtonEnabled(True)
+        self.search_le.returnPressed.connect(lambda: self.search_books(self.search_le.text()))
+        self.search_le.textEdited.connect(self.exit_search)
 
         #widgets pages view handler
         self.widgets_pagination_view_handler = my_widgets_pagination_view.MyWidgetsPaginationView(
@@ -68,7 +71,9 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.generate_books_pages()
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 0, 0)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
+        self.main_lyt.addWidget(self.search_lb, 0, 0)
+        self.main_lyt.addWidget(self.search_le, 0, 1)
 
     def create_books_widgets(self, books: book_sys.BooksList):
         """
@@ -99,6 +104,41 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         
         self.books_widgets = self.create_books_widgets(list(self.shelf._books))
         self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
+        
+    @QtCore.Slot(str)
+    def search_books(self, given_input: str):
+        
+        if given_input:
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.tr("research_in_progress_msg"))
+            matches = self.books_handler.get_books(title=(given_input, False, False))
+            self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
+            
+            if matches:
+                self.search_result_widgets = self.create_books_widgets(matches)
+                self.widgets_pagination_view_handler.set_widgets(self.search_result_widgets.copy())
+                
+            else:
+                self.widgets_pagination_view_handler.set_widgets([])
+                self.widgets_pagination_view_handler.show_nothing_page()
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            
+    @QtCore.Slot()
+    def exit_search(self):
+        
+        if not self.search_le.text():
+            self.widgets_pagination_view_handler.show_loading_page()
+            
+            for widget in self.books_widgets:
+               if shiboken6.isValid(widget):
+                    widget.deleteLater()
+                
+            self.books_widgets = self.create_books_widgets(list(self.books_handler.books.values()))
+            self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
+            
+            for widget in self.search_result_widgets:
+                widget.deleteLater()
+                    
+            self.search_result_widgets.clear()
 
 class BookWidget(widgets_pagination_view.InPageWidget):
     def __init__(
