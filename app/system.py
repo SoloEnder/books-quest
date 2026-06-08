@@ -2,7 +2,7 @@
 import logging
 import os
 import pathlib
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 
 from app.src import book_sys
 from app.src import json_dicts_paths_handler
@@ -14,7 +14,7 @@ from app.src import resources_handler
 import time
 
 class AppSystem:
-    def __init__(self, qt_app):
+    def __init__(self, qt_app: QtWidgets.QApplication):
         self.boot_start_time = time.time()
         self.qt_app = qt_app
         self.instance_locker = None
