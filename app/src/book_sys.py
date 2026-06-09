@@ -124,7 +124,9 @@ class BooksHandler:
         if book_id in self.books.keys():
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
             book_obj: Book = self.books[book_id]
-            self._delete_cover(book_obj.cover_path, True)    
+            
+            if book_obj.cover_path:
+                self._delete_cover(book_obj.cover_path, True)    
             del self.books[book_obj.id]
             book_obj.delete_from_parents()
             del book_obj
@@ -209,8 +211,8 @@ class BooksHandler:
         else:
             raise my_exceptions.BooksShelfExistsError(shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !")
 
-    def remove_shelf(self, id: str):
-        self.logger.debug(f"Removing book shelf with ID : '{id}'...")
+    def delete_shelf(self, id: str):
+        self.logger.debug(f"Deleting shelf with ID : '{id}'...")
 
         if id in self.shelves.keys():
             bookshelf_obj = self.shelves[id]

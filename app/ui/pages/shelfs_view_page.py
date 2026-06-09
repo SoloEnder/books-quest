@@ -280,7 +280,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
 
     def delete_shelf(self):
         self.logger.debug(f"Attempting to delete shelf (ID={self.shelf.id})...")
-        self.books_handler.remove_shelf(self.shelf.id)
+        self.books_handler.delete_shelf(self.shelf.id)
         
         if self.pages_widgets_handler:
         

@@ -321,7 +321,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 self.cover_image = final_cover_image
                 self.set_cover_lb_pixmap(self.cover_image)
 
-        books_infos["cover_path"] = str(self.cover_image)
+            books_infos["cover_path"] = str(self.cover_image)
 
         books_infos["status"] = self.book_status_combob.currentData()
 
