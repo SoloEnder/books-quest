@@ -71,6 +71,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = ""
         self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
             self, 
             self.books_handler, 
@@ -131,7 +132,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
-            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.get_value("loading_page_lb"))
+            self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.get_value("shared.progress.loading_page"))
             if refresh:
                 self.refresh(page_name, page_args)
 
@@ -219,6 +220,31 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 )
             self.pages["shelf_details_page"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
+            
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+        
+        else:
+            return self.langs_handler.tr(lang_path)
 
 class IndevWarnWidget(QtWidgets.QMessageBox):
 
@@ -237,7 +263,33 @@ class ToolBar(QtWidgets.QToolBar):
         super().__init__(parent)
         self.res_handler = res_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = "toolbar"
         
-        self.go_back_act = QtGui.QAction(self.langs_handler.get_value("toolbar.go_back_act"))
+        self.go_back_act = QtGui.QAction(self.my_tr(".actions.go_back"))
         self.go_back_act.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back")))
         self.addAction(self.go_back_act)
+        
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+        
+        else:
+            return self.langs_handler.tr(lang_path)
