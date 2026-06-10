@@ -1,62 +1,96 @@
 {
-    "nothing_to_show_lb": "There is nothing here",
-    "research_lb": "Search",
-    "research_in_progress_msg":"Research in progress...",
-    "loading_lb": "Loading...",
-    "add_b":"Add",
-    "add_confirm_msg": "Do you really want to add this element ?",
-    "edit_b":"Edit",
-    "delete_b":"Delete",
-    "status_lb":"Status",
-    "done_b":"Done",
-    "edit_cover_b":"Edit cover",
-    "loading_page_lb":"Loading page...",
-    "title_lb":"Title : ",
-    "author_lb":"Author : ",
-    "edition_lb":"Edition : ",
-    "summary_lb":"Summary : ",
-    "pages_count_lb":"Total pages count : ",
-    "rename_b":"Rename",
-    "rename_msg":"This element will be renamed as : ",
-    "cancel_b":"Cancel",
+    "shared":{
+        "buttons":{
+            "add":"Add",
+            "edit":"Edit",
+            "delete":"Delete",
+            "done":"Done",
+            "edit_cover":"Edit cover",
+            "rename":"Rename",
+            "cancel":"Cancel"
+        },
+        "labels":{
+            "nothing_to_show": "There is nothing here",
+            "research": "Search",
+            "loading": "Loading...",
+            "status":"Status",
+            "title":"Title : ",
+            "author":"Author : ",
+            "edition":"Edition : ",
+            "summary":"Summary : ",
+            "pages_count":"Total pages count : "
 
-    "toolbar": {
-        "go_back_act":"Back"
+        },
+        "progress":{
+            "research":"Research in progress...",
+            "loading_page":"Loading page..."
+        },
+        "notifications":{
+            "add_confirm": "Do you really want to add this element ?",
+            "renaming_future":"This element will be renamed as : "
+        }
     },
 
-    "pages": {
+    "toolbar": {
+        "actions":{
+            "go_back":"Back"
+        }
+    },
+
+    "main_pages": {
         "book_creation_page": {
-            "alr_read_pages_lb": "Read pages : ",
-            "starting_read_date_lb": "Started reading on : ",
-            "end_read_date_lb": "Finished reading on : ",
-            "shelfs_selection_lb": "Bookshelves : ",
-            "book_already_exists_lb": "Found one or several books with this name"
+            "labels":{
+                "alr_read_pages": "Read pages : ",
+                "starting_read_date": "Started reading on : ",
+                "end_read_date": "Finished reading on : ",
+                "shelfs_selection": "Bookshelves : ",
+                "book_already_exists": "Found one or several books with this name"
+            }
         },
         "shelf_creation_page": {
-            "name": "Name : ",
-            "books_selection_lb": "Book to add to this shelf : ",
-            "shelf_already_exists_lb": "Found one or several shelves with this name"
-        },
+            "labels":{
+                "name": "Name : ",
+                "books_selection": "Book to add to this shelf : "
+            },
+            "notifications":{
+                "shelf_already_exists": "Found one or several shelves with this name"
+            }
+        },  
         "shelfs_view_page": {
-            "book_creation_b":"New book",
-            "shelf_creation_b":"New shelf",
-            "view_b":"See books"
+            "buttons":{
+                "book_creation":"New book",
+                "shelf_creation":"New shelf",
+                "view":"See books"
+            }
         },
         "shelf_details_page": {
-            "book_deletion_progress_lb":"Deleting /f:<count>/f book(s)..."
+            "progress":{
+                "book_deletion":"Deleting /f:<count>/f book(s)..."
+            },
+            "notifications":{
+                "book_deletion_error":"Book not found !"
+            }
         }
     },
     "my_widgets_pagination_view": {
-        "jump_to_page_lb": "Go to :",
-        "invalid_page_index_msg": "This page doesn't exists !"
-    },
-    "notification_service": {
-        "error": {
-            "title":"Warning",
-            "msg":"An error has occured, please try again"
+        "labels":{
+            "jump_to_page": "Go to :"
         },
-        "info": {
-            "title":"Information"
+        "buttons":{},
+        "progress":{},
+        "notifications":{
+            "invalid_page_index": "This page doesn't exists !"
+        }
+    },
+    "notifications_service": {
+        "notifications":{
+            "error": {
+                "title":"Warning",
+                "msg":"An error has occured, please try again"
+            },
+            "info": {
+                "title":"Information"
+            }   
         }
     }
 }
