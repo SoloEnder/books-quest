@@ -30,7 +30,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         - filepath (str|pathlib.Path): the path of the file
         """
         
-        self.user_settings = self.jfm.read_json(filepath)
+        self.user_settings = self.jfm.read_json(filepath, catch_error=False)
         
     def load_base_settings(self, filepath: str|pathlib.Path):
         """
@@ -40,7 +40,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         ----------
         - filepath (str|pathlib.Path): the path of the file
         """
-        self.base_settings = self.jfm.read_json(filepath)
+        self.base_settings = self.jfm.read_json(filepath, catch_error=False)
         
     def load_settings(self, base_settings_filepath: str|pathlib.Path, user_settings_filepath: str|pathlib.Path):
         """
