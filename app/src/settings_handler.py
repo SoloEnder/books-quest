@@ -17,7 +17,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         When the 'apply_user_settings()' method is called, the base_settings file and the user_settings file are merged into one dict, where the user_settings override the defaults values.
         """
         super().__init__(jfm, None)
-        self.settings = {}
+        self.settings = self.base_dict
         self.base_settings = base_settings or {}
         self.user_settings = user_settings or {}
         
