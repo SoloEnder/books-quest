@@ -115,8 +115,8 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
             
             if matches:
-                self.search_result_widgets = self.create_books_widgets(matches)
-                self.widgets_pagination_view_handler.set_widgets(self.search_result_widgets.copy())
+                self.research_result_widgets = self.create_books_widgets(matches)
+                self.widgets_pagination_view_handler.set_widgets(self.research_result_widgets.copy())
                 
             else:
                 self.widgets_pagination_view_handler.set_widgets([])
@@ -136,10 +136,10 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             self.books_widgets = self.create_books_widgets(list(self.books_handler.books.values()))
             self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
             
-            for widget in self.search_result_widgets:
+            for widget in self.research_result_widgets:
                 widget.deleteLater()
                     
-            self.search_result_widgets.clear()
+            self.research_result_widgets.clear()
             
     def my_tr(self, lang_path: str, fill: bool=True) -> str:
         """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n

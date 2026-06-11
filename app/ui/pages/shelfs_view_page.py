@@ -67,7 +67,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
         
         #Shelf research widgets
-        self.search_result_widgets = []
+        self.research_result_widgets = []
         self.search_lb = QtWidgets.QLabel(self.my_tr("shared.labels.research", False))
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setClearButtonEnabled(True)
@@ -103,8 +103,8 @@ class ShelfsViewPage(QtWidgets.QWidget):
             self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
             
             if matches:
-                self.search_result_widgets = self.create_shelves_widgets(matches, False)
-                self.pages_view_handler.set_widgets(self.search_result_widgets.copy())
+                self.research_result_widgets = self.create_shelves_widgets(matches, False)
+                self.pages_view_handler.set_widgets(self.research_result_widgets.copy())
                 
             else:
                 self.pages_view_handler.set_widgets([])
@@ -124,10 +124,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
             self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
             self.pages_view_handler.set_widgets(self.shelves_widgets)
             
-            for widget in self.search_result_widgets:
+            for widget in self.research_result_widgets:
                 widget.deleteLater()
                     
-            self.search_result_widgets.clear()
+            self.research_result_widgets.clear()
 
     def create_shelves_widgets(self, shelves: list|tuple, include_default_shelf: bool=True):
         """
