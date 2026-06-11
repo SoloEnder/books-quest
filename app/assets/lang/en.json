@@ -43,7 +43,9 @@
                 "alr_read_pages": "Read pages : ",
                 "starting_read_date": "Started reading on : ",
                 "end_read_date": "Finished reading on : ",
-                "shelfs_selection": "Bookshelves : ",
+                "shelfs_selection": "Bookshelves : "
+            },
+            "notifications":{
                 "book_already_exists": "Found one or several books with this name"
             }
         },
