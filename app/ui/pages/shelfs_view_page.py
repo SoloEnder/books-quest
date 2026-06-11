@@ -190,10 +190,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
         """
         
         if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
-            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path)
+            return self.langs_handler.tr(lang_path, **kwargs)
                 
 class ShelfWidget(widgets_pagination_view.InPageWidget):
     def __init__(
@@ -341,10 +341,10 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         """
         
         if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
-            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path)
+            return self.langs_handler.tr(lang_path, **kwargs)
 
 
 class DefaultShelfWidget(ShelfWidget):

@@ -141,7 +141,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
                     
             self.research_result_widgets.clear()
             
-    def my_tr(self, lang_path: str, fill: bool=True) -> str:
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
         """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
         Note that your shortcut lang_path must start by '.' for the auto completion to work.
         
@@ -160,10 +160,10 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         """
         
         if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
-            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path)
+            return self.langs_handler.tr(lang_path, **kwargs)
 
 class BookWidget(widgets_pagination_view.InPageWidget):
     def __init__(
@@ -262,7 +262,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         """
         
         if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
-            return self.langs_handler.tr(self.redundant_lang_path+lang_path)
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path)
+            return self.langs_handler.tr(lang_path, **kwargs)
