@@ -116,7 +116,7 @@ class BooksHandler:
         self.res_handler = res_handler
         self.jfm = jfm
         self.shelves = shelves or {}
-        self.default_shelf = Shelf(name="All", books_ids=self.books.keys())
+        self.default_shelf = Shelf(name="All", books=self.books.values())
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -127,9 +127,8 @@ class BooksHandler:
             
             if book_obj.cover_path:
                 self._delete_cover(book_obj.cover_path, True)    
-            del self.books[book_obj.id]
             book_obj.delete_from_parents()
-            del book_obj
+            del self.books[book_obj.id]
 
         else:
             raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
