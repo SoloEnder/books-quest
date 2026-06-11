@@ -49,10 +49,6 @@ class AppSystem:
         self.books_handler.load_shelves(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
-        self.settings_handler.load_settings(
-            self.res_handler.get_res("data.settings.base"),
-            self.res_handler.get_res("data.settings.user")
-            )
         self.load_and_apply_settings()
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
         self.langs_handler.load_from_file(self.res_handler.get_res(f"assets.langs.{self.settings_handler.get_value("general.language.current")}"))
@@ -60,7 +56,13 @@ class AppSystem:
         
     def load_and_apply_settings(self):
         self.settings_handler.load_base_settings(self.res_handler.get_res("data.settings.base"))
-        self.settings_handler.load_user_settings(self.res_handler.get_res("data.settings.user"))
+        
+        try:
+            self.settings_handler.load_user_settings(self.res_handler.get_res("data.settings.user"))
+            
+        except FileNotFoundError:
+            QtWidgets.QMessageBox.warning(None, "Settings Error", "Failed to load user settings : File not found !")
+            
         self.settings_handler.apply_user_settings()
 
     def start(self):
@@ -125,9 +127,9 @@ class AppSystem:
             self.res_handler.get_res("tmp")
         )
         file_to_make = (
-            self.res_handler.get_res("data.books.books"),
-            self.res_handler.get_res("data.bookshelves.bookshelves"),
-            self.res_handler.get_res("data.settings.user")
+            (self.res_handler.get_res("data.books.books"), []),
+            (self.res_handler.get_res("data.bookshelves.bookshelves"), []),
+            (self.res_handler.get_res("data.settings.user"), {})
         )
 
         for folder in folder_to_make:
@@ -150,18 +152,18 @@ class AppSystem:
                     f"Failed to make folder '{folder}' dues to unhandled exception :"
                 )
 
-        for file in file_to_make:
+        for filepath, data in file_to_make:
             
-            if os.path.exists(file):
-                self.logger.warning(f"File {file} already exists, skipping its creation")
+            if os.path.exists(filepath):
+                self.logger.warning(f"File {filepath} already exists, skipping its creation")
                 continue
             
-            if file.endswith(".json"):
-                self.jfm.write_json(file, [], catch_error=False)
+            if filepath.endswith(".json"):
+                self.jfm.write_json(filepath, data, catch_error=False)
                 
             else:
-                with open(file, "w") as f:
-                    f.write("")
+                with open(filepath, "w") as f:
+                    f.write(str(data))
 
     def check_folder(self, *folders):
         """
