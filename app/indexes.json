@@ -55,7 +55,11 @@
                 "_base_": "covers"
             }
         },
-        "settings": "settings.json"
+        "settings":{
+            "_base_":"settings",
+            "base": "base_settings.json",
+            "user":"user_settings.json"
+        }
     },
     "tmp": {
         "_base_": "tmp"

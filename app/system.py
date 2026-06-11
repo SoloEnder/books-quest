@@ -6,6 +6,7 @@ from PySide6 import QtCore, QtWidgets
 
 from app.src import book_sys
 from app.src import json_dicts_paths_handler
+from app.src import settings_handler
 from app.ui import ui
 from app.utils import json_file_manager
 from app.utils import paths
@@ -47,11 +48,20 @@ class AppSystem:
         self.books_handler.edit_default_shelf(name="Tout les livres")
         self.books_handler.load_shelves(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.qt_app.aboutToQuit.connect(self.close_app)
-        self.settings_handler = json_dicts_paths_handler.JSONDictPathHandler(self.jfm)
-        self.settings_handler.load_from_file(self.res_handler.get_res("data.settings"))
+        self.settings_handler = settings_handler.SettingsHandler(self.jfm)
+        self.settings_handler.load_settings(
+            self.res_handler.get_res("data.settings.base"),
+            self.res_handler.get_res("data.settings.user")
+            )
+        self.load_and_apply_settings()
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
         self.langs_handler.load_from_file(self.res_handler.get_res(f"assets.langs.{self.settings_handler.get_value("general.language.current")}"))
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
+        
+    def load_and_apply_settings(self):
+        self.settings_handler.load_base_settings(self.res_handler.get_res("data.settings.base"))
+        self.settings_handler.load_user_settings(self.res_handler.get_res("data.settings.user"))
+        self.settings_handler.apply_user_settings()
 
     def start(self):
         self.start_ui()
@@ -64,8 +74,9 @@ class AppSystem:
         self.boot_end_time = time.time()
         self.logger.info(f"Initialised app in {self.boot_end_time - self.boot_start_time:.3f}s")
         
-        if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_value("developer_settings.show_indev_warning") == True:
+        if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_value("developer_settings.show_indev_warning.current") == True:
             self.ui.show_indev_warn()
+            
 
     def close_app(self):
         self.logger.info("Closing window...")
@@ -75,7 +86,10 @@ class AppSystem:
         self.books_handler.save_shelfs(self.res_handler.get_res("data.bookshelves.bookshelves"))
         self.logger.info("Deleting files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
-        self.settings_handler.save_in_file(self.res_handler.get_res("data.settings"))
+        self.settings_handler.save_settings(
+            self.res_handler.get_res("data.settings.base"),
+            self.res_handler.get_res("data.settings.user")
+            )
         self.logger.info("Exiting app...")    
         
     def set_instance_locker(self, instance_locker: QtCore.QLockFile):
@@ -113,6 +127,7 @@ class AppSystem:
         file_to_make = (
             self.res_handler.get_res("data.books.books"),
             self.res_handler.get_res("data.bookshelves.bookshelves"),
+            self.res_handler.get_res("data.settings.user")
         )
 
         for folder in folder_to_make:
