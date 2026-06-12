@@ -74,6 +74,9 @@
             },
             "notifications":{
                 "book_deletion_error":"Book not found !"
+            },
+            "placeholders":{
+                "book_research":"Search for books"
             }
         }
     },

@@ -43,6 +43,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__)
         
         #Widgets
+        self.fix_min_exp_sp = (QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         self.page_qss_filepath = self.res_handler.get_res("assets.qss.shelf_details_page")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
@@ -51,8 +52,10 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.main_widget = QtWidgets.QWidget()
         self.books_widgets = []
         self.research_result_widgets = []
-        self.search_lb = QtWidgets.QLabel(self.my_tr("shared.labels.research", False))
         self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setPlaceholderText(self.my_tr(".placeholders.book_research"))
+        self.search_le.setSizePolicy(*self.fix_min_exp_sp)
+        self.search_le.setMinimumWidth(200)
         self.search_le.setClearButtonEnabled(True)
         self.search_le.returnPressed.connect(lambda: self.search_books(self.search_le.text()))
         self.search_le.textEdited.connect(self.exit_search)
@@ -73,8 +76,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 
         #Adding widgets to layout
         self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
-        self.main_lyt.addWidget(self.search_lb, 0, 0)
-        self.main_lyt.addWidget(self.search_le, 0, 1)
+        self.main_lyt.addWidget(self.search_le, 0, 0)
 
     def create_books_widgets(self, books: book_sys.BooksList):
         """

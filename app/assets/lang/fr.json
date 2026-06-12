@@ -74,6 +74,9 @@
             },
             "notifications":{
                 "book_deletion_error":"Livre introuvable !"
+            },
+            "placeholders":{
+                "book_research":"Rechercher des livres"
             }
         }
     },
