@@ -5,7 +5,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui.pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
+from app.ui.main_pages import book_creation_page, shelf_creation_page, shelf_details_page, shelfs_view_page
 from app.ui import notification_service
 from app.utils import utils_funcs
 from app.src import json_dicts_paths_handler
