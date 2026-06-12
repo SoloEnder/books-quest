@@ -59,6 +59,9 @@
             }
         },  
         "shelfs_view_page": {
+            "progress":{
+                "shelf_deletion":"Suppression de /f:<count>/f étagère(s)..."
+            },
             "buttons":{
                 "book_creation":"Nouveau livre",
                 "shelf_creation":"Nouvelle étagère",

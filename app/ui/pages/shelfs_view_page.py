@@ -312,11 +312,14 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         if self.pages_widgets_handler:
         
             try:
+                self.qt_signals_handler.edit_progress_msg.emit(self.my_tr(".progress.shelf_deletion"))
                 self.pages_widgets_handler.delete_widget(self)
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
                 
             except my_exceptions.InvalidWidgetIndexError:
                 self.logger.exception("Unable to delete shelf !")
                 self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
                 
         else:
             self.logger.error(f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid parent page found !")

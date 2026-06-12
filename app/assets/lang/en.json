@@ -63,6 +63,9 @@
                 "book_creation":"New book",
                 "shelf_creation":"New shelf",
                 "view":"See books"
+            },
+            "progress":{
+                "shelf_deletion":"Deleting /f:<count>/f shelves..."
             }
         },
         "shelf_details_page": {
