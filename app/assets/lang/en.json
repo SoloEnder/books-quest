@@ -66,6 +66,9 @@
             },
             "progress":{
                 "shelf_deletion":"Deleting /f:<count>/f shelves..."
+            },
+            "placeholders":{
+                "shelves_research":"Search for shelves"
             }
         },
         "shelf_details_page": {

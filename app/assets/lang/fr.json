@@ -66,6 +66,9 @@
                 "book_creation":"Nouveau livre",
                 "shelf_creation":"Nouvelle étagère",
                 "view":"Voir les livres"
+            },
+            "placeholders":{
+                "shelves_research":"Rechercher des étagères"
             }
         },
         "shelf_details_page": {

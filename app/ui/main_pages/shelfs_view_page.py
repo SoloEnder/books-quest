@@ -43,6 +43,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             logger=self.logger,
             )
 
+        self.fix_min_exp_sp = (QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         #Setting Main layout
         self.shelves_widgets = []
         self.main_lyt = QtWidgets.QGridLayout()
@@ -68,8 +69,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
         
         #Shelf research widgets
         self.research_result_widgets = []
-        self.search_lb = QtWidgets.QLabel(self.my_tr("shared.labels.research", False))
         self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setSizePolicy(*self.fix_min_exp_sp)
+        self.search_le.setMinimumWidth(200)
+        self.search_le.setPlaceholderText(self.my_tr(".placeholders.shelves_research"))
         self.search_le.setClearButtonEnabled(True)
         self.search_le.returnPressed.connect(lambda: self.search_shelfs(self.search_le.text()))
         self.search_le.textEdited.connect(self.exit_search)
@@ -88,7 +91,6 @@ class ShelfsViewPage(QtWidgets.QWidget):
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_widget_lyt.addWidget(self.shelf_creation_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_widget_lyt.addWidget(self.search_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignRight)
         self.main_widget_lyt.addWidget(self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight)
         self.main_widget_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
         self.main_lyt.addWidget(self.main_sa)
