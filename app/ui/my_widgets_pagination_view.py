@@ -1,5 +1,5 @@
 import logging
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtGui
 import widgets_pagination_view
 
 from app.utils import utils_funcs
@@ -20,6 +20,10 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         widgets: widgets_pagination_view.InPageWidgetsList,
         **config,
         ):
+        self.langs_handler = langs_handler
+        self.nothing_to_show_lb = QtWidgets.QLabel(self.my_tr("shared.labels.nothing_to_show", False))
+        self.nothing_to_show_lb.setAlignment(QtGui.Qt.AlignmentFlag.AlignCenter)
+        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
         super().__init__(
             parent=parent, 
             max_loadables_pages_count=max_loadables_pages_count, 
@@ -30,16 +34,31 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         self.logger = logging.getLogger(__name__+"WidgetsPaginationView")
         self.res_handler = res_handler
         self.qt_qignals_handler = qt_signals_handler
-        self.langs_handler = langs_handler
         self.redundant_lang_path = "my_widgets_pagination_view"
         self.jump_to_page_lb.setText(self.my_tr(".labels.jump_to_page"))
-        self.nothing_page.set_label_text(self.my_tr("shared.labels.nothing_to_show", False))
+        self.main_lyt.addWidget(self.nothing_to_show_lb, 0, 0)
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.general"),
             self.res_handler.get_res("assets.qss.widgets_pagination_view"), 
             widget=self, 
             logger=self.logger
             )
+        
+    def generate_pages(self):
+        super().generate_pages()
+        if self.widgets:
+            self.nothing_to_show_lb.setVisible(False)
+            
+        else:
+            self.nothing_to_show_lb.setVisible(True)
+            
+    def delete_widget(self, widget: widgets_pagination_view.InPageWidget):
+        super().delete_widget(widget)
+        if self.widgets:
+            self.nothing_to_show_lb.setVisible(False)
+            
+        else:
+            self.nothing_to_show_lb.setVisible(True)
         
     def _generate_pages_buttons(self, pages_indexes: list | tuple):
         super()._generate_pages_buttons(pages_indexes)
@@ -80,5 +99,4 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path, **kwargs)
-        
+            return self.langs_handler.tr(lang_path, **kwargs)        
