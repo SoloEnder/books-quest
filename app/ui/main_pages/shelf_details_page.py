@@ -106,7 +106,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         """
         
         self.books_widgets = self.create_books_widgets(list(self.shelf._books))
-        self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
+        self.widgets_pagination_view_handler.widgets = self.books_widgets
         
     @QtCore.Slot(str)
     def search_books(self, given_input: str):
@@ -118,25 +118,22 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             
             if matches:
                 self.research_result_widgets = self.create_books_widgets(matches)
-                self.widgets_pagination_view_handler.set_widgets(self.research_result_widgets.copy())
+                self.widgets_pagination_view_handler.widgets = self.research_result_widgets.copy()
                 
             else:
-                self.widgets_pagination_view_handler.set_widgets([])
-                self.widgets_pagination_view_handler.show_nothing_page()
+                self.widgets_pagination_view_handler.widgets = []
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             
     @QtCore.Slot()
     def exit_search(self):
         
         if not self.search_le.text():
-            self.widgets_pagination_view_handler.show_loading_page()
             
             for widget in self.books_widgets:
                if shiboken6.isValid(widget):
                     widget.deleteLater()
                 
             self.books_widgets = self.create_books_widgets(list(self.books_handler.books.values()))
-            self.widgets_pagination_view_handler.set_widgets(self.books_widgets)
             
             for widget in self.research_result_widgets:
                 widget.deleteLater()

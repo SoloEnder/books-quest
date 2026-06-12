@@ -104,25 +104,23 @@ class ShelfsViewPage(QtWidgets.QWidget):
             
             if matches:
                 self.research_result_widgets = self.create_shelves_widgets(matches, False)
-                self.pages_view_handler.set_widgets(self.research_result_widgets.copy())
+                self.pages_view_handler.widgets = self.research_result_widgets.copy()
                 
             else:
-                self.pages_view_handler.set_widgets([])
-                self.pages_view_handler.show_nothing_page()
+                self.pages_view_handler.widgets = []
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             
     @QtCore.Slot()
     def exit_search(self):
         
         if not self.search_le.text():
-            self.pages_view_handler.show_loading_page()
             
             for widget in self.shelves_widgets:
                if shiboken6.isValid(widget):
                     widget.deleteLater()
                 
             self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
-            self.pages_view_handler.set_widgets(self.shelves_widgets)
+            self.pages_view_handler.widgets = self.shelves_widgets
             
             for widget in self.research_result_widgets:
                 widget.deleteLater()
@@ -168,7 +166,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             
     def generate_shelves_pages(self):
         self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
-        self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
+        self.pages_view_handler.widgets = self.shelves_widgets.copy()
         
     def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
         """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
