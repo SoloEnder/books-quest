@@ -21,9 +21,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         **config,
         ):
         self.langs_handler = langs_handler
-        self.nothing_to_show_lb = QtWidgets.QLabel(self.my_tr("shared.labels.nothing_to_show", False))
-        self.nothing_to_show_lb.setAlignment(QtGui.Qt.AlignmentFlag.AlignCenter)
-        self.nothing_to_show_lb.setProperty("role", "nothing_to_show_lb")
+        self.nothing_to_show_page = NothingToShowPage(None, self.my_tr("shared.labels.nothing_to_show", False))
         super().__init__(
             parent=parent, 
             max_loadables_pages_count=max_loadables_pages_count, 
@@ -36,7 +34,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         self.qt_qignals_handler = qt_signals_handler
         self.redundant_lang_path = "my_widgets_pagination_view"
         self.jump_to_page_lb.setText(self.my_tr(".labels.jump_to_page"))
-        self.main_lyt.addWidget(self.nothing_to_show_lb, 0, 0)
+        self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.general"),
             self.res_handler.get_res("assets.qss.widgets_pagination_view"), 
@@ -47,18 +45,18 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
     def generate_pages(self):
         super().generate_pages()
         if self.widgets:
-            self.nothing_to_show_lb.setVisible(False)
+            self.nothing_to_show_page.setVisible(False)
             
         else:
-            self.nothing_to_show_lb.setVisible(True)
+            self.nothing_to_show_page.setVisible(True)
             
     def delete_widget(self, widget: widgets_pagination_view.InPageWidget):
         super().delete_widget(widget)
         if self.widgets:
-            self.nothing_to_show_lb.setVisible(False)
+            self.nothing_to_show_page.setVisible(False)
             
         else:
-            self.nothing_to_show_lb.setVisible(True)
+            self.nothing_to_show_page.setVisible(True)
         
     def _generate_pages_buttons(self, pages_indexes: list | tuple):
         super()._generate_pages_buttons(pages_indexes)
@@ -99,4 +97,17 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
         
         else:
-            return self.langs_handler.tr(lang_path, **kwargs)        
+            return self.langs_handler.tr(lang_path, **kwargs)
+        
+class NothingToShowPage(QtWidgets.QWidget):
+    
+    def __init__(self, parent: QtWidgets.QWidget|None, text):
+        super().__init__(parent)
+        self.main_lyt = QtWidgets.QGridLayout()
+        self.setLayout(self.main_lyt)
+        self.label = QtWidgets.QLabel(text)
+        self.label.setProperty("role", "nothing_to_show_lb")
+        self.main_lyt.addWidget(self.label, 0, 0, QtGui.Qt.AlignmentFlag.AlignCenter)
+        
+    def edit_label_text(self, new_text: str):
+        self.label.setText(new_text)
