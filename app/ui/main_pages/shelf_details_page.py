@@ -13,8 +13,6 @@ from app.ui import qt_signals_handler
 from app.ui import my_widgets_pagination_view
 from app.utils import utils_funcs
 
-
-
 class ShelfDetailsPage(QtWidgets.QWidget):
 
     def __init__(
@@ -49,7 +47,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
-        self.main_widget = QtWidgets.QWidget()
         self.books_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
@@ -78,8 +75,8 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.generate_books_pages()
 
         #Adding widgets to layout
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
         self.main_lyt.addWidget(self.search_le, 0, 0)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
 
     def create_books_widgets(self, books: book_sys.BooksList):
         """

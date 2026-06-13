@@ -129,7 +129,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             - page_name (str): the name of the page, a key of the attribute <pages>.
             - refresh (bool): if true, the page will be refreshed. default to False
         """
-
+        
         self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
             self.qt_signals_handler.edit_progress_msg.emit(self.langs_handler.get_value("shared.progress.loading_page"))
