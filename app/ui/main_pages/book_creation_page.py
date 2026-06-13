@@ -28,19 +28,20 @@ class BookCreationPage(QtWidgets.QWidget):
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = "main_pages.book_creation_page"
         self.variables_kw = {}
         
+        self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-        self.lang_data = self.langs_handler.get_value("pages.book_creation_page")
         self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title": self.langs_handler.get_value("title_lb"),
-            "authors": self.langs_handler.get_value("author_lb"),
-            "edition": self.langs_handler.get_value("edition_lb"),
-            "summary": self.langs_handler.get_value("summary_lb"),
-            "tot_pages": self.langs_handler.get_value("pages_count_lb"),
+            "title": self.my_tr("shared.labels.title", False),
+            "authors": self.my_tr("shared.labels.author", False),
+            "edition": self.my_tr("shared.labels.edition", False),
+            "summary": self.my_tr("shared.labels.summary", False),
+            "tot_pages": self.my_tr("shared.labels.pages_count", False),
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -63,7 +64,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
-        self.edit_cover_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
+        self.edit_cover_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.edit_cover", False))
         self.edit_cover_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
@@ -92,7 +93,7 @@ class BookCreationPage(QtWidgets.QWidget):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel(self.langs_handler.get_value("status_lb"))
+        self.book_status_lb = QtWidgets.QLabel(self.my_tr("shared.labels.status", False))
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
         self.book_status_combob.addItem("En cours", "on_reading")
@@ -103,7 +104,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget = QtWidgets.QWidget(self)
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
-        self.alr_read_pages_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.alr_read_pages_lb"))
+        self.alr_read_pages_lb = QtWidgets.QLabel(self.my_tr(".labels.alr_read_pages"))
         self.alr_read_pages_le = QtWidgets.QLineEdit()
         self.alr_read_pages_le.textEdited.connect(
             lambda: self.check_int(
@@ -114,12 +115,12 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date = QtCore.QDate(
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
-        self.starting_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.starting_read_date_lb"))
+        self.starting_read_date_lb = QtWidgets.QLabel(self.my_tr(".labels.starting_read_date"))
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
-        self.end_read_date_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.end_read_date_lb"))
+        self.end_read_date_lb = QtWidgets.QLabel(self.my_tr(".labels.end_read_date"))
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
@@ -133,7 +134,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         # Shelfs widgets
-        self.shelfs_selection_lb = QtWidgets.QLabel(self.langs_handler.get_value("pages.book_creation_page.shelfs_selection_lb"))
+        self.shelfs_selection_lb = QtWidgets.QLabel(self.my_tr(".labels.shelfs_selection"))
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
         self.shelfs_selection_layout = QtWidgets.QVBoxLayout(
@@ -152,11 +153,11 @@ class BookCreationPage(QtWidgets.QWidget):
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
-        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
-        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
+        self.cancel_b = self.existence_msgbox.addButton(self.my_tr("shared.buttons.cancel", False), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.my_tr("shared.buttons.rename", False), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.my_tr("shared.notifications.add_confirm", False))
 
-        self.add_b = QtWidgets.QPushButton(self.langs_handler.get_value("add_b"))
+        self.add_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.add", False))
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
@@ -291,7 +292,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.lang_data["book_already_exists_lb"]} ({len(matches)})\n{self.langs_handler.get_value("rename_msg")} '{books_infos.get("title")} ({len(matches)})'"
+                f"{self.my_tr(".notifications.book_already_exists")} ({len(matches)})\n{self.my_tr("shared.notifications.renaming_future", False)} '{books_infos.get("title")} ({len(matches)})'"
             )
             self.existence_msgbox.exec()
 
@@ -321,7 +322,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 self.cover_image = final_cover_image
                 self.set_cover_lb_pixmap(self.cover_image)
 
-        books_infos["cover_path"] = str(self.cover_image)
+            books_infos["cover_path"] = str(self.cover_image)
 
         books_infos["status"] = self.book_status_combob.currentData()
 
@@ -359,3 +360,28 @@ class BookCreationPage(QtWidgets.QWidget):
 
             else:
                 QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
+                
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
+        
+        else:
+            return self.langs_handler.tr(lang_path, **kwargs)

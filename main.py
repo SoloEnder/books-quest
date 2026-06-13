@@ -6,7 +6,6 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from app import system
 from app.src import my_logging_stuff
 from app.utils import paths
-import time
 
 fmter = logging.Formatter(
     fmt="[{asctime}] - [{name}/{levelname}] : {message}", style="{"
@@ -56,3 +55,4 @@ if __name__ == "__main__":
 
     except Exception:
         logger.exception("Oh no, Book Quest has crashed ! Check logs for more info.")
+        

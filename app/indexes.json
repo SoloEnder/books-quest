@@ -10,7 +10,7 @@
         "qss": {
             "_base_": "qss",
             "general": "general.qss",
-            "pages_widgets_handler": "pages_widgets_handler.qss",
+            "widgets_pagination_view": "widgets_pagination_view.qss",
             "shelf_details_page": "shelf_details_page.qss",
             "shelfs_view_page": "shelfs_view_page.qss"
         },
@@ -55,7 +55,11 @@
                 "_base_": "covers"
             }
         },
-        "settings": "settings.json"
+        "settings":{
+            "_base_":"settings",
+            "base": "base_settings.json",
+            "user":"user_settings.json"
+        }
     },
     "tmp": {
         "_base_": "tmp"

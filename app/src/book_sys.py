@@ -4,14 +4,24 @@ import os
 import pathlib
 
 from app.utils import json_file_manager as jfm
+from app.src import resources_handler
 from app.utils import my_exceptions
 
 type BooksList = list[Book]
 type BooksDict = dict[str, Book]
 
 type ShelvesList = list[Shelf]
-type ShelfsDict = dict[str, Shelf]
+type ShelvesDict = dict[str, Shelf]
 
+class DefaultCoverPathDeletion(Exception):
+    
+    def __init__(self, path):
+        self.path = path
+        self.msg = "Deleting default book or shelf cover file is not allowed !"
+        
+    def __str__(self):
+        return self.msg
+    
 class Book:
     def __init__(self, **kwargs):
         """
@@ -94,19 +104,19 @@ class BooksHandler:
     def __init__(
         self, 
         jfm: jfm.JsonFileManager,
-        default_cover_path: str,
-        books: dict | None = None, 
+        res_handler: resources_handler.RessourcesHandler,
+        books: BooksDict | None = None,
+        shelves: ShelvesDict | None = None
         ):
         """
         Handle and manage books data
         """
         self.logger = logging.getLogger(__name__)
-        self.books = books if books else {}
-        self.shelves = {}
-        self.shelfs_updated = False
-        self.default_shelf = Shelf(name="All", books_ids=self.books.keys())
+        self.books = books or {}
+        self.res_handler = res_handler
         self.jfm = jfm
-        self.default_cover_path = default_cover_path
+        self.shelves = shelves or {}
+        self.default_shelf = Shelf(name="All", books=self.books.values())
 
     def delete_book(self, book_id: str):
         book_id = book_id
@@ -115,23 +125,20 @@ class BooksHandler:
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
             book_obj: Book = self.books[book_id]
             
-            if book_obj.cover_path and book_obj.cover_path != self.default_cover_path:
-                
-                try:
-                    self._delete_cover(book_obj.cover_path)
-                
-                except FileNotFoundError:
-                    self.logger.error(f"Couldn't delete cover file for book (ID={book_obj.id}) : File not found !")
-                    
-            del self.books[book_obj.id]
+            if book_obj.cover_path:
+                self._delete_cover(book_obj.cover_path, True)    
             book_obj.delete_from_parents()
-            del book_obj
+            del self.books[book_obj.id]
 
         else:
             raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
         
-    def _delete_cover(self, cover_path):
+    def _delete_cover(self, cover_path, check_default: bool=True):
         
+        if check_default: 
+            if cover_path in (self.res_handler.get_res("assets.defaults_covers.book"), self.res_handler.get_res("assets.defaults_covers.shelf")):
+                raise DefaultCoverPathDeletion(cover_path)
+            
         if os.path.exists(cover_path):
             pathlib.Path(cover_path).unlink()
             
@@ -203,20 +210,14 @@ class BooksHandler:
         else:
             raise my_exceptions.BooksShelfExistsError(shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !")
 
-    def remove_shelf(self, id: str):
-        self.logger.debug(f"Removing book shelf with ID : '{id}'...")
+    def delete_shelf(self, id: str):
+        self.logger.debug(f"Deleting shelf with ID : '{id}'...")
 
         if id in self.shelves.keys():
             bookshelf_obj = self.shelves[id]
             
             if bookshelf_obj.cover_path:
-                
-                try:
-                    self._delete_cover(bookshelf_obj.cover_path)
-                    
-                except FileNotFoundError:
-                    self.logger.error(f"Couldn't delete cover file for shelf (ID={bookshelf_obj.id}) : File not found !")
-                    
+                self._delete_cover(bookshelf_obj.cover_path)                 
             del self.shelves[id]
 
         else:
@@ -431,7 +432,6 @@ class BooksHandler:
 
         return books_objs
 
-
 class Session:
     def __init__(self, **kwargs):
         self.start_date = kwargs.get("start_date", None)
@@ -461,7 +461,7 @@ class Shelf:
             my_exceptions.BookExistsError(book.id, f"this Shelf ({self})")
             
     def remove_book(self, book: Book):
-        """Removes book specified by 'book_id' from this shelf"""
+        """Removes 'book' from this shelf"""
 
         if book in self._books:
             self._books.remove(book)

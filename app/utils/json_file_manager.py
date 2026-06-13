@@ -4,7 +4,7 @@ import pathlib
 
 def catch_writing_error(func):
     
-    def wrapper(self: JsonFileManager, filepath: str | pathlib.Path, data, catch_error: bool=False, **msg_infos):
+    def wrapper(self: JsonFileManager, filepath: str | pathlib.Path, data, catch_error: bool=True, **msg_infos):
         
         if catch_error:
             try:
@@ -25,7 +25,7 @@ def catch_writing_error(func):
                 
 def catch_reading_error(func):
     
-    def wrapper(self: JsonFileManager, filepath: str | pathlib.Path, catch_error: bool=False, **msg_infos):
+    def wrapper(self: JsonFileManager, filepath: str | pathlib.Path, catch_error: bool=True, **msg_infos):
         
         if catch_error:
             try:
@@ -40,7 +40,7 @@ def catch_reading_error(func):
                 self._raise_msg(**msg_infos)
                 
             except:
-                self.logger.exception(f"Unable to write JSON in file {filepath} ! ")
+                self.logger.exception(f"Unable to read JSON in file {filepath} ! ")
                 self._raise_msg(**msg_infos)
             
             else:

@@ -21,16 +21,19 @@ class ShelfCreationPage(QtWidgets.QWidget):
         **kwargs,
     ):
         super().__init__(parent)
+        self.PAGE_NAME = "SHELF_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = "main_pages.shelf_creation_page"
         self.modes = ("edition", "creation")
         self.current_mode = kwargs.get("mode")
         self.variables_kw = {**kwargs}
 
+        self.PAGE_NAME = "SHELF_CREATION_PAGE"
         if self.current_mode:
             if self.current_mode not in self.modes:
                 self.logger.error(
@@ -45,7 +48,6 @@ class ShelfCreationPage(QtWidgets.QWidget):
                 "No mode provided for Shelf Creation Page initialisation !"
             )
 
-        self.lang_data = self.langs_handler.get_value("pages.shelf_creation_page")
         self.main_lyt = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_lyt)
         self.main_widget = QtWidgets.QWidget()
@@ -64,7 +66,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_pm = QtGui.QPixmap(self.current_shelf_cover)
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
-        self.cover_selection_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_cover_b"))
+        self.cover_selection_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.edit_cover", False))
         self.cover_selection_b_ico = QtGui.QIcon(
             self.res_handler.get_res("assets.icons.edit")
         )
@@ -72,26 +74,26 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.name_lb = QtWidgets.QLabel(self.lang_data["name"])
+        self.name_lb = QtWidgets.QLabel(self.my_tr(".labels.name"))
         self.name_e = QtWidgets.QLineEdit()
         self.name_e.setMinimumWidth(300)
 
         # Books selection widgets
-        self.books_selection_lb = QtWidgets.QLabel(self.lang_data["books_selection_lb"])
-        self.book_research_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
+        self.books_selection_lb = QtWidgets.QLabel(self.my_tr(".labels.books_selection"))
+        self.book_research_lb = QtWidgets.QLabel(self.my_tr("shared.labels.research", False))
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.cancel_b = self.existence_msgbox.addButton(self.langs_handler.get_value("cancel_b"), QtWidgets.QMessageBox.ButtonRole.RejectRole)
-        self.rename_b = self.existence_msgbox.addButton(self.langs_handler.get_value("rename_b"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
-        self.existence_msgbox.setText(self.langs_handler.get_value("add_confirm_msg"))
+        self.cancel_b = self.existence_msgbox.addButton(self.my_tr("shared.buttons.cancel", False), QtWidgets.QMessageBox.ButtonRole.RejectRole)
+        self.rename_b = self.existence_msgbox.addButton(self.my_tr("shared.buttons.rename", False), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        self.existence_msgbox.setText(self.my_tr("shared.notifications.add_confirm", False))
 
         self.draw_books_tree(self.books_handler.books)
 
         # Confirm widgets
-        self.confirm_b = QtWidgets.QPushButton(self.langs_handler.get_value("done_b"))
+        self.confirm_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.done", False))
         self.confirm_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.done"))
         )
@@ -174,7 +176,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.books_tree = QtWidgets.QTreeView()
         self.books_tree.setMinimumHeight(400)
         self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels((self.langs_handler.get_value("title_lb"), self.langs_handler.get_value("author_lb"), self.langs_handler.get_value("edition_lb")))
+        self.books_tree_model.setHorizontalHeaderLabels((self.my_tr("shared.labels.title", False), self.my_tr("shared.labels.author", False), self.my_tr("shared.labels.edition", False)))
         self.books_tree.setModel(self.books_tree_model)
         self.books_title_items = []
 
@@ -230,7 +232,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             
             else:
                 if names_matches:
-                    self.existence_msgbox.setInformativeText(f"{self.lang_data["shelf_already_exists_lb"]} ({len(names_matches)})\n{self.langs_handler.get_value("rename_msg")} '{shelf_name} ({len(names_matches)})'")
+                    self.existence_msgbox.setInformativeText(f"{self.my_tr(".notifications.shelf_already_exists")} ({len(names_matches)})\n{self.my_tr("shared.notifications.renaming_future", False)} '{shelf_name} ({len(names_matches)})'")
                     self.existence_msgbox.exec()
                     
                     if self.existence_msgbox.clickedButton() == self.rename_b:
@@ -314,3 +316,30 @@ class ShelfCreationPage(QtWidgets.QWidget):
                     #QtWidgets.QMessageBox.information(
                     #    self, "Terminé", "Etagère modifiée"
                     #)
+                    
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
+        
+        else:
+            return self.langs_handler.tr(lang_path, **kwargs)
+
+            

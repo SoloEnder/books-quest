@@ -1,15 +1,15 @@
-import datetime as dt
+
 import logging
 import os
 import shiboken6
-from app.utils import utils_funcs
-from app.utils import my_exceptions
-
 from PySide6 import QtCore, QtGui, QtWidgets
+import widgets_pagination_view
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
-from app.ui import widgets_pages_view
+from app.ui import my_widgets_pagination_view
+from app.utils import utils_funcs
+from app.utils import my_exceptions
 
 class ShelfsViewPage(QtWidgets.QWidget):
 
@@ -29,8 +29,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.variables_kw = {}
 
+        self.PAGE_NAME = "SHELFS_VIEW_PAGE"
         #Logger setup
         self.logger = logging.getLogger(__name__+":ShelfsViewPage")
 
@@ -42,6 +44,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             logger=self.logger,
             )
 
+        self.fix_min_exp_sp = (QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         #Setting Main layout
         self.shelves_widgets = []
         self.main_lyt = QtWidgets.QGridLayout()
@@ -59,35 +62,36 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.book_creation_ico = QtGui.QIcon(self.res_handler.get_res("assets.icons.new_book"))
         
         #Books and Shelfs creation buttons
-        self.book_creation_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.book_creation_b"))
-        self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("book_creation_page", True, {}))
+        self.book_creation_b = QtWidgets.QPushButton(self.my_tr(".buttons.book_creation"))
+        self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {}))
         self.book_creation_b.setIcon(self.book_creation_ico)
-        self.shelf_creation_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.shelf_creation_b"))
-        self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
+        self.shelf_creation_b = QtWidgets.QPushButton(self.my_tr(".buttons.shelf_creation"))
+        self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("SHELF_CREATION_PAGE", True, {"mode":"creation"}))
         
         #Shelf research widgets
-        self.search_result_widgets = []
-        self.search_lb = QtWidgets.QLabel(self.langs_handler.get_value("research_lb"))
+        self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setSizePolicy(*self.fix_min_exp_sp)
+        self.search_le.setMinimumWidth(200)
+        self.search_le.setPlaceholderText(self.my_tr(".placeholders.shelves_research"))
         self.search_le.setClearButtonEnabled(True)
         self.search_le.returnPressed.connect(lambda: self.search_shelfs(self.search_le.text()))
         self.search_le.textEdited.connect(self.exit_search)
 
         #Shelfs pages widgets handler
-        self.pages_view_handler = widgets_pages_view.PagesWidgetsHandler(
-            self, 
-            res_handler, 
-            self.qt_signals_handler,
-            self.langs_handler, 
-            5, 
-            10, 
-            [],
+        self.pages_view_handler = my_widgets_pagination_view.MyWidgetsPaginationView(
+            parent=self, 
+            res_handler=res_handler,
+            qt_signals_handler=self.qt_signals_handler,
+            langs_handler=self.langs_handler, 
+            max_loadables_pages_count=5, 
+            widgets_by_page_count=10, 
+            widgets=[],
             )
 
         #Adding widgets to main layout
         self.main_widget_lyt.addWidget(self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_widget_lyt.addWidget(self.shelf_creation_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_widget_lyt.addWidget(self.search_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignRight)
         self.main_widget_lyt.addWidget(self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight)
         self.main_widget_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
         self.main_lyt.addWidget(self.main_sa)
@@ -97,34 +101,34 @@ class ShelfsViewPage(QtWidgets.QWidget):
     def search_shelfs(self, given_input: str):
         
         if given_input:
+            self.qt_signals_handler.edit_progress_msg.emit(self.my_tr("shared.progress.research", False))
             matches = self.books_handler.get_shelfs(name=(given_input, False, False))
             self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
             
             if matches:
-                self.search_result_widgets = self.create_shelves_widgets(matches, False)
-                self.pages_view_handler.set_widgets(self.search_result_widgets.copy())
+                self.research_result_widgets = self.create_shelves_widgets(matches, False)
+                self.pages_view_handler.widgets = self.research_result_widgets.copy()
                 
             else:
-                self.pages_view_handler.set_widgets([])
-                self.pages_view_handler.show_nothing_page()
+                self.pages_view_handler.widgets = []
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
             
     @QtCore.Slot()
     def exit_search(self):
         
         if not self.search_le.text():
-            self.pages_view_handler.show_loading_page()
             
             for widget in self.shelves_widgets:
                if shiboken6.isValid(widget):
                     widget.deleteLater()
                 
             self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
-            self.pages_view_handler.set_widgets(self.shelves_widgets)
+            self.pages_view_handler.widgets = self.shelves_widgets
             
-            for widget in self.search_result_widgets:
+            for widget in self.research_result_widgets:
                 widget.deleteLater()
                     
-            self.search_result_widgets.clear()
+            self.research_result_widgets.clear()
 
     def create_shelves_widgets(self, shelves: list|tuple, include_default_shelf: bool=True):
         """
@@ -165,9 +169,34 @@ class ShelfsViewPage(QtWidgets.QWidget):
             
     def generate_shelves_pages(self):
         self.shelves_widgets = self.create_shelves_widgets(list(self.books_handler.shelves.values()))
-        self.pages_view_handler.set_widgets(self.shelves_widgets.copy())
+        self.pages_view_handler.widgets = self.shelves_widgets.copy()
+        
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
+        
+        else:
+            return self.langs_handler.tr(lang_path, **kwargs)
                 
-class ShelfWidget(widgets_pages_view.InPageWidget):
+class ShelfWidget(widgets_pagination_view.InPageWidget):
     def __init__(
         self,
         shelf: book_sys.Shelf,
@@ -182,6 +211,7 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.langs_handler = langs_handler
+        self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.logger = logging.getLogger(__name__)
 
         self.setProperty("role", "shelf_widget")
@@ -210,7 +240,6 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
         self.name_w_sa = QtWidgets.QScrollArea()
         self.name_w_sa.setWidgetResizable(True)
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
-        self.logger.debug(f"Books of ShelfWidget {self} = {self.shelf._books}")
         self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
         self.on_reading_books_count = 0
@@ -238,25 +267,25 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
         self.finished_books_lb.setIndent(10)
 
         self.button_size = QtWidgets.QSizePolicy()
-        self.view_b = QtWidgets.QPushButton(self.langs_handler.get_value("pages.shelfs_view_page.view_b"))
+        self.view_b = QtWidgets.QPushButton(self.my_tr(".buttons.view"))
         self.view_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
-        self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("shelf_details_page", True, {"shelf":self.shelf}))
+        self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("SHELF_DETAILS_PAGE", True, {"shelf":self.shelf}))
 
-        self.edit_b = QtWidgets.QPushButton(self.langs_handler.get_value("edit_b"))
+        self.edit_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.edit", False))
         self.edit_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "shelf_creation_page", True, {"mode": "edition", "shelf": self.shelf}
+                "SHELF_CREATION_PAGE", True, {"mode": "edition", "shelf": self.shelf}
             )
         )
         self.edit_b.setSizePolicy(self.button_size)
 
-        self.delete_b = QtWidgets.QPushButton(self.langs_handler.get_value("delete_b"))
+        self.delete_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.delete", False))
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
@@ -279,19 +308,48 @@ class ShelfWidget(widgets_pages_view.InPageWidget):
 
     def delete_shelf(self):
         self.logger.debug(f"Attempting to delete shelf (ID={self.shelf.id})...")
-        self.books_handler.remove_shelf(self.shelf.id)
+        self.books_handler.delete_shelf(self.shelf.id)
         
         if self.pages_widgets_handler:
         
             try:
+                self.qt_signals_handler.edit_progress_msg.emit(self.my_tr(".progress.shelf_deletion"))
                 self.pages_widgets_handler.delete_widget(self)
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
                 
             except my_exceptions.InvalidWidgetIndexError:
                 self.logger.exception("Unable to delete shelf !")
                 self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
                 
         else:
             self.logger.error(f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid parent page found !")
+            
+    def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
+        """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
+        Note that your shortcut lang_path must start by '.' for the auto completion to work.
+        
+        Parameters
+        ----------
+        fill (bool=True): specifies wheter or not to fill the begining of the lang_path
+        **kwargs: the additionnal arguments for the translation text
+        
+        Returns
+        -------
+        str: the translation
+        
+        Example:
+        --------
+        you can pass the lang_path '.buttons.do_something' instead of 'main_pages.page_name.buttons.do_something'\n
+        if the value of the 'redundant_lang_path' is 'main_pages.page_name'
+        """
+        
+        if fill and hasattr(self, "redundant_lang_path") and lang_path.startswith("."):
+            return self.langs_handler.tr(self.redundant_lang_path+lang_path, **kwargs)
+        
+        else:
+            return self.langs_handler.tr(lang_path, **kwargs)
+
 
 class DefaultShelfWidget(ShelfWidget):
     def __init__(
