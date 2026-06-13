@@ -114,7 +114,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         if given_input:
             self.qt_signals_handler.edit_progress_msg.emit(self.my_tr("shared.progress.research", False))
             matches = self.books_handler.get_books(title=(given_input, False, False))
-            self.logger.info(f"Found {len(matches)} shelfs which matches with the query")
+            self.logger.info(f"Found {len(matches)} books which matches with the query")
             
             if matches:
                 self.research_result_widgets = self.create_books_widgets(matches)
@@ -134,6 +134,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
                     widget.deleteLater()
                 
             self.books_widgets = self.create_books_widgets(list(self.books_handler.books.values()))
+            self.widgets_pagination_view_handler.widgets = self.books_widgets
             
             for widget in self.research_result_widgets:
                 widget.deleteLater()
