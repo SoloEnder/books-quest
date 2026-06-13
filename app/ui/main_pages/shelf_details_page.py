@@ -42,9 +42,11 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         
         #Widgets
         self.fix_min_exp_sp = (QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
-        self.page_qss_filepath = self.res_handler.get_res("assets.qss.shelf_details_page")
-        utils_funcs.load_and_set_ss(self.gen_qss_filepath, self.page_qss_filepath, widget=self, logger=self.logger)
+        utils_funcs.load_and_set_ss(
+            self.res_handler.get_res("assets.qss.shelf_details_page"), 
+            widget=self, 
+            logger=self.logger
+            )
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
         self.books_widgets = []

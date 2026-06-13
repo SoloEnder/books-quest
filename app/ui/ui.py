@@ -119,6 +119,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.switch_page("SHELFS_VIEW_PAGE")
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
+        utils_funcs.load_and_set_ss(self.res_handler.get_res("assets.qss.general"), widget=self)
 
     @QtCore.Slot(str, bool, dict)
     def switch_page(self, page_name: str, refresh: bool = False, page_args={}):

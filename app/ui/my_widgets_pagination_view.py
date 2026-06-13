@@ -37,7 +37,6 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         self.nothing_to_show_page = NothingToShowPage(self, self.my_tr("shared.labels.nothing_to_show", False))
         self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_res("assets.qss.general"),
             self.res_handler.get_res("assets.qss.widgets_pagination_view"), 
             widget=self, 
             logger=self.logger

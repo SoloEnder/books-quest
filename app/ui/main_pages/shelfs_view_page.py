@@ -39,7 +39,6 @@ class ShelfsViewPage(QtWidgets.QWidget):
         #Loading custom QSS
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.shelfs_view_page"),
-            self.res_handler.get_res("assets.qss.general"),
             widget=self, 
             logger=self.logger,
             )
