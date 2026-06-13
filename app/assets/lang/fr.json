@@ -75,6 +75,9 @@
             "progress":{
                 "book_deletion":"Suppression de /f:<count>/f livre(s)..."
             },
+            "labels":{
+                "empty_shelf":"Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?"
+            },
             "notifications":{
                 "book_deletion_error":"Livre introuvable !"
             },

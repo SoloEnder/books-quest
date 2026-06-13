@@ -78,6 +78,9 @@
             "notifications":{
                 "book_deletion_error":"Book not found !"
             },
+            "labels":{
+                "empty_shelf":"There are no books here... \nWhy not add some ?"
+            },
             "placeholders":{
                 "book_research":"Search for books"
             }

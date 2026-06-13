@@ -70,7 +70,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             widgets_by_page_count=10,
             widgets=[],
         )
-
+        self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(self.my_tr(".labels.empty_shelf"))
         #books widgets
         self.generate_books_pages()
 
