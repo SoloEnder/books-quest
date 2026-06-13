@@ -171,7 +171,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     def refresh(self, page_name, page_args):
         self.logger.debug(f"Pages switch history={self.history}")
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
-        if page_name == "SHELF_VIEW_PAGE":
+        if page_name == "SHELFS_VIEW_PAGE":
             self.removeWidget(self.shelfs_view_page)
             self.shelfs_view_page.setParent(None)
             self.shelfs_view_page.deleteLater()
@@ -232,6 +232,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 )
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
+            
+        else:
+            raise ValueError(f"Unknown page : '{page_name}'")
             
     def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
         """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n
