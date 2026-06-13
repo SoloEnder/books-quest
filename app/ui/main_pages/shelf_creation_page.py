@@ -33,6 +33,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.current_mode = kwargs.get("mode")
         self.variables_kw = {**kwargs}
 
+        self.PAGE_NAME = "SHELF_CREATION_PAGE"
         if self.current_mode:
             if self.current_mode not in self.modes:
                 self.logger.error(

@@ -30,7 +30,7 @@ class UI(QtWidgets.QMainWindow):
         )
         self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
         self.addToolBar(self.toolbar)
-        self.toolbar.go_back_act.triggered.connect(lambda: self.my_stacked_widgets.go_back(True))
+        self.toolbar.close_page_act.triggered.connect(lambda: self.my_stacked_widgets.close_page())
         self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger)
@@ -106,19 +106,19 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             mode="creation",
         )
         self.pages = {
-            "shelfs_view_page": self.shelfs_view_page,
-            "shelf_details_page": self.shelf_details_page,
-            "book_creation_page": self.book_creation_page,
-            "shelf_creation_page": self.shelf_creation_page,
+            "SHELFS_VIEW_PAGE": self.shelfs_view_page,
+            "SHELF_DETAILS_PAGE": self.shelf_details_page,
+            "BOOK_CREATION_PAGE": self.book_creation_page,
+            "SHELF_CREATION_PAGE": self.shelf_creation_page,
         }
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.book_creation_page)
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
         self.history = []
-        self.history.append("shelfs_view_page")
+        self.switch_page("SHELFS_VIEW_PAGE")
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
-        self.qt_signals_handler.go_previous_page_sg.connect(self.go_back)
+        self.qt_signals_handler.close_page_sg.connect(self.close_page)
 
     @QtCore.Slot(str, bool, dict)
     def switch_page(self, page_name: str, refresh: bool = False, page_args={}):
@@ -146,20 +146,32 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.logger.error(f"Page <{page_name}> not found !")
 
     @QtCore.Slot(bool)
-    def go_back(self, refresh: bool):
+    def close_page(self):
         
-        if len(self.history) >= 1:
+        if len(self.history) > 1:
+            self.switch_page(
+                self.history[1],
+                True,
+                self.pages[self.history[1]].variables_kw
+            )
+            del self.history[1]
+            del self.history[0]
+        
+        # history_copy = self.history.copy()
+        # if len(history_copy) >= 1:
             
-            if self.history[0] != self.history[1]:
-                self.switch_page(
-                    self.history[1],
-                    True if refresh else False,
-                    self.pages[self.history[1]].variables_kw
-                )
+        #     if history_copy[0] != history_copy[1]:
+        #         del self.history[1]
+        #         self.switch_page(
+        #             history_copy[1],
+        #             True if refresh else False,
+        #             self.pages[history_copy[1]].variables_kw
+        #         )
 
     def refresh(self, page_name, page_args):
+        self.logger.debug(f"Pages switch history={self.history}")
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
-        if page_name == "shelfs_view_page":
+        if page_name == "SHELF_VIEW_PAGE":
             self.removeWidget(self.shelfs_view_page)
             self.shelfs_view_page.setParent(None)
             self.shelfs_view_page.deleteLater()
@@ -171,10 +183,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.settings_handler,
                 self.langs_handler,
             )
-            self.pages["shelfs_view_page"] = self.shelfs_view_page
+            self.pages["SHELFS_VIEW_PAGE"] = self.shelfs_view_page
             self.addWidget(self.shelfs_view_page)
 
-        elif page_name == "book_creation_page":
+        elif page_name == "BOOK_CREATION_PAGE":
             self.removeWidget(self.book_creation_page)
             self.book_creation_page.setParent(None)
             self.book_creation_page.deleteLater()
@@ -186,10 +198,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.settings_handler,
                 self.langs_handler,
             )
-            self.pages["book_creation_page"] = self.book_creation_page
+            self.pages["BOOK_CREATION_PAGE"] = self.book_creation_page
             self.addWidget(self.book_creation_page)
 
-        elif page_name == "shelf_creation_page":
+        elif page_name == "SHELF_CREATION_PAGE":
             self.removeWidget(self.shelf_creation_page)
             self.shelf_creation_page.setParent(None)
             self.shelf_creation_page.deleteLater()
@@ -202,10 +214,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.langs_handler,
                 **page_args,
             )
-            self.pages["shelf_creation_page"] = self.shelf_creation_page
+            self.pages["SHELF_CREATION_PAGE"] = self.shelf_creation_page
             self.addWidget(self.shelf_creation_page)
 
-        elif page_name == "shelf_details_page":
+        elif page_name == "SHELF_DETAILS_PAGE":
             self.removeWidget(self.shelf_details_page)
             self.shelf_details_page.setParent(None)
             self.shelf_details_page.deleteLater()
@@ -218,7 +230,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.settings_handler,
                 self.langs_handler,
                 )
-            self.pages["shelf_details_page"] = self.shelf_details_page
+            self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
             
     def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
@@ -265,9 +277,9 @@ class ToolBar(QtWidgets.QToolBar):
         self.langs_handler = langs_handler
         self.redundant_lang_path = "toolbar"
         
-        self.go_back_act = QtGui.QAction(self.my_tr(".actions.go_back"))
-        self.go_back_act.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.go_back")))
-        self.addAction(self.go_back_act)
+        self.close_page_act = QtGui.QAction(self.my_tr(".actions.close_page"))
+        self.close_page_act.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.exit")))
+        self.addAction(self.close_page_act)
         
     def my_tr(self, lang_path: str, fill: bool=True, **kwargs) -> str:
         """Do the same as the 'langs_handler.tr()' attribute, but auto-complete the first part of the 'lang_path' by the value of the 'rebondant_lang_path' attr.\n

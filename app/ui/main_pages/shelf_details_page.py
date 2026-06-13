@@ -72,7 +72,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         )
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(self.my_tr(".labels.empty_shelf"))
         self.add_book_b = QtWidgets.QPushButton(self.my_tr("main_pages.shelfs_view_page.buttons.book_creation", False))
-        self.add_book_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("book_creation_page", True, {}))
+        self.add_book_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {}))
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(self.add_book_b, 1, 0, QtGui.Qt.AlignmentFlag.AlignCenter)
         #books widgets
         self.generate_books_pages()

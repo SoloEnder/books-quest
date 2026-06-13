@@ -31,6 +31,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.redundant_lang_path = "main_pages.book_creation_page"
         self.variables_kw = {}
         
+        self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
         self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()

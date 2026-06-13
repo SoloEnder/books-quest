@@ -32,6 +32,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.variables_kw = {}
 
+        self.PAGE_NAME = "SHELFS_VIEW_PAGE"
         #Logger setup
         self.logger = logging.getLogger(__name__+":ShelfsViewPage")
 
@@ -62,10 +63,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
         
         #Books and Shelfs creation buttons
         self.book_creation_b = QtWidgets.QPushButton(self.my_tr(".buttons.book_creation"))
-        self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("book_creation_page", True, {}))
+        self.book_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {}))
         self.book_creation_b.setIcon(self.book_creation_ico)
         self.shelf_creation_b = QtWidgets.QPushButton(self.my_tr(".buttons.shelf_creation"))
-        self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("shelf_creation_page", True, {"mode":"creation"}))
+        self.shelf_creation_b.clicked.connect(lambda: qt_signals_handler.switch_page_sg.emit("SHELF_CREATION_PAGE", True, {"mode":"creation"}))
         
         #Shelf research widgets
         self.research_result_widgets = []
@@ -271,7 +272,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
             QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
-        self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("shelf_details_page", True, {"shelf":self.shelf}))
+        self.view_b.clicked.connect(lambda: self.qt_signals_handler.switch_page_sg.emit("SHELF_DETAILS_PAGE", True, {"shelf":self.shelf}))
 
         self.edit_b = QtWidgets.QPushButton(self.my_tr("shared.buttons.edit", False))
         self.edit_b.setIcon(
@@ -279,7 +280,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "shelf_creation_page", True, {"mode": "edition", "shelf": self.shelf}
+                "SHELF_CREATION_PAGE", True, {"mode": "edition", "shelf": self.shelf}
             )
         )
         self.edit_b.setSizePolicy(self.button_size)

@@ -33,7 +33,7 @@
 
     "toolbar": {
         "actions":{
-            "go_back":"Retour"
+            "close_page":"Fermer"
         }
     },
 
