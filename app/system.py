@@ -79,7 +79,6 @@ class AppSystem:
         if self.app_infos["version"]["semantic"] == "indev" and self.settings_handler.get_value("developer_settings.show_indev_warning.current") == True:
             self.ui.show_indev_warn()
             
-
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
