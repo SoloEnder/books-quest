@@ -11,17 +11,16 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         
     def __init__(
         self,
+        parent: QtWidgets.QWidget|None, 
         res_handler: resources_handler.RessourcesHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler, 
         langs_handler: langs_handler.LangsHandler,
-        parent: QtWidgets.QWidget|None, 
         max_loadables_pages_count: int, 
         widgets_by_page_count: int, 
         widgets: widgets_pagination_view.InPageWidgetsList,
         **config,
         ):
-        self.langs_handler = langs_handler
-        self.nothing_to_show_page = NothingToShowPage(None, self.my_tr("shared.labels.nothing_to_show", False))
+        self.init_completed = False
         super().__init__(
             parent=parent, 
             max_loadables_pages_count=max_loadables_pages_count, 
@@ -31,9 +30,11 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         )
         self.logger = logging.getLogger(__name__+"WidgetsPaginationView")
         self.res_handler = res_handler
+        self.langs_handler = langs_handler
         self.qt_qignals_handler = qt_signals_handler
         self.redundant_lang_path = "my_widgets_pagination_view"
         self.jump_to_page_lb.setText(self.my_tr(".labels.jump_to_page"))
+        self.nothing_to_show_page = NothingToShowPage(self, self.my_tr("shared.labels.nothing_to_show", False))
         self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.general"),
@@ -41,14 +42,17 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             widget=self, 
             logger=self.logger
             )
+        self.init_completed = True
         
     def generate_pages(self):
         super().generate_pages()
-        if self.widgets:
-            self.nothing_to_show_page.setVisible(False)
-            
-        else:
-            self.nothing_to_show_page.setVisible(True)
+        
+        if self.init_completed:
+            if self.widgets:
+                self.nothing_to_show_page.setVisible(False)
+                
+            else:
+                self.nothing_to_show_page.setVisible(True)
             
     def delete_widget(self, widget: widgets_pagination_view.InPageWidget):
         super().delete_widget(widget)
