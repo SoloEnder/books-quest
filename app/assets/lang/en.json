@@ -58,7 +58,8 @@
   },
   "shelf": {
     "infos": {
-      "name": "Name : "
+      "title": "Titre : ",
+      "default_shelf_title": "All Books"
     },
     "msg": {
       "books_selection": "Book to add to this shelf : ",

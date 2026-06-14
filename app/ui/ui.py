@@ -34,6 +34,9 @@ class UI(QtWidgets.QMainWindow):
             self, self.langs_handler
         )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
+        self.books_handler.edit_default_shelf(
+            title=self.langs_handler.tr("shelf.infos.default_shelf_title")
+        )
         self.my_stacked_widgets = MyStackedWidgets(
             self,
             self.books_handler,

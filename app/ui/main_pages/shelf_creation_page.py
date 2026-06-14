@@ -79,7 +79,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.name"))
+        self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.title"))
         self.title_e = QtWidgets.QLineEdit()
         self.title_e.setMinimumWidth(300)
 
