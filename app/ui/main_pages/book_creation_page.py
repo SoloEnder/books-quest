@@ -2,12 +2,11 @@ import datetime as dt
 import logging
 import os
 import shutil
-import traceback
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys
+from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.utils import images_tools
 
@@ -17,10 +16,10 @@ class BookCreationPage(QtWidgets.QWidget):
         self,
         parent: QtWidgets.QWidget,
         books_handler: book_sys.BooksHandler,
-        res_handler,
+        res_handler: resources_handler.RessourcesHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler,
-        langs_handler,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
     ):
         super().__init__(parent)
         self.books_handler = books_handler
@@ -160,7 +159,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for shelf in self.books_handler.shelves.values():
-            shelf_cb = QtWidgets.QCheckBox(shelf.name)
+            shelf_cb = QtWidgets.QCheckBox(shelf.title)
             self.shelfs_selection_cbs[shelf.id] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
