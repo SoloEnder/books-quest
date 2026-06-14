@@ -70,7 +70,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
         self.cover_selection_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.edit_cover")
+            self.langs_handler.tr("shared.actions.edit_cover")
         )
         self.cover_selection_b_ico = QtGui.QIcon(
             self.res_handler.get_res("assets.icons.edit")
@@ -79,16 +79,16 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.name_lb = QtWidgets.QLabel(self.langs_handler.tr(".labels.name"))
+        self.name_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.name"))
         self.name_e = QtWidgets.QLineEdit()
         self.name_e.setMinimumWidth(300)
 
         # Books selection widgets
         self.books_selection_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(".labels.books_selection")
+            self.langs_handler.tr("shelf.actions.select_books")
         )
         self.book_research_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shared.labels.research")
+            self.langs_handler.tr("shared.actions.search.book")
         )
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
@@ -96,22 +96,20 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
         self.cancel_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.buttons.cancel"),
+            self.langs_handler.tr("shared.actions.cancel"),
             QtWidgets.QMessageBox.ButtonRole.RejectRole,
         )
         self.rename_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.buttons.rename"),
+            self.langs_handler.tr("shared.actions.rename"),
             QtWidgets.QMessageBox.ButtonRole.AcceptRole,
         )
-        self.existence_msgbox.setText(
-            self.langs_handler.tr("shared.notifications.add_confirm")
-        )
+        self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
         self.draw_books_tree(self.books_handler.books)
 
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.done")
+            self.langs_handler.tr("shared.actions.done")
         )
         self.confirm_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.done"))
@@ -198,9 +196,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.books_tree_model = QtGui.QStandardItemModel()
         self.books_tree_model.setHorizontalHeaderLabels(
             (
-                self.langs_handler.tr("shared.labels.title"),
-                self.langs_handler.tr("shared.labels.author"),
-                self.langs_handler.tr("shared.labels.edition"),
+                self.langs_handler.tr("shared.infos.title"),
+                self.langs_handler.tr("shared.infos.author"),
+                self.langs_handler.tr("shared.infos.edition"),
             )
         )
         self.books_tree.setModel(self.books_tree_model)
@@ -265,7 +263,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             else:
                 if names_matches:
                     self.existence_msgbox.setInformativeText(
-                        f"{self.langs_handler.tr('.notifications.shelf_already_exists')} ({len(names_matches)})\n{self.langs_handler.tr('shared.notifications.renaming_future')} '{shelf_name} ({len(names_matches)})'"
+                        f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(names_matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_name} ({len(names_matches)})'"
                     )
                     self.existence_msgbox.exec()
 

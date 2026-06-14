@@ -53,7 +53,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setPlaceholderText(
-            self.langs_handler.tr(".placeholders.book_research")
+            self.langs_handler.tr("shared.actions.search.book")
         )
         self.search_le.setSizePolicy(*self.fix_min_exp_sp)
         self.search_le.setMinimumWidth(200)
@@ -76,10 +76,10 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             )
         )
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-            self.langs_handler.tr(".labels.empty_shelf")
+            self.langs_handler.tr("shelf.msg.empty_shelf")
         )
         self.add_book_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("main_pages.shelfs_view_page.buttons.book_creation")
+            self.langs_handler.tr("shared.actions.book_creation")
         )
         self.add_book_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -133,7 +133,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 
         if given_input:
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.progress.research")
+                self.langs_handler.tr("shared.actions.search_in_progress")
             )
             matches = self.books_handler.get_books(title=(given_input, False, False))
             self.logger.info(f"Found {len(matches)} books which matches with the query")
@@ -229,12 +229,12 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("book_summary_te")
         self.edit_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.edit")
+            self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
         self.edit_b.setObjectName("edit_b")
         self.edit_b.setSizePolicy(self.fixed_sp)
         self.delete_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.delete")
+            self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")

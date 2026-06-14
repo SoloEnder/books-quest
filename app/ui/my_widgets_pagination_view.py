@@ -33,9 +33,9 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         self.langs_handler = langs_handler
         self.qt_qignals_handler = qt_signals_handler
         self.redundant_lang_path = "my_widgets_pagination_view"
-        self.jump_to_page_lb.setText(self.langs_handler.tr(".labels.jump_to_page"))
+        self.jump_to_page_lb.setText(self.langs_handler.tr("shared.actions.go_to"))
         self.nothing_to_show_page = NothingToShowPage(
-            self, self.langs_handler.tr("shared.labels.nothing_to_show")
+            self, self.langs_handler.tr("shared.msg.nothing_to_show")
         )
         self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
         utils_funcs.load_and_set_ss(

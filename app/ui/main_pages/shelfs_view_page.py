@@ -66,7 +66,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
 
         # Books and Shelfs creation buttons
         self.book_creation_b = QtWidgets.QPushButton(
-            self.langs_handler.tr(".buttons.book_creation")
+            self.langs_handler.tr("shared.actions.book_creation")
         )
         self.book_creation_b.clicked.connect(
             lambda: qt_signals_handler.switch_page_sg.emit(
@@ -75,7 +75,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         )
         self.book_creation_b.setIcon(self.book_creation_ico)
         self.shelf_creation_b = QtWidgets.QPushButton(
-            self.langs_handler.tr(".buttons.shelf_creation")
+            self.langs_handler.tr("shared.actions.shelf_creation")
         )
         self.shelf_creation_b.clicked.connect(
             lambda: qt_signals_handler.switch_page_sg.emit(
@@ -89,7 +89,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
         self.search_le.setSizePolicy(*self.fix_min_exp_sp)
         self.search_le.setMinimumWidth(200)
         self.search_le.setPlaceholderText(
-            self.langs_handler.tr(".placeholders.shelves_research")
+            self.langs_handler.tr("shared.actions.search.shelf")
         )
         self.search_le.setClearButtonEnabled(True)
         self.search_le.returnPressed.connect(
@@ -127,7 +127,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
 
         if given_input:
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.progress.research")
+                self.langs_handler.tr("shared.msg.search_in_progress")
             )
             matches = self.books_handler.get_shelfs(name=(given_input, False, False))
             self.logger.info(
@@ -285,7 +285,9 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         self.finished_books_lb.setIndent(10)
 
         self.button_size = QtWidgets.QSizePolicy()
-        self.view_b = QtWidgets.QPushButton(self.langs_handler.tr(".buttons.view"))
+        self.view_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shelf.actions.view_books")
+        )
         self.view_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
         )
@@ -297,7 +299,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         )
 
         self.edit_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.edit")
+            self.langs_handler.tr("shared.actions.edit")
         )
         self.edit_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.edit")))
         self.edit_b.clicked.connect(
@@ -308,7 +310,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         self.edit_b.setSizePolicy(self.button_size)
 
         self.delete_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.delete")
+            self.langs_handler.tr("shared.actions.delete")
         )
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
@@ -337,7 +339,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         if self.pages_widgets_handler:
             try:
                 self.qt_signals_handler.edit_progress_msg.emit(
-                    self.langs_handler.tr(".progress.shelf_deletion")
+                    self.langs_handler.tr("shelf.msg.shelf_deletion")
                 )
                 self.pages_widgets_handler.delete_widget(self)
                 self.qt_signals_handler.edit_progress_msg.emit(" ")

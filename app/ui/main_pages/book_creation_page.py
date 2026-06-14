@@ -37,11 +37,11 @@ class BookCreationPage(QtWidgets.QWidget):
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title": self.langs_handler.tr("shared.labels.title"),
-            "authors": self.langs_handler.tr("shared.labels.author"),
-            "edition": self.langs_handler.tr("shared.labels.edition"),
-            "summary": self.langs_handler.tr("shared.labels.summary"),
-            "tot_pages": self.langs_handler.tr("shared.labels.pages_coun"),
+            "title": self.langs_handler.tr("shared.infos.title"),
+            "authors": self.langs_handler.tr("shared.infos.author"),
+            "edition": self.langs_handler.tr("shared.infos.edition"),
+            "summary": self.langs_handler.tr("shared.infos.summary"),
+            "tot_pages": self.langs_handler.tr("shared.infos.pages_count"),
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -65,7 +65,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
         self.edit_cover_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.buttons.edit_cover")
+            self.langs_handler.tr("shared.actions.edit_cover")
         )
         self.edit_cover_b.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
@@ -96,7 +96,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         # Book status widgets
         self.book_status_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shared.labels.status")
+            self.langs_handler.tr("shared.infos.status")
         )
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem("Non lut", "unread")
@@ -109,7 +109,7 @@ class BookCreationPage(QtWidgets.QWidget):
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
         self.alr_read_pages_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(".labels.alr_read_pages")
+            self.langs_handler.tr("book.infos.alr_read_pages")
         )
         self.alr_read_pages_le = QtWidgets.QLineEdit()
         self.alr_read_pages_le.textEdited.connect(
@@ -122,14 +122,14 @@ class BookCreationPage(QtWidgets.QWidget):
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
         self.starting_read_date_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(".labels.starting_read_date")
+            self.langs_handler.tr("book.infos.starting_read_date")
         )
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
         self.end_read_date_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(".labels.end_read_date")
+            self.langs_handler.tr("book.infos.end_read_date")
         )
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
@@ -145,7 +145,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
         # Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(".labels.shelfs_selection")
+            self.langs_handler.tr("book.infos.shelfs_selection")
         )
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
@@ -166,18 +166,16 @@ class BookCreationPage(QtWidgets.QWidget):
 
         self.existence_msgbox = QtWidgets.QMessageBox()
         self.cancel_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.buttons.cancel"),
+            self.langs_handler.tr("shared.actions.cancel"),
             QtWidgets.QMessageBox.ButtonRole.RejectRole,
         )
         self.rename_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.buttons.rename"),
+            self.langs_handler.tr("shared.actions.rename"),
             QtWidgets.QMessageBox.ButtonRole.AcceptRole,
         )
-        self.existence_msgbox.setText(
-            self.langs_handler.tr("shared.notifications.add_confirm")
-        )
+        self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
-        self.add_b = QtWidgets.QPushButton(self.langs_handler.tr("shared.buttons.add"))
+        self.add_b = QtWidgets.QPushButton(self.langs_handler.tr("shared.actions.add"))
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
@@ -317,7 +315,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('.notifications.book_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.notifications.renaming_future')} '{books_infos.get('title')} ({len(matches)})'"
+                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({len(matches)})\n{self.langs_handler.tr('book.msg.renaming_future')} '{books_infos.get('title')} ({len(matches)})'"
             )
             self.existence_msgbox.exec()
 

@@ -162,7 +162,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.progress.loading_page")
+                self.langs_handler.tr("shared.msg.loading_page")
             )
             if refresh:
                 self.refresh(page_name, page_args)
@@ -287,7 +287,7 @@ class ToolBar(QtWidgets.QToolBar):
         self.redundant_lang_path = "toolbar"
 
         self.close_page_act = QtGui.QAction(
-            self.langs_handler.tr(".actions.close_page")
+            self.langs_handler.tr("shared.actions.close")
         )
         self.close_page_act.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
