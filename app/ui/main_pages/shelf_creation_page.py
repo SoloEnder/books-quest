@@ -79,9 +79,9 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
 
         # Shelf name input widget
-        self.name_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.name"))
-        self.name_e = QtWidgets.QLineEdit()
-        self.name_e.setMinimumWidth(300)
+        self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.name"))
+        self.title_e = QtWidgets.QLineEdit()
+        self.title_e.setMinimumWidth(300)
 
         # Books selection widgets
         self.books_selection_lb = QtWidgets.QLabel(
@@ -124,10 +124,10 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.cover_selection_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_widget_lyt.addWidget(
-            self.name_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.title_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_widget_lyt.addWidget(
-            self.name_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.title_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_widget_lyt.addWidget(
             self.books_selection_lb, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft
@@ -157,7 +157,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
     def edition_mode(self):
         if self.shelf:
-            self.name_e.setText(self.shelf.name)
+            self.title_e.setText(self.shelf.title)
 
             for title_item in self.books_title_items:
                 if self.shelf.has_book(title_item.data()):
@@ -238,12 +238,12 @@ class ShelfCreationPage(QtWidgets.QWidget):
     def get_shelf_infos(self) -> dict | None:
         id = str(dt.datetime.timestamp(dt.datetime.now()))
 
-        shelf_name = self.name_e.text()
-        name_suffix = None
+        shelf_title = self.title_e.text()
+        title_suffix = None
 
         if (
-            not shelf_name.lower()
-            or shelf_name.lower() == self.books_handler.default_shelf.name.lower()
+            not shelf_title.lower()
+            or shelf_title.lower() == self.books_handler.default_shelf.title.lower()
         ):  # type: ignore
             self.qt_signals_handler.notify_sg.emit(
                 "error", "", "Nom d'étagère invalide", ""
@@ -252,23 +252,23 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         if self.current_mode == "creation":
             try:
-                names_matches = self.check_name_existence(shelf_name)
+                names_matches = self.check_name_existence(shelf_title)
 
             except AttributeError:
                 self.logger.exception(
-                    f"Unable to check {shelf_name=} existence for on creating shelf !"
+                    f"Unable to check {shelf_title=} existence for on creating shelf !"
                 )
                 return
 
             else:
                 if names_matches:
                     self.existence_msgbox.setInformativeText(
-                        f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(names_matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_name} ({len(names_matches)})'"
+                        f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(names_matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({len(names_matches)})'"
                     )
                     self.existence_msgbox.exec()
 
                     if self.existence_msgbox.clickedButton() == self.rename_b:
-                        name_suffix = len(names_matches)
+                        title_suffix = len(names_matches)
 
                     else:
                         return
@@ -295,8 +295,8 @@ class ShelfCreationPage(QtWidgets.QWidget):
             self.set_cover_lb_pixmap(final_img_path)
 
         return {
-            "name": shelf_name,
-            "name_suffix": name_suffix,
+            "title": shelf_title,
+            "title_suffix": shelf_title,
             "books": books,
             "id": id,
             "cover_path": self.current_shelf_cover

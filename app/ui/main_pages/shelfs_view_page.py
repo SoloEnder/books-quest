@@ -245,13 +245,13 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         else:
             self.displayed_cover = self.default_cover
 
-        self.name_lb = QtWidgets.QLabel(
-            self.shelf.name
+        self.title_lb = QtWidgets.QLabel(
+            self.shelf.title
             + (f" ({self.shelf.name_suffix})" if self.shelf.name_suffix else "")
         )
 
-        self.name_lb.setWordWrap(True)
-        self.name_lb.setObjectName("name_lb")
+        self.title_lb.setWordWrap(True)
+        self.title_lb.setObjectName("name_lb")
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
@@ -320,7 +320,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         self.delete_b.clicked.connect(self.delete_shelf)
 
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_layout.addWidget(self.name_lb, 0, 0, 1, 2)
+        self.main_layout.addWidget(self.title_lb, 0, 0, 1, 2)
         self.main_layout.addWidget(self.cover_lb, 1, 0, 8, 1)
         self.main_layout.addWidget(self.total_books, 1, 1)
         self.main_layout.addWidget(self.unread_books_lb, 2, 1)
