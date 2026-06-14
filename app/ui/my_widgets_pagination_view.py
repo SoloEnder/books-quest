@@ -80,7 +80,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             self.qt_qignals_handler.notify_sg.emit(
                 "error",
                 "Page not found",
-                self.tr("my_widgets_pagination_view.notifications.invalid_page_index"),
+                self.langs_handler.tr("shared.msg.invalid_page_index"),
                 "",
             )
 
