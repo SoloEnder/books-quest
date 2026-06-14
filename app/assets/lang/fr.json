@@ -8,10 +8,14 @@
       "edit_cover": "Modifier la couverture",
       "rename": "Renommer",
       "cancel": "Annuler",
-      "search": "Rechercher",
+      "search": {
+        "base": "Search",
+        "book": "Rechercher des livres",
+        "shelf": "Rechercher des étagères"
+      },
       "close": "Fermer",
       "book_creation": "Nouveau livre",
-      "shelf_creation": "Nouvelle rangée",
+      "shelf_creation": "Nouvelle étagère",
       "go_to": "Aller à:"
     },
     "basic_error_notification": {
@@ -24,7 +28,7 @@
     "msg": {
       "nothing_to_show": "Il n'y a rien ici",
       "loading": "Chargement...",
-      "research": "Recherche en cours...",
+      "search_in_progress": "Recherche en cours...",
       "loading_page": "Chargement de la page...",
       "add_confirm": "Voulez vous vraiment ajouter cet élément ?",
       "renaming_future": "Il sera renommé en : ",
@@ -63,8 +67,8 @@
       "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?"
     },
     "actions": {
-      "view": "Voir les livres",
-      "book_research": "Rechercher des livres"
+      "view_books": "Voir les livres",
+      "select_books": "Selectionner des livres :"
     }
   }
 }

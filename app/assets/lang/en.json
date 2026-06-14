@@ -8,24 +8,28 @@
       "edit_cover": "Edit cover",
       "rename": "Rename",
       "cancel": "Cancel",
-      "search": "Search",
+      "search": {
+        "base": "Search",
+        "book": "Search for books",
+        "shelf": "Search for shelves"
+      },
       "close": "Close",
       "book_creation": "New book",
       "shelf_creation": "New shelf",
       "go_to": "Go to :"
     },
-    "basic_error": {
+    "basic_error_notification": {
       "title": "Warning",
       "msg": "An error has occured, please try again"
     },
-    "basic_info": {
+    "basic_info_notification": {
       "title": "Information",
       "msg": "An error has occured, please try again"
     },
     "msg": {
       "nothing_to_show": "There is nothing here",
       "loading": "Loading...",
-      "research": "Research in progress...",
+      "search_in_progress": "Research in progress...",
       "loading_page": "Loading page...",
       "add_confirm": "Do you really want to add this element ?",
       "renaming_future": "This element will be renamed as : ",
@@ -64,8 +68,8 @@
       "book_deletion_error": "Book not found !"
     },
     "actions": {
-      "view": "See books",
-      "book_research": "Search for books"
+      "select_books": "Select books :",
+      "view_books": "See books"
     }
   }
 }
