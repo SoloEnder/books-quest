@@ -262,7 +262,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         if self.pages_widgets_handler:
             self.logger.info(f"Deleting book with ID={self.book.id}")
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr(".progress.book_deletion", count=1)
+                self.langs_handler.tr("book.msg.book_deletion", count=1)
             )
 
             try:
