@@ -136,6 +136,13 @@ class Shelf:
                 f"Book with (ID={book.id}) is not contained in Shelf (ID={self.id}) !",
             )
 
+    def remove_all_books(self):
+        """
+        Remove that shelf from all its books
+        """
+        for book in self._books:
+            book._parents_shelves.remove(self)
+
     def has_book(self, book: Book):
         """
         Return True if 'book' is in the '_books' attribute, otherwise return False
@@ -280,10 +287,12 @@ class BooksHandler:
         self.logger.debug(f"Deleting shelf with ID : '{id}'...")
 
         if id in self.shelves.keys():
-            bookshelf_obj = self.shelves[id]
+            shelf = self.shelves[id]
 
-            if bookshelf_obj.cover_path:
-                self._delete_cover(bookshelf_obj.cover_path)
+            if shelf.cover_path:
+                self._delete_cover(shelf.cover_path)
+
+            shelf.remove_all_books()
             del self.shelves[id]
 
         else:
