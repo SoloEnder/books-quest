@@ -226,12 +226,15 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         self.book_authors_lb.setObjectName("book_authors_lb")
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
+        self.book_summary_te.setMinimumSize(350, 120)
+        self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("book_summary_te")
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
         self.edit_b.setObjectName("edit_b")
+        self.edit_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.edit")))
         self.edit_b.setSizePolicy(self.fixed_sp)
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -243,6 +246,9 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         self.delete_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
+        self.delete_b.setIcon(
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
+        )
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")
         self.delete_b.clicked.connect(self.delete_book)
@@ -250,7 +256,9 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.book_title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_layout.addWidget(self.book_authors_lb, 1, 1)
-        self.main_layout.addWidget(self.book_summary_te, 2, 1)
+        self.main_layout.addWidget(
+            self.book_summary_te, 2, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         self.main_layout.addWidget(self.edit_b, 3, 1)
         self.main_layout.addWidget(self.delete_b, 4, 1)
         self.main_layout.addWidget(
