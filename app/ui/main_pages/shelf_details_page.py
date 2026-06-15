@@ -133,7 +133,7 @@ class ShelfDetailsPage(QtWidgets.QWidget):
 
         if given_input:
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.actions.search_in_progress")
+                self.langs_handler.tr("shared.msg.search_in_progress")
             )
             matches = self.books_handler.get_books(title=(given_input, False, False))
             self.logger.info(f"Found {len(matches)} books which matches with the query")
