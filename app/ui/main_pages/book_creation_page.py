@@ -20,6 +20,7 @@ class BookCreationPage(QtWidgets.QWidget):
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler: langs_handler.LangsHandler,
+        **kwargs,
     ):
         super().__init__(parent)
         self.books_handler = books_handler
@@ -27,11 +28,23 @@ class BookCreationPage(QtWidgets.QWidget):
         self.qt_signals_handler = qt_signals_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.book_creation_page"
-        self.variables_kw = {}
+        self._edition_mode_enabled = kwargs.get("edition_mode_enabled", False)
+        self._book: book_sys.Book | None = kwargs.get("book", None)
+        self.variables_kw = {**kwargs}
 
         self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
+        self.logger.debug(f"{self._edition_mode_enabled=}")
+        self.logger.debug(f"{self._book=}")
+
+        if self._edition_mode_enabled and not self._book:
+            self.logger.info(
+                f"Page {self.PAGE_NAME} called in edition mode, but no book provided for edition !"
+            )
+            raise ValueError(
+                f"Page {self.PAGE_NAME} called in edition mode, but no book provided for edition !"
+            )
+
         self.icons_folder = self.res_handler.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
@@ -205,6 +218,60 @@ class BookCreationPage(QtWidgets.QWidget):
             self.add_b, self.container_widget_layout.rowCount() + 1, 0
         )
         self.main_layout.addWidget(self.scroll_area, 1)
+        if self._edition_mode_enabled:
+            self.apply_edition_mode()
+
+    def apply_edition_mode(self):
+        """
+        Switch the page to edition mode
+        """
+
+        if self._book:
+            self.cover_image = self._book.cover_path or self.default_cover_img
+            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+            for book_attr in self.basic_book_infos:
+                value = getattr(self._book, book_attr)
+                self.basic_book_info_ew[book_attr].setText(
+                    str(value) if isinstance(value, (int, bool)) else value
+                )
+
+            combob_choices_indexes = {
+                "unread": 0,
+                "on_reading": 1,
+                "finished": 2,
+            }
+            self.book_status_combob.setCurrentIndex(
+                combob_choices_indexes[getattr(self._book, "status", "unread")]
+            )
+            self.alr_read_pages_le.setText(self._book.alr_read_pages or "0")
+            starting_read_date_dt = (
+                self._book.starting_read_date.split("-")
+                if self._book.starting_read_date
+                else self.today_date
+            )
+
+            if not isinstance(starting_read_date_dt, QtCore.QDate):
+                starting_read_date_dt = QtCore.QDate(
+                    *[int(date) for date in starting_read_date_dt]
+                )
+
+            end_read_date_dt = (
+                self._book.end_read_date.split("-")
+                if self._book.end_read_date
+                else self.today_date
+            )
+
+            if not isinstance(end_read_date_dt, QtCore.QDate):
+                end_read_date_dt = QtCore.QDate(
+                    *[int(date) for date in end_read_date_dt]
+                )
+
+            self.starting_read_date_de.setDate(QtCore.QDate(starting_read_date_dt))
+            self.end_read_date_de.setDate(QtCore.QDate(end_read_date_dt))
+
+            for shelf in self._book._parents_shelves:
+                self.logger.debug(f"On editing books has shelf {shelf}")
+                self.shelfs_selection_cbs[shelf.id].setChecked(True)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
         """
@@ -304,17 +371,23 @@ class BookCreationPage(QtWidgets.QWidget):
             )
 
         except AttributeError:
+            matches = []
             self.logger.exception(
                 f"an error occured while checking the existence of book name {books_infos.get('title')}"
             )
             return
+
+        else:
+            if self._edition_mode_enabled and self._book:
+                if self._book in matches:
+                    matches = []
 
         if matches:
             self.logger.debug(
                 f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({len(matches)})\n{self.langs_handler.tr('book.msg.renaming_future')} '{books_infos.get('title')} ({len(matches)})'"
+                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({len(matches)})'"
             )
             self.existence_msgbox.exec()
 
@@ -375,7 +448,14 @@ class BookCreationPage(QtWidgets.QWidget):
                         shelves.append(self.books_handler.shelves[shelf_id])
 
                 books_infos["parents_shelves"] = shelves
-                self.books_handler.new_book(**books_infos)
+
+                if self._edition_mode_enabled and self._book:
+                    books_infos["id"] = self._book.id
+                    new_book = self.books_handler.create_book(**books_infos)
+                    self.books_handler.edit_book(self._book.id, new_book)
+
+                else:
+                    self.books_handler.new_book(**books_infos)
 
             except Exception:
                 self.logger.exception("Failed to create valid book : ")
