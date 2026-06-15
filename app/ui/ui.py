@@ -229,6 +229,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.qt_signals_handler,
                 self.settings_handler,
                 self.langs_handler,
+                **page_args,
             )
             self.pages["BOOK_CREATION_PAGE"] = self.book_creation_page
             self.addWidget(self.book_creation_page)
