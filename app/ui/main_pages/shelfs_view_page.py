@@ -129,7 +129,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             self.qt_signals_handler.edit_progress_msg.emit(
                 self.langs_handler.tr("shared.msg.search_in_progress")
             )
-            matches = self.books_handler.get_shelfs(name=(given_input, False, False))
+            matches = self.books_handler.get_shelfs(title=(given_input, False, False))
             self.logger.info(
                 f"Found {len(matches)} shelfs which matches with the query"
             )
