@@ -244,34 +244,31 @@ class BookCreationPage(QtWidgets.QWidget):
                 combob_choices_indexes[getattr(self._book, "status", "unread")]
             )
             self.alr_read_pages_le.setText(self._book.alr_read_pages or "0")
-            starting_read_date_dt = (
-                self._book.starting_read_date.split("-")
-                if self._book.starting_read_date
-                else self.today_date
-            )
 
-            if not isinstance(starting_read_date_dt, QtCore.QDate):
-                starting_read_date_dt = QtCore.QDate(
-                    *[int(date) for date in starting_read_date_dt]
+            if self._book.starting_read_date:
+                starting_read_date_dt = QtCore.QDate()
+                starting_read_date_dt = starting_read_date_dt.fromString(
+                    self._book.starting_read_date, QtCore.Qt.DateFormat.ISODate
+                )
+                self.logger.debug(
+                    f"Book started read at {starting_read_date_dt.currentDate()}"
                 )
 
-            end_read_date_dt = (
-                self._book.end_read_date.split("-")
-                if self._book.end_read_date
-                else self.today_date
-            )
+            else:
+                starting_read_date_dt = self.today_date
 
-            if not isinstance(end_read_date_dt, QtCore.QDate):
-                end_read_date_dt = QtCore.QDate(
-                    *[int(date) for date in end_read_date_dt]
+            if self._book.end_read_date:
+                end_read_date_dt = QtCore.QDate()
+                end_read_date_dt = end_read_date_dt.fromString(
+                    self._book.end_read_date, QtCore.Qt.DateFormat.ISODate
                 )
 
-            self.starting_read_date_de.setDate(QtCore.QDate(starting_read_date_dt))
-            self.end_read_date_de.setDate(QtCore.QDate(end_read_date_dt))
+            else:
+                end_read_date_dt = self.today_date
 
-            self.logger.debug(
-                f"On editing books has shelves {self._book._parents_shelves}"
-            )
+            self.starting_read_date_de.setDate(starting_read_date_dt)
+            self.end_read_date_de.setDate(end_read_date_dt)
+
             for shelf in self._book._parents_shelves:
                 self.shelfs_selection_cbs[shelf.id].setChecked(True)
 
@@ -436,6 +433,9 @@ class BookCreationPage(QtWidgets.QWidget):
             books_infos["end_read_date"] = self.end_read_date_de.date().toString(
                 QtCore.Qt.DateFormat.ISODate
             )
+        self.logger.debug(
+            f"{books_infos.get("starting_read_date")=}, {books_infos.get("end_read_date")=}"
+        )
 
         return books_infos
 
