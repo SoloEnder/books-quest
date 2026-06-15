@@ -68,7 +68,9 @@
       "shelf_already_exists": "Found one or several shelves with this name",
       "shelf_deletion": "Deleting /f:<count>/f shelves...",
       "empty_shelf": "There are no books here... \nWhy not add some ?",
-      "book_deletion_error": "Book not found !"
+      "book_deletion_error": "Book not found !",
+      "creation_success": "Shelf added !",
+      "edition_success": "Shelf infos updated !"
     },
     "actions": {
       "select_books": "Select books :",

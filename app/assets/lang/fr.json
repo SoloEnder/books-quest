@@ -67,7 +67,9 @@
       "books_selection": "Livres à ajouter à cette étagère : ",
       "shelf_already_exists": "Une ou plusieurs étagères avec ce nom ont été trouvées",
       "shelf_deletion": "Suppression de /f:<count>/f étagères...",
-      "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?"
+      "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?",
+      "edition_success": "Informations de l'étagère mises à jour",
+      "creation_success": "Etagère ajoutée !"
     },
     "actions": {
       "view_books": "Voir les livres",
