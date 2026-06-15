@@ -233,6 +233,13 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         )  # type: ignore
         self.edit_b.setObjectName("edit_b")
         self.edit_b.setSizePolicy(self.fixed_sp)
+        self.edit_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "BOOK_CREATION_PAGE",
+                True,
+                {"edition_mode_enabled": True, "book": self.book},
+            )
+        )
         self.delete_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
