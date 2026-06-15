@@ -470,7 +470,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 if self._edition_mode_enabled:
                     QtWidgets.QMessageBox.information(
                         self,
-                        "Done",
+                        "Success",
                         self.langs_handler.tr("book.msg.book_edition_success"),
                     )
                     self.qt_signals_handler.close_page_sg.emit()
@@ -478,6 +478,6 @@ class BookCreationPage(QtWidgets.QWidget):
                 else:
                     QtWidgets.QMessageBox.information(
                         self,
-                        "Done",
+                        "Success",
                         self.langs_handler.tr("book.msg.book_addition_success"),
                     )
