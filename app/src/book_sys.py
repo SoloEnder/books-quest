@@ -146,7 +146,7 @@ class Shelf:
 
     def get_infos(self) -> dict:
         return {
-            "name": self.name,
+            "title": self.title,
             "name_suffix": self.name_suffix,
             "id": self.id,
             "books": self._books,
