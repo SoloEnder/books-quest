@@ -232,8 +232,8 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         self.main_widget_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
 
-    def check_name_existence(self, name):
-        return self.books_handler.get_shelfs(name=(name, True, False))
+    def check_title_existence(self, title):
+        return self.books_handler.get_shelfs(title=(title, True, False))
 
     def get_shelf_infos(self) -> dict | None:
         id = str(dt.datetime.timestamp(dt.datetime.now()))
@@ -252,7 +252,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         if self.current_mode == "creation":
             try:
-                names_matches = self.check_name_existence(shelf_title)
+                names_matches = self.check_title_existence(shelf_title)
 
             except AttributeError:
                 self.logger.exception(
@@ -279,7 +279,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
                 books.append(book_title_item.data())
 
-                final_img_path = self.current_shelf_cover
+        final_img_path = self.current_shelf_cover
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
@@ -296,7 +296,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
 
         return {
             "title": shelf_title,
-            "title_suffix": shelf_title,
+            "title_suffix": title_suffix,
             "books": books,
             "id": id,
             "cover_path": self.current_shelf_cover
