@@ -1,110 +1,79 @@
 {
-    "shared":{
-        "buttons":{
-            "add":"Ajouter",
-            "edit":"Modifier",
-            "delete":"Supprimer",
-            "done":"Terminer",
-            "edit_cover":"Modifier la couverture",
-            "rename":"Renommer",
-            "cancel":"Annuler"
-        },
-        "labels":{
-            "nothing_to_show": "Il n'y a rien ici",
-            "research": "Rechercher",
-            "loading": "Chargement...",
-            "status":"Status",
-            "title":"Titre : ",
-            "author":"Auteur : ",
-            "edition":"Edition : ",
-            "summary":"Résumé : ",
-            "pages_count":"Nombre total de pages : "
-
-        },
-        "progress":{
-            "research":"Recherche en cours...",
-            "loading_page":"Chargement de la page..."
-        },
-        "notifications":{
-            "add_confirm": "Voulez vous vraiment ajouter cet élément ?",
-            "renaming_future":"Cet élément sera renommé en : "
-        }
+  "shared": {
+    "actions": {
+      "add": "Ajouter",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "done": "Terminer",
+      "edit_cover": "Modifier la couverture",
+      "rename": "Renommer",
+      "cancel": "Annuler",
+      "search": {
+        "base": "Search",
+        "book": "Rechercher des livres",
+        "shelf": "Rechercher des étagères"
+      },
+      "close": "Fermer",
+      "book_creation": "Nouveau livre",
+      "shelf_creation": "Nouvelle étagère",
+      "go_to": "Aller à:"
     },
-
-    "toolbar": {
-        "actions":{
-            "close_page":"Fermer"
-        }
+    "basic_error_notification": {
+      "title": "Avertissement",
+      "msg": "Une erreur est survenue, veuillez réessayer"
     },
-
-    "main_pages": {
-        "book_creation_page": {
-            "labels":{
-                "alr_read_pages": "Pages lues : ",
-                "starting_read_date": "Commencé le : ",
-                "end_read_date": "Terminé le : ",
-                "shelfs_selection": "Etagères : "
-            },
-            "notifications":{
-                "book_already_exists": "Un ou plusieurs livres avec le même titre ont étés trouvés !"
-            }
-        },
-        "shelf_creation_page": {
-            "labels":{
-                "name": "Nom : ",
-                "books_selection": "Livres à ajouter à cette étagère : "
-            },
-            "notifications":{
-                "shelf_already_exists": "Une ou plusieurs étagères avec le même nom ont étés trouvées !"
-            }
-        },  
-        "shelfs_view_page": {
-            "progress":{
-                "shelf_deletion":"Suppression de /f:<count>/f étagère(s)..."
-            },
-            "buttons":{
-                "book_creation":"Nouveau livre",
-                "shelf_creation":"Nouvelle étagère",
-                "view":"Voir les livres"
-            },
-            "placeholders":{
-                "shelves_research":"Rechercher des étagères"
-            }
-        },
-        "shelf_details_page": {
-            "progress":{
-                "book_deletion":"Suppression de /f:<count>/f livre(s)..."
-            },
-            "labels":{
-                "empty_shelf":"Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?"
-            },
-            "notifications":{
-                "book_deletion_error":"Livre introuvable !"
-            },
-            "placeholders":{
-                "book_research":"Rechercher des livres"
-            }
-        }
+    "basic_info_notification": {
+      "title": "Information"
     },
-    "my_widgets_pagination_view": {
-        "labels":{
-            "jump_to_page": "Go to :"
-        },
-        "buttons":{},
-        "progress":{},
-        "notifications":{
-            "invalid_page_index": "This page doesn't exists !"
-        }
+    "msg": {
+      "nothing_to_show": "Il n'y a rien ici",
+      "loading": "Chargement...",
+      "search_in_progress": "Recherche en cours...",
+      "loading_page": "Chargement de la page...",
+      "add_confirm": "Voulez vous vraiment ajouter cet élément ?",
+      "renaming_future": "Il sera renommé en : ",
+      "invalid_page_index": "Cette page n'existe pas !"
     },
-    "notifications_service": {
-        "notifications":{
-            "error": {
-                "title":"Avertissement",
-                "msg":"Une erreur est survenue, veuillez réessayer"
-            },
-            "info": {
-                "title":"Information"
-            }   
-        }
+    "infos": {
+      "status": "Status",
+      "title": "Titre : ",
+      "author": "Auteur : ",
+      "edition": "Edition : ",
+      "summary": "Résumé : ",
+      "pages_count": "Nombre total de pages :"
     }
+  },
+  "book": {
+    "infos": {
+      "alr_read_pages": "Pages lues : ",
+      "starting_read_date": "Lecture commencé le : ",
+      "end_read_date": "Lecture terminée le : ",
+      "shelfs_selection": "Etagères : "
+    },
+    "msg": {
+      "book_addition_success": "Livre ajouté !",
+      "book_edition_success": "Livre modifié !",
+      "book_already_exists": "Un ou plusieurs livres avec ce noms ont été trouvés",
+      "book_deletion": "Suppression de /f:<count>/f livres(s)...",
+      "book_deletion_error": "Livre introuvable !"
+    }
+  },
+  "shelf": {
+    "infos": {
+      "title": "Title : ",
+      "default_shelf_title": "Tout les livres"
+    },
+    "msg": {
+      "books_selection": "Livres à ajouter à cette étagère : ",
+      "shelf_already_exists": "Une ou plusieurs étagères avec ce nom ont été trouvées",
+      "shelf_deletion": "Suppression de /f:<count>/f étagères...",
+      "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?",
+      "edition_success": "Informations de l'étagère mises à jour",
+      "creation_success": "Etagère ajoutée !"
+    },
+    "actions": {
+      "view_books": "Voir les livres",
+      "select_books": "Selectionner des livres :"
+    }
+  }
 }
