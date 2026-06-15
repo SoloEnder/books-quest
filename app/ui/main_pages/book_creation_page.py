@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import os
 import shutil
+from this import s
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -9,6 +10,18 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.utils import images_tools
+
+
+class EditionModeNotEnabled(Exception):
+    def __init__(self, msg: str | None = None):
+        """
+        Exception usually raised when trying to do something that is only possible if BookCreationPage is in edition mode
+        """
+        self.msg = msg or "Edition mode not enabled !"
+        super().__init__(self.msg)
+
+    def __str__(self):
+        return self.msg
 
 
 class BookCreationPage(QtWidgets.QWidget):
@@ -223,17 +236,77 @@ class BookCreationPage(QtWidgets.QWidget):
         if self._edition_mode_enabled:
             self.apply_edition_mode()
 
+    @property
+    def edition_mode_enabled(self):
+        """Getter of property 'edition_mode_enabled'"""
+        return self._edition_mode_enabled
+
+    @edition_mode_enabled.setter
+    def edition_mode_enabled(self, new_value: bool):
+        """
+        Setter of property 'edition_mode_enabled'
+        """
+
+        if isinstance(new_value, bool):
+            self._edition_mode_enabled = new_value
+
+            if self._edition_mode_enabled:
+                self.apply_edition_mode()
+
+            else:
+                self.apply_creation_mode()
+
+        else:
+            raise ValueError(
+                f"Wrong value given to 'edition_mode_enabled': {new_value}"
+            )
+
+    @property
+    def book(self):
+        """
+        Getter of property 'book'
+        """
+        return self._book
+
+    @book.setter
+    def book(self, new_value: book_sys.Book):
+        """
+        Setter of property 'book'
+        """
+        if isinstance(new_value, book_sys.Book):
+            if self.edition_mode_enabled:
+                self._book = new_value
+                self.apply_edition_mode()
+
+            else:
+                raise EditionModeNotEnabled(
+                    "Couldn't set value of 'BookCreationPage.book' while edition mode isn't enabled"
+                )
+
+        else:
+            raise ValueError(
+                f"Wrong value given for 'BookCreationPage.book' : {new_value}"
+            )
+
+    def apply_creation_mode(self):
+        """
+        Switch the page to normal mode
+        """
+
+        self.logger.info("Appling normal mode...")
+        self.qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {})
+
     def apply_edition_mode(self):
         """
         Switch the page to edition mode
         """
 
         self.logger.info("Appling edition mode...")
-        if self._book:
-            self.cover_image = self._book.cover_path or self.default_cover_img
+        if self.book:
+            self.cover_image = self.book.cover_path or self.default_cover_img
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
             for book_attr in self.basic_book_infos:
-                value = getattr(self._book, book_attr)
+                value = getattr(self.book, book_attr)
                 self.basic_book_info_ew[book_attr].setText(
                     str(value) if isinstance(value, (int, bool)) else value
                 )
@@ -244,14 +317,14 @@ class BookCreationPage(QtWidgets.QWidget):
                 "finished": 2,
             }
             self.book_status_combob.setCurrentIndex(
-                combob_choices_indexes[getattr(self._book, "status", "unread")]
+                combob_choices_indexes[getattr(self.book, "status", "unread")]
             )
-            self.alr_read_pages_le.setText(self._book.alr_read_pages or "0")
+            self.alr_read_pages_le.setText(self.book.alr_read_pages or "0")
 
-            if self._book.starting_read_date:
+            if self.book.starting_read_date:
                 starting_read_date_dt = QtCore.QDate()
                 starting_read_date_dt = starting_read_date_dt.fromString(
-                    self._book.starting_read_date, QtCore.Qt.DateFormat.ISODate
+                    self.book.starting_read_date, QtCore.Qt.DateFormat.ISODate
                 )
                 self.logger.debug(
                     f"Book started read at {starting_read_date_dt.currentDate()}"
@@ -260,10 +333,10 @@ class BookCreationPage(QtWidgets.QWidget):
             else:
                 starting_read_date_dt = self.today_date
 
-            if self._book.end_read_date:
+            if self.book.end_read_date:
                 end_read_date_dt = QtCore.QDate()
                 end_read_date_dt = end_read_date_dt.fromString(
-                    self._book.end_read_date, QtCore.Qt.DateFormat.ISODate
+                    self.book.end_read_date, QtCore.Qt.DateFormat.ISODate
                 )
 
             else:
@@ -272,7 +345,7 @@ class BookCreationPage(QtWidgets.QWidget):
             self.starting_read_date_de.setDate(starting_read_date_dt)
             self.end_read_date_de.setDate(end_read_date_dt)
 
-            for shelf in self._book._parents_shelves:
+            for shelf in self.book._parents_shelves:
                 self.shelfs_selection_cbs[shelf.id].setChecked(True)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
@@ -380,8 +453,8 @@ class BookCreationPage(QtWidgets.QWidget):
             return
 
         else:
-            if self._edition_mode_enabled and self._book:
-                if self._book in matches:
+            if self.edition_mode_enabled and self.book:
+                if self.book in matches:
                     matches = []
 
         if matches:
@@ -454,11 +527,11 @@ class BookCreationPage(QtWidgets.QWidget):
 
                 books_infos["parents_shelves"] = shelves
 
-                if self._edition_mode_enabled and self._book:
-                    books_infos["id"] = self._book.id
-                    self._book.delete_from_parents()
+                if self.edition_mode_enabled and self.book:
+                    books_infos["id"] = self.book.id
+                    self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book(self._book.id, new_book)
+                    self.books_handler.edit_book(self.book.id, new_book)
 
                 else:
                     self.books_handler.new_book(**books_infos)
@@ -467,7 +540,7 @@ class BookCreationPage(QtWidgets.QWidget):
                 self.logger.exception("Failed to create valid book : ")
 
             else:
-                if self._edition_mode_enabled:
+                if self.edition_mode_enabled:
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
