@@ -132,6 +132,11 @@ class ShelfDetailsPage(QtWidgets.QWidget):
     def search_books(self, given_input: str):
 
         if given_input:
+            # Editing the message displayed on the nothing_to_show page
+            self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shared.msg.no_search_result")
+            )
+
             self.qt_signals_handler.edit_progress_msg.emit(
                 self.langs_handler.tr("shared.msg.search_in_progress")
             )
@@ -165,6 +170,9 @@ class ShelfDetailsPage(QtWidgets.QWidget):
                 widget.deleteLater()
 
             self.research_result_widgets.clear()
+            self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shelf.msg.empty_shelf")
+            )
 
 
 class BookWidget(widgets_pagination_view.InPageWidget):

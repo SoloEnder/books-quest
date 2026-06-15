@@ -33,7 +33,8 @@
       "loading_page": "Loading page...",
       "add_confirm": "Do you really want to add this element ?",
       "renaming_future": "This element will be renamed as : ",
-      "invalid_page_index": "This page doesn't exists !"
+      "invalid_page_index": "This page doesn't exists !",
+      "no_search_result": "No items match your search"
     },
     "infos": {
       "status": "Status",

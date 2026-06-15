@@ -126,6 +126,10 @@ class ShelfsViewPage(QtWidgets.QWidget):
     def search_shelfs(self, given_input: str):
 
         if given_input:
+            # Editing the message displayed on the nothing_to_show page
+            self.pages_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shared.msg.no_search_result")
+            )
             self.qt_signals_handler.edit_progress_msg.emit(
                 self.langs_handler.tr("shared.msg.search_in_progress")
             )
@@ -161,6 +165,9 @@ class ShelfsViewPage(QtWidgets.QWidget):
                 widget.deleteLater()
 
             self.research_result_widgets.clear()
+            self.pages_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shared.msg.nothing_to_show")
+            )
 
     def create_shelves_widgets(
         self, shelves: list | tuple, include_default_shelf: bool = True
