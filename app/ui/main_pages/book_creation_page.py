@@ -138,6 +138,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
+        self.starting_read_date_de.setMaximumDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
         self.end_read_date_lb = QtWidgets.QLabel(
@@ -145,6 +146,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
+        self.end_read_date_de.setMinimumDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
         self.set_book_status("unread")
@@ -226,6 +228,7 @@ class BookCreationPage(QtWidgets.QWidget):
         Switch the page to edition mode
         """
 
+        self.logger.info("Appling edition mode...")
         if self._book:
             self.cover_image = self._book.cover_path or self.default_cover_img
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
