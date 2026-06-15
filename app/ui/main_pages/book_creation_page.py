@@ -187,7 +187,7 @@ class BookCreationPage(QtWidgets.QWidget):
         )
         self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
-        self.add_b = QtWidgets.QPushButton(self.langs_handler.tr("shared.actions.add"))
+        self.add_b = QtWidgets.QPushButton(self.langs_handler.tr("shared.actions.done"))
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
@@ -269,8 +269,10 @@ class BookCreationPage(QtWidgets.QWidget):
             self.starting_read_date_de.setDate(QtCore.QDate(starting_read_date_dt))
             self.end_read_date_de.setDate(QtCore.QDate(end_read_date_dt))
 
+            self.logger.debug(
+                f"On editing books has shelves {self._book._parents_shelves}"
+            )
             for shelf in self._book._parents_shelves:
-                self.logger.debug(f"On editing books has shelf {shelf}")
                 self.shelfs_selection_cbs[shelf.id].setChecked(True)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
@@ -451,6 +453,7 @@ class BookCreationPage(QtWidgets.QWidget):
 
                 if self._edition_mode_enabled and self._book:
                     books_infos["id"] = self._book.id
+                    self._book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
                     self.books_handler.edit_book(self._book.id, new_book)
 
@@ -461,4 +464,17 @@ class BookCreationPage(QtWidgets.QWidget):
                 self.logger.exception("Failed to create valid book : ")
 
             else:
-                QtWidgets.QMessageBox.information(self, "Terminé", "Livre ajouté !")
+                if self._edition_mode_enabled:
+                    QtWidgets.QMessageBox.information(
+                        self,
+                        "Done",
+                        self.langs_handler.tr("book.msg.book_edition_success"),
+                    )
+                    self.qt_signals_handler.close_page_sg.emit()
+
+                else:
+                    QtWidgets.QMessageBox.information(
+                        self,
+                        "Done",
+                        self.langs_handler.tr("book.msg.book_addition_success"),
+                    )

@@ -109,6 +109,9 @@ class Shelf:
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", str(dt.datetime.timestamp(dt.datetime.now())))
+        for book in self._books:
+            if not book.has_parent(self):
+                book._parents_shelves.append(self)
 
     def add_book(self, book: Book):
         """

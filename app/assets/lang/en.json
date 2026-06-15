@@ -52,6 +52,8 @@
       "shelfs_selection": "Bookshelves : "
     },
     "msg": {
+      "book_addition_success": "Livre ajouté !",
+      "book_edition_success": "Livre modifié !",
       "book_already_exists": "Found one or several books with this name",
       "book_deletion": "Deleting /f:<count>/f book(s)..."
     }
