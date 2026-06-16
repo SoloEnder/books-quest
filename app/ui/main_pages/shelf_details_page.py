@@ -8,10 +8,11 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
+from app.ui.main_pages import base_page
 from app.utils import my_exceptions, utils_funcs
 
 
-class ShelfDetailsPage(QtWidgets.QWidget):
+class ShelfDetailsPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -23,15 +24,12 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         langs_handler,
     ):
 
-        super().__init__(parent)
+        super().__init__(
+            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
+        )
         self.PAGE_NAME = "SHELF_DETAILS_PAGE"
         self.shelf = shelf
         self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.shelf_details_page"
         self.variables_kw = {"shelf": self.shelf}
 
         # logger
@@ -47,8 +45,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             widget=self,
             logger=self.logger,
         )
-        self.main_lyt = QtWidgets.QGridLayout()
-        self.setLayout(self.main_lyt)
         self.books_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()

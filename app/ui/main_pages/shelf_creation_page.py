@@ -8,6 +8,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import qt_signals_handler
+from app.ui.main_pages import base_page
 from app.utils import images_tools
 
 
@@ -23,7 +24,7 @@ class EditionModeNotEnabled(Exception):
         return self.msg
 
 
-class ShelfCreationPage(QtWidgets.QWidget):
+class ShelfCreationPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -34,15 +35,16 @@ class ShelfCreationPage(QtWidgets.QWidget):
         langs_handler,
         **kwargs,
     ):
-        super().__init__(parent)
+        super().__init__(
+            parent,
+            res_handler,
+            settings_handler,
+            langs_handler,
+            qt_signals_handler,
+        )
         self.PAGE_NAME = "SHELF_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
         self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.shelf_creation_page"
         self.modes = ("edition", "creation")
         self._current_mode = kwargs.get("mode")
         self.variables_kw = {**kwargs}
@@ -61,18 +63,6 @@ class ShelfCreationPage(QtWidgets.QWidget):
             raise ValueError(
                 "No mode provided for Shelf Creation Page initialisation !"
             )
-
-        self.main_lyt = QtWidgets.QVBoxLayout()
-        self.setLayout(self.main_lyt)
-        self.main_widget = QtWidgets.QWidget()
-        self.main_widget_lyt = QtWidgets.QGridLayout()
-        self.main_widget.setLayout(self.main_widget_lyt)
-
-        # Scroll area
-        self.scroll_area = QtWidgets.QScrollArea()
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self.main_widget)
-        self.main_lyt.addWidget(self.scroll_area, 1)
 
         # Shelf cover
         self.default_shelf_cover = self.res_handler.get_res(
@@ -130,30 +120,24 @@ class ShelfCreationPage(QtWidgets.QWidget):
         self.confirm_b.clicked.connect(self.create_shelf)
 
         # Add the widgets to the layout
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.shelf_cover_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.cover_selection_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
-            self.title_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
-        )
-        self.main_widget_lyt.addWidget(
-            self.title_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
-        )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(self.title_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(self.title_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(
             self.books_selection_lb, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.book_research_lb, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.book_research_e, 5, 1, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
-            self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft
-        )
+        self.main_lyt.addWidget(self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         if self._current_mode == "edition":
             if kwargs.get("shelf"):
@@ -255,7 +239,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
     def draw_books_tree(self, books_dict: book_sys.BooksDict):
 
         if hasattr(self, "books_tree"):
-            self.main_widget_lyt.removeWidget(self.books_tree)
+            self.main_lyt.removeWidget(self.books_tree)
             self.books_tree.setParent(None)
             self.books_tree.deleteLater()
 
@@ -302,7 +286,7 @@ class ShelfCreationPage(QtWidgets.QWidget):
             QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
         )
 
-        self.main_widget_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
+        self.main_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
 
     def check_title_existence(self, title):
         return self.books_handler.get_shelfs(title=(title, True, False))

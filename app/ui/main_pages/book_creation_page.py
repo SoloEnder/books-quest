@@ -9,6 +9,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
+from app.ui.main_pages import base_page
 from app.utils import images_tools
 
 
@@ -24,7 +25,7 @@ class EditionModeNotEnabled(Exception):
         return self.msg
 
 
-class BookCreationPage(QtWidgets.QWidget):
+class BookCreationPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget,
@@ -35,12 +36,14 @@ class BookCreationPage(QtWidgets.QWidget):
         langs_handler: langs_handler.LangsHandler,
         **kwargs,
     ):
-        super().__init__(parent)
+        super().__init__(
+            parent,
+            res_handler,
+            settings_handler,
+            langs_handler,
+            qt_signals_handler,
+        )
         self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
         self._edition_mode_enabled = kwargs.get("edition_mode_enabled", False)
         self._book: book_sys.Book | None = kwargs.get("book", None)
         self.variables_kw = {**kwargs}
@@ -71,16 +74,6 @@ class BookCreationPage(QtWidgets.QWidget):
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
         self.top_alignment = QtCore.Qt.AlignmentFlag.AlignTop
-
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.container_widget = QtWidgets.QWidget(self)
-        self.container_widget_layout = QtWidgets.QGridLayout(self.container_widget)
-        self.container_widget_layout.setAlignment(self.left_alignment)
-        self.container_widget_layout.setSpacing(30)
-        self.container_widget.setLayout(self.container_widget_layout)
-        self.scroll_area = QtWidgets.QScrollArea(self)
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setWidget(self.container_widget)
 
         # Cover widgets
         self.default_cover_img = os.path.join(
@@ -114,8 +107,8 @@ class BookCreationPage(QtWidgets.QWidget):
                 ew.textEdited.connect(lambda: self.check_int(ew.text(), ew))  # type: ignore
 
             ew.setMaximumWidth(300)
-            self.container_widget_layout.addWidget(lb, row, 0)
-            self.container_widget_layout.addWidget(ew, row, 1)
+            self.main_lyt.addWidget(lb, row, 0)
+            self.main_lyt.addWidget(ew, row, 1)
             self.basic_book_info_ew[key] = ew
             row += 1
 
@@ -206,33 +199,28 @@ class BookCreationPage(QtWidgets.QWidget):
         self.add_b.clicked.connect(self.create_book)
 
         # Add the widgets
-        self.container_widget_layout.addWidget(self.book_cover_lb, 0, 0)
-        self.container_widget_layout.addWidget(self.edit_cover_b, 1, 0)
-        self.container_widget_layout.addWidget(
-            self.book_status_lb, self.container_widget_layout.rowCount() + 1, 0
+        self.main_lyt.addWidget(self.book_cover_lb, 0, 0)
+        self.main_lyt.addWidget(self.edit_cover_b, 1, 0)
+        self.main_lyt.addWidget(self.book_status_lb, self.main_lyt.rowCount() + 1, 0)
+        self.main_lyt.addWidget(
+            self.book_status_combob, self.main_lyt.rowCount() + 1, 0
         )
-        self.container_widget_layout.addWidget(
-            self.book_status_combob, self.container_widget_layout.rowCount() + 1, 1
-        )
-        self.container_widget_layout.addWidget(
+        self.main_lyt.addWidget(
             self.book_status_widget,
-            self.container_widget_layout.rowCount() + 1,
+            self.main_lyt.rowCount() + 1,
             0,
             2,
             0,
         )
-        self.container_widget_layout.addWidget(
-            self.shelfs_selection_lb, self.container_widget_layout.rowCount() + 1, 0
+        self.main_lyt.addWidget(
+            self.shelfs_selection_lb, self.main_lyt.rowCount() + 1, 0
         )
-        self.container_widget_layout.addWidget(
+        self.main_lyt.addWidget(
             self.shelfs_selection_scroll_area,
-            self.container_widget_layout.rowCount() + 1,
+            self.main_lyt.rowCount() + 1,
             0,
         )
-        self.container_widget_layout.addWidget(
-            self.add_b, self.container_widget_layout.rowCount() + 1, 0
-        )
-        self.main_layout.addWidget(self.scroll_area, 1)
+        self.main_lyt.addWidget(self.add_b, self.main_lyt.rowCount() + 1, 0)
         if self._edition_mode_enabled:
             self.apply_edition_mode()
 

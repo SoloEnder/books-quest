@@ -7,10 +7,11 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import book_sys
 from app.ui import my_widgets_pagination_view, qt_signals_handler
+from app.ui.main_pages import base_page
 from app.utils import my_exceptions, utils_funcs
 
 
-class ShelfsViewPage(QtWidgets.QWidget):
+class ShelfsViewPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -20,15 +21,12 @@ class ShelfsViewPage(QtWidgets.QWidget):
         settings_handler,
         langs_handler,
     ):
-        super().__init__(parent)
+        super().__init__(
+            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
+        )
 
         # Assingning arguments to attr
         self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.variables_kw = {}
 
         self.PAGE_NAME = "SHELFS_VIEW_PAGE"
@@ -46,18 +44,7 @@ class ShelfsViewPage(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Fixed,
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
-        # Setting Main layout
         self.shelves_widgets = []
-        self.main_lyt = QtWidgets.QGridLayout()
-        self.setLayout(self.main_lyt)
-
-        # Setup a main scroll area
-        self.main_widget = QtWidgets.QWidget()
-        self.main_widget_lyt = QtWidgets.QGridLayout()
-        self.main_widget.setLayout(self.main_widget_lyt)
-        self.main_sa = QtWidgets.QScrollArea()
-        self.main_sa.setWidget(self.main_widget)
-        self.main_sa.setWidgetResizable(True)
 
         # icons
         self.book_creation_ico = QtGui.QIcon(
@@ -109,17 +96,16 @@ class ShelfsViewPage(QtWidgets.QWidget):
         )
 
         # Adding widgets to main layout
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.book_creation_b, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.shelf_creation_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_widget_lyt.addWidget(
+        self.main_lyt.addWidget(
             self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
-        self.main_widget_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
-        self.main_lyt.addWidget(self.main_sa)
+        self.main_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
         self.generate_shelves_pages()
 
     @QtCore.Slot(str)
