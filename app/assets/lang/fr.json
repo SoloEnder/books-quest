@@ -32,7 +32,8 @@
       "loading_page": "Chargement de la page...",
       "add_confirm": "Voulez vous vraiment ajouter cet élément ?",
       "renaming_future": "Il sera renommé en : ",
-      "invalid_page_index": "Cette page n'existe pas !"
+      "invalid_page_index": "Cette page n'existe pas !",
+      "no_search_result": "Aucun élément ne correspond à votre recherche"
     },
     "infos": {
       "status": "Status",

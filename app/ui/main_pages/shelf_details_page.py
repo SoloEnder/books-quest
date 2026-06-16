@@ -8,10 +8,11 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
+from app.ui.main_pages import base_page
 from app.utils import my_exceptions, utils_funcs
 
 
-class ShelfDetailsPage(QtWidgets.QWidget):
+class ShelfDetailsPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -23,15 +24,12 @@ class ShelfDetailsPage(QtWidgets.QWidget):
         langs_handler,
     ):
 
-        super().__init__(parent)
+        super().__init__(
+            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
+        )
         self.PAGE_NAME = "SHELF_DETAILS_PAGE"
         self.shelf = shelf
         self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.shelf_details_page"
         self.variables_kw = {"shelf": self.shelf}
 
         # logger
@@ -47,8 +45,6 @@ class ShelfDetailsPage(QtWidgets.QWidget):
             widget=self,
             logger=self.logger,
         )
-        self.main_lyt = QtWidgets.QGridLayout()
-        self.setLayout(self.main_lyt)
         self.books_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
@@ -132,8 +128,13 @@ class ShelfDetailsPage(QtWidgets.QWidget):
     def search_books(self, given_input: str):
 
         if given_input:
+            # Editing the message displayed on the nothing_to_show page
+            self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shared.msg.no_search_result")
+            )
+
             self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.actions.search_in_progress")
+                self.langs_handler.tr("shared.msg.search_in_progress")
             )
             matches = self.books_handler.get_books(title=(given_input, False, False))
             self.logger.info(f"Found {len(matches)} books which matches with the query")
@@ -165,6 +166,9 @@ class ShelfDetailsPage(QtWidgets.QWidget):
                 widget.deleteLater()
 
             self.research_result_widgets.clear()
+            self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
+                self.langs_handler.tr("shelf.msg.empty_shelf")
+            )
 
 
 class BookWidget(widgets_pagination_view.InPageWidget):
@@ -226,12 +230,15 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         self.book_authors_lb.setObjectName("book_authors_lb")
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
+        self.book_summary_te.setMinimumSize(350, 120)
+        self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("book_summary_te")
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
         self.edit_b.setObjectName("edit_b")
+        self.edit_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.edit")))
         self.edit_b.setSizePolicy(self.fixed_sp)
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -243,6 +250,9 @@ class BookWidget(widgets_pagination_view.InPageWidget):
         self.delete_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
+        self.delete_b.setIcon(
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
+        )
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")
         self.delete_b.clicked.connect(self.delete_book)
@@ -250,7 +260,9 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.book_title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_layout.addWidget(self.book_authors_lb, 1, 1)
-        self.main_layout.addWidget(self.book_summary_te, 2, 1)
+        self.main_layout.addWidget(
+            self.book_summary_te, 2, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         self.main_layout.addWidget(self.edit_b, 3, 1)
         self.main_layout.addWidget(self.delete_b, 4, 1)
         self.main_layout.addWidget(
