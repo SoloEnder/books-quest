@@ -244,7 +244,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         )
 
         self.title_lb.setWordWrap(True)
-        self.title_lb.setObjectName("name_lb")
+        self.title_lb.setProperty("role", "h3")
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
