@@ -1,0 +1,277 @@
+from PySide6 import QtCore, QtWidgets
+
+from app.src import langs_handler, resources_handler, settings_handler
+from app.ui import qt_signals_handler
+from app.ui.main_pages import base_page
+
+
+class SettingsPage(base_page.BasePage):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        res_handler: resources_handler.RessourcesHandler,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
+        super().__init__(
+            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
+        )
+        self.PAGE_NAME = "SETTINGS_PAGE"
+        self.nav_bar = MainNavigationBar(None)
+        self.main_lyt.addWidget(self.nav_bar)
+
+        # ---- The dictionnary which contains the page object ----
+        self._sections = {}
+
+        # ---- The widgets which display the differents settings sections ----
+        self._sections_displayer = QtWidgets.QStackedWidget()
+
+        # ---- Creating and adding the differents settings sections ----
+        self.nav_bar.section_requested_sg.connect(self.set_displayed_section)
+        self.appearance_settings = AppearanceSettings(None, self.settings_handler)
+        self.add_section(self.appearance_settings, "Appearence")
+
+        self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
+        self.main_lyt.addWidget(
+            self._sections_displayer, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+
+    def has_section(self, section: SettingsSection) -> bool:
+        """
+        Check if `section` is integrated to this SettingsHandler.
+        Return True if this is the case, otherwise False.
+
+        Parameters
+        ----------
+        section (SettingsSection): the section to check
+
+        Returns
+        -------
+        bool: if the section is integrated or not
+
+        Details
+        -------
+        This method first check if the section.SECTION_NAME attribute is a key of the `_sections` dict attribute,
+        then check if the `section` value in the dict is the same object as the `section` parameter.
+        """
+        if section.SECTION_NAME in self._sections.keys():
+            if self._sections[section.SECTION_NAME] == section:
+                return False
+
+            else:
+                return True
+        else:
+            return False
+
+    def has_section_with_name(self, section_name: str) -> bool:
+        """
+        This method checks if `section_name` is a key of `_sections` attribute
+        Return True if yes, otherwise False
+        """
+        if section_name in self._sections.keys():
+            return True
+        else:
+            return False
+
+    def add_section(self, section: SettingsSection, nav_button_text: str):
+        """
+        Integrate a new `SettingsSection` instance to this `SettingsHandler`
+
+        Parameters
+        ----------
+        section: an instance of `SettingsSection`
+        nav_button_text: The button displayed on the naviguation button for this section
+        """
+        if not self.has_section(section):
+            self._sections[section.SECTION_NAME] = section
+            self._sections_displayer.addWidget(section)
+            self.nav_bar.add_section_button(section.SECTION_NAME, nav_button_text)
+
+        else:
+            raise ValueError(
+                f"A SettingsSection named '{section.SECTION_NAME} is already integrated !'"
+            )
+
+    def remove_section(self, section: SettingsSection):
+        """
+        Integrate a new `SettingsSection` instance to this `SettingsHandler`
+        """
+        if self.has_section(section):
+            del self._sections[section.SECTION_NAME]
+            self.nav_bar.remove_section_button(section.SECTION_NAME)
+
+        else:
+            raise ValueError(
+                f"Section with name '{section.SECTION_NAME}' not integrated to this SettingsPage!'"
+            )
+
+    def set_displayed_section(self, section_name: str):
+        """
+        Set the currently displayed settings section to the one at `section_name`
+
+        Raises
+        ------
+        ValueError: if no settings sectioon with this name is found
+        """
+        if self.has_section_with_name(section_name):
+            self._sections_displayer.setCurrentWidget(self._sections[section_name])
+
+        else:
+            raise ValueError(f"Unknown section name : '{section_name}'")
+
+
+class MainNavigationBar(QtWidgets.QWidget):
+    # --- Signal is emitted when the click on ones of the section's button in the naviguation bar ---
+    section_requested_sg = QtCore.Signal(str)
+
+    def __init__(self, parent: QtWidgets.QWidget | None):
+        super().__init__(parent)
+        self.lyt = QtWidgets.QVBoxLayout()
+        self._sections_buttons: dict[str, QtWidgets.QPushButton] = {}
+        self.setLayout(self.lyt)
+
+    def has_button_for_section(self, section_name: str) -> bool:
+        """
+        Checks if there is a button for `section_name`, return True if yes, otherwise return False
+        """
+
+        if section_name in self._sections_buttons.keys():
+            return True
+
+        else:
+            return False
+
+    def add_section_button(self, section_name: str, displayed_text: str):
+        """
+        Add a new button for naviguate to a settings section with `section_name`
+
+        Parameters
+        ----------
+        section_name: the name of the section to naviguate
+        displayed_text: the text displayed on the button
+
+        Raises
+        ------
+        ValueError: if `section_name` is already assigned to a button
+        """
+
+        if section_name not in self._sections_buttons.keys():
+            button = QtWidgets.QPushButton(displayed_text)
+            button.clicked.connect(lambda: self.section_requested_sg.emit(section_name))
+            self._sections_buttons[section_name] = button
+            self.lyt.addWidget(button)
+
+        else:
+            raise ValueError(f"A section button for {section_name} already exists")
+
+    def remove_section_button(self, section_name: str):
+        """
+        Removes the naviguation button for `section_name`
+
+        Raises
+        ------
+        ValueError: if `section_name` is not assigned to a button
+        """
+
+        if section_name in self._sections_buttons.keys():
+            self.lyt.removeWidget(self._sections_buttons[section_name])
+            del self._sections_buttons[section_name]
+
+        else:
+            raise ValueError(f"Unknown section name {section_name}")
+
+
+class SettingsSection(QtWidgets.QWidget):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        section_name: str,
+        header_text: str,
+        settings_handler: settings_handler.SettingsHandler,
+    ):
+        super().__init__(parent)
+        self.SECTION_NAME = section_name
+        self.settings_handler = settings_handler
+
+        self.base_lyt = QtWidgets.QGridLayout()
+        self.setLayout(self.base_lyt)
+
+        self._child_sections: dict[str, SettingsSection] = {}
+
+        self.header_lb = QtWidgets.QLabel(header_text)
+        self.header_lb.setProperty("role", "h2")
+        self.base_lyt.addWidget(self.header_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+
+    def has_child_section(self, section: SettingsSection) -> bool:
+        """
+        Check if `section` is a child of this SettingsSection.
+        Return True if this is the case, otherwise False.
+
+        Parameters
+        ----------
+        section (SettingsSection): the section to check
+
+        Returns
+        -------
+        bool: if  `section` is a child or not
+
+        Details
+        -------
+        This method first check if the section.SECTION_NAME attribute is a key of the `_child_sections` dict attribute,
+        then check if the `section` value in the dict is the same object as the `section` parameter.
+        """
+        if section.SECTION_NAME in self._child_sections.keys():
+            if self._child_sections[section.SECTION_NAME] == section:
+                return True
+
+            else:
+                return False
+
+        else:
+            return False
+
+    def set_header_text(self, text: str):
+        self.header_lb.setText(text)
+
+    def add_child_section(self, section: SettingsSection):
+        """
+        Add `section` as a child section of this SettingsSection
+        """
+        self._child_sections[section.SECTION_NAME] = section
+        self.base_lyt.addWidget(section)
+
+
+class AppearanceSettings(SettingsSection):
+    class LangsSettings(SettingsSection):
+        """
+        The SettingsSection for the languages options
+        """
+
+        def __init__(
+            self,
+            parent: QtWidgets.QWidget | None,
+            settings_handler: settings_handler.SettingsHandler,
+        ):
+            super().__init__(parent, "LANGS_SETTINGS", "Language", settings_handler)
+            self.header_lb.setProperty("role", "h3")
+
+            # --- The widgets for the language selection
+            self.lang_selection_combob = QtWidgets.QComboBox()
+            self.lang_selection_combob.addItem("Français", "fr")
+            self.lang_selection_combob.addItem("English", "en")
+            self.base_lyt.addWidget(self.lang_selection_combob)
+
+        def apply_settings(self):
+            self.settings_handler.edit_value(
+                "general.appearance.language", self.lang_selection_combob.currentData()
+            )
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+    ):
+        super().__init__(parent, "APPEARANCE", "Appearence", settings_handler)
+        self.langs_settings = AppearanceSettings.LangsSettings(None, settings_handler)
+        self.add_child_section(self.langs_settings)
