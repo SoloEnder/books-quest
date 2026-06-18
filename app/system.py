@@ -81,11 +81,21 @@ class AppSystem:
 
         self.settings_handler.apply_user_settings()
 
+    def refresh_ui(self):
+        """
+        Delete the MainWindow object and recreate it
+        """
+        self.start_ui()
+
     def start(self):
         self.start_ui()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
+
+        if hasattr(self, "ui"):
+            self.ui.deleteLater()
+
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
@@ -93,6 +103,7 @@ class AppSystem:
             self.langs_handler,
         )
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
+        self.ui.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(
