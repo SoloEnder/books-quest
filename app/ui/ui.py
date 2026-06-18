@@ -5,6 +5,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, settings_handler
 from app.ui import notification_service, qt_signals_handler
 from app.ui.main_pages import (
+    base_page,
     book_creation_page,
     settings_page,
     shelf_creation_page,
@@ -110,7 +111,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
         self.redundant_lang_path = ""
-        self.current_page_infos = ()  # This tuple should contain 2 values : the current page name and the current page object (in this order)
+        self.current_page_infos: (
+            tuple[str, base_page.BasePage, dict] | tuple
+        ) = ()  # This tuple should contain 3 values : the current page name the current page object (in this order), and the specials arguments of the current page
         self.settings_page = settings_page.SettingsPage(
             self,
             self.res_handler,
@@ -193,7 +196,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.history.insert(0, page_name)
-            self.current_page_infos = (page_name, page_obj)
+            self.current_page_infos = (page_name, page_obj, page_args)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
