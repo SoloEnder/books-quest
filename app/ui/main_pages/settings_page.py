@@ -40,7 +40,9 @@ class SettingsPage(base_page.BasePage):
             None, self.settings_handler, self.langs_handler, self.apply_settings_sg
         )
 
-        self.apply_button = QtWidgets.QPushButton("Appliquer")
+        self.apply_button = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.done")
+        )
         self.apply_button.clicked.connect(self.apply_and_refresh)
         self.add_section(
             self.appearance_settings,
@@ -252,8 +254,21 @@ class GeneralSettings(SettingsSection):
 
                 # --- The widgets for the language selection
                 self.lang_selection_combob = QtWidgets.QComboBox()
+                self.languages_opts_indexes = {
+                    "fr": 0,
+                    "en": 1,
+                }
                 self.lang_selection_combob.addItem("Français", "fr")
                 self.lang_selection_combob.addItem("English", "en")
+                self.lang_selection_combob.setCurrentIndex(
+                    self.languages_opts_indexes[
+                        str(
+                            self.settings_handler.get_setting_value(
+                                "general.appearance.language.current"
+                            )
+                        )
+                    ]
+                )
                 self.base_lyt.addWidget(self.lang_selection_combob)
 
             def apply_settings(self):
