@@ -1,67 +1,68 @@
 {
-    "app_infos": "app_infos.json",
-    "logs": {
-        "_base_": "logs",
-        "main": "main.log",
-        "app": "app.log"
+  "app_infos": "app_infos.json",
+  "logs": {
+    "_base_": "logs",
+    "main": "main.log",
+    "app": "app.log"
+  },
+  "assets": {
+    "_base_": "assets",
+    "qss": {
+      "_base_": "qss",
+      "general": "general.qss",
+      "widgets_pagination_view": "widgets_pagination_view.qss",
+      "shelf_details_page": "shelf_details_page.qss",
+      "shelfs_view_page": "shelfs_view_page.qss"
     },
-    "assets": {
-        "_base_": "assets",
-        "qss": {
-            "_base_": "qss",
-            "general": "general.qss",
-            "widgets_pagination_view": "widgets_pagination_view.qss",
-            "shelf_details_page": "shelf_details_page.qss",
-            "shelfs_view_page": "shelfs_view_page.qss"
-        },
-        "defaults_covers": {
-            "_base_": "defaults_covers",
-            "book": "default_book_cover.png",
-            "shelf": "default_shelf_cover.png"
-        },
-        "icons": {
-            "_base_": "icons",
-            "add": "add_ico.png",
-            "go_back": "back_ico.png",
-            "exit": "cross_ico.png",
-            "edit": "edit_ico.png",
-            "done": "done_ico.png",
-            "new_book": "new_book_ico.png",
-            "view_books": "view_books_ico.png"
-        },
-        "splashscreen": {
-            "_base_": "splashscreen",
-            "splashscreen": "splashscreen.png"
-        },
-        "langs": {
-            "_base_": "lang",
-            "fr": "fr.json",
-            "en":"en.json"
-        }
+    "defaults_covers": {
+      "_base_": "defaults_covers",
+      "book": "default_book_cover.png",
+      "shelf": "default_shelf_cover.png"
     },
-    "data": {
-        "_base_": "data",
-        "books": {
-            "_base_": "books_data",
-            "books": "books.json",
-            "covers": {
-                "_base_": "covers"
-            }
-        },
-        "bookshelves": {
-            "_base_": "bookshelves_data",
-            "bookshelves": "bookshelves.json",
-            "covers": {
-                "_base_": "covers"
-            }
-        },
-        "settings":{
-            "_base_":"settings",
-            "base": "base_settings.json",
-            "user":"user_settings.json"
-        }
+    "icons": {
+      "_base_": "icons",
+      "add": "add_ico.png",
+      "go_back": "back_ico.png",
+      "exit": "cross_ico.png",
+      "edit": "edit_ico.png",
+      "done": "done_ico.png",
+      "new_book": "new_book_ico.png",
+      "view_books": "view_books_ico.png",
+      "settings": "gear.png"
     },
-    "tmp": {
-        "_base_": "tmp"
+    "splashscreen": {
+      "_base_": "splashscreen",
+      "splashscreen": "splashscreen.png"
+    },
+    "langs": {
+      "_base_": "lang",
+      "fr": "fr.json",
+      "en": "en.json"
     }
+  },
+  "data": {
+    "_base_": "data",
+    "books": {
+      "_base_": "books_data",
+      "books": "books.json",
+      "covers": {
+        "_base_": "covers"
+      }
+    },
+    "bookshelves": {
+      "_base_": "bookshelves_data",
+      "bookshelves": "bookshelves.json",
+      "covers": {
+        "_base_": "covers"
+      }
+    },
+    "settings": {
+      "_base_": "settings",
+      "base": "base_settings.json",
+      "user": "user_settings.json"
+    }
+  },
+  "tmp": {
+    "_base_": "tmp"
+  }
 }
