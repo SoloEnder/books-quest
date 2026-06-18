@@ -243,8 +243,8 @@ class AppearanceSettings(SettingsSection):
             self.base_lyt.addWidget(self.lang_selection_combob)
 
         def apply_settings(self):
-            self.settings_handler.edit_value(
-                "general.appearance.language.current",
+            self.settings_handler.set_setting_value(
+                "general.appearance.language",
                 self.lang_selection_combob.currentData(),
             )
 
