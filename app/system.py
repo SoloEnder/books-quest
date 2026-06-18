@@ -54,7 +54,7 @@ class AppSystem:
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.load_and_apply_settings()
-        self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
+        self.langs_handler = langs_handler.LangsHandler(self.jfm, {}, self.res_handler)
         self.langs_handler.load_from_file(
             self.res_handler.get_res(
                 f"assets.langs.{self.settings_handler.get_value('general.appearance.language.current')}"
