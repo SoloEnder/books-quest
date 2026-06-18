@@ -59,6 +59,7 @@ class SettingsPage(base_page.BasePage):
         """
         Send a signal to all SettingsSection to save the settings, and emit the signal to refresh UI
         """
+        self.logger.info("Applying new settings...")
         self.qt_signals_handler.edit_progress_msg.emit(
             self.langs_handler.tr("settings.msg.applying_changes")
         )

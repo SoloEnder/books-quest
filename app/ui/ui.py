@@ -92,6 +92,7 @@ class UI(QtWidgets.QMainWindow):
         """
         Refresh the UI
         """
+        self.logger.info("Refreshing UI...")
         current_page_infos_before_redraw = self.my_stacked_widgets.current_page_infos
         self.draw_ui()
         self.qt_signals_handler.switch_page_sg.emit(
