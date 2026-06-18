@@ -81,17 +81,14 @@ class AppSystem:
 
         self.settings_handler.apply_user_settings()
 
-    def refresh_ui(self):
-        """
-        Delete the MainWindow object and recreate it
-        """
-        self.start_ui()
-
     def start(self):
         self.start_ui()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
+
+        if hasattr(self, "ui"):
+            self.ui.deleteLater()
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
@@ -112,7 +109,7 @@ class AppSystem:
             )
             == True
         ):
-            self.ui.show_indev_warn()
+            self.show_indev_warn()
 
     def close_app(self):
         self.logger.info("Closing window...")
@@ -238,3 +235,15 @@ class AppSystem:
 
     def save_app_infos(self, filepath: str | pathlib.Path):
         self.jfm.write_json(filepath, data=self.app_infos, catch_error=False)
+
+    def show_indev_warn(self):
+        """
+        Show the in develepoment warning window
+        """
+
+        # self.indev_warning_w.show()
+        QtWidgets.QMessageBox.information(
+            None,
+            "Indev Warning",
+            "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>",
+        )
