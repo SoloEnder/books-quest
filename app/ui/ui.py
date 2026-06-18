@@ -68,6 +68,44 @@ class UI(QtWidgets.QMainWindow):
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
         self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
+        self.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
+
+    def refresh_ui(self):
+        self.logger.info("Refreshing UI...")
+        self.my_stacked_widgets.deleteLater()
+        self.my_stacked_widgets = MyStackedWidgets(
+            self,
+            self.books_handler,
+            self.res_handler,
+            self.qt_signals_handler,
+            self.settings_handler,
+            self.langs_handler,
+        )
+        self.removeToolBar(self.toolbar)
+        self.toolbar.deleteLater()
+        self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
+        self.addToolBar(self.toolbar)
+        self.toolbar.close_page_act.triggered.connect(
+            lambda: self.my_stacked_widgets.close_page()
+        )
+        self.toolbar.settings_act.triggered.connect(
+            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
+        )
+        self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
+        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
+        utils_funcs.load_and_set_ss(
+            self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
+        )
+        self.my_stacked_widgets.switch_page("shelfs_view_page")
+        self.setCentralWidget(self.my_stacked_widgets)
+        self.setWindowTitle("Books Quest")
+        self.setWindowIcon(
+            QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen"))
+        )
+        self.progress_info_lb = QtWidgets.QLabel()
+        self.statusBar().addPermanentWidget(self.progress_info_lb)
+        self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
+        self.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
 
     def set_progress_msg(self, msg: str):
         self.progress_info_lb.setText(msg)

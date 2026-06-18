@@ -57,7 +57,7 @@ class AppSystem:
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
         self.langs_handler.load_from_file(
             self.res_handler.get_res(
-                f"assets.langs.{self.settings_handler.get_value('general.language.current')}"
+                f"assets.langs.{self.settings_handler.get_value('general.appearance.language.current')}"
             )
         )
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
@@ -92,10 +92,6 @@ class AppSystem:
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
-
-        if hasattr(self, "ui"):
-            self.ui.deleteLater()
-
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
@@ -103,7 +99,6 @@ class AppSystem:
             self.langs_handler,
         )
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
-        self.ui.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(

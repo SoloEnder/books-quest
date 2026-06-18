@@ -1,3 +1,5 @@
+import logging
+
 from PySide6 import QtCore, QtWidgets
 
 from app.src import langs_handler, resources_handler, settings_handler
@@ -6,6 +8,8 @@ from app.ui.main_pages import base_page
 
 
 class SettingsPage(base_page.BasePage):
+    apply_settings_sg = QtCore.Signal()
+
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -17,6 +21,7 @@ class SettingsPage(base_page.BasePage):
         super().__init__(
             parent, res_handler, settings_handler, langs_handler, qt_signals_handler
         )
+        self.logger = logging.getLogger()
         self.PAGE_NAME = "SETTINGS_PAGE"
         self.nav_bar = MainNavigationBar(None)
         self.main_lyt.addWidget(self.nav_bar)
@@ -28,14 +33,31 @@ class SettingsPage(base_page.BasePage):
         self._sections_displayer = QtWidgets.QStackedWidget()
 
         # ---- Creating and adding the differents settings sections ----
-        self.nav_bar.section_requested_sg.connect(self.set_displayed_section)
-        self.appearance_settings = AppearanceSettings(None, self.settings_handler)
+        self.nav_bar.section_requested_sg.connect(
+            self.set_displayed_section
+        )  # The naviguation bar
+        self.appearance_settings = AppearanceSettings(
+            None, self.settings_handler, self.apply_settings_sg
+        )
+
+        self.apply_button = QtWidgets.QPushButton("Appliquer")
+        self.apply_button.clicked.connect(self.apply_and_refresh)
         self.add_section(self.appearance_settings, "Appearence")
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
         self.main_lyt.addWidget(
             self._sections_displayer, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop
         )
+        self.main_lyt.addWidget(self.apply_button, 1, 0)
+
+    def apply_and_refresh(self):
+        """
+        Send a signal to all SettingsSection to save the settings, and emit the signal to refresh UI
+        """
+        self.logger.debug("Sending new settings save request...")
+        self.apply_settings_sg.emit()
+        self.logger.debug("Sending UI refresh request...")
+        self.qt_signals_handler.refresh_ui_sg.emit()
 
     def has_section(self, section: SettingsSection) -> bool:
         """
@@ -121,6 +143,126 @@ class SettingsPage(base_page.BasePage):
             raise ValueError(f"Unknown section name : '{section_name}'")
 
 
+class SettingsSection(QtWidgets.QWidget):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        section_name: str,
+        header_text: str,
+        settings_handler: settings_handler.SettingsHandler,
+        apply_settings_sg,
+    ):
+        super().__init__(parent)
+        self.SECTION_NAME = section_name
+        self.settings_handler = settings_handler
+        self.apply_settings_sg = apply_settings_sg
+
+        self.base_lyt = QtWidgets.QGridLayout()
+        self.setLayout(self.base_lyt)
+
+        self._child_sections: dict[str, SettingsSection] = {}
+
+        self.header_lb = QtWidgets.QLabel(header_text)
+        self.header_lb.setProperty("role", "h2")
+        self.base_lyt.addWidget(self.header_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        # --- Connecting the signal emitted when an appliance of the new settings is request
+        self.apply_settings_sg.connect(self.apply_settings)
+
+    def has_child_section(self, section: SettingsSection) -> bool:
+        """
+        Check if `section` is a child of this SettingsSection.
+        Return True if this is the case, otherwise False.
+
+        Parameters
+        ----------
+        section (SettingsSection): the section to check
+
+        Returns
+        -------
+        bool: if  `section` is a child or not
+
+        Details
+        -------
+        This method first check if the section.SECTION_NAME attribute is a key of the `_child_sections` dict attribute,
+        then check if the `section` value in the dict is the same object as the `section` parameter.
+        """
+        if section.SECTION_NAME in self._child_sections.keys():
+            if self._child_sections[section.SECTION_NAME] == section:
+                return True
+
+            else:
+                return False
+
+        else:
+            return False
+
+    def set_header_text(self, text: str):
+        self.header_lb.setText(text)
+
+    def add_child_section(self, section: SettingsSection):
+        """
+        Add `section` as a child section of this SettingsSection
+        """
+        self._child_sections[section.SECTION_NAME] = section
+        self.base_lyt.addWidget(section)
+
+    def apply_settings(self):
+        """
+        This method must be overriden by the child class.
+        This is where must be the recuperation and the appliance of the new settings value
+        """
+        pass
+
+
+class AppearanceSettings(SettingsSection):
+    class LangsSettings(SettingsSection):
+        """
+        The SettingsSection for the languages options
+        """
+
+        def __init__(
+            self,
+            parent: QtWidgets.QWidget | None,
+            settings_handler: settings_handler.SettingsHandler,
+            apply_settings_sg,
+        ):
+            super().__init__(
+                parent,
+                "LANGS_SETTINGS",
+                "Language",
+                settings_handler,
+                apply_settings_sg,
+            )
+            self.header_lb.setProperty("role", "h3")
+
+            # --- The widgets for the language selection
+            self.lang_selection_combob = QtWidgets.QComboBox()
+            self.lang_selection_combob.addItem("Français", "fr")
+            self.lang_selection_combob.addItem("English", "en")
+            self.base_lyt.addWidget(self.lang_selection_combob)
+
+        def apply_settings(self):
+            self.settings_handler.edit_value(
+                "general.appearance.language.current",
+                self.lang_selection_combob.currentData(),
+            )
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent, "APPEARANCE", "Appearence", settings_handler, apply_settings_sg
+        )
+        self.langs_settings = AppearanceSettings.LangsSettings(
+            None, settings_handler, apply_settings_sg
+        )
+        self.add_child_section(self.langs_settings)
+
+
 class MainNavigationBar(QtWidgets.QWidget):
     # --- Signal is emitted when the click on ones of the section's button in the naviguation bar ---
     section_requested_sg = QtCore.Signal(str)
@@ -180,98 +322,3 @@ class MainNavigationBar(QtWidgets.QWidget):
 
         else:
             raise ValueError(f"Unknown section name {section_name}")
-
-
-class SettingsSection(QtWidgets.QWidget):
-    def __init__(
-        self,
-        parent: QtWidgets.QWidget | None,
-        section_name: str,
-        header_text: str,
-        settings_handler: settings_handler.SettingsHandler,
-    ):
-        super().__init__(parent)
-        self.SECTION_NAME = section_name
-        self.settings_handler = settings_handler
-
-        self.base_lyt = QtWidgets.QGridLayout()
-        self.setLayout(self.base_lyt)
-
-        self._child_sections: dict[str, SettingsSection] = {}
-
-        self.header_lb = QtWidgets.QLabel(header_text)
-        self.header_lb.setProperty("role", "h2")
-        self.base_lyt.addWidget(self.header_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-
-    def has_child_section(self, section: SettingsSection) -> bool:
-        """
-        Check if `section` is a child of this SettingsSection.
-        Return True if this is the case, otherwise False.
-
-        Parameters
-        ----------
-        section (SettingsSection): the section to check
-
-        Returns
-        -------
-        bool: if  `section` is a child or not
-
-        Details
-        -------
-        This method first check if the section.SECTION_NAME attribute is a key of the `_child_sections` dict attribute,
-        then check if the `section` value in the dict is the same object as the `section` parameter.
-        """
-        if section.SECTION_NAME in self._child_sections.keys():
-            if self._child_sections[section.SECTION_NAME] == section:
-                return True
-
-            else:
-                return False
-
-        else:
-            return False
-
-    def set_header_text(self, text: str):
-        self.header_lb.setText(text)
-
-    def add_child_section(self, section: SettingsSection):
-        """
-        Add `section` as a child section of this SettingsSection
-        """
-        self._child_sections[section.SECTION_NAME] = section
-        self.base_lyt.addWidget(section)
-
-
-class AppearanceSettings(SettingsSection):
-    class LangsSettings(SettingsSection):
-        """
-        The SettingsSection for the languages options
-        """
-
-        def __init__(
-            self,
-            parent: QtWidgets.QWidget | None,
-            settings_handler: settings_handler.SettingsHandler,
-        ):
-            super().__init__(parent, "LANGS_SETTINGS", "Language", settings_handler)
-            self.header_lb.setProperty("role", "h3")
-
-            # --- The widgets for the language selection
-            self.lang_selection_combob = QtWidgets.QComboBox()
-            self.lang_selection_combob.addItem("Français", "fr")
-            self.lang_selection_combob.addItem("English", "en")
-            self.base_lyt.addWidget(self.lang_selection_combob)
-
-        def apply_settings(self):
-            self.settings_handler.edit_value(
-                "general.appearance.language", self.lang_selection_combob.currentData()
-            )
-
-    def __init__(
-        self,
-        parent: QtWidgets.QWidget | None,
-        settings_handler: settings_handler.SettingsHandler,
-    ):
-        super().__init__(parent, "APPEARANCE", "Appearence", settings_handler)
-        self.langs_settings = AppearanceSettings.LangsSettings(None, settings_handler)
-        self.add_child_section(self.langs_settings)
