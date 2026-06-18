@@ -44,7 +44,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         if self.is_valid_setting(setting_path):
             setting_infos = self.get_value(setting_path)
             if new_value in setting_infos["choices"]:
-                self.edit_value(f"{setting_infos}.current", new_value)
+                self.edit_value(f"{setting_path}.current", new_value)
 
             else:
                 raise ValueNotAllowedError(
