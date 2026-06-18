@@ -14,6 +14,7 @@
         "shelf": "Search for shelves"
       },
       "close": "Close",
+      "open_settings": "Open settings",
       "book_creation": "New book",
       "shelf_creation": "New shelf",
       "go_to": "Go to :"

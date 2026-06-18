@@ -76,7 +76,7 @@ class UI(QtWidgets.QMainWindow):
         self.toolbar.close_page_act.triggered.connect(
             lambda: self.my_stacked_widgets.close_page()
         )
-        self.toolbar.settings_act.triggered.connect(
+        self.toolbar.open_settings_act.triggered.connect(
             lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
         )
         self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
@@ -110,6 +110,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
         self.redundant_lang_path = ""
+        self.current_page_infos = ()  # This tuple should contain 2 values : the current page name and the current page object (in this order)
         self.settings_page = settings_page.SettingsPage(
             self,
             self.res_handler,
@@ -192,6 +193,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.history.insert(0, page_name)
+            self.current_page_infos = (page_name, page_obj)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
@@ -327,12 +329,11 @@ class ToolBar(QtWidgets.QToolBar):
         self.close_page_act.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
         )
-        self.settings_act = QtGui.QAction(
-            # self.langs_handler.tr("shared.actions.close")
-            "settings"
+        self.open_settings_act = QtGui.QAction(
+            self.langs_handler.tr("shared.actions.open_settings")
         )
         # self.close_page_act.setIcon(
         #     QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
         # )
         self.addAction(self.close_page_act)
-        self.addAction(self.settings_act)
+        self.addAction(self.open_settings_act)
