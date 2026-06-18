@@ -41,27 +41,63 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         ValueNotAllowedError: if `new_value` isn't in the list of availables values for the setting
 
         """
+        if self.is_valid_setting(setting_path):
+            setting_infos = self.get_value(setting_path)
+            if new_value in setting_infos["choices"]:
+                self.edit_value(f"{setting_infos}.current", new_value)
+
+            else:
+                raise ValueNotAllowedError(
+                    setting_path, new_value, setting_infos["choices"]
+                )
+        else:
+            raise InvalidSettingFormat(setting_path)
+
+    def get_setting_value(self, setting_path: str):
+        """
+        Get the value of the `current` key from a setting.
+        If `setting_path` already end with '.current', then this method do the same as `get_value` method
+
+        Raises
+        ------
+        InvalidSettingFormat: if the setting at `setting_path` is not valid
+        See `get_value` method raises if `setting_path` end with '.current'
+        """
+
+        if setting_path.endswith(".current"):
+            return self.get_value(setting_path)
+
+        if self.is_valid_setting(setting_path):
+            return self.get_value(f"{setting_path}.current")
+
+        else:
+            raise InvalidSettingFormat(setting_path)
+
+    def is_valid_setting(self, setting_path: str):
+        """
+        Checks if the setting at `setting_path` respect the valid setting format
+
+        Returns
+        -------
+        bool: if the setting is valid or not
+
+        Details
+        -------
+        Valid setting format : {setting_name: {'current':current_value, 'choices':availables_choices}}
+        """
         setting_infos = self.get_value(setting_path)
 
         if isinstance(setting_infos, dict):
             if setting_infos.get("choices") and setting_infos.get("current"):
                 setting_choices = setting_infos["choices"]
                 if isinstance(setting_choices, list):
-                    if new_value in setting_choices:
-                        self.edit_value(f"{setting_infos}.current", new_value)
-
-                    else:
-                        raise ValueNotAllowedError(
-                            setting_path, new_value, setting_choices
-                        )
-                else:
-                    raise InvalidSettingFormat(setting_path)
+                    return True
 
             else:
-                raise InvalidSettingFormat(setting_path)
+                return False
 
         else:
-            raise InvalidSettingFormat(setting_path)
+            return False
 
     def load_user_settings(self, filepath: str | pathlib.Path):
         """
