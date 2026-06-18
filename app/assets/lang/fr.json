@@ -86,7 +86,8 @@
         "section_description": "Paramètres concernant l'apparence de l'application",
         "language": {
           "section_title": "Language",
-          "section_description": "Paramètres concernant la langue de l'interface"
+          "section_description": "Paramètres concernant la langue de l'interface",
+          "edit_current_lang": "Modifier la langue d'affichage"
         }
       }
     }

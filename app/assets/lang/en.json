@@ -87,7 +87,8 @@
         "section_description": "Settings related to the apparence of the applicaion",
         "language": {
           "section_title": "Language",
-          "section_description": "Interface language settings"
+          "section_description": "Interface language settings",
+          "edit_current_lang": "Edit interface language"
         }
       }
     }

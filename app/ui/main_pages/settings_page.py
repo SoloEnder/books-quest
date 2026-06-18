@@ -1,6 +1,6 @@
 import logging
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
@@ -51,7 +51,7 @@ class SettingsPage(base_page.BasePage):
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
         self.main_lyt.addWidget(
-            self._sections_displayer, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop
+            self._sections_displayer, 0, 1, 2, 1, QtCore.Qt.AlignmentFlag.AlignTop
         )
         self.main_lyt.addWidget(self.apply_button, 1, 0)
 
@@ -245,7 +245,7 @@ class GeneralSettings(SettingsSection):
                     langs_handler,
                     apply_settings_sg,
                 )
-                self.header_lb.setProperty("role", "h3")
+                self.header_lb.setProperty("role", "h4")
                 self.header_lb.setStatusTip(
                     self.langs_handler.tr(
                         "settings.general.appearance.language.section_description"
@@ -253,6 +253,11 @@ class GeneralSettings(SettingsSection):
                 )
 
                 # --- The widgets for the language selection
+                self.lang_selection_lb = QtWidgets.QLabel(
+                    self.langs_handler.tr(
+                        "settings.general.appearance.language.edit_current_lang"
+                    )
+                )
                 self.lang_selection_combob = QtWidgets.QComboBox()
                 self.languages_opts_indexes = {
                     "fr": 0,
@@ -264,12 +269,22 @@ class GeneralSettings(SettingsSection):
                     self.languages_opts_indexes[
                         str(
                             self.settings_handler.get_setting_value(
-                                "general.appearance.language.current"
+                                "general.appearance.language"
                             )
                         )
                     ]
                 )
-                self.base_lyt.addWidget(self.lang_selection_combob)
+                self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+                self.base_lyt.addWidget(
+                    self.lang_selection_lb,
+                    1,
+                    0,  # QtGui.Qt.AlignmentFlag.AlignLeft
+                )
+                self.base_lyt.addWidget(
+                    self.lang_selection_combob,
+                    1,
+                    1,  # QtGui.Qt.AlignmentFlag.AlignLeft
+                )
 
             def apply_settings(self):
                 self.settings_handler.set_setting_value(
@@ -295,6 +310,7 @@ class GeneralSettings(SettingsSection):
             self.header_lb.setStatusTip(
                 self.langs_handler.tr("settings.general.appearance.section_description")
             )
+            self.header_lb.setProperty("role", "h3")
             self.langs_settings = GeneralSettings.AppearanceSettings.LangsSettings(
                 None,
                 settings_handler,
