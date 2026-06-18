@@ -85,7 +85,7 @@ class UI(QtWidgets.QMainWindow):
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
         )
-        self.my_stacked_widgets.switch_page("shelfs_view_page")
+        self.my_stacked_widgets.switch_page("SHELFS_VIEW_PAGE")
         self.setCentralWidget(self.my_stacked_widgets)
 
     def refresh_ui(self):
@@ -179,7 +179,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
         self.history = []
-        self.switch_page("SHELFS_VIEW_PAGE")
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
         utils_funcs.load_and_set_ss(
