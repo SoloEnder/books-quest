@@ -57,7 +57,7 @@ class AppSystem:
         self.langs_handler = langs_handler.LangsHandler(self.jfm, {}, self.res_handler)
         self.langs_handler.load_from_file(
             self.res_handler.get_res(
-                f"assets.langs.{self.settings_handler.get_value('general.appearance.language.current')}"
+                f"assets.langs.{self.settings_handler.get_setting_value('general.appearance.language')}"
             )
         )
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
@@ -104,8 +104,8 @@ class AppSystem:
 
         if (
             self.app_infos["version"]["semantic"] == "indev"
-            and self.settings_handler.get_value(
-                "developer_settings.show_indev_warning.current"
+            and self.settings_handler.get_setting_value(
+                "developer_settings.show_indev_warning"
             )
             == True
         ):

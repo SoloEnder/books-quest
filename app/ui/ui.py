@@ -52,7 +52,7 @@ class UI(QtWidgets.QMainWindow):
         """
         self.logger.info("Drawing UI...")
         self.langs_handler.set_current_language(
-            self.settings_handler.get_value("general.appearance.language.current")
+            self.settings_handler.get_setting_value("general.appearance.language")
         )
         self.logger.info("Refreshing UI...")
 
