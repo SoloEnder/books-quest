@@ -48,6 +48,9 @@ class UI(QtWidgets.QMainWindow):
         )
 
     def draw_ui(self):
+        """
+        Draws almost the entire widgets, and remove the existant ones before.
+        """
         self.logger.info("Drawing UI...")
         self.langs_handler.set_current_language(
             self.settings_handler.get_value("general.appearance.language.current")
