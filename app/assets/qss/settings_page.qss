@@ -1,0 +1,4 @@
+QPushButton[role="nav_button"] {
+    font-weight: 600;
+    font-size: 14px;
+}
