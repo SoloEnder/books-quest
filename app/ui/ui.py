@@ -1,9 +1,8 @@
 import logging
-from typing import Sequence
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, json_dicts_paths_handler, langs_handler, settings_handler
+from app.src import book_sys, langs_handler, settings_handler
 from app.ui import notification_service, qt_signals_handler
 from app.ui.main_pages import (
     book_creation_page,
