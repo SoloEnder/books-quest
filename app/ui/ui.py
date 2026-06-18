@@ -41,7 +41,7 @@ class UI(QtWidgets.QMainWindow):
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
         self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
-        self.qt_signals_handler.refresh_ui_sg.connect(self.draw_ui)
+        self.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
         self.setWindowTitle("Books Quest")
         self.setWindowIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen"))
@@ -87,6 +87,15 @@ class UI(QtWidgets.QMainWindow):
         )
         self.my_stacked_widgets.switch_page("shelfs_view_page")
         self.setCentralWidget(self.my_stacked_widgets)
+
+    def refresh_ui(self):
+        current_page_infos_before_redraw = self.my_stacked_widgets.current_page_infos
+        self.draw_ui()
+        self.qt_signals_handler.switch_page_sg.emit(
+            current_page_infos_before_redraw[0],
+            True,
+            current_page_infos_before_redraw[1],
+        )  # The first element should be the page name
 
     def set_progress_msg(self, msg: str):
         self.progress_info_lb.setText(msg)
