@@ -59,10 +59,17 @@ class SettingsPage(base_page.BasePage):
         """
         Send a signal to all SettingsSection to save the settings, and emit the signal to refresh UI
         """
+        self.qt_signals_handler.edit_progress_msg.emit(
+            self.langs_handler.tr("settings.msg.applying_changes")
+        )
         self.logger.debug("Sending new settings save request...")
         self.apply_settings_sg.emit()
         self.logger.debug("Sending UI refresh request...")
         self.qt_signals_handler.refresh_ui_sg.emit()
+        self.qt_signals_handler.edit_progress_msg.emit(" ")
+        QtWidgets.QMessageBox.information(
+            None, "Settings", self.langs_handler.tr("settings.msg.settings_updated")
+        )
 
     def has_section(self, section: SettingsSection) -> bool:
         """
@@ -217,10 +224,8 @@ class SettingsSection(QtWidgets.QWidget):
 
     def apply_settings(self):
         """
-        This method must be overriden by the child class.
         This is where must be the recuperation and the appliance of the new settings value
         """
-        pass
 
 
 class GeneralSettings(SettingsSection):

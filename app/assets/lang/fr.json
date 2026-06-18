@@ -79,6 +79,10 @@
     }
   },
   "settings": {
+    "msg": {
+      "applying_changes": "Application des nouveaux paramètres...",
+      "settings_updated": "Paramètres mis à jour !"
+    },
     "general": {
       "section_title": "General",
       "appearance": {

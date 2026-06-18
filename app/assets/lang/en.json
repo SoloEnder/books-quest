@@ -80,6 +80,10 @@
     }
   },
   "settings": {
+    "msg": {
+      "applying_changes": "Applying settings changes...",
+      "settings_updated": "Settings updated !"
+    },
     "general": {
       "section_title": "General",
       "appearance": {
