@@ -42,7 +42,6 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
 
         """
         setting_infos = self.get_value(setting_path)
-        print(f"{setting_infos=}")
 
         if isinstance(setting_infos, dict):
             if setting_infos.get("choices") and setting_infos.get("current"):
