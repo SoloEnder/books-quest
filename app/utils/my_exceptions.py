@@ -1,5 +1,8 @@
+
+import uuid
+
 class BooksShelfExistsError(Exception):
-    def __init__(self, shelf_id: str, msg: str|None=None):
+    def __init__(self, shelf_id: uuid.UUID|str, msg: str|None=None):
         self.shelf_id = shelf_id
         self.msg = msg or f"Book shelf with the ID {shelf_id} already exists !"
         super().__init__(self.msg)
@@ -9,7 +12,7 @@ class BooksShelfExistsError(Exception):
 
 
 class BooksShelfNotFoundError(Exception):
-    def __init__(self, shelf_id: str, msg: str|None=None):
+    def __init__(self, shelf_id: uuid.UUID|str, msg: str|None=None):
         self.shelf_id = shelf_id
         self.msg = msg or (
             f"Book shelf with ID {shelf_id} dosen't exists ! Has been it deleted ?"
@@ -21,7 +24,7 @@ class BooksShelfNotFoundError(Exception):
 
 
 class BookNotFoundError(Exception):
-    def __init__(self, book_id: str, container, msg: str|None=None):
+    def __init__(self, book_id: uuid.UUID|str, container, msg: str|None=None):
         self.book_id = book_id
         self.msg = msg or f"Book with ID {book_id} dosen't exists in {container} ! Has been it deleted ?"
         super().__init__()
@@ -31,7 +34,7 @@ class BookNotFoundError(Exception):
 
 
 class BookExistsError(Exception):
-    def __init__(self, book_id: str, container_name: str, msg: str|None=None):
+    def __init__(self, book_id: uuid.UUID|str, container_name: str, msg: str|None=None):
         self.book_id = book_id
         self.msg = msg or f"Book with ID {book_id} arleady exists in {container_name} !"
         super().__init__(self.msg)

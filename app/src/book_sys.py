@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import os
 import pathlib
+import uuid
 
 from app.src import resources_handler
 from app.utils import json_file_manager as jfm
@@ -40,10 +41,7 @@ class Book:
         self.status = kwargs.get("status")
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
-        self.id = kwargs.get(
-            "id",
-            str(dt.datetime.timestamp(dt.datetime.now())),
-        )
+        self.id = kwargs.get("id", uuid.uuid4()) # The id must be an UUID 4 !
         self._parents_shelves: ShelvesList = kwargs.get("parents_shelves", [])
 
         for parent_shelf in self._parents_shelves:
@@ -81,6 +79,10 @@ class Book:
         else:
             parent_shelf.add_book(self)
             return False
+        
+    def str_id(self):
+        "Return a string representation of the `id` attribute"
+        return str(self.id)
 
     def has_parent(self, parent_shelf: Shelf) -> bool:
         """
@@ -108,7 +110,7 @@ class Shelf:
         self.name_suffix = kwargs.get("title_suffix")
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
-        self.id = kwargs.get("id", str(dt.datetime.timestamp(dt.datetime.now())))
+        self.id = kwargs.get("id", uuid.uuid4)
         for book in self._books:
             if not book.has_parent(self):
                 book._parents_shelves.append(self)
@@ -162,6 +164,9 @@ class Shelf:
             "books": self._books,
             "cover_path": self.cover_path,
         }
+        
+    def str_id(self) -> str:
+        return str(self.id)
 
 
 class BooksHandler:
@@ -192,7 +197,7 @@ class BooksHandler:
             if book_obj.cover_path:
                 self._delete_cover(book_obj.cover_path, True)
             book_obj.delete_from_parents()
-            del self.books[book_obj.id]
+            del self.books[str(book_obj.id)]
 
         else:
             raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
@@ -232,8 +237,8 @@ class BooksHandler:
         Add 'book_obj' to this BooksHandler and to the default shelf
         """
 
-        if not book_obj.id in self.books:
-            self.books[book_obj.id] = book_obj
+        if not book_obj.str_id() in self.books:
+            self.books[book_obj.str_id()] = book_obj
             self.default_shelf.add_book(book_obj)
 
         else:
@@ -275,8 +280,8 @@ class BooksHandler:
         book_shelf: an instance of a BookShelf object
         """
 
-        if shelf.id not in self.shelves.keys():
-            self.shelves[shelf.id] = shelf
+        if shelf.str_id() not in self.shelves.keys():
+            self.shelves[shelf.str_id()] = shelf
 
         else:
             raise my_exceptions.BooksShelfExistsError(
@@ -310,7 +315,7 @@ class BooksHandler:
     def edit_shelf(self, shelf_id: str, new_shelf):
 
         if shelf_id in self.shelves.keys():
-            new_shelf.id = shelf_id
+            new_shelf.id = uuid.UUID(shelf_id)
             self.shelves[shelf_id] = new_shelf
 
         else:
@@ -427,11 +432,13 @@ class BooksHandler:
 
         for book in self.books.values():
             book_data = book.get_infos()
+            # -- Converting book `id` into a string
+            book_data["id"] = book.str_id()
             book_data["parents_shelves_ids"] = []
 
             for shelf in book_data["parents_shelves"]:
                 if shelf != self.default_shelf:
-                    book_data["parents_shelves_ids"].append(shelf.id)
+                    book_data["parents_shelves_ids"].append(shelf.str_id())
 
             del book_data["parents_shelves"]
             data.append(book_data)
@@ -445,6 +452,7 @@ class BooksHandler:
 
         if data:
             for book_data in data:
+                book_data["id"] = uuid.UUID(book_data["id"])
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):
@@ -459,10 +467,11 @@ class BooksHandler:
 
         for shelf in self.shelves.values():
             shelf_data = shelf.get_infos()
+            shelf_data["id"] = str(shelf_data["id"])
             shelf_data["books_ids"] = []
 
             for book in shelf_data["books"]:
-                shelf_data["books_ids"].append(book.id)
+                shelf_data["books_ids"].append(book.str_id())
 
             del shelf_data["books"]
 
@@ -484,6 +493,7 @@ class BooksHandler:
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
                 shelf_data["books"] = books
+                shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
 
     def convert_books_ids(self, books_ids: list | tuple):

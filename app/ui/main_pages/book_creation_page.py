@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 import os
 import shutil
-from this import s
+import uuid
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -460,12 +460,12 @@ class BookCreationPage(base_page.BasePage):
             else:
                 return
 
-        books_infos["id"] = str(dt.datetime.timestamp(dt.datetime.now()))
+        books_infos["id"] = uuid.uuid4()
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
                 self.res_handler.get_res("data.books.covers"),
-                f"{books_infos['id'].replace('.', '_')}.png",
+                f"{str(books_infos['id'])}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
 
@@ -519,7 +519,7 @@ class BookCreationPage(base_page.BasePage):
                     books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book(self.book.id, new_book)
+                    self.books_handler.edit_book(self.book.str_id(), new_book)
 
                 else:
                     self.books_handler.new_book(**books_infos)
