@@ -181,7 +181,7 @@ class BookCreationPage(base_page.BasePage):
 
         for shelf in self.books_handler.shelves.values():
             shelf_cb = QtWidgets.QCheckBox(shelf.title)
-            self.shelfs_selection_cbs[shelf.id] = shelf_cb
+            self.shelfs_selection_cbs[shelf.str_id()] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
@@ -334,7 +334,7 @@ class BookCreationPage(base_page.BasePage):
             self.end_read_date_de.setDate(end_read_date_dt)
 
             for shelf in self.book._parents_shelves:
-                self.shelfs_selection_cbs[shelf.id].setChecked(True)
+                self.shelfs_selection_cbs[shelf.str_id()].setChecked(True)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
         """
@@ -519,7 +519,7 @@ class BookCreationPage(base_page.BasePage):
                     books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book(self.book.str_id(), new_book)
+                    self.books_handler.edit_book(self.book.id, new_book)
 
                 else:
                     self.books_handler.new_book(**books_infos)
