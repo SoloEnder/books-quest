@@ -110,7 +110,7 @@ class Shelf:
         self.name_suffix = kwargs.get("title_suffix")
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
-        self.id = kwargs.get("id", uuid.uuid4)
+        self.id = kwargs.get("id", uuid.uuid4())
         for book in self._books:
             if not book.has_parent(self):
                 book._parents_shelves.append(self)
