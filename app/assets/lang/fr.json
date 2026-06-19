@@ -14,6 +14,7 @@
         "shelf": "Rechercher des étagères"
       },
       "close": "Fermer",
+      "open_settings": "Ouvrir les paramètres",
       "book_creation": "Nouveau livre",
       "shelf_creation": "Nouvelle étagère",
       "go_to": "Aller à:"
@@ -75,6 +76,24 @@
     "actions": {
       "view_books": "Voir les livres",
       "select_books": "Selectionner des livres :"
+    }
+  },
+  "settings": {
+    "msg": {
+      "applying_changes": "Application des nouveaux paramètres...",
+      "settings_updated": "Paramètres mis à jour !"
+    },
+    "general": {
+      "section_title": "General",
+      "appearance": {
+        "section_title": "Apparence",
+        "section_description": "Paramètres concernant l'apparence de l'application",
+        "language": {
+          "section_title": "Language",
+          "section_description": "Paramètres concernant la langue de l'interface",
+          "edit_current_lang": "Modifier la langue d'affichage"
+        }
+      }
     }
   }
 }

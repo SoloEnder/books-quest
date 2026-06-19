@@ -54,10 +54,10 @@ class AppSystem:
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.load_and_apply_settings()
-        self.langs_handler = langs_handler.LangsHandler(self.jfm, {})
+        self.langs_handler = langs_handler.LangsHandler(self.jfm, {}, self.res_handler)
         self.langs_handler.load_from_file(
             self.res_handler.get_res(
-                f"assets.langs.{self.settings_handler.get_value('general.language.current')}"
+                f"assets.langs.{self.settings_handler.get_setting_value('general.appearance.language')}"
             )
         )
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
@@ -86,6 +86,9 @@ class AppSystem:
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
+
+        if hasattr(self, "ui"):
+            self.ui.deleteLater()
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
@@ -101,12 +104,12 @@ class AppSystem:
 
         if (
             self.app_infos["version"]["semantic"] == "indev"
-            and self.settings_handler.get_value(
-                "developer_settings.show_indev_warning.current"
+            and self.settings_handler.get_setting_value(
+                "developer_settings.show_indev_warning"
             )
             == True
         ):
-            self.ui.show_indev_warn()
+            self.show_indev_warn()
 
     def close_app(self):
         self.logger.info("Closing window...")
@@ -232,3 +235,15 @@ class AppSystem:
 
     def save_app_infos(self, filepath: str | pathlib.Path):
         self.jfm.write_json(filepath, data=self.app_infos, catch_error=False)
+
+    def show_indev_warn(self):
+        """
+        Show the in develepoment warning window
+        """
+
+        # self.indev_warning_w.show()
+        QtWidgets.QMessageBox.information(
+            None,
+            "Indev Warning",
+            "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>",
+        )

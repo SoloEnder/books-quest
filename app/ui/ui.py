@@ -1,12 +1,13 @@
 import logging
-from typing import Sequence
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, json_dicts_paths_handler
+from app.src import book_sys, langs_handler, settings_handler
 from app.ui import notification_service, qt_signals_handler
 from app.ui.main_pages import (
+    base_page,
     book_creation_page,
+    settings_page,
     shelf_creation_page,
     shelf_details_page,
     shelfs_view_page,
@@ -19,8 +20,8 @@ class UI(QtWidgets.QMainWindow):
         self,
         books_handler,
         res_handler,
-        settings_handler: json_dicts_paths_handler.JSONDictPathHandler,
-        langs_handler: json_dicts_paths_handler.JSONDictPathHandler,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
     ):
         super().__init__()
         self.logger = logging.getLogger(__name__)
@@ -28,7 +29,6 @@ class UI(QtWidgets.QMainWindow):
         self.res_handler = res_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
-
         self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
         self.notification_service = notification_service.NotificationService(
             self, self.langs_handler
@@ -37,6 +37,29 @@ class UI(QtWidgets.QMainWindow):
         self.books_handler.edit_default_shelf(
             title=self.langs_handler.tr("shelf.infos.default_shelf_title")
         )
+        self.draw_ui()
+        self.progress_info_lb = QtWidgets.QLabel()
+        self.statusBar().addPermanentWidget(self.progress_info_lb)
+        self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
+        self.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
+        self.setWindowTitle("Books Quest")
+        self.setWindowIcon(
+            QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen"))
+        )
+
+    def draw_ui(self):
+        """
+        Draws almost the entire widgets, and remove the existant ones before.
+        """
+        self.logger.info("Drawing UI...")
+        self.langs_handler.set_current_language(
+            self.settings_handler.get_setting_value("general.appearance.language")
+        )
+        self.logger.info("Refreshing UI...")
+
+        if hasattr(self, "my_stacked_widgets"):
+            self.my_stacked_widgets.deleteLater()
+
         self.my_stacked_widgets = MyStackedWidgets(
             self,
             self.books_handler,
@@ -45,41 +68,42 @@ class UI(QtWidgets.QMainWindow):
             self.settings_handler,
             self.langs_handler,
         )
+        if hasattr(self, "toolbar"):
+            self.removeToolBar(self.toolbar)
+            self.toolbar.deleteLater()
+
         self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
         self.addToolBar(self.toolbar)
         self.toolbar.close_page_act.triggered.connect(
             lambda: self.my_stacked_widgets.close_page()
+        )
+        self.toolbar.open_settings_act.triggered.connect(
+            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
         )
         self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
         )
-        self.my_stacked_widgets.switch_page("shelfs_view_page")
+        self.my_stacked_widgets.switch_page("SHELFS_VIEW_PAGE")
         self.setCentralWidget(self.my_stacked_widgets)
-        self.setWindowTitle("Books Quest")
-        self.setWindowIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen"))
-        )
-        self.progress_info_lb = QtWidgets.QLabel()
-        self.statusBar().addPermanentWidget(self.progress_info_lb)
-        self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
+
+    def refresh_ui(self):
+        """
+        Refresh the UI
+        """
+        self.logger.info("Refreshing UI...")
+        current_page_infos_before_redraw = self.my_stacked_widgets.current_page_infos
+        self.draw_ui()
+        self.qt_signals_handler.switch_page_sg.emit(
+            current_page_infos_before_redraw[0],
+            True,
+            current_page_infos_before_redraw[1],
+        )  # The first element should be the page name
 
     def set_progress_msg(self, msg: str):
         self.progress_info_lb.setText(msg)
         QtWidgets.QApplication.processEvents()
-
-    def show_indev_warn(self):
-        """
-        Show the in develepoment warning window
-        """
-
-        # self.indev_warning_w.show()
-        QtWidgets.QMessageBox.information(
-            self,
-            "Indev Warning",
-            "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>",
-        )
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
@@ -100,6 +124,16 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
         self.redundant_lang_path = ""
+        self.current_page_infos: (
+            tuple[str, base_page.BasePage, dict] | tuple
+        ) = ()  # This tuple should contain 3 values : the current page name the current page object (in this order), and the specials arguments of the current page
+        self.settings_page = settings_page.SettingsPage(
+            self,
+            self.res_handler,
+            self.settings_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+        )
         self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
             self,
             self.books_handler,
@@ -135,6 +169,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             mode="creation",
         )
         self.pages = {
+            "SETTINGS_PAGE": self.settings_page,
             "SHELFS_VIEW_PAGE": self.shelfs_view_page,
             "SHELF_DETAILS_PAGE": self.shelf_details_page,
             "BOOK_CREATION_PAGE": self.book_creation_page,
@@ -145,7 +180,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
         self.history = []
-        self.switch_page("SHELFS_VIEW_PAGE")
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
         utils_funcs.load_and_set_ss(
@@ -174,6 +208,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.history.insert(0, page_name)
+            self.current_page_infos = (page_name, page_obj, page_args)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
@@ -203,7 +238,20 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     def refresh(self, page_name, page_args):
         self.logger.debug(f"Pages switch history={self.history}")
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
-        if page_name == "SHELFS_VIEW_PAGE":
+
+        if page_name == "SETTINGS_PAGE":
+            self.removeWidget(self.settings_page)
+            self.settings_page = settings_page.SettingsPage(
+                self,
+                self.res_handler,
+                self.settings_handler,
+                self.langs_handler,
+                self.qt_signals_handler,
+            )
+            self.pages["SETTINGS_PAGE"] = self.settings_page
+            self.addWidget(self.settings_page)
+
+        elif page_name == "SHELFS_VIEW_PAGE":
             self.removeWidget(self.shelfs_view_page)
             self.shelfs_view_page.setParent(None)
             self.shelfs_view_page.deleteLater()
@@ -296,4 +344,11 @@ class ToolBar(QtWidgets.QToolBar):
         self.close_page_act.setIcon(
             QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
         )
+        self.open_settings_act = QtGui.QAction(
+            self.langs_handler.tr("shared.actions.open_settings")
+        )
+        self.open_settings_act.setIcon(
+            QtGui.QIcon(self.res_handler.get_res("assets.icons.settings"))
+        )
         self.addAction(self.close_page_act)
+        self.addAction(self.open_settings_act)

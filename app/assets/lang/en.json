@@ -14,6 +14,7 @@
         "shelf": "Search for shelves"
       },
       "close": "Close",
+      "open_settings": "Open settings",
       "book_creation": "New book",
       "shelf_creation": "New shelf",
       "go_to": "Go to :"
@@ -76,6 +77,24 @@
     "actions": {
       "select_books": "Select books :",
       "view_books": "See books"
+    }
+  },
+  "settings": {
+    "msg": {
+      "applying_changes": "Applying settings changes...",
+      "settings_updated": "Settings updated !"
+    },
+    "general": {
+      "section_title": "General",
+      "appearance": {
+        "section_title": "Appearance",
+        "section_description": "Settings related to the apparence of the applicaion",
+        "language": {
+          "section_title": "Language",
+          "section_description": "Interface language settings",
+          "edit_current_lang": "Edit interface language"
+        }
+      }
     }
   }
 }
