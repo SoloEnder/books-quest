@@ -519,13 +519,14 @@ class BookCreationPage(base_page.BasePage):
                     books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book(self.book.id, new_book)
+                    self.books_handler.edit_book("123", new_book)
 
                 else:
                     self.books_handler.new_book(**books_infos)
 
             except Exception:
                 self.logger.exception("Failed to create valid book : ")
+                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
 
             else:
                 if self.edition_mode_enabled:
