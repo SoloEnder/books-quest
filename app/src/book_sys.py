@@ -307,10 +307,10 @@ class BooksHandler:
         self.logger.debug(f"Editing book with id {book_id}...")
 
         if book_id != new_book.id:
-            raise ValueError(f"Couldn't set new book to ID {book_id} : old book and new book haven't the same ID !")
+            raise ValueError(f"Couldn't assign new book to ID {book_id} : old book and new book haven't the same ID !")
 
         else:
-            self.books[book_id] = new_book
+            self.books[new_book.str_id()] = new_book
 
     def edit_shelf(self, shelf_id: str, new_shelf):
 
