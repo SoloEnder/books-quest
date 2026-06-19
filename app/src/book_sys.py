@@ -23,6 +23,19 @@ class DefaultCoverPathDeletion(Exception):
     def __str__(self):
         return self.msg
 
+class InvalidUUIDError(Exception):
+    """
+    Exception usually raised when the format of a `Book` or `Shelf` UUID is not valid
+    """
+    
+    
+    def __init__(self, id):
+        self.id = id
+        self.msg = f"ID '{self.id}' is not a valid UUID !"
+        super().__init__(self.msg)
+        
+    def __str__(self):
+        return self.msg
 
 class Book:
     def __init__(self, **kwargs):
@@ -42,6 +55,10 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4()) # The id must be an UUID 4 !
+        # -- Check if the ID is a valid UUID
+        if not isinstance(self.id, uuid.UUID):
+            raise InvalidUUIDError(self.id)
+        
         self._parents_shelves: ShelvesList = kwargs.get("parents_shelves", [])
 
         for parent_shelf in self._parents_shelves:
@@ -111,6 +128,9 @@ class Shelf:
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
+        # -- Check if the ID is a valid UUID
+        if not isinstance(self.id, uuid.UUID):
+            raise InvalidUUIDError(self.id)
         for book in self._books:
             if not book.has_parent(self):
                 book._parents_shelves.append(self)
