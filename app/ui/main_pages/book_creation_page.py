@@ -519,7 +519,7 @@ class BookCreationPage(base_page.BasePage):
                     books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book("123", new_book)
+                    self.books_handler.edit_book(self.book.id, new_book)
 
                 else:
                     self.books_handler.new_book(**books_infos)
