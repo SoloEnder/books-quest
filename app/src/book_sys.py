@@ -307,7 +307,7 @@ class BooksHandler:
         self.logger.debug(f"Editing book with id {book_id}...")
 
         if book_id != new_book.id:
-            raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
+            raise ValueError(f"Couldn't set new book to ID {book_id} : old book and new book haven't the same ID !")
 
         else:
             self.books[book_id] = new_book
