@@ -327,7 +327,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
 
     def delete_shelf(self):
         self.logger.debug(f"Attempting to delete shelf (ID={self.shelf.id})...")
-        self.books_handler.delete_shelf(self.shelf.id)
+        self.books_handler.delete_shelf(self.shelf.str_id())
 
         if self.pages_widgets_handler:
             try:
@@ -344,7 +344,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
 
         else:
             self.logger.error(
-                f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid parent page found !"
+                f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid widgets handler found !"
             )
 
 
