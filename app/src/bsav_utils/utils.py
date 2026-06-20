@@ -36,3 +36,24 @@ def extract_save_file(filepath: str, dest_dir: str):
         zpf.extractall(dest_dir)
         
     return read_json(os.path.join(dest_dir, 'infos.json'))
+
+class SaveFormatVersionError(Exception):
+    
+    def __init__(self, save_filepath: str, save_version: str, supported_versions: list[str]|tuple[str]|set[str]):
+        """
+        Exception usually raised when trying to do stuff with save file that have another version than the program version.
+        
+        Parameters
+        ----------
+        save_filepath (str): the path to the save file
+        save_version (str): the version of the save file
+        supported_version (list[str]|tuple[str]|set[str]): the versions supported by the module
+        """
+        self.save_filepath = save_filepath
+        self.supported_versions = supported_versions
+        self.save_version = save_version
+        self.msg = f"Save file at {self.save_filepath} version is {self.save_version} but supported version are only {" ,".join(self.supported_versions)} !"
+        super().__init__(self.msg)
+        
+    def __str__(self):
+        return self.msg
