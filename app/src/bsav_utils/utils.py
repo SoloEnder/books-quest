@@ -17,7 +17,7 @@ def get_infos(arcpath: str):
     "Return the content of the infos file in BooksQuest Save/Books/Shelves file"
     with zipfile.ZipFile(arcpath, "r") as zpf:
         infos_data = zpf.read(f"infos.json")
-        return infos_data.decode()
+        return json.loads(infos_data)
     
 def extract_save_file(filepath: str, dest_dir: str):
     """
@@ -45,9 +45,9 @@ class SaveFormatVersionError(Exception):
         
         Parameters
         ----------
-        save_filepath (str): the path to the save file
-        save_version (str): the version of the save file
-        supported_version (list[str]|tuple[str]|set[str]): the versions supported by the module
+        - save_filepath (str): the path to the save file
+        - save_version (str): the version of the save file
+        - supported_version (list[str]|tuple[str]|set[str]): the versions supported by the module
         """
         self.save_filepath = save_filepath
         self.supported_versions = supported_versions
