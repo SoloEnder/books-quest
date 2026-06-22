@@ -69,17 +69,3 @@ def open_bbs_file(save_path, dest_dir: str):
         ("infos.json", "shelves.json", "covers/"),
     )
     return utils.extract_save_file(save_path, dest_dir)
-
-
-i = create_bbs_data(
-    [
-        {
-            "title": "test",
-            "name_suffix": None,
-            "id": "ef674156-c80e-4593-ad1e-7322241578ab",
-            "cover_path": "C:\\Users\\leonidehoungbedji\\Desktop\\programs\\my_programs\\not_sync\\books_quest\\books-quest\\app\\data\\bookshelves_data\\covers\\e8d1cd80-3560-4637-9f10-d178e023f461.png",
-            "books_ids": ["0c12934d-bfda-4fc4-b37b-91d7a71fc0e8"],
-        }
-    ],
-    "1.0.0",
-)
