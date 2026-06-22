@@ -5,6 +5,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
+from app.utils import utils_funcs
 
 
 class SettingsPage(base_page.BasePage):
@@ -25,6 +26,12 @@ class SettingsPage(base_page.BasePage):
         self.PAGE_NAME = "SETTINGS_PAGE"
         self.nav_bar = MainNavigationBar(None)
         self.main_lyt.addWidget(self.nav_bar)
+        self.setObjectName("settings_page")
+        utils_funcs.load_and_set_ss(
+            self.res_handler.get_res("assets.qss.settings_page"),
+            widget=self,
+            logger=self.logger,
+        )
 
         # ---- The dictionnary which contains the page object ----
         self._sections = {}
@@ -379,6 +386,7 @@ class MainNavigationBar(QtWidgets.QWidget):
 
         if section_name not in self._sections_buttons.keys():
             button = QtWidgets.QPushButton(displayed_text)
+            button.setProperty("role", "nav_button")
             button.clicked.connect(lambda: self.section_requested_sg.emit(section_name))
             self._sections_buttons[section_name] = button
             self.lyt.addWidget(button)

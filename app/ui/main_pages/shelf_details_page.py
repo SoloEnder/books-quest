@@ -278,7 +278,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             )
 
             try:
-                self.books_handler.delete_book(self.book.id)
+                self.books_handler.delete_book(self.book.str_id())
 
             except my_exceptions.BookNotFoundError:
                 self.logger.error(

@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 import os
 import shutil
-from this import s
+import uuid
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -181,7 +181,7 @@ class BookCreationPage(base_page.BasePage):
 
         for shelf in self.books_handler.shelves.values():
             shelf_cb = QtWidgets.QCheckBox(shelf.title)
-            self.shelfs_selection_cbs[shelf.id] = shelf_cb
+            self.shelfs_selection_cbs[shelf.str_id()] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
@@ -334,7 +334,7 @@ class BookCreationPage(base_page.BasePage):
             self.end_read_date_de.setDate(end_read_date_dt)
 
             for shelf in self.book._parents_shelves:
-                self.shelfs_selection_cbs[shelf.id].setChecked(True)
+                self.shelfs_selection_cbs[shelf.str_id()].setChecked(True)
 
     def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
         """
@@ -460,12 +460,12 @@ class BookCreationPage(base_page.BasePage):
             else:
                 return
 
-        books_infos["id"] = str(dt.datetime.timestamp(dt.datetime.now()))
+        books_infos["id"] = uuid.uuid4()
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
                 self.res_handler.get_res("data.books.covers"),
-                f"{books_infos['id'].replace('.', '_')}.png",
+                f"{str(books_infos['id'])}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
 
@@ -526,6 +526,7 @@ class BookCreationPage(base_page.BasePage):
 
             except Exception:
                 self.logger.exception("Failed to create valid book : ")
+                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
 
             else:
                 if self.edition_mode_enabled:

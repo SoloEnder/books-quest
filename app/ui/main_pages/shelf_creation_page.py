@@ -1,4 +1,4 @@
-import datetime as dt
+import uuid
 import logging
 import os
 import shutil
@@ -292,7 +292,7 @@ class ShelfCreationPage(base_page.BasePage):
         return self.books_handler.get_shelfs(title=(title, True, False))
 
     def get_shelf_infos(self) -> dict | None:
-        id = str(dt.datetime.timestamp(dt.datetime.now()))
+        id = uuid.uuid4()
 
         shelf_title = self.title_e.text()
         title_suffix = None
@@ -340,7 +340,7 @@ class ShelfCreationPage(base_page.BasePage):
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
                 self.res_handler.get_res("data.bookshelves.covers"),
-                f"{id.replace('.', '_')}.png",
+                f"{str(id)}.png",
             )
             done = self.move_cover_img(final_img_path)
 
@@ -402,7 +402,7 @@ class ShelfCreationPage(base_page.BasePage):
             elif self.current_mode == "edition":
                 if self.shelf:
                     edited_shelf = self.books_handler.create_shelf(**shelf_infos)
-                    self.books_handler.edit_shelf(self.shelf.id, edited_shelf)
+                    self.books_handler.edit_shelf(self.shelf.str_id(), edited_shelf)
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",

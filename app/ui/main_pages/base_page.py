@@ -25,6 +25,7 @@ class BasePage(QtWidgets.QWidget):
         self.PAGE_NAME = "BASE_PAGE"  # the page name, mostly used for identify the page on page switching
         # Calling the __init__ of the parent
         super().__init__(parent)
+        self.variables_kw = {}
         self.base_main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.base_main_lyt)
 
