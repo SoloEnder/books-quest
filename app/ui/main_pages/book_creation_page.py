@@ -498,7 +498,7 @@ class BookCreationPage(base_page.BasePage):
                 QtCore.Qt.DateFormat.ISODate
             )
         self.logger.debug(
-            f"{books_infos.get("starting_read_date")=}, {books_infos.get("end_read_date")=}"
+            f"{books_infos.get('starting_read_date')=}, {books_infos.get('end_read_date')=}"
         )
 
         return books_infos
