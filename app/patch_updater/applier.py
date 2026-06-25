@@ -22,8 +22,8 @@ def run(installation_path: str):
         installation_path, f"backup_{installation_semantic_version}"
     )
     update_infos_data = {
-        "from_version": installation_infos["version"]["readable"],
-        "to_version": patch_infos["upgrade_to"]["readable"],
+        "from_version": installation_infos["version"],
+        "to_version": patch_infos["upgrade_to"],
         "state": "IN_PROGRESS",
         "started_at": str(dt.datetime.now()),
         "ended_at": None,
