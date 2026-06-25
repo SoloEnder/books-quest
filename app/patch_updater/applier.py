@@ -17,19 +17,20 @@ def run(installation_path: str):
     update_infos_filepath = os.path.join(installation_path, "update_infos.json")
     patch_infos = getpinfos(patch_path)
     installation_infos = utils.get_installation_infos(installation_path)
-    update_infos_data = {
-        "from_version": installation_infos["version"]["readable"],
-        "to_version": patch_infos["upgrade_to"]["version"],
-        "state": "IN_PROGRESS",
-        "started_at": str(dt.datetime.now()),
-        "ended_at": None,
-    }
-    utils.write_json(update_infos_filepath, update_infos_data)
     installation_semantic_version = installation_infos["version"]["semantic"]
-    patch_instructions = utils.read_json(os.path.join(patch_path, "instructions.json"))
     backup_folder = os.path.join(
         installation_path, f"backup_{installation_semantic_version}"
     )
+    update_infos_data = {
+        "from_version": installation_infos["version"]["readable"],
+        "to_version": patch_infos["upgrade_to"]["readable"],
+        "state": "IN_PROGRESS",
+        "started_at": str(dt.datetime.now()),
+        "ended_at": None,
+        "backup_folder": backup_folder,
+    }
+    utils.write_json(update_infos_filepath, update_infos_data)
+    patch_instructions = utils.read_json(os.path.join(patch_path, "instructions.json"))
     undo_filepath = os.path.join(backup_folder, "undo.json")
     utils.check_and_make_folder(backup_folder)
     apply_patch(
@@ -117,16 +118,25 @@ def move_item(
         raise InvalidUpdateInstructions
 
     if to.startswith("installation::"):
-        old_to = to
-        to = to.split("::")[1]
-        to = os.path.join(installation_path, to)
+        to_parts = to.split("::")
+
+        if len(to_parts) > 1:
+            to = os.path.join(installation_path, to_parts[1])
+
+        else:
+            to = installation_path
 
     else:
         raise InvalidUpdateInstructions
 
     shutil.move(from_, to)
+
     undo.insert(
-        0, {"type": "remove", "path": os.path.join(old_to, os.path.basename(from_))}
+        0,
+        {
+            "type": "remove",
+            "path": f"{to_parts[0]}::{to if to != installation_path else ''}",
+        },
     )
 
 
@@ -160,7 +170,7 @@ def remove_item(
         0,
         {
             "type": "move",
-            "from": "installation::" + os.path.join("backup", os.path.basename(path)),
+            "from": "backup::" + os.path.basename(path),
             "to": old_path,
         },
     )
