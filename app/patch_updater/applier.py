@@ -33,6 +33,7 @@ def run(installation_path: str):
     patch_instructions = utils.read_json(os.path.join(patch_path, "instructions.json"))
     undo_filepath = os.path.join(backup_folder, "undo.json")
     utils.check_and_make_folder(backup_folder)
+    utils.write_json(undo_filepath, [])
     apply_patch(
         patch_instructions, installation_path, backup_folder, patch_path, undo_filepath
     )
@@ -118,24 +119,23 @@ def move_item(
         raise InvalidUpdateInstructions
 
     if to.startswith("installation::"):
-        to_parts = to.split("::")
-
-        if len(to_parts) > 1:
-            to = os.path.join(installation_path, to_parts[1])
-
-        else:
-            to = installation_path
+        old_to = to
+        to = os.path.join(installation_path, to.split("::")[1])
 
     else:
         raise InvalidUpdateInstructions
 
-    shutil.move(from_, to)
+    if os.path.isdir(from_):
+        shutil.copytree(from_, to)
+
+    else:
+        shutil.copy(from_, to)
 
     undo.insert(
         0,
         {
             "type": "remove",
-            "path": f"{to_parts[0]}::{to if to != installation_path else ''}",
+            "path": old_to,
         },
     )
 
