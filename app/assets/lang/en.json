@@ -35,7 +35,8 @@
       "add_confirm": "Do you really want to add this element ?",
       "renaming_future": "This element will be renamed as : ",
       "invalid_page_index": "This page doesn't exists !",
-      "no_search_result": "No items match your search"
+      "no_search_result": "No items match your search",
+      "indev_warn": "This program is in developement ! If you encounter bugs, or wish to suggest new features, please let us know <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>"
     },
     "infos": {
       "status": "Status",

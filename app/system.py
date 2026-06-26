@@ -102,12 +102,10 @@ class AppSystem:
             f"Initialised app in {self.boot_end_time - self.boot_start_time:.3f}s"
         )
 
-        if (
-            self.app_infos["version"]["semantic"] == "indev"
-            and self.settings_handler.get_setting_value(
-                "developer_settings.show_indev_warning"
-            )
-            == True
+        if self.app_infos["version"][
+            "semantic"
+        ] == "indev" and self.settings_handler.get_setting_value(
+            "developer_settings.show_indev_warning"
         ):
             self.show_indev_warn()
 
@@ -243,7 +241,5 @@ class AppSystem:
 
         # self.indev_warning_w.show()
         QtWidgets.QMessageBox.information(
-            None,
-            "Indev Warning",
-            "This program is in developement ! If you see any bug, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>",
+            None, "Books Quest", self.langs_handler.tr("shared.msg.indev_warn")
         )
