@@ -34,7 +34,8 @@
       "add_confirm": "Voulez vous vraiment ajouter cet élément ?",
       "renaming_future": "Il sera renommé en : ",
       "invalid_page_index": "Cette page n'existe pas !",
-      "no_search_result": "Aucun élément ne correspond à votre recherche"
+      "no_search_result": "Aucun élément ne correspond à votre recherche",
+      "indev_warn": "Ce programme est en cours de développement ! Si vous expérimentez des bugs ou voulez proposer des fonctionnalitées, veuillez nous en informer <a href='https://github.com/SoloEnder/books-quest/issues'>ici</a>"
     },
     "infos": {
       "status": "Status",
@@ -93,6 +94,18 @@
           "section_description": "Paramètres concernant la langue de l'interface",
           "edit_current_lang": "Modifier la langue d'affichage"
         }
+      },
+      "update": {
+        "section_title": "Mises à jour",
+        "section_description": "Paramètres concernant les mises à jour de l'application",
+        "actions": {
+          "check_update": "Vérifier les mises à jour"
+        }
+      },
+      "about": {
+        "section_title": "A propos",
+        "section_description": "Quelques informations sur BooksQuest :)",
+        "current_version": "BooksQuest version /f:<version>/f"
       }
     }
   }

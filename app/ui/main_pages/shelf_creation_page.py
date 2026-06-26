@@ -1,7 +1,7 @@
-import uuid
 import logging
 import os
 import shutil
+import uuid
 from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -213,6 +213,9 @@ class ShelfCreationPage(base_page.BasePage):
 
     def edition_mode(self):
         if self.shelf:
+            if self.shelf.cover_path:
+                self.current_shelf_cover = self.shelf.cover_path
+                self.set_cover_lb_pixmap(self.current_shelf_cover)
             self.title_e.setText(self.shelf.title)
 
             for title_item in self.books_title_items:
@@ -363,7 +366,7 @@ class ShelfCreationPage(base_page.BasePage):
     def move_cover_img(self, dest_path):
 
         try:
-            shutil.copy2(self.current_shelf_cover, dest_path)
+            shutil.copy2(self.current_shelf_cover, dest_path)  # type: ignore
 
         except Exception:
             self.logger.exception(

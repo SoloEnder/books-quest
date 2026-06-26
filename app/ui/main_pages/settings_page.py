@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import webbrowser
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -45,7 +46,13 @@ class SettingsPage(base_page.BasePage):
         self.nav_bar.section_requested_sg.connect(
             self.set_displayed_section
         )  # The naviguation bar
-        self.appearance_settings = GeneralSettings.AppearanceSettings(
+        self.appearance_settings = AppearanceSettings(
+            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+        )
+        self.update_settings = UpdateSettings(
+            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+        )
+        self.about_settings = AboutSettings(
             None, self.settings_handler, self.langs_handler, self.apply_settings_sg
         )
 
@@ -56,6 +63,14 @@ class SettingsPage(base_page.BasePage):
         self.add_section(
             self.appearance_settings,
             self.langs_handler.tr("settings.general.appearance.section_title"),
+        )
+        self.add_section(
+            self.update_settings,
+            self.langs_handler.tr("settings.general.update.section_title"),
+        )
+        self.add_section(
+            self.about_settings,
+            self.langs_handler.tr("settings.general.about.section_title"),
         )
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
@@ -239,101 +254,6 @@ class SettingsSection(QtWidgets.QWidget):
 
 
 class GeneralSettings(SettingsSection):
-    class AppearanceSettings(SettingsSection):
-        class LangsSettings(SettingsSection):
-            """
-            The SettingsSection for the languages options
-            """
-
-            def __init__(
-                self,
-                parent: QtWidgets.QWidget | None,
-                settings_handler: settings_handler.SettingsHandler,
-                langs_handler: langs_handler.LangsHandler,
-                apply_settings_sg,
-            ):
-                super().__init__(
-                    parent,
-                    "LANGS_SETTINGS",
-                    "settings.general.appearance.language.section_title",
-                    settings_handler,
-                    langs_handler,
-                    apply_settings_sg,
-                )
-                self.header_lb.setProperty("role", "h4")
-                self.header_lb.setStatusTip(
-                    self.langs_handler.tr(
-                        "settings.general.appearance.language.section_description"
-                    )
-                )
-
-                # --- The widgets for the language selection
-                self.lang_selection_lb = QtWidgets.QLabel(
-                    self.langs_handler.tr(
-                        "settings.general.appearance.language.edit_current_lang"
-                    )
-                )
-                self.lang_selection_combob = QtWidgets.QComboBox()
-                self.languages_opts_indexes = {
-                    "fr": 0,
-                    "en": 1,
-                }
-                self.lang_selection_combob.addItem("Français", "fr")
-                self.lang_selection_combob.addItem("English", "en")
-                self.lang_selection_combob.setCurrentIndex(
-                    self.languages_opts_indexes[
-                        str(
-                            self.settings_handler.get_setting_value(
-                                "general.appearance.language"
-                            )
-                        )
-                    ]
-                )
-                self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-                self.base_lyt.addWidget(
-                    self.lang_selection_lb,
-                    1,
-                    0,  # QtGui.Qt.AlignmentFlag.AlignLeft
-                )
-                self.base_lyt.addWidget(
-                    self.lang_selection_combob,
-                    1,
-                    1,  # QtGui.Qt.AlignmentFlag.AlignLeft
-                )
-
-            def apply_settings(self):
-                self.settings_handler.set_setting_value(
-                    "general.appearance.language",
-                    self.lang_selection_combob.currentData(),
-                )
-
-        def __init__(
-            self,
-            parent: QtWidgets.QWidget | None,
-            settings_handler: settings_handler.SettingsHandler,
-            langs_handler,
-            apply_settings_sg,
-        ):
-            super().__init__(
-                parent,
-                "APPEARANCE",
-                "settings.general.appearance.section_title",
-                settings_handler,
-                langs_handler,
-                apply_settings_sg,
-            )
-            self.header_lb.setStatusTip(
-                self.langs_handler.tr("settings.general.appearance.section_description")
-            )
-            self.header_lb.setProperty("role", "h3")
-            self.langs_settings = GeneralSettings.AppearanceSettings.LangsSettings(
-                None,
-                settings_handler,
-                self.langs_handler,
-                apply_settings_sg,
-            )
-            self.add_child_section(self.langs_settings)
-
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -348,6 +268,168 @@ class GeneralSettings(SettingsSection):
             settings_handler,
             langs_handler,
             apply_settings_sg,
+        )
+
+
+class AppearanceSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "APPEARANCE",
+            "settings.general.appearance.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.appearance.section_description")
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.langs_settings = LangsSettings(
+            None,
+            settings_handler,
+            self.langs_handler,
+            apply_settings_sg,
+        )
+        self.add_child_section(self.langs_settings)
+
+
+class LangsSettings(SettingsSection):
+    """
+    The SettingsSection for the languages options
+    """
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "LANGS_SETTINGS",
+            "settings.general.appearance.language.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h4")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr(
+                "settings.general.appearance.language.section_description"
+            )
+        )
+
+        # --- The widgets for the language selection
+        self.lang_selection_lb = QtWidgets.QLabel(
+            self.langs_handler.tr(
+                "settings.general.appearance.language.edit_current_lang"
+            )
+        )
+        self.lang_selection_combob = QtWidgets.QComboBox()
+        self.languages_opts_indexes = {
+            "fr": 0,
+            "en": 1,
+        }
+        self.lang_selection_combob.addItem("Français", "fr")
+        self.lang_selection_combob.addItem("English", "en")
+        self.lang_selection_combob.setCurrentIndex(
+            self.languages_opts_indexes[
+                str(
+                    self.settings_handler.get_setting_value(
+                        "general.appearance.language"
+                    )
+                )
+            ]
+        )
+        self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.base_lyt.addWidget(
+            self.lang_selection_lb,
+            1,
+            0,  # QtGui.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.lang_selection_combob,
+            1,
+            1,  # QtGui.Qt.AlignmentFlag.AlignLeft
+        )
+
+    def apply_settings(self):
+        self.settings_handler.set_setting_value(
+            "general.appearance.language",
+            self.lang_selection_combob.currentData(),
+        )
+
+
+class UpdateSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "update_settings",
+            "settings.general.update.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.update.section_description")
+        )
+        self.check_update_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("settings.general.update.actions.check_update")
+        )
+        self.check_update_b.clicked.connect(
+            lambda: webbrowser.open_new_tab(
+                "https://github.com/SoloEnder/books-quest/releases"
+            )
+        )
+        self.check_update_b.setObjectName("check_update_button")
+        self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
+        self.base_lyt.addWidget(
+            self.check_update_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+
+class AboutSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "about_settings",
+            "settings.general.about.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.about.section_description")
+        )
+        self.version_lb = QtWidgets.QLabel(
+            self.langs_handler.tr(
+                "settings.general.about.current_version", version="0.1.0"
+            )
+        )
+        self.base_lyt.addWidget(
+            self.version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
 
