@@ -52,6 +52,9 @@ class SettingsPage(base_page.BasePage):
         self.update_settings = UpdateSettings(
             None, self.settings_handler, self.langs_handler, self.apply_settings_sg
         )
+        self.about_settings = AboutSettings(
+            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+        )
 
         self.apply_button = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.done")
@@ -64,6 +67,10 @@ class SettingsPage(base_page.BasePage):
         self.add_section(
             self.update_settings,
             self.langs_handler.tr("settings.general.update.section_title"),
+        )
+        self.add_section(
+            self.about_settings,
+            self.langs_handler.tr("settings.general.about.section_title"),
         )
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
@@ -378,6 +385,9 @@ class UpdateSettings(SettingsSection):
             apply_settings_sg,
         )
         self.header_lb.setProperty("role", "h3")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.update.section_description")
+        )
         self.check_update_b = QtWidgets.QPushButton(
             self.langs_handler.tr("settings.general.update.actions.check_update")
         )
@@ -390,6 +400,36 @@ class UpdateSettings(SettingsSection):
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.base_lyt.addWidget(
             self.check_update_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+
+class AboutSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "about_settings",
+            "settings.general.about.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.about.section_description")
+        )
+        self.version_lb = QtWidgets.QLabel(
+            self.langs_handler.tr(
+                "settings.general.about.current_version", version="0.1.0"
+            )
+        )
+        self.base_lyt.addWidget(
+            self.version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
 

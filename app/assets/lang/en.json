@@ -102,6 +102,11 @@
         "actions": {
           "check_update": "Check for updates"
         }
+      },
+      "about": {
+        "section_title": "About",
+        "section_description": "Some informations about BooksQuest :)",
+        "current_version": "BooksQuest version /f:<version>/f"
       }
     }
   }
