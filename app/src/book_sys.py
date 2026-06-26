@@ -1,4 +1,5 @@
-import datetime as dt
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
@@ -7,12 +8,6 @@ import uuid
 from app.src import resources_handler
 from app.utils import json_file_manager as jfm
 from app.utils import my_exceptions
-
-type BooksList = list[Book]
-type BooksDict = dict[str, Book]
-
-type ShelvesList = list[Shelf]
-type ShelvesDict = dict[str, Shelf]
 
 
 class DefaultCoverPathDeletion(Exception):
@@ -23,102 +18,19 @@ class DefaultCoverPathDeletion(Exception):
     def __str__(self):
         return self.msg
 
+
 class InvalidUUIDError(Exception):
     """
     Exception usually raised when the format of a `Book` or `Shelf` UUID is not valid
     """
-    
-    
+
     def __init__(self, id):
         self.id = id
         self.msg = f"ID '{self.id}' is not a valid UUID !"
         super().__init__(self.msg)
-        
+
     def __str__(self):
         return self.msg
-
-class Book:
-    def __init__(self, **kwargs):
-        """
-        The base class for the books
-        """
-        self.title = kwargs["title"]
-        self.title_suffix = kwargs.get("title_suffix")
-        self.authors = kwargs.get("authors")
-        self.edition = kwargs.get("edition")
-        self.summary = kwargs.get("summary")
-        self.isbn = kwargs.get("isbn")
-        self.cover_path = kwargs.get("cover_path")
-        self.starting_read_date = kwargs.get("starting_read_date")
-        self.end_read_date = kwargs.get("end_read_date")
-        self.status = kwargs.get("status")
-        self.tot_pages = kwargs.get("tot_pages", 1)
-        self.alr_read_pages = kwargs.get("read_pages", 0)
-        self.id = kwargs.get("id", uuid.uuid4()) # The id must be an UUID 4 !
-        # -- Check if the ID is a valid UUID
-        if not isinstance(self.id, uuid.UUID):
-            raise InvalidUUIDError(self.id)
-        
-        self._parents_shelves: ShelvesList = kwargs.get("parents_shelves", [])
-
-        for parent_shelf in self._parents_shelves:
-            self.check_parent_shelf(parent_shelf)
-
-    def get_infos(self) -> dict:
-        return {
-            "id": self.id,
-            "title": self.title,
-            "authors": self.authors,
-            "cover_path": self.cover_path,
-            "edition": self.edition,
-            "summary": self.summary,
-            "isbn": self.isbn,
-            "status": self.status,
-            "starting_read_date": self.starting_read_date,
-            "end_read_date": self.end_read_date,
-            "tot_pages": self.tot_pages,
-            "alr_read_pages": self.alr_read_pages,
-            "parents_shelves": self._parents_shelves,
-        }
-
-    def check_parent_shelf(self, parent_shelf: Shelf):
-        """
-        Checks if this book is in 'parent_shelf'\n
-        If this is not the case, add this book as a book of 'parent_shelf' and return False, otherwise, return False
-
-        Args:
-        - parent_shelf: a valid instance of Shelf
-        """
-
-        if parent_shelf.has_book(self):
-            return True
-
-        else:
-            parent_shelf.add_book(self)
-            return False
-        
-    def str_id(self):
-        "Return a string representation of the `id` attribute"
-        return str(self.id)
-
-    def has_parent(self, parent_shelf: Shelf) -> bool:
-        """
-        Return True if 'parent_shelf' is in the '_parents_shelves' attribute, otherwise return False
-        """
-
-        if parent_shelf in self._parents_shelves:
-            return True
-
-        else:
-            return False
-
-    def delete_from_parents(self):
-        """
-        Remove this book from all his parents shelves
-        """
-
-        for parent_shelf in self._parents_shelves:
-            parent_shelf.remove_book(self)
 
 
 class Shelf:
@@ -184,9 +96,100 @@ class Shelf:
             "books": self._books,
             "cover_path": self.cover_path,
         }
-        
+
     def str_id(self) -> str:
         return str(self.id)
+
+
+class Book:
+    def __init__(self, **kwargs):
+        """
+        The base class for the books
+        """
+        self.title = kwargs["title"]
+        self.title_suffix = kwargs.get("title_suffix")
+        self.authors = kwargs.get("authors")
+        self.edition = kwargs.get("edition")
+        self.summary = kwargs.get("summary")
+        self.isbn = kwargs.get("isbn")
+        self.cover_path = kwargs.get("cover_path")
+        self.starting_read_date = kwargs.get("starting_read_date")
+        self.end_read_date = kwargs.get("end_read_date")
+        self.status = kwargs.get("status")
+        self.tot_pages = kwargs.get("tot_pages", 1)
+        self.alr_read_pages = kwargs.get("read_pages", 0)
+        self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
+        # -- Check if the ID is a valid UUID
+        if not isinstance(self.id, uuid.UUID):
+            raise InvalidUUIDError(self.id)
+
+        self._parents_shelves: ShelvesList = kwargs.get("parents_shelves", [])
+
+        for parent_shelf in self._parents_shelves:
+            self.check_parent_shelf(parent_shelf)
+
+    def get_infos(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "authors": self.authors,
+            "cover_path": self.cover_path,
+            "edition": self.edition,
+            "summary": self.summary,
+            "isbn": self.isbn,
+            "status": self.status,
+            "starting_read_date": self.starting_read_date,
+            "end_read_date": self.end_read_date,
+            "tot_pages": self.tot_pages,
+            "alr_read_pages": self.alr_read_pages,
+            "parents_shelves": self._parents_shelves,
+        }
+
+    def check_parent_shelf(self, parent_shelf: Shelf):
+        """
+        Checks if this book is in 'parent_shelf'\n
+        If this is not the case, add this book as a book of 'parent_shelf' and return False, otherwise, return False
+
+        Args:
+        - parent_shelf: a valid instance of Shelf
+        """
+
+        if parent_shelf.has_book(self):
+            return True
+
+        else:
+            parent_shelf.add_book(self)
+            return False
+
+    def str_id(self):
+        "Return a string representation of the `id` attribute"
+        return str(self.id)
+
+    def has_parent(self, parent_shelf: Shelf) -> bool:
+        """
+        Return True if 'parent_shelf' is in the '_parents_shelves' attribute, otherwise return False
+        """
+
+        if parent_shelf in self._parents_shelves:
+            return True
+
+        else:
+            return False
+
+    def delete_from_parents(self):
+        """
+        Remove this book from all his parents shelves
+        """
+
+        for parent_shelf in self._parents_shelves:
+            parent_shelf.remove_book(self)
+
+
+BooksList = list[Book]
+BooksDict = dict[str, Book]
+
+ShelvesList = list[Shelf]
+ShelvesDict = dict[str, Shelf]
 
 
 class BooksHandler:
@@ -327,7 +330,9 @@ class BooksHandler:
         self.logger.debug(f"Editing book with id {book_id}...")
 
         if book_id != new_book.id:
-            raise ValueError(f"Couldn't assign new book to ID {book_id} : old book and new book haven't the same ID !")
+            raise ValueError(
+                f"Couldn't assign new book to ID {book_id} : old book and new book haven't the same ID !"
+            )
 
         else:
             self.books[new_book.str_id()] = new_book

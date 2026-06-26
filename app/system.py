@@ -23,7 +23,7 @@ class AppSystem:
         self.logger = logging.getLogger(__name__)
         self.jfm = json_file_manager.JsonFileManager()
         self.res_handler = resources_handler.RessourcesHandler(
-            self.jfm, {}, paths.BASE_PATH
+            self.jfm, {}, paths.APP_PATH
         )
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))

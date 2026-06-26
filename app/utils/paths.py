@@ -1,7 +1,10 @@
 # app/base_path.py
 import os
+import sys
 import typing
 from pathlib import Path
+
+print(f"{sys.executable=}")
 
 
 def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> str:
@@ -13,10 +16,10 @@ def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> st
     """
 
     if mode == "frozen":
-        path = Path(__file__).parents[1]
+        path = Path(sys.executable).parents[0]
 
     elif mode == "unfrozen":
-        path = Path(__file__).parents[1]
+        path = Path(__file__).parents[2]
 
     else:
         raise ValueError(f"Invalid value given for argument <mode> : '{mode}'")
@@ -25,5 +28,5 @@ def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> st
 
 
 BASE_PATH = get_base_path()
-
-RESS_INDEXES_FILEPATH = os.path.join(BASE_PATH, "indexes.json")
+APP_PATH = os.path.join(BASE_PATH, "app")
+RESS_INDEXES_FILEPATH = os.path.join(APP_PATH, "indexes.json")
