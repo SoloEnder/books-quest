@@ -95,6 +95,13 @@
           "section_description": "Interface language settings",
           "edit_current_lang": "Edit interface language"
         }
+      },
+      "update": {
+        "section_title": "Update Settings",
+        "section_description": "Settings related to the updates of the application",
+        "actions": {
+          "check_update": "Check for updates"
+        }
       }
     }
   }

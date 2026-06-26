@@ -94,6 +94,13 @@
           "section_description": "Paramètres concernant la langue de l'interface",
           "edit_current_lang": "Modifier la langue d'affichage"
         }
+      },
+      "update": {
+        "section_title": "Mises à jour",
+        "section_description": "Paramètres concernant les mises à jour de l'application",
+        "actions": {
+          "check_update": "Vérifier les mises à jour"
+        }
       }
     }
   }

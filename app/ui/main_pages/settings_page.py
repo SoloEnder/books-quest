@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import webbrowser
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -48,6 +49,9 @@ class SettingsPage(base_page.BasePage):
         self.appearance_settings = AppearanceSettings(
             None, self.settings_handler, self.langs_handler, self.apply_settings_sg
         )
+        self.update_settings = UpdateSettings(
+            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+        )
 
         self.apply_button = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.done")
@@ -56,6 +60,10 @@ class SettingsPage(base_page.BasePage):
         self.add_section(
             self.appearance_settings,
             self.langs_handler.tr("settings.general.appearance.section_title"),
+        )
+        self.add_section(
+            self.update_settings,
+            self.langs_handler.tr("settings.general.update.section_title"),
         )
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
@@ -350,6 +358,38 @@ class LangsSettings(SettingsSection):
         self.settings_handler.set_setting_value(
             "general.appearance.language",
             self.lang_selection_combob.currentData(),
+        )
+
+
+class UpdateSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "update_settings",
+            "settings.general.update.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.check_update_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("settings.general.update.actions.check_update")
+        )
+        self.check_update_b.clicked.connect(
+            lambda: webbrowser.open_new_tab(
+                "https://github.com/SoloEnder/books-quest/releases"
+            )
+        )
+        self.check_update_b.setObjectName("check_update_button")
+        self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
+        self.base_lyt.addWidget(
+            self.check_update_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
 
