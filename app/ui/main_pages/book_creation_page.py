@@ -152,7 +152,7 @@ class BookCreationPage(base_page.BasePage):
         )
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
-        self.end_read_date_de.setMinimumDate(self.today_date)
+        self.end_read_date_de.setMaximumDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
         self.set_book_status("unread")
