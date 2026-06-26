@@ -45,7 +45,7 @@ class SettingsPage(base_page.BasePage):
         self.nav_bar.section_requested_sg.connect(
             self.set_displayed_section
         )  # The naviguation bar
-        self.appearance_settings = GeneralSettings.AppearanceSettings(
+        self.appearance_settings = AppearanceSettings(
             None, self.settings_handler, self.langs_handler, self.apply_settings_sg
         )
 
@@ -239,101 +239,6 @@ class SettingsSection(QtWidgets.QWidget):
 
 
 class GeneralSettings(SettingsSection):
-    class AppearanceSettings(SettingsSection):
-        class LangsSettings(SettingsSection):
-            """
-            The SettingsSection for the languages options
-            """
-
-            def __init__(
-                self,
-                parent: QtWidgets.QWidget | None,
-                settings_handler: settings_handler.SettingsHandler,
-                langs_handler: langs_handler.LangsHandler,
-                apply_settings_sg,
-            ):
-                super().__init__(
-                    parent,
-                    "LANGS_SETTINGS",
-                    "settings.general.appearance.language.section_title",
-                    settings_handler,
-                    langs_handler,
-                    apply_settings_sg,
-                )
-                self.header_lb.setProperty("role", "h4")
-                self.header_lb.setStatusTip(
-                    self.langs_handler.tr(
-                        "settings.general.appearance.language.section_description"
-                    )
-                )
-
-                # --- The widgets for the language selection
-                self.lang_selection_lb = QtWidgets.QLabel(
-                    self.langs_handler.tr(
-                        "settings.general.appearance.language.edit_current_lang"
-                    )
-                )
-                self.lang_selection_combob = QtWidgets.QComboBox()
-                self.languages_opts_indexes = {
-                    "fr": 0,
-                    "en": 1,
-                }
-                self.lang_selection_combob.addItem("Français", "fr")
-                self.lang_selection_combob.addItem("English", "en")
-                self.lang_selection_combob.setCurrentIndex(
-                    self.languages_opts_indexes[
-                        str(
-                            self.settings_handler.get_setting_value(
-                                "general.appearance.language"
-                            )
-                        )
-                    ]
-                )
-                self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-                self.base_lyt.addWidget(
-                    self.lang_selection_lb,
-                    1,
-                    0,  # QtGui.Qt.AlignmentFlag.AlignLeft
-                )
-                self.base_lyt.addWidget(
-                    self.lang_selection_combob,
-                    1,
-                    1,  # QtGui.Qt.AlignmentFlag.AlignLeft
-                )
-
-            def apply_settings(self):
-                self.settings_handler.set_setting_value(
-                    "general.appearance.language",
-                    self.lang_selection_combob.currentData(),
-                )
-
-        def __init__(
-            self,
-            parent: QtWidgets.QWidget | None,
-            settings_handler: settings_handler.SettingsHandler,
-            langs_handler,
-            apply_settings_sg,
-        ):
-            super().__init__(
-                parent,
-                "APPEARANCE",
-                "settings.general.appearance.section_title",
-                settings_handler,
-                langs_handler,
-                apply_settings_sg,
-            )
-            self.header_lb.setStatusTip(
-                self.langs_handler.tr("settings.general.appearance.section_description")
-            )
-            self.header_lb.setProperty("role", "h3")
-            self.langs_settings = GeneralSettings.AppearanceSettings.LangsSettings(
-                None,
-                settings_handler,
-                self.langs_handler,
-                apply_settings_sg,
-            )
-            self.add_child_section(self.langs_settings)
-
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -348,6 +253,103 @@ class GeneralSettings(SettingsSection):
             settings_handler,
             langs_handler,
             apply_settings_sg,
+        )
+
+
+class AppearanceSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "APPEARANCE",
+            "settings.general.appearance.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr("settings.general.appearance.section_description")
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.langs_settings = LangsSettings(
+            None,
+            settings_handler,
+            self.langs_handler,
+            apply_settings_sg,
+        )
+        self.add_child_section(self.langs_settings)
+
+
+class LangsSettings(SettingsSection):
+    """
+    The SettingsSection for the languages options
+    """
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
+        apply_settings_sg,
+    ):
+        super().__init__(
+            parent,
+            "LANGS_SETTINGS",
+            "settings.general.appearance.language.section_title",
+            settings_handler,
+            langs_handler,
+            apply_settings_sg,
+        )
+        self.header_lb.setProperty("role", "h4")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr(
+                "settings.general.appearance.language.section_description"
+            )
+        )
+
+        # --- The widgets for the language selection
+        self.lang_selection_lb = QtWidgets.QLabel(
+            self.langs_handler.tr(
+                "settings.general.appearance.language.edit_current_lang"
+            )
+        )
+        self.lang_selection_combob = QtWidgets.QComboBox()
+        self.languages_opts_indexes = {
+            "fr": 0,
+            "en": 1,
+        }
+        self.lang_selection_combob.addItem("Français", "fr")
+        self.lang_selection_combob.addItem("English", "en")
+        self.lang_selection_combob.setCurrentIndex(
+            self.languages_opts_indexes[
+                str(
+                    self.settings_handler.get_setting_value(
+                        "general.appearance.language"
+                    )
+                )
+            ]
+        )
+        self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.base_lyt.addWidget(
+            self.lang_selection_lb,
+            1,
+            0,  # QtGui.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.lang_selection_combob,
+            1,
+            1,  # QtGui.Qt.AlignmentFlag.AlignLeft
+        )
+
+    def apply_settings(self):
+        self.settings_handler.set_setting_value(
+            "general.appearance.language",
+            self.lang_selection_combob.currentData(),
         )
 
 
