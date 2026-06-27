@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from PIL import Image
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtSvg, QtWidgets
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,37 @@ def select_image(base_path: str | None = None):
         "Supported Formats (*.png *.jpeg *.jpg);;PNG Images (*.png);;JPEG Images (*.jpeg);;JPG Images (*.jpg)",
     )
     return infos
+
+
+def get_svg(filepath: str, color: QtGui.QColor | str, size: int = 24) -> QtGui.QIcon:
+    """
+    Apply `color` to a svg file and return a PySide6.QtGui.QIcon with the modified image inside
+
+    Parameters
+    ----------
+    color (PySide6.QtGui.QColor|str): the color to apply to the svg image
+    size (int): the size to give to the final svg image
+
+    Returns
+    -------
+    PySide6.QtGui.QIcon: an icon with the modified svg file displayed inside
+    """
+    renderer = QtSvg.QSvgRenderer(filepath)
+
+    image = QtGui.QImage(size, size, QtGui.QImage.Format_ARGB32)  # type: ignore
+    image.fill(QtCore.Qt.transparent)  # type: ignore
+
+    painter = QtGui.QPainter(image)
+    renderer.render(painter)
+    painter.end()
+
+    # recolorisation propre
+    painter = QtGui.QPainter(image)
+    painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceIn)  # type: ignore
+    painter.fillRect(image.rect(), color)
+    painter.end()
+
+    return QtGui.QIcon(QtGui.QPixmap.fromImage(image))
 
 
 def prepare_image(
