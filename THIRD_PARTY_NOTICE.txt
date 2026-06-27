@@ -9,5 +9,6 @@ This project may include third-party software and resources, including:
 - "pywin32-ctypes" (version 0.2.3) licensed under BSD-3-Clause
 - "shiboken6" (version 6.11.0) licensed under LGPL-3.0-only
 - "widgets_pagination_view" (1.1.1) licensed under MIT
+- "lucide" icons pack licensed under ISC
 
 This project was compiled using "pyinstaller" version 6.21.0 and "pyinstaller-hook-contrib" version 2026.6
