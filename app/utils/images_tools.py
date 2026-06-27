@@ -20,7 +20,9 @@ def select_image(base_path: str | None = None):
     return infos
 
 
-def get_svg(filepath: str, color: QtGui.QColor | str, size: int = 24) -> QtGui.QIcon:
+def get_svg(
+    filepath: str, color: QtGui.QColor | str | None = None, size: int = 24
+) -> QtGui.QIcon:
     """
     Apply `color` to a svg file and return a PySide6.QtGui.QIcon with the modified image inside
 
@@ -33,6 +35,18 @@ def get_svg(filepath: str, color: QtGui.QColor | str, size: int = 24) -> QtGui.Q
     -------
     PySide6.QtGui.QIcon: an icon with the modified svg file displayed inside
     """
+
+    if not color:
+        style_hint = QtWidgets.QApplication.styleHints()
+
+        if style_hint.colorScheme() == QtCore.Qt.ColorScheme.Dark:
+            color = "white"
+
+        elif style_hint.colorScheme() == QtCore.Qt.ColorScheme.Light:
+            color = "black"
+
+        else:
+            color = "#808080"
     renderer = QtSvg.QSvgRenderer(filepath)
 
     image = QtGui.QImage(size, size, QtGui.QImage.Format_ARGB32)  # type: ignore
@@ -42,7 +56,6 @@ def get_svg(filepath: str, color: QtGui.QColor | str, size: int = 24) -> QtGui.Q
     renderer.render(painter)
     painter.end()
 
-    # recolorisation propre
     painter = QtGui.QPainter(image)
     painter.setCompositionMode(QtGui.QPainter.CompositionMode_SourceIn)  # type: ignore
     painter.fillRect(image.rect(), color)
