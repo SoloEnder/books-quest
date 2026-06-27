@@ -342,7 +342,7 @@ class ToolBar(QtWidgets.QToolBar):
             self.langs_handler.tr("shared.actions.close")
         )
         self.close_page_act.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.open_settings_act = QtGui.QAction(
             self.langs_handler.tr("shared.actions.open_settings")

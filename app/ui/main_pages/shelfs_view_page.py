@@ -309,7 +309,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         )
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.delete_b.setSizePolicy(self.button_size)
         self.delete_b.clicked.connect(self.delete_shelf)
