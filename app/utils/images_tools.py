@@ -21,7 +21,7 @@ def select_image(base_path: str | None = None):
 
 
 def get_svg(
-    filepath: str, color: QtGui.QColor | str | None = None, size: int = 24
+    filepath: str, color: QtGui.QColor | str | None = None, size: int = 20
 ) -> QtGui.QIcon:
     """
     Apply `color` to a svg file and return a PySide6.QtGui.QIcon with the modified image inside
