@@ -1,0 +1,13 @@
+
+This project may include third party code and ressources, listed as following :
+- "PySide6" (version 6.11.0) package licensed under LGPL-3.0-only
+- "altgraph" package (version 0.17.5) licensed under MIT license
+- "dicts-paths-handler" package (version 1.3.0) licensed under MIT
+- "packaging" package (version 26.2) lisenced under BSD-2-Clause
+- "pefile" package (version 2024.8.26) licensed under MIT
+- "pillow" package (version 12.2.0) licensed under MIT-CMU
+- "pywin32-ctypes" (version 0.2.3) licensed under BSD-3-Clause
+- "shiboken6" (version 6.11.0) licensed under LGPL-3.0-only
+- "widgets_pagination_view" (1.1.1) licensed under MIT
+
+This project has been compiled using "pyinstaller" version 6.21.0 and "pyinstaller-hook-contrib" version 2026.6
