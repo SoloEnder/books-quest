@@ -9,7 +9,7 @@ from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import my_exceptions, utils_funcs
+from app.utils import images_tools, my_exceptions, utils_funcs
 
 
 class ShelfDetailsPage(base_page.BasePage):
@@ -238,7 +238,9 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
         self.edit_b.setObjectName("edit_b")
-        self.edit_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.edit")))
+        self.edit_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
+        )
         self.edit_b.setSizePolicy(self.fixed_sp)
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
@@ -251,7 +253,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
         self.delete_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
         )
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("delete_b")

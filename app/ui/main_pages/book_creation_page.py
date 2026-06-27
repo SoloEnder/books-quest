@@ -86,7 +86,7 @@ class BookCreationPage(base_page.BasePage):
             self.langs_handler.tr("shared.actions.edit_cover")
         )
         self.edit_cover_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.edit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
