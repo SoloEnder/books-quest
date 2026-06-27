@@ -8,7 +8,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import my_exceptions, utils_funcs
+from app.utils import images_tools, my_exceptions, utils_funcs
 
 
 class ShelfsViewPage(base_page.BasePage):
@@ -47,7 +47,7 @@ class ShelfsViewPage(base_page.BasePage):
         self.shelves_widgets = []
 
         # icons
-        self.book_creation_ico = QtGui.QIcon(
+        self.book_creation_ico = images_tools.get_svg(
             self.res_handler.get_res("assets.icons.new_book")
         )
 
@@ -282,7 +282,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
             self.langs_handler.tr("shelf.actions.view_books")
         )
         self.view_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.view_books"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
         self.view_b.clicked.connect(
@@ -294,7 +294,9 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )
-        self.edit_b.setIcon(QtGui.QIcon(self.res_handler.get_res("assets.icons.edit")))
+        self.edit_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
+        )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
                 "SHELF_CREATION_PAGE", True, {"mode": "edition", "shelf": self.shelf}
@@ -307,7 +309,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         )
         self.delete_b.setProperty("role", "delete_b")
         self.delete_b.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.delete_b.setSizePolicy(self.button_size)
         self.delete_b.clicked.connect(self.delete_shelf)

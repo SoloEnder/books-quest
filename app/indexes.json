@@ -21,15 +21,15 @@
       "shelf": "default_shelf_cover.png"
     },
     "icons": {
-      "_base_": "icons",
-      "add": "add_ico.png",
-      "go_back": "back_ico.png",
-      "exit": "cross_ico.png",
-      "edit": "edit_ico.png",
-      "done": "done_ico.png",
-      "new_book": "new_book_ico.png",
-      "view_books": "view_books_ico.png",
-      "settings": "gear.png"
+      "_base_": "icons/lucide",
+      "add": "plus-circle.svg",
+      "go_back": "move-left.svg",
+      "exit": "x.svg",
+      "edit": "pencil.svg",
+      "done": "check.svg",
+      "new_book": "book-plus.svg",
+      "view_books": "library.svg",
+      "settings": "settings.svg"
     },
     "splashscreen": {
       "_base_": "splashscreen",

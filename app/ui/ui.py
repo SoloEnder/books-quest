@@ -12,7 +12,7 @@ from app.ui.main_pages import (
     shelf_details_page,
     shelfs_view_page,
 )
-from app.utils import utils_funcs
+from app.utils import images_tools, utils_funcs
 
 
 class UI(QtWidgets.QMainWindow):
@@ -342,13 +342,13 @@ class ToolBar(QtWidgets.QToolBar):
             self.langs_handler.tr("shared.actions.close")
         )
         self.close_page_act.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.open_settings_act = QtGui.QAction(
             self.langs_handler.tr("shared.actions.open_settings")
         )
         self.open_settings_act.setIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.icons.settings"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.settings"))
         )
         self.addAction(self.close_page_act)
         self.addAction(self.open_settings_act)
