@@ -2,6 +2,7 @@ from PySide6 import QtCore, QtGui
 
 
 class QtSignalsHandler(QtCore.QObject):
+    apply_settings_sg = QtCore.Signal()
     refresh_ui_sg = QtCore.Signal()
     switch_page_sg = QtCore.Signal(str, bool, dict)
     close_page_sg = QtCore.Signal()

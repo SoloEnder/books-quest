@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import webbrowser
 
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from app.src import langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
@@ -12,8 +12,6 @@ from app.utils import utils_funcs
 
 
 class SettingsPage(base_page.BasePage):
-    apply_settings_sg = QtCore.Signal()
-
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -47,13 +45,17 @@ class SettingsPage(base_page.BasePage):
             self.set_displayed_section
         )  # The naviguation bar
         self.appearance_settings = AppearanceSettings(
-            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
         )
         self.update_settings = UpdateSettings(
-            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
         )
         self.about_settings = AboutSettings(
-            None, self.settings_handler, self.langs_handler, self.apply_settings_sg
+            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+        )
+        self.about_button = QtWidgets.QPushButton("About")
+        self.about_button.clicked.connect(
+            lambda: self.qt_signals_handler.show_about_sg.emit(True)
         )
 
         self.apply_button = QtWidgets.QPushButton(
@@ -77,7 +79,8 @@ class SettingsPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self._sections_displayer, 0, 1, 2, 1, QtCore.Qt.AlignmentFlag.AlignTop
         )
-        self.main_lyt.addWidget(self.apply_button, 1, 0)
+        self.main_lyt.addWidget(self.about_button, 1, 0)
+        self.main_lyt.addWidget(self.apply_button, 2, 0)
 
     def apply_and_refresh(self):
         """
@@ -88,7 +91,7 @@ class SettingsPage(base_page.BasePage):
             self.langs_handler.tr("settings.msg.applying_changes")
         )
         self.logger.debug("Sending new settings save request...")
-        self.apply_settings_sg.emit()
+        self.qt_signals_handler.apply_settings_sg.emit()
         self.logger.debug("Sending UI refresh request...")
         self.qt_signals_handler.refresh_ui_sg.emit()
         self.qt_signals_handler.edit_progress_msg.emit(" ")
@@ -188,14 +191,14 @@ class SettingsSection(QtWidgets.QWidget):
         header_lang_path: str,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler: langs_handler.LangsHandler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)
         self.SECTION_NAME = section_name
         self.header_lang_path = header_lang_path
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
-        self.apply_settings_sg = apply_settings_sg
+        self.qt_signals_handler = qt_signals_handler
 
         self.base_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.base_lyt)
@@ -207,7 +210,7 @@ class SettingsSection(QtWidgets.QWidget):
         self.base_lyt.addWidget(self.header_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         # --- Connecting the signal emitted when an appliance of the new settings is request
-        self.apply_settings_sg.connect(self.apply_settings)
+        self.qt_signals_handler.apply_settings_sg.connect(self.apply_settings)
 
     def has_child_section(self, section: SettingsSection) -> bool:
         """
@@ -259,7 +262,7 @@ class GeneralSettings(SettingsSection):
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler: langs_handler.LangsHandler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(
             parent,
@@ -267,7 +270,7 @@ class GeneralSettings(SettingsSection):
             "settings.general.section_title",
             settings_handler,
             langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
 
 
@@ -277,7 +280,7 @@ class AppearanceSettings(SettingsSection):
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(
             parent,
@@ -285,7 +288,7 @@ class AppearanceSettings(SettingsSection):
             "settings.general.appearance.section_title",
             settings_handler,
             langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
         self.header_lb.setStatusTip(
             self.langs_handler.tr("settings.general.appearance.section_description")
@@ -295,7 +298,7 @@ class AppearanceSettings(SettingsSection):
             None,
             settings_handler,
             self.langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
         self.add_child_section(self.langs_settings)
 
@@ -310,7 +313,7 @@ class LangsSettings(SettingsSection):
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler: langs_handler.LangsHandler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(
             parent,
@@ -318,7 +321,7 @@ class LangsSettings(SettingsSection):
             "settings.general.appearance.language.section_title",
             settings_handler,
             langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
         self.header_lb.setProperty("role", "h4")
         self.header_lb.setStatusTip(
@@ -374,7 +377,7 @@ class UpdateSettings(SettingsSection):
         parent: QtWidgets.QWidget | None,
         settings_handler,
         langs_handler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(
             parent,
@@ -382,7 +385,7 @@ class UpdateSettings(SettingsSection):
             "settings.general.update.section_title",
             settings_handler,
             langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
@@ -409,7 +412,7 @@ class AboutSettings(SettingsSection):
         parent: QtWidgets.QWidget | None,
         settings_handler,
         langs_handler,
-        apply_settings_sg,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(
             parent,
@@ -417,12 +420,16 @@ class AboutSettings(SettingsSection):
             "settings.general.about.section_title",
             settings_handler,
             langs_handler,
-            apply_settings_sg,
+            qt_signals_handler,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
             self.langs_handler.tr("settings.general.about.section_description")
         )
+        self.about_bq_pb = QtWidgets.QPushButton("About Books Quest")
+        # self.about_bq_pb.clicked.connect(lambda: self.qt_signals_handler.show_about_sg.emit(True))
+        # self.about
+        self.about_qt_pb = QtWidgets.QPushButton("About Qt")
         self.version_lb = QtWidgets.QLabel(
             self.langs_handler.tr(
                 "settings.general.about.current_version", version="0.1.0"
