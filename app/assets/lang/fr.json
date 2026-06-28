@@ -102,11 +102,18 @@
           "check_update": "Vérifier les mises à jour"
         }
       },
-      "about": {
-        "section_title": "A propos",
-        "section_description": "Quelques informations sur BooksQuest :)",
-        "current_version": "BooksQuest version /f:<version>/f"
+      "help": {
+        "section_title": "Aide",
+        "section_description": "Quelques informations et liens utiles sur BooksQuest",
+        "actions": {
+          "about_books_quest": "A propos de BooksQuest",
+          "report_issues": "Rapporter des problèmes"
+        }
       }
     }
+  },
+  "about": {
+    "title": "A propos de BooksQuest",
+    "msg": "Books Quest version /f:<version>/f, développé par /f:<developer>/f sous la licence /f:<license>/f"
   }
 }

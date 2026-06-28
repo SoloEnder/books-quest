@@ -64,7 +64,6 @@ def apply_patch(
     - InvalidUpdateInstructions: if `from_` or `to` does not respect the allowed syntax
     """
     undo = []
-    updater_helper_infos = {}
 
     for step in instructions:
         if step["type"] == "move":
@@ -80,13 +79,6 @@ def apply_patch(
         elif step["type"] == "remove":
             remove_item(step["path"], installation_folder, backup_folder, undo)
             utils.write_json(undo_filepath, undo)
-
-        elif step["type"] == "replace_updater":
-            updater_helper_infos = {**step}
-            updater_helper_infos["installation_path"]
-            updater_helper_infos["extracted_patch_content"] = os.path.join(
-                extracted_patch_folder, "content"
-            )
 
         else:
             raise InvalidUpdateInstructions
@@ -113,14 +105,14 @@ def move_item(
 
     if from_.startswith("patch::"):
         from_ = from_.split("::")[1]
-        from_ = os.path.join(patch_content_path, from_)
+        from_ = os.path.abspath(os.path.join(patch_content_path, from_))
 
     else:
         raise InvalidUpdateInstructions
 
     if to.startswith("installation::"):
         old_to = to
-        to = os.path.join(installation_path, to.split("::")[1])
+        to = os.path.abspath(os.path.join(installation_path, to.split("::")[1]))
 
     else:
         raise InvalidUpdateInstructions
@@ -160,7 +152,7 @@ def remove_item(
     """
     if path.startswith("installation::"):
         old_path = path
-        path = os.path.join(installation_folder, path.split("::")[1])
+        path = os.path.abspath(os.path.join(installation_folder, path.split("::")[1]))
 
     else:
         raise InvalidUpdateInstructions

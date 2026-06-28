@@ -96,6 +96,7 @@ class AppSystem:
             self.langs_handler,
         )
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
+        self.ui.qt_signals_handler.show_about_sg.connect(self.about)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(
@@ -243,3 +244,34 @@ class AppSystem:
         QtWidgets.QMessageBox.information(
             None, "Books Quest", self.langs_handler.tr("shared.msg.indev_warn")
         )
+
+    @QtCore.Slot(bool)
+    def about(self, print_console: bool = True):
+        """
+        Shows some infos about BooksQuest
+
+        Parameters
+        ----------
+        print_console (bool=True): whether to show the infos in the console too
+        """
+        QtWidgets.QMessageBox.about(
+            None,
+            self.langs_handler.tr("about.title"),
+            self.langs_handler.tr(
+                "about.msg",
+                version=self.app_infos["version"]["readable"],
+                developer="SoloEnder",
+                license="MIT",
+            ),
+        )
+        if print_console:
+            print(f"===== {self.langs_handler.tr('about.title')} =====")
+            print(
+                self.langs_handler.tr(
+                    "about.msg",
+                    version=self.app_infos["version"]["readable"],
+                    developer="SoloEnder",
+                    license="MIT",
+                )
+            )
+            print("=============================")
