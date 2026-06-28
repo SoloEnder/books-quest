@@ -50,12 +50,8 @@ class SettingsPage(base_page.BasePage):
         self.update_settings = UpdateSettings(
             None, self.settings_handler, self.langs_handler, self.qt_signals_handler
         )
-        self.about_settings = AboutSettings(
+        self.about_settings = HelpSettings(
             None, self.settings_handler, self.langs_handler, self.qt_signals_handler
-        )
-        self.about_button = QtWidgets.QPushButton("About")
-        self.about_button.clicked.connect(
-            lambda: self.qt_signals_handler.show_about_sg.emit(True)
         )
 
         self.apply_button = QtWidgets.QPushButton(
@@ -72,15 +68,14 @@ class SettingsPage(base_page.BasePage):
         )
         self.add_section(
             self.about_settings,
-            self.langs_handler.tr("settings.general.about.section_title"),
+            self.langs_handler.tr("settings.general.help.section_title"),
         )
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
         self.main_lyt.addWidget(
             self._sections_displayer, 0, 1, 2, 1, QtCore.Qt.AlignmentFlag.AlignTop
         )
-        self.main_lyt.addWidget(self.about_button, 1, 0)
-        self.main_lyt.addWidget(self.apply_button, 2, 0)
+        self.main_lyt.addWidget(self.apply_button, 1, 0)
 
     def apply_and_refresh(self):
         """
@@ -406,7 +401,7 @@ class UpdateSettings(SettingsSection):
         )
 
 
-class AboutSettings(SettingsSection):
+class HelpSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
@@ -416,27 +411,42 @@ class AboutSettings(SettingsSection):
     ):
         super().__init__(
             parent,
-            "about_settings",
-            "settings.general.about.section_title",
+            "help_settings",
+            "settings.general.help.section_title",
             settings_handler,
             langs_handler,
             qt_signals_handler,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
-            self.langs_handler.tr("settings.general.about.section_description")
+            self.langs_handler.tr("settings.general.help.section_description")
         )
-        self.about_bq_pb = QtWidgets.QPushButton("About Books Quest")
-        # self.about_bq_pb.clicked.connect(lambda: self.qt_signals_handler.show_about_sg.emit(True))
-        # self.about
-        self.about_qt_pb = QtWidgets.QPushButton("About Qt")
-        self.version_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(
-                "settings.general.about.current_version", version="0.1.0"
+        self.report_issues_pb = QtWidgets.QPushButton(
+            self.langs_handler.tr("settings.general.help.actions.report_issues")
+        )
+        self.report_issues_pb.clicked.connect(
+            lambda: webbrowser.open_new_tab(
+                "https://github.com/SoloEnder/books-quest/issues"
             )
         )
+        self.about_bq_pb = QtWidgets.QPushButton(
+            self.langs_handler.tr("settings.general.help.actions.about_books_quest")
+        )
+        self.about_bq_pb.clicked.connect(
+            lambda: self.qt_signals_handler.show_about_sg.emit(True)
+        )
+
+        self.about_qt_pb = QtWidgets.QPushButton("About Qt")
+        self.about_qt_pb.clicked.connect(QtWidgets.QApplication.aboutQt)
+
         self.base_lyt.addWidget(
-            self.version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.report_issues_pb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.about_bq_pb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.about_qt_pb, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
 

@@ -254,10 +254,24 @@ class AppSystem:
         ----------
         print_console (bool=True): whether to show the infos in the console too
         """
-        text = f"Books Quest v{self.app_infos['version']['readable']}"
-        self.qt_app.aboutQt()
-        QtWidgets.QMessageBox.about(None, "About Books Quest", text)
+        QtWidgets.QMessageBox.about(
+            None,
+            self.langs_handler.tr("about.title"),
+            self.langs_handler.tr(
+                "about.msg",
+                version=self.app_infos["version"]["readable"],
+                developer="SoloEnder",
+                license="MIT",
+            ),
+        )
         if print_console:
-            print("===== About Books Quest =====")
-            print(text)
+            print(f"===== {self.langs_handler.tr('about.title')} =====")
+            print(
+                self.langs_handler.tr(
+                    "about.msg",
+                    version=self.app_infos["version"]["readable"],
+                    developer="SoloEnder",
+                    license="MIT",
+                )
+            )
             print("=============================")
