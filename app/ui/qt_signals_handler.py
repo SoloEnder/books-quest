@@ -8,6 +8,7 @@ class QtSignalsHandler(QtCore.QObject):
     notify_sg = QtCore.Signal(str, str, str, str)
     add_action_sg = QtCore.Signal(list[QtGui.QAction])
     edit_progress_msg = QtCore.Signal(str)
+    show_about_sg = QtCore.Signal(bool)
 
     def __init__(self):
         super().__init__()
