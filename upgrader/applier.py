@@ -7,46 +7,56 @@ import typing
 
 import utils
 
-PATCH_FORMAT_VERSION = "1.0.0"
+SUPPORTED_UPDATES_FORMATS = ("1",)
 
 
 def run(installation_path: str):
-    patch_exe_path = sys.executable
-    patch_path = str(pathlib.Path(patch_exe_path).parent)
-    check_patch(str(patch_path), installation_path)
-    update_infos_filepath = os.path.join(installation_path, "update_infos.json")
-    patch_infos = getpinfos(patch_path)
+    upgrader_filepath = sys.executable
+    upgrader_folder = str(pathlib.Path(upgrader_filepath).parent)
+    manifest = check_update(str(upgrader_folder), installation_path)
+    update_state_filepath = os.path.abspath(
+        os.path.join(installation_path, "update_state.json")
+    )
     installation_infos = utils.get_installation_infos(installation_path)
     installation_semantic_version = installation_infos["version"]["semantic"]
     backup_folder = os.path.join(
         installation_path, f"backup_{installation_semantic_version}"
     )
-    update_infos_data = {
-        "from_version": installation_infos["version"],
-        "to_version": patch_infos["upgrade_to"],
+    update_state_data = {
         "state": "IN_PROGRESS",
+        "from_version": installation_infos["version"],
+        "to_version": manifest["upgrade_to"],
         "started_at": str(dt.datetime.now()),
         "ended_at": None,
         "backup_folder": backup_folder,
     }
-    utils.write_json(update_infos_filepath, update_infos_data)
-    patch_instructions = utils.read_json(os.path.join(patch_path, "instructions.json"))
+    utils.write_json(update_state_filepath, update_state_data)
+    update_instructions = utils.read_json(
+        os.path.join(upgrader_folder, "update_instructions.json")
+    )
     undo_filepath = os.path.join(backup_folder, "undo.json")
     utils.check_and_make_folder(backup_folder)
     utils.write_json(undo_filepath, [])
     apply_patch(
-        patch_instructions, installation_path, backup_folder, patch_path, undo_filepath
+        update_instructions,
+        installation_path,
+        backup_folder,
+        upgrader_folder,
+        undo_filepath,
+        manifest["type"],
     )
-    update_infos_data["state"] = "COMPLETED"
-    utils.write_json(update_infos_filepath, update_infos_data)
+    update_state_data["state"] = "COMPLETED"
+    update_state_data["ended_at"] = str(dt.datetime.now())
+    utils.write_json(update_state_filepath, update_state_data)
 
 
 def apply_patch(
     instructions: list,
     installation_folder,
     backup_folder,
-    extracted_patch_folder: str,
+    update_content_folder: str,
     undo_filepath: str,
+    update_type: typing.Literal["FULL", "PATCH"],
 ):
     """
     Apply the patch instructions
@@ -56,7 +66,7 @@ def apply_patch(
     - instructions (list): a list of instructions to execute
     - installation_folder (str): the folder where is located the user program installation
     - backup_folder: the folder where will be temporary stored the client files that has been modified, for allow downgrade if something went wrong during the update
-    - patch_content_path (str): the path where is located the content of the patch
+    - update_content_folder (str): the path where is located the content of the update
     - undo_filepath (list): the filepath where to store the data used for downgrade if something went wrong during the update
 
     Raises
@@ -67,10 +77,15 @@ def apply_patch(
 
     for step in instructions:
         if step["type"] == "move":
+            content_folder = (
+                os.path.join(update_content_folder, "content")
+                if update_type == "PATCH"
+                else update_content_folder
+            )
             move_item(
                 step["from"],
                 step["to"],
-                os.path.join(extracted_patch_folder, "content"),
+                content_folder,
                 installation_folder,
                 undo,
             )
@@ -85,14 +100,14 @@ def apply_patch(
 
 
 def move_item(
-    from_: str, to: str, patch_content_path: str, installation_path: str, undo: list
+    from_: str, to: str, udpdate_content_folder: str, installation_path: str, undo: list
 ):
     """
-    Moves a file/directory from an extracted patch folder to a specific destination in the user installation folder
+    Copy a file/directory from an update content folder to a specific destination in the user installation folder
 
     Parameters
     ----------
-    - from_ (str): the original location of the file/directory, relative to `patch_content_folder`. The path must starts by 'patch::',
+    - from_ (str): the original location of the file/directory, relative to `update_content_folder`. The path must starts by 'update::',
     - to (str): the destination of the moved file, relative to `ìnstallation_path`. The path must starts with 'installation::'
     - patch_content_path (str): the path where is located the content of the patch
     - installation_path (str): the path where is located the user program installation
@@ -103,9 +118,9 @@ def move_item(
     - InvalidUpdateInstructions: if `from_` or `to` does not respect the allowed syntax
     """
 
-    if from_.startswith("patch::"):
+    if from_.startswith("update::"):
         from_ = from_.split("::")[1]
-        from_ = os.path.abspath(os.path.join(patch_content_path, from_))
+        from_ = os.path.abspath(os.path.join(udpdate_content_folder, from_))
 
     else:
         raise InvalidUpdateInstructions
@@ -139,9 +154,9 @@ def remove_item(
     undo: list,
 ):
     """
-    Moves an item deleted by the patch instructions in the backup folder, for allow recovery.
+    Moves an item deleted by the patch instructions in the backup folder, to allow recovery.
 
-    - path (str): the path to element to delete, relative to the `installation_folder`. It must starts with 'installation::'.
+    - path (str): the path to the element to delete, relative to the `installation_folder`. It must starts with 'installation::'.
     - installation_folder (str): the path to the location of the user program installation
     - backup_folder (str): the folder where moves the pseudo deleted element
     - undo (list): the list where are stored the opposite of the actions done by the updater
@@ -168,56 +183,79 @@ def remove_item(
     )
 
 
-def check_patch(patch_path: str, installation_path: str):
-    patch_content = os.listdir(patch_path)
-    excepted_content = ("content", "infos.json", "instructions.json", "patch.exe")
+def check_update(upgrader_folder: str, installation_path: str) -> dict:
+    """
+    Checks partially the validity of an update.
+
+    Parameters
+    ----------
+    - upgrader_folder (str): the folder where is located the `upgrader.exe` file, and where should be the update infos and instructions
+    - installation_path (str): the path to the installation to update
+
+    Returns
+    -------
+    dict: the update infos (usually found in the `manifest.json` file)
+    """
+    upgrader_folder_content = os.listdir(upgrader_folder)
+    manifest_data = get_manifest(upgrader_folder)
+
+    update_type = manifest_data["type"]
+    if update_type == "PATCH":
+        excepted_content = ["content", "update_instructions.json", "upgrader.exe"]
+
+    elif update_type == "FULL":
+        excepted_content = [
+            "update_manifest.json",
+            "update_instructions.json",
+            "upgrader.exe",
+            "books-quest.exe",
+            "app",
+            "_internal",
+        ]
+
+    else:
+        raise InvalidManifestData(f"Unknown update type : '{update_type}'")
+
     missings_elements = []
     for excepted in excepted_content:
-        if excepted not in patch_content:
+        if excepted not in upgrader_folder_content:
             missings_elements.append(excepted)
 
     if missings_elements:
         raise MissingsElementsError(missings_elements)
 
-    patch_infos = getpinfos(patch_path)
-    excepted_keys = (
-        "target_version",
-        "upgrade_to",
-        "creation_date",
-        "format_version",
-    )
-    if not tuple(patch_infos.keys()) == excepted_keys:
-        raise InvalidPatchInfos
-
-    if not patch_infos["format_version"] == PATCH_FORMAT_VERSION:
-        raise UnsupportedPatchVersion(
-            PATCH_FORMAT_VERSION, patch_infos["format_version"]
+    if manifest_data["format_version"] not in SUPPORTED_UPDATES_FORMATS:
+        raise UnsupportedUpdateFormat(
+            SUPPORTED_UPDATES_FORMATS, manifest_data["format_version"]
         )
 
     installation_infos = utils.get_installation_infos(installation_path)
-    if (
-        not installation_infos["version"]["semantic"]
-        == patch_infos["target_version"]["semantic"]
-    ):
-        raise UntargetedInstallationError(
-            patch_infos["target_version"]["readable"],
-            installation_infos["version"]["readable"],
-        )
+
+    if update_type == "PATCH":
+        if (
+            not installation_infos["version"]["semantic"]
+            == manifest_data["target_version"]["semantic"]
+        ):
+            raise UntargetedInstallationError(
+                manifest_data["target_version"]["readable"],
+                installation_infos["version"]["readable"],
+            )
 
     if int(installation_infos["version"]["semantic"]) > int(
-        patch_infos["upgrade_to"]["semantic"]
+        manifest_data["upgrade_to"]["semantic"]
     ):
         raise DownGradeError(
-            patch_infos["version"]["readable"],
+            manifest_data["upgrade_to"]["readable"],
             installation_infos["version"]["readable"],
         )
+    return manifest_data
 
 
-def getpinfos(patch_path: str) -> dict:
+def get_manifest(patch_path: str) -> dict:
     """
     Returns the content of `infos.json` file in the patch
     """
-    return utils.read_json(os.path.join(patch_path, "infos.json"))
+    return utils.read_json(os.path.join(patch_path, "update_manifest.json"))
 
 
 class MyBaseException(Exception):
@@ -230,39 +268,47 @@ class MyBaseException(Exception):
         return self.msg
 
 
+class InvalidManifestData(MyBaseException):
+    """
+    Usually raised when the update manifest gives an unexpected/invalid information
+    """
+
+    def __init__(self, msg):
+        super().__init__()
+        self.msg = msg
+
+
 class MissingsElementsError(MyBaseException):
     def __init__(self, missing_elements: typing.Sequence[str]):
         super().__init__()
-        self.msg = (
-            f"The following elements {missing_elements} are missing in the patch file !"
-        )
+        self.msg = f"The following elements {missing_elements} are missing in the update content !"
 
 
 class InvalidPatchInfos(MyBaseException):
     def __init__(self):
         super().__init__()
-        self.msg = "The information declared by the patch are not in a valid formet !"
+        self.msg = "The information declared by the update are not in a valid formet !"
 
 
-class UnsupportedPatchVersion(MyBaseException):
-    def __init__(self, supported_version: str, declared_version: str):
+class UnsupportedUpdateFormat(MyBaseException):
+    def __init__(self, supported_formats: tuple[str, ...], given_version: str):
         super().__init__()
-        self.supported_version = supported_version
-        self.declared_version = declared_version
-        self.msg = f"Patch declared version is {declared_version}, but the version supported by the updater is only {supported_version}"
+        self.supported_formats = supported_formats
+        self.given_version = given_version
+        self.msg = f"Update format is {self.given_version}, but upgrader supported formats are {self.supported_formats} !"
 
 
 class UntargetedInstallationError(MyBaseException):
     def __init__(self, patch_target: str, program_version: str):
         self.patch_target = patch_target
         self.program_version = program_version
-        self.msg = f"Patch target version is {self.patch_target}, but program version is {self.program_version} !"
+        self.msg = f"Update target version is {self.patch_target}, but program version is {self.program_version} !"
 
 
 class InvalidUpdateInstructions(MyBaseException):
     def __init__(self):
         super().__init__()
-        self.msg = "The update instructions of the patch file are not valid !"
+        self.msg = "The update instructions are not valid !"
 
 
 class DownGradeError(MyBaseException):
@@ -270,4 +316,4 @@ class DownGradeError(MyBaseException):
         super().__init__()
         self.patch_version = patch_version
         self.installation_version = installation_version
-        self.msg = f"Patch upgrade to {self.patch_version}, but installation version is already {self.installation_version}"
+        self.msg = f"Update upgrade to {self.patch_version}, but installation version is already {self.installation_version}"

@@ -36,13 +36,13 @@ def write_json(filepath: str, data):
         json.dump(data, f)
 
 
-def check_and_make_folder(extraction_folder: str):
+def check_and_make_folder(folder: str):
     """
     Checks if a folder exists, and make it otherwise
 
     Parameters
     ----------
-    - extraction_folder: the folder to check
+    - folder: the folder to check
     """
-    if not os.path.exists(extraction_folder):
-        os.mkdir(extraction_folder)
+    if not os.path.exists(folder):
+        os.mkdir(folder)
