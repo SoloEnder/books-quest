@@ -5,6 +5,9 @@ import shutil
 import undo
 import utils
 
+UPDATER_VERSION = "1.0.0"
+
+print(f"Books Quest Updater version {UPDATER_VERSION}")
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "installation_path",
@@ -15,7 +18,7 @@ parser.add_argument("-c", "--check_state", action="store_true")
 args = parser.parse_args()
 
 if args.check_state:
-    update_infos_filepath = os.path.join(args.installation_path, "update_infos.json")
+    update_infos_filepath = os.path.join(args.installation_path, "update_state.json")
     update_infos = utils.read_json(update_infos_filepath)
     backup_folder = update_infos["backup_folder"]
     if not update_infos["state"] == "COMPLETED":
