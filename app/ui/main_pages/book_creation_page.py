@@ -397,11 +397,36 @@ class BookCreationPage(base_page.BasePage):
     def set_cover_lb_pixmap(self, new_path):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
-    def check_existence(self, **kwargs):
+    def get_matches(self, title: str, authors: str | None):
         """
-        Check if a book who match with the requirements specified iin kwargs exists in the current books handler, and return the standard output of the method <get_book> of the books handler
+        Get the books that have the same title and author as the current book
+        In edition mode, this method checks if the book title/author has been modified before get the matches
         """
-        return self.books_handler.get_books(**kwargs)
+        matches = []
+        if self.edition_mode_enabled and self.book:
+            if self.book.title != title:
+                self.logger.debug(
+                    "Searching for matches in EDITION mode because Book title has been modified !"
+                )
+                matches = self.books_handler.get_books(
+                    title=(title, True, False), authors=(authors, True, False)
+                )
+
+            elif self.book.authors != authors:
+                self.logger.debug(
+                    "Searching for matches in EDITION mode because Book authors has been modified !"
+                )
+                matches = self.books_handler.get_books(
+                    title=(title, True, False), authors=(authors, True, False)
+                )
+
+        elif not self.edition_mode_enabled:
+            self.logger.debug("Searching for matches...")
+            matches = self.books_handler.get_books(
+                title=(title, True, False), authors=(authors, True, False)
+            )
+
+        return matches
 
     def get_book_infos(self):
         books_infos = {}
@@ -429,23 +454,7 @@ class BookCreationPage(base_page.BasePage):
             )
             return
 
-        try:
-            matches = self.check_existence(
-                title=(books_infos.get("title"), True, False),
-                authors=(books_infos.get("authors"), True, False),
-            )
-
-        except AttributeError:
-            matches = []
-            self.logger.exception(
-                f"an error occured while checking the existence of book name {books_infos.get('title')}"
-            )
-            return
-
-        else:
-            if self.edition_mode_enabled and self.book:
-                if self.book in matches:
-                    matches = []
+        matches = self.get_matches(books_infos["title"], books_infos.get("authors"))
 
         if matches:
             self.logger.debug(
