@@ -16,36 +16,23 @@ def unknown_shelf_name_fmt(shelf: book_sys.Shelf):
     return f"[Unnamed]-{creation_date.date()}"
 
 
-def format_displayed_title(
+def add_title_suffix(
     title: str,
-    format: str = "<title> (<title_suffix>)",
-    **kwargs,
+    title_suffix,
 ) -> str:
     """
-    Format the displayed title by replacing the placeholders in `format` by their value given in `kwargs`
-    In `format`, each argument must be placed between '<>'.
+    Add the suffix of a book/shelf title and return the result
 
     Parameters
     ----------
-    title (str): the title to format
-    format (str): the excepted output (where each arg will be replaced by its value)
+    title (str): the title
+    title_suffix (str): the title suffix
 
     Returns
     -------
-    str: the formatted text
-
-    Example
-    -------
-    `format_dispkayer_title(title="Book", format="<title> (<occurence_count>)", occurence_count=10)`
-    will return : "Book (10)"
+    str: the result text
     """
-    formatted_title = format
-    formatted_title.replace(f"<{title}>", title)
-    for key, value in kwargs.items():
-        if not value:
-            value = ""
-        formatted_title = formatted_title.replace(f"<{key}>", value)
-    return formatted_title
+    return f"{title} ({title_suffix})"
 
 
 def load_and_set_ss(
