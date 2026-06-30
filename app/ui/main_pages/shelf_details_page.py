@@ -96,7 +96,6 @@ class ShelfDetailsPage(base_page.BasePage):
         """
         Generate widget ('BookWidget') for every book ('book_sys.Book') in the books argument
         """
-        base_displayed_titles = []
         books_widgets = []
 
         for index, book in enumerate(books):
