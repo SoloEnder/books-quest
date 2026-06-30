@@ -19,7 +19,6 @@ def unknown_shelf_name_fmt(shelf: book_sys.Shelf):
 def format_displayed_title(
     title: str,
     format: str = "<title> (<title_suffix>)",
-    ignore_none: bool = True,
     **kwargs,
 ) -> str:
     """
@@ -30,7 +29,6 @@ def format_displayed_title(
     ----------
     title (str): the title to format
     format (str): the excepted output (where each arg will be replaced by its value)
-    ignore_none (bool): wether to ignore format arguments that have `None` as value
 
     Returns
     -------
@@ -44,7 +42,7 @@ def format_displayed_title(
     formatted_title = format
     formatted_title.replace(f"<{title}>", title)
     for key, value in kwargs.items():
-        if ignore_none and value:
+        if not value:
             value = ""
         formatted_title.replace(f"<{key}>", value)
     return formatted_title
