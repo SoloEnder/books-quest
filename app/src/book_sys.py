@@ -336,12 +336,14 @@ class BooksHandler:
             )
 
         else:
+            new_book.title_suffix = self.books[new_book.str_id()].title_suffix
             self.books[new_book.str_id()] = new_book
 
-    def edit_shelf(self, shelf_id: str, new_shelf):
+    def edit_shelf(self, shelf_id: str, new_shelf: Shelf):
 
         if shelf_id in self.shelves.keys():
             new_shelf.id = uuid.UUID(shelf_id)
+            new_shelf.title_suffix = self.shelves[shelf_id].title_suffix
             self.shelves[shelf_id] = new_shelf
 
         else:
