@@ -132,6 +132,7 @@ class Book:
         return {
             "id": self.id,
             "title": self.title,
+            "title_suffix": self.title_suffix,
             "authors": self.authors,
             "cover_path": self.cover_path,
             "edition": self.edition,
