@@ -25,6 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Logs**
 Please add the logs of application. You can found them inside `app\logs` folder in your BooksQuest installation
+
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows]
  - Version [e.g. 11]
