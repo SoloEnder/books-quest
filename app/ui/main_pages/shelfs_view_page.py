@@ -212,6 +212,87 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         langs_handler,
     ):
+        self.shelf = shelf
+        self.books_handler = books_handler
+        self.res_handler = res_handler
+        self.qt_signals_handler = qt_signals_handler
+        self.langs_handler = langs_handler
+        super().__init__(None, None)
+        self.logger = logging.getLogger(__name__)
+
+        self.setProperty("role", "shelf_widget")
+        self.main_layout = QtWidgets.QGridLayout(self)
+        self.sub_widget = SubShelfWidget(
+            self.shelf,
+            self.books_handler,
+            self.res_handler,
+            self.qt_signals_handler,
+            self.langs_handler,
+        )
+        self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
+        self.title_lb = QtWidgets.QLabel(
+            utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
+        )
+        self.title_lb.setProperty("role", "h3")
+        self.main_layout.addWidget(
+            self.title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.main_layout.addWidget(
+            self.sub_widget, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+    def delete_shelf(self):
+        self.logger.info(f"Attempting to delete shelf (ID={self.shelf.id})...")
+        self.books_handler.delete_shelf(self.shelf.str_id())
+
+        if self.pages_widgets_handler:
+            try:
+                self.qt_signals_handler.edit_progress_msg.emit(
+                    self.langs_handler.tr("shelf.msg.shelf_deletion")
+                )
+                self.pages_widgets_handler.delete_widget(self)
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+            except my_exceptions.InvalidWidgetIndexError:
+                self.logger.exception("Unable to delete shelf !")
+                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+                self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+        else:
+            self.logger.error(
+                f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid widgets handler found !"
+            )
+
+
+class DefaultShelfWidget(ShelfWidget):
+    def __init__(
+        self,
+        shelf: book_sys.Shelf,
+        books_handler: book_sys.BooksHandler,
+        res_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        langs_handler,
+    ):
+        super().__init__(
+            shelf,
+            books_handler,
+            res_handler,
+            qt_signals_handler,
+            langs_handler,
+        )
+        self.sub_widget.edit_b.setVisible(False)
+        self.sub_widget.delete_b.setVisible(False)
+
+
+class SubShelfWidget(widgets_pagination_view.InPageWidget):
+    def __init__(
+        self,
+        shelf: book_sys.Shelf,
+        books_handler: book_sys.BooksHandler,
+        res_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        langs_handler,
+    ):
         super().__init__(None, None)
         self.shelf = shelf
         self.books_handler = books_handler
@@ -221,7 +302,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.logger = logging.getLogger(__name__)
 
-        self.setProperty("role", "shelf_widget")
+        self.setProperty("role", "sub_shelf_widget")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
 
@@ -237,13 +318,6 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
 
         else:
             self.displayed_cover = self.default_cover
-
-        self.title_lb = QtWidgets.QLabel(
-            utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
-        )
-
-        self.title_lb.setWordWrap(True)
-        self.title_lb.setProperty("role", "h3")
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
@@ -311,77 +385,13 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
             images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.delete_b.setSizePolicy(self.button_size)
-        self.delete_b.clicked.connect(self.delete_shelf)
 
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_layout.addWidget(self.title_lb, 0, 0, 1, 2)
-        self.main_layout.addWidget(self.cover_lb, 1, 0, 8, 1)
-        self.main_layout.addWidget(self.total_books, 1, 1)
-        self.main_layout.addWidget(self.unread_books_lb, 2, 1)
-        self.main_layout.addWidget(self.on_reading_books_lb, 3, 1)
-        self.main_layout.addWidget(self.finished_books_lb, 4, 1)
-        self.main_layout.addWidget(self.view_b, 5, 1)
-        self.main_layout.addWidget(self.edit_b, 6, 1)
-        self.main_layout.addWidget(self.delete_b, 7, 1)
-
-        # The book creation information
-
-    def delete_shelf(self):
-        self.logger.debug(f"Attempting to delete shelf (ID={self.shelf.id})...")
-        self.books_handler.delete_shelf(self.shelf.str_id())
-
-        if self.pages_widgets_handler:
-            try:
-                self.qt_signals_handler.edit_progress_msg.emit(
-                    self.langs_handler.tr("shelf.msg.shelf_deletion")
-                )
-                self.pages_widgets_handler.delete_widget(self)
-                self.qt_signals_handler.edit_progress_msg.emit(" ")
-
-            except my_exceptions.InvalidWidgetIndexError:
-                self.logger.exception("Unable to delete shelf !")
-                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
-                self.qt_signals_handler.edit_progress_msg.emit(" ")
-
-        else:
-            self.logger.error(
-                f"Unable to delete a shelf widget with ShelfID={self.shelf.id}: No valid widgets handler found !"
-            )
-
-
-class DefaultShelfWidget(ShelfWidget):
-    def __init__(
-        self,
-        shelf: book_sys.Shelf,
-        books_handler: book_sys.BooksHandler,
-        res_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        langs_handler,
-    ):
-        super().__init__(
-            shelf,
-            books_handler,
-            res_handler,
-            qt_signals_handler,
-            langs_handler,
-        )
-        self.edit_b.hide()
-        self.delete_b.hide()
-        self.main_layout.removeWidget(self.cover_lb)
-        self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
-
-
-class ShelfNameWidget(QtWidgets.QWidget):
-    def __init__(
-        self,
-        parent: QtWidgets.QWidget | None,
-        label_text: str,
-        label_name: str = "name_lb",
-    ):
-        super().__init__(parent)
-
-        self.main_lyt = QtWidgets.QVBoxLayout()
-        self.setLayout(self.main_lyt)
-        self.label = QtWidgets.QLabel(label_text)
-        self.label.setObjectName(label_name)
-        self.main_lyt.addWidget(self.label)
+        self.main_layout.addWidget(self.cover_lb, 0, 0, 8, 1)
+        self.main_layout.addWidget(self.total_books, 0, 1)
+        self.main_layout.addWidget(self.unread_books_lb, 1, 1)
+        self.main_layout.addWidget(self.on_reading_books_lb, 2, 1)
+        self.main_layout.addWidget(self.finished_books_lb, 3, 1)
+        self.main_layout.addWidget(self.view_b, 4, 1)
+        self.main_layout.addWidget(self.edit_b, 5, 1)
+        self.main_layout.addWidget(self.delete_b, 6, 1)
