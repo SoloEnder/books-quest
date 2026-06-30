@@ -54,6 +54,8 @@
       "shelfs_selection": "Etagères : "
     },
     "msg": {
+      "book_not_found": "Livre introuvable !",
+      "invalid_title": "Titre de livre non valide !",
       "book_addition_success": "Livre ajouté !",
       "book_edition_success": "Livre modifié !",
       "book_already_exists": "Un ou plusieurs livres avec ce noms ont été trouvés",
@@ -67,6 +69,7 @@
       "default_shelf_title": "Tout les livres"
     },
     "msg": {
+      "invalid_title": "Titre d'étagère non valide",
       "books_selection": "Livres à ajouter à cette étagère : ",
       "shelf_already_exists": "Une ou plusieurs étagères avec ce nom ont été trouvées",
       "shelf_deletion": "Suppression de /f:<count>/f étagères...",

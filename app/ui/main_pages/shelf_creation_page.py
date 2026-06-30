@@ -305,7 +305,7 @@ class ShelfCreationPage(base_page.BasePage):
             or shelf_title.lower() == self.books_handler.default_shelf.title.lower()
         ):  # type: ignore
             self.qt_signals_handler.notify_sg.emit(
-                "error", "", "Nom d'étagère invalide", ""
+                "error", "", self.langs_handler.tr("shelf.msg.invalid_title"), ""
             )
             return
 

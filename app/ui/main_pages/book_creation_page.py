@@ -423,7 +423,7 @@ class BookCreationPage(base_page.BasePage):
 
         if not books_infos.get("title"):
             self.qt_signals_handler.notify_sg.emit(
-                "error", "", "Nom de livre invalide", ""
+                "error", "", self.langs_handler.tr("book.msg.invalid_title"), ""
             )
             return
 

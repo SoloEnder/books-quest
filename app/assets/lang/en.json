@@ -55,10 +55,12 @@
       "shelfs_selection": "Bookshelves : "
     },
     "msg": {
-      "book_addition_success": "Livre ajouté !",
-      "book_edition_success": "Livre modifié !",
+      "invalid_title": "Book title is not valid !",
+      "book_addition_success": "Book added !",
+      "book_edition_success": "Book updated !",
       "book_already_exists": "Found one or several books with this name",
-      "book_deletion": "Deleting /f:<count>/f book(s)..."
+      "book_deletion": "Deleting /f:<count>/f book(s)...",
+      "book_not_found": "Book not found !"
     }
   },
   "shelf": {
@@ -67,11 +69,11 @@
       "default_shelf_title": "All Books"
     },
     "msg": {
+      "invalid_title": "Shelf title is not valid",
       "books_selection": "Book to add to this shelf : ",
       "shelf_already_exists": "Found one or several shelves with this name",
       "shelf_deletion": "Deleting /f:<count>/f shelves...",
       "empty_shelf": "There are no books here... \nWhy not add some ?",
-      "book_deletion_error": "Book not found !",
       "creation_success": "Shelf added !",
       "edition_success": "Shelf infos updated !"
     },

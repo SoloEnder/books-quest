@@ -287,7 +287,10 @@ class BookWidget(widgets_pagination_view.InPageWidget):
                     f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books_handler}) !"
                 )
                 self.qt_signals_handler.notify_sg.emit(
-                    "error", "", "Livre introuvable !", ""
+                    "error",
+                    "",
+                    self.langs_handler.tr("book.msg.book_not_found"),
+                    "",
                 )
 
             self.pages_widgets_handler.delete_widget(self)
