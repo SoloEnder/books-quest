@@ -107,11 +107,6 @@ class ShelfDetailsPage(base_page.BasePage):
                 self.langs_handler,
                 self.qt_signals_handler,
             )
-            base_displayed_titles.append(book_widget.book_title_lb.text())
-            book_widget.book_title_lb.setText(
-                utils_funcs.set_displayed_names(base_displayed_titles)[index]
-            )
-            self.books_widgets.append(book_widget)
             books_widgets.append(book_widget)
 
         return books_widgets
@@ -220,8 +215,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.book_title_lb = QtWidgets.QLabel(
-            self.book.title
-            + (f" ({str(self.book.title_suffix)})" if self.book.title_suffix else "")
+            utils_funcs.add_title_suffix(book.title, title_suffix=book.title_suffix)
         )
         self.book_title_lb.setObjectName("book_title_lb")
         self.book_authors_lb = QtWidgets.QLabel(

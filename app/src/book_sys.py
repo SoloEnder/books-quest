@@ -36,7 +36,7 @@ class InvalidUUIDError(Exception):
 class Shelf:
     def __init__(self, **kwargs):
         self.title = kwargs["title"]
-        self.name_suffix = kwargs.get("title_suffix")
+        self.title_suffix = kwargs.get("title_suffix")
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
@@ -91,7 +91,7 @@ class Shelf:
     def get_infos(self) -> dict:
         return {
             "title": self.title,
-            "name_suffix": self.name_suffix,
+            "title_suffix": self.title_suffix,
             "id": self.id,
             "books": self._books,
             "cover_path": self.cover_path,

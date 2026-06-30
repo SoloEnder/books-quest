@@ -10,7 +10,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools
+from app.utils import images_tools, utils_funcs
 
 
 class EditionModeNotEnabled(Exception):
@@ -180,7 +180,9 @@ class BookCreationPage(base_page.BasePage):
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for shelf in self.books_handler.shelves.values():
-            shelf_cb = QtWidgets.QCheckBox(shelf.title)
+            shelf_cb = QtWidgets.QCheckBox(
+                utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
+            )
             self.shelfs_selection_cbs[shelf.str_id()] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
