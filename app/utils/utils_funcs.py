@@ -44,7 +44,7 @@ def format_displayed_title(
     for key, value in kwargs.items():
         if not value:
             value = ""
-        formatted_title.replace(f"<{key}>", value)
+        formatted_title = formatted_title.replace(f"<{key}>", value)
     return formatted_title
 
 
