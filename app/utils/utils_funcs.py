@@ -32,7 +32,7 @@ def add_title_suffix(
     -------
     str: the result text
     """
-    return f"{title} ({title_suffix})"
+    return f"{title} ({title_suffix})" if title_suffix else title
 
 
 def load_and_set_ss(
