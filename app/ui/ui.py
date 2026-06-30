@@ -34,9 +34,6 @@ class UI(QtWidgets.QMainWindow):
             self, self.langs_handler
         )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
-        self.books_handler.edit_default_shelf(
-            title=self.langs_handler.tr("shelf.infos.default_shelf_title")
-        )
         self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
@@ -54,6 +51,9 @@ class UI(QtWidgets.QMainWindow):
         self.logger.info("Drawing UI...")
         self.langs_handler.set_current_language(
             self.settings_handler.get_setting_value("general.appearance.language")
+        )
+        self.books_handler.edit_default_shelf(
+            title=self.langs_handler.tr("shelf.infos.default_shelf_title")
         )
         self.logger.info("Refreshing UI...")
 
