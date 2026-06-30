@@ -60,6 +60,7 @@ class AppSystem:
                 f"assets.langs.{self.settings_handler.get_setting_value('general.appearance.language')}"
             )
         )
+        self.logger.info("Erasing files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
 
     def load_and_apply_settings(self):
@@ -118,7 +119,6 @@ class AppSystem:
         self.books_handler.save_shelfs(
             self.res_handler.get_res("data.bookshelves.bookshelves")
         )
-        self.logger.info("Deleting files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         self.settings_handler.save_settings(
             self.res_handler.get_res("data.settings.base"),
@@ -131,9 +131,15 @@ class AppSystem:
 
     def empty_tmp_folder(self, dir_path):
         """
-        Erase all the files in the tmp directory
+        Create the tmp directory if it does not exists, then erase its content
         """
         tmp_path = pathlib.Path(dir_path)
+
+        if not tmp_path.exists():
+            self.logger.warning(
+                "Temporary directory not found, attempting to make it..."
+            )
+            tmp_path.mkdir()
 
         for element in tmp_path.iterdir():
             try:

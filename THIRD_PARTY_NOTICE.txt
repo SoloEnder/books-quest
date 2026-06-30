@@ -12,3 +12,4 @@ This project may include third-party software and resources, including:
 - "lucide" icons pack licensed under ISC
 
 This project was compiled using "pyinstaller" version 6.21.0 and "pyinstaller-hook-contrib" version 2026.6
+Licenses details can be found inside `licenses` folder.

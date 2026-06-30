@@ -291,13 +291,26 @@ class ShelfCreationPage(base_page.BasePage):
 
         self.main_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
 
-    def check_title_existence(self, title):
-        return self.books_handler.get_shelfs(title=(title, True, False))
+    def get_matches(self, title) -> list:
+        """
+        Get shelves which have the same title as this shelf in the books handler.
+        In edition mode, this method checks if the title has been modified before searching for matches
+        """
+        matches = []
+
+        if self.current_mode == "creation":
+            matches = self.books_handler.get_shelfs(title=(title, True, False))
+
+        elif self.current_mode == "edition" and self.shelf:
+            if self.shelf.title != title:
+                matches = self.books_handler.get_shelfs(title=(title, True, False))
+
+        return matches
 
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
-        shelf_title = self.title_e.text()
+        shelf_title = self.title_e.text().strip()
         title_suffix = None
 
         if (
@@ -305,32 +318,23 @@ class ShelfCreationPage(base_page.BasePage):
             or shelf_title.lower() == self.books_handler.default_shelf.title.lower()
         ):  # type: ignore
             self.qt_signals_handler.notify_sg.emit(
-                "error", "", "Nom d'étagère invalide", ""
+                "error", "", self.langs_handler.tr("shelf.msg.invalid_title"), ""
             )
             return
 
-        if self.current_mode == "creation":
-            try:
-                names_matches = self.check_title_existence(shelf_title)
+        matches = self.get_matches(shelf_title)
 
-            except AttributeError:
-                self.logger.exception(
-                    f"Unable to check {shelf_title=} existence for on creating shelf !"
-                )
-                return
+        if matches:
+            self.existence_msgbox.setInformativeText(
+                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({len(matches)})'"
+            )
+            self.existence_msgbox.exec()
+
+            if self.existence_msgbox.clickedButton() == self.rename_b:
+                title_suffix = len(matches)
 
             else:
-                if names_matches:
-                    self.existence_msgbox.setInformativeText(
-                        f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(names_matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({len(names_matches)})'"
-                    )
-                    self.existence_msgbox.exec()
-
-                    if self.existence_msgbox.clickedButton() == self.rename_b:
-                        title_suffix = len(names_matches)
-
-                    else:
-                        return
+                return
 
         books: book_sys.BooksList = []
 

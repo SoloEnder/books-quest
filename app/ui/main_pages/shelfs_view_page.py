@@ -239,8 +239,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
             self.displayed_cover = self.default_cover
 
         self.title_lb = QtWidgets.QLabel(
-            self.shelf.title
-            + (f" ({self.shelf.name_suffix})" if self.shelf.name_suffix else "")
+            utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
         )
 
         self.title_lb.setWordWrap(True)

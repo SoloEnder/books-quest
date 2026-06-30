@@ -36,7 +36,7 @@ class InvalidUUIDError(Exception):
 class Shelf:
     def __init__(self, **kwargs):
         self.title = kwargs["title"]
-        self.name_suffix = kwargs.get("title_suffix")
+        self.title_suffix = kwargs.get("title_suffix")
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
@@ -91,7 +91,7 @@ class Shelf:
     def get_infos(self) -> dict:
         return {
             "title": self.title,
-            "name_suffix": self.name_suffix,
+            "title_suffix": self.title_suffix,
             "id": self.id,
             "books": self._books,
             "cover_path": self.cover_path,
@@ -132,6 +132,7 @@ class Book:
         return {
             "id": self.id,
             "title": self.title,
+            "title_suffix": self.title_suffix,
             "authors": self.authors,
             "cover_path": self.cover_path,
             "edition": self.edition,
@@ -335,12 +336,14 @@ class BooksHandler:
             )
 
         else:
+            new_book.title_suffix = self.books[new_book.str_id()].title_suffix
             self.books[new_book.str_id()] = new_book
 
-    def edit_shelf(self, shelf_id: str, new_shelf):
+    def edit_shelf(self, shelf_id: str, new_shelf: Shelf):
 
         if shelf_id in self.shelves.keys():
             new_shelf.id = uuid.UUID(shelf_id)
+            new_shelf.title_suffix = self.shelves[shelf_id].title_suffix
             self.shelves[shelf_id] = new_shelf
 
         else:
