@@ -415,7 +415,7 @@ class BookCreationPage(base_page.BasePage):
 
                 else:
                     if text:
-                        books_infos[key] = text
+                        books_infos[key] = text.strip()
 
             elif isinstance(w, QtWidgets.QTextEdit):
                 text = w.toPlainText()

@@ -297,7 +297,7 @@ class ShelfCreationPage(base_page.BasePage):
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
-        shelf_title = self.title_e.text()
+        shelf_title = self.title_e.text().strip()
         title_suffix = None
 
         if (
