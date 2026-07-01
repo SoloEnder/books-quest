@@ -75,7 +75,7 @@ class Shelf:
         self.title = kwargs["title"]
         self.title_suffix = kwargs.get("title_suffix")
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
-        self._child_shelves: ShelvesList = kwargs.get("child_shelves", [])
+        self._childrens_shelves: ShelvesList = kwargs.get("child_shelves", [])
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
@@ -95,8 +95,8 @@ class Shelf:
         - shelf (Shelf): the shelf to define as child
         """
         if shelf not in self._parent_shelves:
-            if self not in shelf._child_shelves:
-                self._child_shelves.append(shelf)
+            if self not in shelf._childrens_shelves:
+                self._childrens_shelves.append(shelf)
                 shelf._parent_shelves.append(self)
 
             else:
@@ -113,8 +113,8 @@ class Shelf:
         ----------
         shelf: the child shelf to remove
         """
-        if shelf in self._child_shelves:
-            self._child_shelves.remove(shelf)
+        if shelf in self._childrens_shelves:
+            self._childrens_shelves.remove(shelf)
             shelf._parent_shelves.remove(self)
 
         else:
@@ -173,6 +173,8 @@ class Shelf:
             "title": self.title,
             "title_suffix": self.title_suffix,
             "id": self.id,
+            "child_shelves": self._childrens_shelves,
+            "parents_shelves": self._parent_shelves,
             "books": self._books,
             "cover_path": self.cover_path,
         }
