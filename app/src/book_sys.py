@@ -281,6 +281,7 @@ BooksDict = dict[str, Book]
 
 ShelvesList = list[Shelf]
 ShelvesDict = dict[str, Shelf]
+IDsList = list[str] | tuple[str, ...] | set[str]
 
 
 class BooksHandler:
@@ -587,7 +588,10 @@ class BooksHandler:
             shelf_data = shelf.get_infos()
             shelf_data["id"] = str(shelf_data["id"])
             shelf_data["books_ids"] = []
-
+            shelf_data["childrens_shelves_ids"] = [
+                shelf.str_id for shelf in shelf_data["childrens_shelves"]
+            ]
+            del shelf_data["childrens_shelves"]
             for book in shelf_data["books"]:
                 shelf_data["books_ids"].append(book.str_id())
 
@@ -610,7 +614,13 @@ class BooksHandler:
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
+                childrens_shelves = list(
+                    self.get_shelves_with_id(
+                        shelf_data.get("childrens_shelves")
+                    ).values()
+                )
                 shelf_data["books"] = books
+                shelf_data["childrens_shelves"] = childrens_shelves
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
 
@@ -632,6 +642,21 @@ class BooksHandler:
             books_objs[book_id] = book_obj
 
         return books_objs
+
+    def get_shelves_with_id(self, ids: IDsList) -> ShelvesDict:
+        shelves = {}
+
+        for id in ids:
+            try:
+                shelf = self.shelves[id]
+
+            except KeyError:
+                raise my_exceptions.BooksShelfNotFoundError(id)
+
+            else:
+                shelves[id] = shelf
+
+        return shelves
 
 
 class Session:
