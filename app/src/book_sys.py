@@ -87,7 +87,12 @@ class Shelf:
                 book._parents_shelves.append(self)
 
         for shelf in self._parent_shelves:
-            shelf.add_child_shelf(self)
+            if not shelf.has_shelf(self):
+                shelf._children_shelves.append(self)
+
+        for shelf in self._children_shelves:
+            if not shelf.has_parent_shelf(self):
+                shelf._parent_shelves.append(self)
 
     def add_child_shelf(self, shelf: Shelf):
         """
@@ -133,6 +138,16 @@ class Shelf:
     def has_shelf(self, shelf: Shelf) -> bool:
         "Checks if `shelf` is a child of this shelf. Returns a boolean value (yes (True)/no (False))"
         if shelf in self._children_shelves:
+            return True
+
+        else:
+            return False
+
+    def has_parent_shelf(self, parent: Shelf) -> bool:
+        """
+        Cheks if `parent` is a parent of this shelf
+        """
+        if parent in self._parent_shelves:
             return True
 
         else:
