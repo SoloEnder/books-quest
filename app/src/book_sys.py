@@ -619,7 +619,9 @@ class BooksHandler:
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
                 parent_shelves = list(
-                    self.get_shelves_with_id(shelf_data.get("parents_shelves")).values()
+                    self.get_shelves_with_id(
+                        shelf_data.get("parents_shelves", []),
+                    ).values()
                 )
                 shelf_data["books"] = books
                 shelf_data["parents_shelves"] = parent_shelves
