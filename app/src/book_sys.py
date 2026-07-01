@@ -75,7 +75,7 @@ class Shelf:
         self.title = kwargs["title"]
         self.title_suffix = kwargs.get("title_suffix")
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
-        self._childrens_shelves: ShelvesList = kwargs.get("child_shelves", [])
+        self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
@@ -95,8 +95,8 @@ class Shelf:
         - shelf (Shelf): the shelf to define as child
         """
         if shelf not in self._parent_shelves:
-            if self not in shelf._childrens_shelves:
-                self._childrens_shelves.append(shelf)
+            if self not in shelf._children_shelves:
+                self._children_shelves.append(shelf)
                 shelf._parent_shelves.append(self)
 
             else:
@@ -113,8 +113,8 @@ class Shelf:
         ----------
         shelf: the child shelf to remove
         """
-        if shelf in self._childrens_shelves:
-            self._childrens_shelves.remove(shelf)
+        if shelf in self._children_shelves:
+            self._children_shelves.remove(shelf)
             shelf._parent_shelves.remove(self)
 
         else:
@@ -129,7 +129,7 @@ class Shelf:
 
     def has_shelf(self, shelf: Shelf) -> bool:
         "Checks if `shelf` is a child of this shelf. Returns a boolean value (yes (True)/no (False))"
-        if shelf in self._childrens_shelves:
+        if shelf in self._children_shelves:
             return True
 
         else:
@@ -181,7 +181,7 @@ class Shelf:
             "title": self.title,
             "title_suffix": self.title_suffix,
             "id": self.id,
-            "child_shelves": self._childrens_shelves,
+            "children_shelves": self._children_shelves,
             "parents_shelves": self._parent_shelves,
             "books": self._books,
             "cover_path": self.cover_path,
@@ -588,10 +588,11 @@ class BooksHandler:
             shelf_data = shelf.get_infos()
             shelf_data["id"] = str(shelf_data["id"])
             shelf_data["books_ids"] = []
-            shelf_data["childrens_shelves_ids"] = [
-                shelf.str_id for shelf in shelf_data["childrens_shelves"]
+            shelf_data["parents_shelves_ids"] = [
+                shelf.str_id for shelf in shelf_data["parents_shelves"]
             ]
-            del shelf_data["childrens_shelves"]
+            del shelf_data["children_shelves"]
+            del shelf_data["parents_shelves"]
             for book in shelf_data["books"]:
                 shelf_data["books_ids"].append(book.str_id())
 
@@ -614,13 +615,11 @@ class BooksHandler:
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
-                childrens_shelves = list(
-                    self.get_shelves_with_id(
-                        shelf_data.get("childrens_shelves")
-                    ).values()
+                parent_shelves = list(
+                    self.get_shelves_with_id(shelf_data.get("parents_shelves")).values()
                 )
                 shelf_data["books"] = books
-                shelf_data["childrens_shelves"] = childrens_shelves
+                shelf_data["parents_shelves"] = parent_shelves
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
 
