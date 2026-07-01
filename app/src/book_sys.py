@@ -127,6 +127,14 @@ class Shelf:
         for parent_shelf in self._parent_shelves.copy():
             parent_shelf.remove_child_shelf(self)
 
+    def has_shelf(self, shelf: Shelf) -> bool:
+        "Checks if `shelf` is a child of this shelf. Returns a boolean value (yes (True)/no (False))"
+        if shelf in self._childrens_shelves:
+            return True
+
+        else:
+            return False
+
     def add_book(self, book: Book):
         """
         Defines 'book' as a book of this shelf
