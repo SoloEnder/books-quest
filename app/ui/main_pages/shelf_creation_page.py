@@ -241,26 +241,26 @@ class ShelfCreationPage(base_page.BasePage):
 
     def draw_children_tree(self, books_dict: book_sys.BooksDict):
 
-        if hasattr(self, "books_tree"):
-            self.main_lyt.removeWidget(self.books_tree)
-            self.books_tree.setParent(None)
-            self.books_tree.deleteLater()
+        if hasattr(self, "children_tree"):
+            self.main_lyt.removeWidget(self.children_tree)
+            self.children_tree.setParent(None)
+            self.children_tree.deleteLater()
 
-        if hasattr(self, "books_tree_model"):
-            self.books_tree_model.setParent(None)
-            self.books_tree_model.deleteLater()
+        if hasattr(self, "children_tree_model"):
+            self.children_tree_model.setParent(None)
+            self.children_tree_model.deleteLater()
 
-        self.books_tree = QtWidgets.QTreeView()
-        self.books_tree.setMinimumHeight(400)
-        self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels(
+        self.children_tree = QtWidgets.QTreeView()
+        self.children_tree.setMinimumHeight(400)
+        self.children_tree_model = QtGui.QStandardItemModel()
+        self.children_tree_model.setHorizontalHeaderLabels(
             (
                 self.langs_handler.tr("shared.infos.title"),
                 self.langs_handler.tr("shared.infos.author"),
                 self.langs_handler.tr("shared.infos.edition"),
             )
         )
-        self.books_tree.setModel(self.books_tree_model)
+        self.children_tree.setModel(self.children_tree_model)
         self.books_title_items = []
 
         # Books items
@@ -277,19 +277,19 @@ class ShelfCreationPage(base_page.BasePage):
             book_edition_item = QtGui.QStandardItem(
                 book.edition if book.edition else "Unknown"
             )
-            self.books_tree_model.appendRow(
+            self.children_tree_model.appendRow(
                 (book_title_item, book_author_item, book_edition_item)
             )
             self.books_title_items.append(book_title_item)
 
-        self.books_tree.setColumnWidth(0, 150)
-        self.books_tree.setColumnWidth(1, 150)
-        self.books_tree.setColumnWidth(2, 150)
-        self.books_tree.setEditTriggers(
+        self.children_tree.setColumnWidth(0, 150)
+        self.children_tree.setColumnWidth(1, 150)
+        self.children_tree.setColumnWidth(2, 150)
+        self.children_tree.setEditTriggers(
             QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
         )
 
-        self.main_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
+        self.main_lyt.addWidget(self.children_tree, 6, 0, 1, 2)
 
     def get_matches(self, title) -> list:
         """
