@@ -284,7 +284,7 @@ class DefaultShelfWidget(ShelfWidget):
         self.sub_widget.delete_b.setVisible(False)
 
 
-class SubShelfWidget(widgets_pagination_view.InPageWidget):
+class SubShelfWidget(QtWidgets.QWidget):
     def __init__(
         self,
         shelf: book_sys.Shelf,
@@ -293,7 +293,7 @@ class SubShelfWidget(widgets_pagination_view.InPageWidget):
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         langs_handler,
     ):
-        super().__init__(None, None)
+        super().__init__(None)
         self.shelf = shelf
         self.books_handler = books_handler
         self.res_handler = res_handler
