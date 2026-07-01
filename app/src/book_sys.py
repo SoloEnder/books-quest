@@ -86,6 +86,9 @@ class Shelf:
             if not book.has_parent(self):
                 book._parents_shelves.append(self)
 
+        for shelf in self._parent_shelves:
+            shelf.add_child_shelf(self)
+
     def add_child_shelf(self, shelf: Shelf):
         """
         Define `shelf` as a child of this shelf
