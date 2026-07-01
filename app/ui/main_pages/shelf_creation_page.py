@@ -108,7 +108,7 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
-        self.draw_books_tree(self.books_handler.books)
+        self.draw_children_tree(self.books_handler.books)
 
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton(
@@ -239,7 +239,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
-    def draw_books_tree(self, books_dict: book_sys.BooksDict):
+    def draw_children_tree(self, books_dict: book_sys.BooksDict):
 
         if hasattr(self, "books_tree"):
             self.main_lyt.removeWidget(self.books_tree)
@@ -391,10 +391,10 @@ class ShelfCreationPage(base_page.BasePage):
             for result in query_results:
                 matches[result.id] = result
 
-            self.draw_books_tree(matches)
+            self.draw_children_tree(matches)
 
         else:
-            self.draw_books_tree(self.books_handler.books)
+            self.draw_children_tree(self.books_handler.books)
 
     def create_shelf(self):
         shelf_infos = self.get_shelf_infos()
