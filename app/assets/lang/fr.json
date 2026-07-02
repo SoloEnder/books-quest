@@ -38,6 +38,7 @@
       "indev_warn": "Ce programme est en cours de développement ! Si vous expérimentez des bugs ou voulez proposer des fonctionnalitées, veuillez nous en informer <a href='https://github.com/SoloEnder/books-quest/issues'>ici</a>"
     },
     "infos": {
+      "type": "Type",
       "status": "Status",
       "title": "Titre : ",
       "author": "Auteur : ",
@@ -48,6 +49,7 @@
   },
   "book": {
     "infos": {
+      "object_type": "Livre",
       "alr_read_pages": "Pages lues : ",
       "starting_read_date": "Lecture commencé le : ",
       "end_read_date": "Lecture terminée le : ",
@@ -65,6 +67,7 @@
   },
   "shelf": {
     "infos": {
+      "object_type": "Etagère",
       "title": "Title : ",
       "default_shelf_title": "Tout les livres"
     },
