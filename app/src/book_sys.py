@@ -56,6 +56,18 @@ class NotAChildShelfError(Exception):
         return self.msg
 
 
+class NotAParentShelfError(Exception):
+    def __init__(self, shelf_id: uuid.UUID, parent_id: uuid.UUID):
+        self.shelf_id = shelf_id
+        self.parent_id = parent_id
+        self.msg = (
+            f"Shelf (ID={self.shelf_id} is not a parent of Shelf {self.parent_id})"
+        )
+
+    def __str__(self):
+        return self.msg
+
+
 class InvalidUUIDError(Exception):
     """
     Exception usually raised when the format of a `Book` or `Shelf` UUID is not valid
@@ -128,12 +140,29 @@ class Shelf:
         else:
             raise NotAChildShelfError(shelf.id, self.id)
 
-    def remove_from_parent(self):
+    def remove_all_parents(self):
         """
         Removes this shelf from all its parents
         """
         for parent_shelf in self._parent_shelves.copy():
             parent_shelf.remove_child_shelf(self)
+
+    def remove_all_child(self):
+        """
+        Removes this shelf from all its children
+        """
+        for child in self._children_shelves.copy():
+            child.remove_parent(self)
+
+    def remove_parent(self, parent: Shelf):
+        """
+        Removes `parent` from this shelf
+        """
+        if parent in self._parent_shelves:
+            parent.remove_child_shelf(self)
+
+        else:
+            raise NotAParentShelfError(self.id, parent.id)
 
     def has_shelf(self, shelf: Shelf) -> bool:
         "Checks if `shelf` is a child of this shelf. Returns a boolean value (yes (True)/no (False))"
@@ -431,6 +460,8 @@ class BooksHandler:
                 self._delete_cover(shelf.cover_path)
 
             shelf.remove_all_books()
+            shelf.remove_all_parents()
+            shelf.remove_all_child()
             del self.shelves[id]
 
         else:
