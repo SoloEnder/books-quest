@@ -607,7 +607,7 @@ class BooksHandler:
             shelf_data["id"] = str(shelf_data["id"])
             shelf_data["books_ids"] = []
             shelf_data["parents_shelves_ids"] = [
-                shelf.str_id for shelf in shelf_data["parents_shelves"]
+                shelf.str_id() for shelf in shelf_data["parents_shelves"]
             ]
             del shelf_data["children_shelves"]
             del shelf_data["parents_shelves"]
