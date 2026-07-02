@@ -207,8 +207,8 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             page_obj = self.pages[page_name]
             self.setCurrentWidget(page_obj)
 
-            self.history.insert(0, page_name)
             self.current_page_infos = (page_name, page_obj, page_args)
+            self.history.insert(0, self.current_page_infos)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
@@ -218,9 +218,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     def close_page(self):
 
         if len(self.history) > 1:
-            self.switch_page(
-                self.history[1], True, self.pages[self.history[1]].variables_kw
-            )
+            self.switch_page(self.history[1][0], True, self.history[1][2])
             del self.history[1]
             del self.history[0]
 
@@ -236,7 +234,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         #         )
 
     def refresh(self, page_name, page_args):
-        self.logger.debug(f"Pages switch history={self.history}")
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
 
         if page_name == "SETTINGS_PAGE":
