@@ -160,14 +160,14 @@ class ShelfDetailsPage(base_page.BasePage):
             self.qt_signals_handler.edit_progress_msg.emit(
                 self.langs_handler.tr("shared.msg.search_in_progress")
             )
-            books_matches = self.books_handler.get_books(
-                title=(given_input, False, False)
+            books_matches = self.books_handler.get_obj(
+                self.shelf._books, title=(given_input, False, False)
             )
-            shelves_matches = self.books_handler.get_shelfs(
-                title=(given_input, False, False)
+            shelves_matches = self.books_handler.get_obj(
+                self.shelf._children_shelves, title=(given_input, False, False)
             )
             self.logger.info(
-                f"Found {len(books_matches)} books and {len(shelves_matches)} which matches with the query"
+                f"Found {len(books_matches)} books and {len(shelves_matches)} shelves which matches with the query"
             )
 
             if books_matches or shelves_matches:
