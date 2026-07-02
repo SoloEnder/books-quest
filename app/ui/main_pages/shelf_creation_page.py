@@ -396,13 +396,15 @@ class ShelfCreationPage(base_page.BasePage):
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(final_img_path)
 
-        self.logger.debug(
-            f"On creation shelf has {len(child_shelves)} children shelves"
-        )
+        parents_shelves = []
+        if self.current_mode == "edition":
+            parents_shelves = self.shelf._parent_shelves
+
         return {
             "title": shelf_title,
             "title_suffix": title_suffix,
             "books": books,
+            "parents_shelves": parents_shelves,
             "children_shelves": child_shelves,
             "id": id,
             "cover_path": self.current_shelf_cover
