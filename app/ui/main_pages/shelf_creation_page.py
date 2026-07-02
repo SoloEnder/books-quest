@@ -222,6 +222,9 @@ class ShelfCreationPage(base_page.BasePage):
                 if self.shelf.has_book(title_item.data()):
                     title_item.setCheckState(QtCore.Qt.CheckState.Checked)
 
+                if self.shelf.has_shelf(title_item.data()):
+                    title_item.setCheckState(QtCore.Qt.CheckState.Checked)
+
     def set_shelf_cover(self):
         infos = images_tools.select_image()
         self.logger.debug(f"Shelf cover infos={infos}")
