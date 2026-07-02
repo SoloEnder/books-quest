@@ -633,13 +633,13 @@ class BooksHandler:
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
-                parent_shelves = list(
+                parents_shelves = list(
                     self.get_shelves_with_id(
-                        shelf_data.get("parents_shelves", []),
+                        shelf_data.get("parents_shelves_ids", []),
                     ).values()
                 )
                 shelf_data["books"] = books
-                shelf_data["parents_shelves"] = parent_shelves
+                shelf_data["parents_shelves"] = parents_shelves
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
 
