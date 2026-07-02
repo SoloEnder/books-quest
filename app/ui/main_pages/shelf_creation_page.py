@@ -65,7 +65,7 @@ class ShelfCreationPage(base_page.BasePage):
             )
         if self._current_mode == "edition":
             if kwargs.get("shelf"):
-                self._shelf: book_sys.Shelf | None = kwargs.get("shelf")
+                self._shelf: book_sys.Shelf = kwargs["shelf"]
 
             else:
                 self.logger.error(
@@ -272,6 +272,9 @@ class ShelfCreationPage(base_page.BasePage):
         for object in objects.values():
             if self.current_mode == "edition":
                 if object == self.shelf:
+                    continue
+
+                if object in self.shelf._parent_shelves:
                     continue
 
             object_type_item = QtGui.QStandardItem("N/A")
