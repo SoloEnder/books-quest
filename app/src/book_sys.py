@@ -629,19 +629,34 @@ class BooksHandler:
         data: list = self.jfm.read_json(filepath)
 
         if data:
+            deferred_adoption_data: dict[str, list[str]] = {}
             for shelf_data in data:
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
-                parents_shelves = list(
-                    self.get_shelves_with_id(
-                        shelf_data.get("parents_shelves_ids", []),
-                    ).values()
-                )
                 shelf_data["books"] = books
-                shelf_data["parents_shelves"] = parents_shelves
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
+                deferred_adoption_data[str(shelf_data["id"])] = shelf_data[
+                    "parents_shelves_ids"
+                ]
+            self.defered_shelf_adoption(deferred_adoption_data)
+
+    def defered_shelf_adoption(self, data: dict[str, list[str]]):
+        """
+        This method define shelves as child of others.
+        It is called 'defered' because when loading shelves data, some shelves may needs parent that are not loaded yet.
+        So this methods is designed to set the parenting *after* every shelves are loaded.
+
+        Parameters
+        ----------
+        data (dict[str, list[str]]): the key of the dict is the shelf ID, and the list contain its parent IDs
+        """
+        for shelf_id, child_ids in data.items():
+            child_obj = list(self.get_shelves_with_id(child_ids).values())
+
+            for kid in child_obj:
+                self.shelves[shelf_id].add_child_shelf(kid)
 
     def convert_books_ids(self, books_ids: list | tuple):
         """
