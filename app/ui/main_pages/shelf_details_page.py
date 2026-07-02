@@ -9,7 +9,20 @@ from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
+from app.ui.main_pages.shelfs_view_page import ShelfWidget
 from app.utils import images_tools, my_exceptions, utils_funcs
+
+
+class UnknownChildrenError(Exception):
+    def __init__(self, children):
+        """
+        Exception usually raised when the type of one of the `Shelf` children is not supported
+        """
+        super().__init__()
+        self.msg = f"Unknown shelf children type : {type(children)}"
+
+    def __str__(self):
+        return self.msg
 
 
 class ShelfDetailsPage(base_page.BasePage):
@@ -86,37 +99,54 @@ class ShelfDetailsPage(base_page.BasePage):
             self.add_book_b, 1, 0, QtGui.Qt.AlignmentFlag.AlignCenter
         )
         # books widgets
-        self.generate_books_pages()
+        self.generate_widgets_pages()
 
         # Adding widgets to layout
         self.main_lyt.addWidget(self.search_le, 0, 0)
         self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
 
-    def create_books_widgets(self, books: book_sys.BooksList):
+    def create_children_widgets(
+        self, books: book_sys.BooksList, shelves: book_sys.ShelvesList
+    ):
         """
         Generate widget ('BookWidget') for every book ('book_sys.Book') in the books argument
         """
-        books_widgets = []
+        children_widgets = []
+        children_obj = []
+        children_obj.extend(shelves)
+        children_obj.extend(books)
+        for object in children_obj:
+            widget = None
+            if isinstance(object, book_sys.Book):
+                widget = BookWidget(
+                    object,
+                    self.books_handler,
+                    self.res_handler,
+                    self.langs_handler,
+                    self.qt_signals_handler,
+                )
 
-        for index, book in enumerate(books):
-            book_widget = BookWidget(
-                book,
-                self.books_handler,
-                self.res_handler,
-                self.langs_handler,
-                self.qt_signals_handler,
-            )
-            books_widgets.append(book_widget)
+            if isinstance(object, book_sys.Shelf):
+                widget = ShelfWidget(
+                    object,
+                    self.books_handler,
+                    self.res_handler,
+                    self.qt_signals_handler,
+                    self.langs_handler,
+                )
+            children_widgets.append(widget)
 
-        return books_widgets
+        return children_widgets
 
-    def generate_books_pages(self):
+    def generate_widgets_pages(self):
         """
         Generate and place the books widget into a pagination view
         """
 
-        self.books_widgets = self.create_books_widgets(list(self.shelf._books))
-        self.widgets_pagination_view_handler.widgets = self.books_widgets
+        self.children_widget = self.create_children_widgets(
+            self.shelf._books, self.shelf._children_shelves
+        )
+        self.widgets_pagination_view_handler.widgets = self.children_widget
 
     @QtCore.Slot(str)
     def search_books(self, given_input: str):
@@ -130,11 +160,20 @@ class ShelfDetailsPage(base_page.BasePage):
             self.qt_signals_handler.edit_progress_msg.emit(
                 self.langs_handler.tr("shared.msg.search_in_progress")
             )
-            matches = self.books_handler.get_books(title=(given_input, False, False))
-            self.logger.info(f"Found {len(matches)} books which matches with the query")
+            books_matches = self.books_handler.get_books(
+                title=(given_input, False, False)
+            )
+            shelves_matches = self.books_handler.get_shelfs(
+                title=(given_input, False, False)
+            )
+            self.logger.info(
+                f"Found {len(books_matches)} books and {len(shelves_matches)} which matches with the query"
+            )
 
-            if matches:
-                self.research_result_widgets = self.create_books_widgets(matches)
+            if books_matches or shelves_matches:
+                self.research_result_widgets = self.create_children_widgets(
+                    books_matches, shelves_matches
+                )
                 self.widgets_pagination_view_handler.widgets = (
                     self.research_result_widgets.copy()
                 )
@@ -151,8 +190,9 @@ class ShelfDetailsPage(base_page.BasePage):
                 if shiboken6.isValid(widget):
                     widget.deleteLater()
 
-            self.books_widgets = self.create_books_widgets(
-                list(self.books_handler.books.values())
+            self.books_widgets = self.create_children_widgets(
+                list(self.shelf._books),
+                list(self.shelf._children_shelves),
             )
             self.widgets_pagination_view_handler.widgets = self.books_widgets
 
