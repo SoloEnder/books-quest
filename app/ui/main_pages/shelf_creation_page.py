@@ -63,6 +63,17 @@ class ShelfCreationPage(base_page.BasePage):
             raise ValueError(
                 "No mode provided for Shelf Creation Page initialisation !"
             )
+        if self._current_mode == "edition":
+            if kwargs.get("shelf"):
+                self._shelf: book_sys.Shelf | None = kwargs.get("shelf")
+
+            else:
+                self.logger.error(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
+                raise KeyError(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
 
         # Shelf cover
         self.default_shelf_cover = self.res_handler.get_res(
@@ -90,6 +101,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.books_selection_lb = QtWidgets.QLabel(
             self.langs_handler.tr("shelf.actions.select_books")
         )
+        self.draw_children_tree(self.books_handler.shelves, self.books_handler.books)
         self.book_research_lb = QtWidgets.QLabel(
             self.langs_handler.tr("shared.actions.search.book")
         )
@@ -108,8 +120,6 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
-        self.draw_children_tree(self.books_handler.shelves, self.books_handler.books)
-
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.done")
@@ -118,6 +128,9 @@ class ShelfCreationPage(base_page.BasePage):
             images_tools.get_svg(self.res_handler.get_res("assets.icons.done"))
         )
         self.confirm_b.clicked.connect(self.create_shelf)
+
+        if self._current_mode == "edition":
+            self.edition_mode()
 
         # Add the widgets to the layout
         self.main_lyt.addWidget(
@@ -138,19 +151,6 @@ class ShelfCreationPage(base_page.BasePage):
             self.book_research_e, 5, 1, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_lyt.addWidget(self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-
-        if self._current_mode == "edition":
-            if kwargs.get("shelf"):
-                self._shelf: book_sys.Shelf | None = kwargs.get("shelf")
-                self.edition_mode()
-
-            else:
-                self.logger.error(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
-                raise KeyError(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
 
     @property
     def current_mode(self):
@@ -270,6 +270,10 @@ class ShelfCreationPage(base_page.BasePage):
         objects.update(books_dict)
 
         for object in objects.values():
+            if self.current_mode == "edition":
+                if object == self.shelf:
+                    continue
+
             object_type_item = QtGui.QStandardItem("N/A")
             title_item = QtGui.QStandardItem(
                 utils_funcs.add_title_suffix(object.title, object.title_suffix)
