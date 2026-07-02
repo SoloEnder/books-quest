@@ -13,6 +13,7 @@
         "book": "Rechercher des livres",
         "shelf": "Rechercher des étagères"
       },
+      "see_details": "Voir les détails",
       "close": "Fermer",
       "open_settings": "Ouvrir les paramètres",
       "book_creation": "Nouveau livre",

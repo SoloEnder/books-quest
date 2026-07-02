@@ -352,8 +352,9 @@ class SubShelfWidget(QtWidgets.QWidget):
 
         self.button_size = QtWidgets.QSizePolicy()
         self.view_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shelf.actions.view_books")
+            self.langs_handler.tr("shared.actions.see_details")
         )
+        self.view_b.setObjectName("see_details_b")
         self.view_b.setIcon(
             images_tools.get_svg(self.res_handler.get_res("assets.icons.view_books"))
         )

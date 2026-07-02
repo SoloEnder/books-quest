@@ -13,6 +13,7 @@
         "book": "Search for books",
         "shelf": "Search for shelves"
       },
+      "see_details": "Details",
       "close": "Close",
       "open_settings": "Open settings",
       "book_creation": "New book",
