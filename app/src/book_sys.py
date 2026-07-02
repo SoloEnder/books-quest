@@ -517,7 +517,7 @@ class BooksHandler:
                     return False
 
         filters = {}
-        books_matchs = []
+        matches = []
 
         for filter_name, filter_infos in kwargs.items():
             if filter_infos:
@@ -559,9 +559,9 @@ class BooksHandler:
 
             if len(filter_matchs) == len(filters):
                 if all(filter_matchs):
-                    books_matchs.append(obj)
+                    matches.append(obj)
 
-        return books_matchs
+        return matches
 
     def save_books(self, filepath: str):
         self.logger.debug(f"Saving books data in {filepath}...")
