@@ -18,7 +18,8 @@
       "open_settings": "Ouvrir les paramètres",
       "book_creation": "Nouveau livre",
       "shelf_creation": "Nouvelle étagère",
-      "go_to": "Aller à:"
+      "go_to": "Aller à:",
+      "restore_default_cover": "Restaurer la couverture par défaut"
     },
     "basic_error_notification": {
       "title": "Avertissement",

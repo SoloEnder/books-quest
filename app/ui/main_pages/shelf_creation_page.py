@@ -91,6 +91,13 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
+        self.restore_default_cover_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.restore_default_cover")
+        )
+        self.restore_default_cover_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.remove_img"))
+        )
+        self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
         # Shelf name input widget
         self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.title"))
@@ -139,18 +146,21 @@ class ShelfCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self.cover_selection_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.title_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_lyt.addWidget(self.title_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_lyt.addWidget(
-            self.books_selection_lb, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.restore_default_cover_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.main_lyt.addWidget(self.title_lb, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(self.title_e, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(
+            self.books_selection_lb, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_lyt.addWidget(
-            self.book_research_lb, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.book_research_lb, 6, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_lyt.addWidget(
-            self.book_research_e, 5, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.book_research_e, 6, 1, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(self.confirm_b, 8, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
     @property
     def current_mode(self):
@@ -242,6 +252,13 @@ class ShelfCreationPage(base_page.BasePage):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
+    def restore_default_cover(self):
+        """
+        Set the cover image to the default value
+        """
+        self.current_shelf_cover = self.default_shelf_cover
+        self.set_cover_lb_pixmap(self.current_shelf_cover)
+
     def draw_children_tree(
         self, shelves_dict: book_sys.ShelvesDict, books_dict: book_sys.BooksDict
     ):
@@ -323,7 +340,7 @@ class ShelfCreationPage(base_page.BasePage):
             QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
         )
 
-        self.main_lyt.addWidget(self.children_tree, 6, 0, 1, 2)
+        self.main_lyt.addWidget(self.children_tree, 7, 0, 1, 2)
 
     def get_matches(self, title) -> list:
         """
