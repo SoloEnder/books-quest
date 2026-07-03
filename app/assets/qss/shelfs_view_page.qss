@@ -1,5 +1,5 @@
 
-QLabel#total_books_lb {
+QLabel#total_elements_lb {
     font-size: 17px;
 }
 
