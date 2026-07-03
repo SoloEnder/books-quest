@@ -85,7 +85,8 @@
       "shelf_deletion": "Deleting /f:<count>/f shelves...",
       "empty_shelf": "There are no books here... \nWhy not add some ?",
       "creation_success": "Shelf added !",
-      "edition_success": "Shelf infos updated !"
+      "edition_success": "Shelf infos updated !",
+      "shelf_not_found": "Shelf not found"
     },
     "actions": {
       "select_books": "Select books :",

@@ -9,7 +9,7 @@ from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
-from app.ui.main_pages.shelfs_view_page import ShelfWidget
+from app.ui.main_pages.shelfs_view_page import DefaultShelfWidget, ShelfWidget
 from app.utils import images_tools, my_exceptions, utils_funcs
 
 
@@ -58,9 +58,29 @@ class ShelfDetailsPage(base_page.BasePage):
             widget=self,
             logger=self.logger,
         )
+        if self.shelf != self.books_handler.default_shelf:
+            self.shelf_basic_infos_w = BasicShelfInfosWidget(
+                self.shelf,
+                self.books_handler,
+                self.res_handler,
+                self.qt_signals_handler,
+                self.langs_handler,
+            )
+
+        else:
+            self.shelf_basic_infos_w = DefaultShelfWidget(
+                self.shelf,
+                self.books_handler,
+                self.res_handler,
+                self.qt_signals_handler,
+                self.langs_handler,
+            )
+        self.shelf_basic_infos_w.sub_widget.view_b.setVisible(False)
         self.shelf_content_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setProperty("role", "search_field")
+        self.search_le.setObjectName("search_in_shelf_field")
         self.search_le.setPlaceholderText(
             self.langs_handler.tr("shared.actions.search.book")
         )
@@ -102,8 +122,13 @@ class ShelfDetailsPage(base_page.BasePage):
         self.generate_widgets_pages()
 
         # Adding widgets to layout
-        self.main_lyt.addWidget(self.search_le, 0, 0)
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
+        self.main_lyt.addWidget(
+            self.search_le, 0, 1, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        self.main_lyt.addWidget(
+            self.shelf_basic_infos_w, 1, 0, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 1)
 
     def create_children_widgets(
         self, books: book_sys.BooksList, shelves: book_sys.ShelvesList
@@ -203,6 +228,51 @@ class ShelfDetailsPage(base_page.BasePage):
             self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
                 self.langs_handler.tr("shelf.msg.empty_shelf")
             )
+
+
+class BasicShelfInfosWidget(ShelfWidget):
+    def __init__(
+        self, shelf, books_handler, res_handler, qt_signals_handler, langs_handler
+    ):
+        super().__init__(
+            shelf, books_handler, res_handler, qt_signals_handler, langs_handler
+        )
+        self.sub_widget.delete_b.clicked.disconnect(self.delete_shelf)
+        self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
+        self.sub_widget.view_b.hide()
+
+    @QtCore.Slot()
+    def delete_shelf(self):
+        """
+        An override of the `delete_shelf` method, which do basically the same, without deleting this widget from the widgets pagination handler, since there is *no* pagination handler
+        """
+        self.qt_signals_handler.edit_progress_msg.emit(
+            self.langs_handler.tr("shelf.msg.shelf_deletion", count=1)
+        )
+        self.logger.error(f"Deleting 1 Shelf (ID={self.shelf.id})...")
+        try:
+            print(self.shelf.str_id())
+            self.books_handler.delete_shelf(self.shelf.str_id())
+
+        except my_exceptions.BooksShelfNotFoundError:
+            self.logger.error(
+                f"Unable to delete Shelf (ID={self.shelf.id}) : Shelf not found !"
+            )
+            self.qt_signals_handler.notify_sg.emit(
+                "error", "", self.langs_handler.tr("shelf.msg.shelf_not_found"), ""
+            )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+        except Exception:
+            self.logger.exception(
+                f"Unable to delete Shelf (ID={self.shelf.id}) : due to the following exception : "
+            )
+            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+        else:
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals_handler.close_page_sg.emit()
 
 
 class BookWidget(widgets_pagination_view.InPageWidget):

@@ -85,7 +85,8 @@
       "shelf_deletion": "Suppression de /f:<count>/f étagères...",
       "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?",
       "edition_success": "Informations de l'étagère mises à jour",
-      "creation_success": "Etagère ajoutée !"
+      "creation_success": "Etagère ajoutée !",
+      "shelf_not_found": "Etagère introuvable !"
     },
     "actions": {
       "view_books": "Voir les livres",
