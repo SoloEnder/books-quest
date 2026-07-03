@@ -58,7 +58,7 @@ class ShelfDetailsPage(base_page.BasePage):
             widget=self,
             logger=self.logger,
         )
-        self.books_widgets = []
+        self.shelf_content_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setPlaceholderText(
@@ -186,15 +186,15 @@ class ShelfDetailsPage(base_page.BasePage):
     def exit_search(self):
 
         if not self.search_le.text():
-            for widget in self.books_widgets:
+            for widget in self.shelf_content_widgets:
                 if shiboken6.isValid(widget):
                     widget.deleteLater()
 
-            self.books_widgets = self.create_children_widgets(
+            self.shelf_content_widgets = self.create_children_widgets(
                 list(self.shelf._books),
                 list(self.shelf._children_shelves),
             )
-            self.widgets_pagination_view_handler.widgets = self.books_widgets
+            self.widgets_pagination_view_handler.widgets = self.shelf_content_widgets
 
             for widget in self.research_result_widgets:
                 widget.deleteLater()
