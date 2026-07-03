@@ -321,8 +321,6 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
-        self.name_w_sa = QtWidgets.QScrollArea()
-        self.name_w_sa.setWidgetResizable(True)
         self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
         self.total_books.setObjectName("total_books_lb")
         self.unread_books_count = 0
