@@ -124,9 +124,16 @@ class BookCreationPage(base_page.BasePage):
             self.langs_handler.tr("shared.infos.status")
         )
         self.book_status_combob = QtWidgets.QComboBox()
-        self.book_status_combob.addItem("Non lut", "unread")
-        self.book_status_combob.addItem("En cours", "on_reading")
-        self.book_status_combob.addItem("Terminé", "finished")
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.unread"), "unread"
+        )
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.currently_reading"),
+            "on_reading",
+        )
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.finished"), "finished"
+        )
         self.book_status_combob.currentIndexChanged.connect(
             lambda: self.set_book_status(self.book_status_combob.currentData())
         )

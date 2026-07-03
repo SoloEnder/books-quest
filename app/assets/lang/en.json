@@ -56,7 +56,12 @@
       "alr_read_pages": "Read pages : ",
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
-      "shelfs_selection": "Bookshelves : "
+      "shelfs_selection": "Bookshelves : ",
+      "reading_state": {
+        "unread": "Unread",
+        "finished": "Finished",
+        "currently_reading": "Currently reading"
+      }
     },
     "msg": {
       "invalid_title": "Book title is not valid !",
