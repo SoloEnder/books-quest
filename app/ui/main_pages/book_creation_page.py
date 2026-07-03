@@ -90,6 +90,13 @@ class BookCreationPage(base_page.BasePage):
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
+        self.restore_default_cover_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.restore_default_cover")
+        )
+        self.restore_default_cover_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.remove_img"))
+        )
+        self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
         # Book infos widgets
         row = 3
@@ -203,6 +210,9 @@ class BookCreationPage(base_page.BasePage):
         # Add the widgets
         self.main_lyt.addWidget(self.book_cover_lb, 0, 0)
         self.main_lyt.addWidget(self.edit_cover_b, 1, 0)
+        self.main_lyt.addWidget(
+            self.restore_default_cover_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
         self.main_lyt.addWidget(self.book_status_lb, self.main_lyt.rowCount() + 1, 0)
         self.main_lyt.addWidget(
             self.book_status_combob, self.main_lyt.rowCount() + 1, 0
@@ -396,6 +406,13 @@ class BookCreationPage(base_page.BasePage):
 
     def set_cover_lb_pixmap(self, new_path):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+
+    def restore_default_cover(self):
+        """
+        Set the cover image to the default value
+        """
+        self.cover_image = self.default_cover_img
+        self.set_cover_lb_pixmap(self.cover_image)
 
     def get_matches(self, title: str, authors: str | None):
         """
