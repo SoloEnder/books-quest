@@ -19,6 +19,55 @@ class DefaultCoverPathDeletion(Exception):
         return self.msg
 
 
+class IsParentShelfError(Exception):
+    def __init__(self, parent_id: uuid.UUID, child_id: uuid.UUID):
+        """
+        Excpetion usually raised when trying to add Shelf A as a child to Shelf B, while A is parent of B
+        """
+        super().__init__()
+        self.parent_id = parent_id
+        self.child_id = child_id
+        self.msg = f"Couldn't define shelf A (ID={self.parent_id}) as child to shelf B (ID={self.child_id}) : Shelf A is parent of Shelf B !"
+
+    def __str__(self):
+        return self.msg
+
+
+class IsChildShelfError(Exception):
+    def __init__(self, shelf_id: uuid.UUID, parent_id: uuid.UUID):
+        super().__init__()
+        self.shelf_id = shelf_id
+        self.parent_id = parent_id
+        self.msg = f"Shelf (ID={self.shelf_id}) is already a child of shelf with ID={self.parent_id}"
+
+    def __str__(self):
+        return self.msg
+
+
+class NotAChildShelfError(Exception):
+    def __init__(self, shelf_id: uuid.UUID, parent_id: uuid.UUID):
+        self.shelf_id = shelf_id
+        self.parent_id = parent_id
+        self.msg = (
+            f"Shelf (ID={self.shelf_id} is not a child of Shelf {self.parent_id})"
+        )
+
+    def __str__(self):
+        return self.msg
+
+
+class NotAParentShelfError(Exception):
+    def __init__(self, shelf_id: uuid.UUID, parent_id: uuid.UUID):
+        self.shelf_id = shelf_id
+        self.parent_id = parent_id
+        self.msg = (
+            f"Shelf (ID={self.shelf_id} is not a parent of Shelf {self.parent_id})"
+        )
+
+    def __str__(self):
+        return self.msg
+
+
 class InvalidUUIDError(Exception):
     """
     Exception usually raised when the format of a `Book` or `Shelf` UUID is not valid
@@ -37,6 +86,8 @@ class Shelf:
     def __init__(self, **kwargs):
         self.title = kwargs["title"]
         self.title_suffix = kwargs.get("title_suffix")
+        self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
+        self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
         self._books: BooksList = kwargs.get("books", [])
         self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
@@ -46,6 +97,90 @@ class Shelf:
         for book in self._books:
             if not book.has_parent(self):
                 book._parents_shelves.append(self)
+
+        for shelf in self._parent_shelves:
+            if not shelf.has_shelf(self):
+                shelf._children_shelves.append(self)
+
+        for shelf in self._children_shelves:
+            if not shelf.has_parent_shelf(self):
+                shelf._parent_shelves.append(self)
+
+    def add_child_shelf(self, shelf: Shelf):
+        """
+        Define `shelf` as a child of this shelf
+
+        Parameters
+        ----------
+        - shelf (Shelf): the shelf to define as child
+        """
+        if shelf not in self._parent_shelves:
+            if self not in shelf._children_shelves:
+                self._children_shelves.append(shelf)
+                shelf._parent_shelves.append(self)
+
+            else:
+                raise IsChildShelfError(shelf.id, self.id)
+
+        else:
+            raise IsParentShelfError(shelf.id, self.id)
+
+    def remove_child_shelf(self, shelf: Shelf):
+        """
+        Removes `shelf` from the child of this shelf
+
+        Parameters
+        ----------
+        shelf: the child shelf to remove
+        """
+        if shelf in self._children_shelves:
+            self._children_shelves.remove(shelf)
+            shelf._parent_shelves.remove(self)
+
+        else:
+            raise NotAChildShelfError(shelf.id, self.id)
+
+    def remove_all_parents(self):
+        """
+        Removes this shelf from all its parents
+        """
+        for parent_shelf in self._parent_shelves.copy():
+            parent_shelf.remove_child_shelf(self)
+
+    def remove_all_child(self):
+        """
+        Removes this shelf from all its children
+        """
+        for child in self._children_shelves.copy():
+            child.remove_parent(self)
+
+    def remove_parent(self, parent: Shelf):
+        """
+        Removes `parent` from this shelf
+        """
+        if parent in self._parent_shelves:
+            parent.remove_child_shelf(self)
+
+        else:
+            raise NotAParentShelfError(self.id, parent.id)
+
+    def has_shelf(self, shelf: Shelf) -> bool:
+        "Checks if `shelf` is a child of this shelf. Returns a boolean value (yes (True)/no (False))"
+        if shelf in self._children_shelves:
+            return True
+
+        else:
+            return False
+
+    def has_parent_shelf(self, parent: Shelf) -> bool:
+        """
+        Cheks if `parent` is a parent of this shelf
+        """
+        if parent in self._parent_shelves:
+            return True
+
+        else:
+            return False
 
     def add_book(self, book: Book):
         """
@@ -93,6 +228,8 @@ class Shelf:
             "title": self.title,
             "title_suffix": self.title_suffix,
             "id": self.id,
+            "children_shelves": self._children_shelves,
+            "parents_shelves": self._parent_shelves,
             "books": self._books,
             "cover_path": self.cover_path,
         }
@@ -191,6 +328,7 @@ BooksDict = dict[str, Book]
 
 ShelvesList = list[Shelf]
 ShelvesDict = dict[str, Shelf]
+IDsList = list[str] | tuple[str, ...] | set[str]
 
 
 class BooksHandler:
@@ -261,7 +399,7 @@ class BooksHandler:
         Add 'book_obj' to this BooksHandler and to the default shelf
         """
 
-        if not book_obj.str_id() in self.books:
+        if book_obj.str_id() not in self.books:
             self.books[book_obj.str_id()] = book_obj
             self.default_shelf.add_book(book_obj)
 
@@ -322,6 +460,8 @@ class BooksHandler:
                 self._delete_cover(shelf.cover_path)
 
             shelf.remove_all_books()
+            shelf.remove_all_parents()
+            shelf.remove_all_child()
             del self.shelves[id]
 
         else:
@@ -408,7 +548,7 @@ class BooksHandler:
                     return False
 
         filters = {}
-        books_matchs = []
+        matches = []
 
         for filter_name, filter_infos in kwargs.items():
             if filter_infos:
@@ -450,9 +590,9 @@ class BooksHandler:
 
             if len(filter_matchs) == len(filters):
                 if all(filter_matchs):
-                    books_matchs.append(obj)
+                    matches.append(obj)
 
-        return books_matchs
+        return matches
 
     def save_books(self, filepath: str):
         self.logger.debug(f"Saving books data in {filepath}...")
@@ -497,7 +637,11 @@ class BooksHandler:
             shelf_data = shelf.get_infos()
             shelf_data["id"] = str(shelf_data["id"])
             shelf_data["books_ids"] = []
-
+            shelf_data["parents_shelves_ids"] = [
+                shelf.str_id() for shelf in shelf_data["parents_shelves"]
+            ]
+            del shelf_data["children_shelves"]
+            del shelf_data["parents_shelves"]
             for book in shelf_data["books"]:
                 shelf_data["books_ids"].append(book.str_id())
 
@@ -516,6 +660,7 @@ class BooksHandler:
         data: list = self.jfm.read_json(filepath)
 
         if data:
+            deferred_adoption_data: dict[str, list[str]] = {}
             for shelf_data in data:
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
@@ -523,6 +668,26 @@ class BooksHandler:
                 shelf_data["books"] = books
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
+                deferred_adoption_data[str(shelf_data["id"])] = shelf_data[
+                    "parents_shelves_ids"
+                ]
+            self.defered_shelf_adoption(deferred_adoption_data)
+
+    def defered_shelf_adoption(self, data: dict[str, list[str]]):
+        """
+        This method define shelves as child of others.
+        It is called 'defered' because when loading shelves data, some shelves may needs parent that are not loaded yet.
+        So this methods is designed to set the parenting *after* every shelves are loaded.
+
+        Parameters
+        ----------
+        data (dict[str, list[str]]): the key of the dict is the shelf ID, and the list contain its parent IDs
+        """
+        for shelf_id, child_ids in data.items():
+            child_obj = list(self.get_shelves_with_id(child_ids).values())
+
+            for kid in child_obj:
+                self.shelves[shelf_id].add_child_shelf(kid)
 
     def convert_books_ids(self, books_ids: list | tuple):
         """
@@ -542,6 +707,21 @@ class BooksHandler:
             books_objs[book_id] = book_obj
 
         return books_objs
+
+    def get_shelves_with_id(self, ids: IDsList) -> ShelvesDict:
+        shelves = {}
+
+        for id in ids:
+            try:
+                shelf = self.shelves[id]
+
+            except KeyError:
+                raise my_exceptions.BooksShelfNotFoundError(id)
+
+            else:
+                shelves[id] = shelf
+
+        return shelves
 
 
 class Session:

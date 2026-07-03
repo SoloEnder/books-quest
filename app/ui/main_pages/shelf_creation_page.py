@@ -6,10 +6,10 @@ from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys
+from app.src import book_sys, langs_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools
+from app.utils import images_tools, utils_funcs
 
 
 class EditionModeNotEnabled(Exception):
@@ -63,6 +63,17 @@ class ShelfCreationPage(base_page.BasePage):
             raise ValueError(
                 "No mode provided for Shelf Creation Page initialisation !"
             )
+        if self._current_mode == "edition":
+            if kwargs.get("shelf"):
+                self._shelf: book_sys.Shelf = kwargs["shelf"]
+
+            else:
+                self.logger.error(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
+                raise KeyError(
+                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
+                )
 
         # Shelf cover
         self.default_shelf_cover = self.res_handler.get_res(
@@ -80,6 +91,13 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
+        self.restore_default_cover_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.restore_default_cover")
+        )
+        self.restore_default_cover_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.remove_img"))
+        )
+        self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
         # Shelf name input widget
         self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.title"))
@@ -90,6 +108,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.books_selection_lb = QtWidgets.QLabel(
             self.langs_handler.tr("shelf.actions.select_books")
         )
+        self.draw_children_tree(self.books_handler.shelves, self.books_handler.books)
         self.book_research_lb = QtWidgets.QLabel(
             self.langs_handler.tr("shared.actions.search.book")
         )
@@ -108,8 +127,6 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
 
-        self.draw_books_tree(self.books_handler.books)
-
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.done")
@@ -119,6 +136,9 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.confirm_b.clicked.connect(self.create_shelf)
 
+        if self._current_mode == "edition":
+            self.edition_mode()
+
         # Add the widgets to the layout
         self.main_lyt.addWidget(
             self.shelf_cover_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
@@ -126,31 +146,21 @@ class ShelfCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self.cover_selection_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.title_lb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_lyt.addWidget(self.title_e, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_lyt.addWidget(
-            self.books_selection_lb, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.restore_default_cover_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.main_lyt.addWidget(self.title_lb, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(self.title_e, 4, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_lyt.addWidget(
+            self.books_selection_lb, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_lyt.addWidget(
-            self.book_research_lb, 5, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.book_research_lb, 6, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
         self.main_lyt.addWidget(
-            self.book_research_e, 5, 1, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.book_research_e, 6, 1, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.confirm_b, 7, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-
-        if self._current_mode == "edition":
-            if kwargs.get("shelf"):
-                self._shelf: book_sys.Shelf | None = kwargs.get("shelf")
-                self.edition_mode()
-
-            else:
-                self.logger.error(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
-                raise KeyError(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
+        self.main_lyt.addWidget(self.confirm_b, 8, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
     @property
     def current_mode(self):
@@ -218,8 +228,11 @@ class ShelfCreationPage(base_page.BasePage):
                 self.set_cover_lb_pixmap(self.current_shelf_cover)
             self.title_e.setText(self.shelf.title)
 
-            for title_item in self.books_title_items:
+            for title_item in self.objects_title_items:
                 if self.shelf.has_book(title_item.data()):
+                    title_item.setCheckState(QtCore.Qt.CheckState.Checked)
+
+                if self.shelf.has_shelf(title_item.data()):
                     title_item.setCheckState(QtCore.Qt.CheckState.Checked)
 
     def set_shelf_cover(self):
@@ -239,57 +252,95 @@ class ShelfCreationPage(base_page.BasePage):
         self.shelf_cover_pm.load(new_path)
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
 
-    def draw_books_tree(self, books_dict: book_sys.BooksDict):
+    def restore_default_cover(self):
+        """
+        Set the cover image to the default value
+        """
+        self.current_shelf_cover = self.default_shelf_cover
+        self.set_cover_lb_pixmap(self.current_shelf_cover)
 
-        if hasattr(self, "books_tree"):
-            self.main_lyt.removeWidget(self.books_tree)
-            self.books_tree.setParent(None)
-            self.books_tree.deleteLater()
+    def draw_children_tree(
+        self, shelves_dict: book_sys.ShelvesDict, books_dict: book_sys.BooksDict
+    ):
 
-        if hasattr(self, "books_tree_model"):
-            self.books_tree_model.setParent(None)
-            self.books_tree_model.deleteLater()
+        if hasattr(self, "children_tree"):
+            self.main_lyt.removeWidget(self.children_tree)
+            self.children_tree.setParent(None)
+            self.children_tree.deleteLater()
 
-        self.books_tree = QtWidgets.QTreeView()
-        self.books_tree.setMinimumHeight(400)
-        self.books_tree_model = QtGui.QStandardItemModel()
-        self.books_tree_model.setHorizontalHeaderLabels(
+        if hasattr(self, "children_tree_model"):
+            self.children_tree_model.setParent(None)
+            self.children_tree_model.deleteLater()
+
+        self.children_tree = QtWidgets.QTreeView()
+        self.children_tree.setMinimumHeight(400)
+        self.children_tree_model = QtGui.QStandardItemModel()
+        self.children_tree_model.setHorizontalHeaderLabels(
             (
+                self.langs_handler.tr("shared.infos.type"),
                 self.langs_handler.tr("shared.infos.title"),
                 self.langs_handler.tr("shared.infos.author"),
                 self.langs_handler.tr("shared.infos.edition"),
             )
         )
-        self.books_tree.setModel(self.books_tree_model)
-        self.books_title_items = []
+        self.children_tree.setModel(self.children_tree_model)
+        self.objects_title_items = []
+        objects = {}
+        objects.update(shelves_dict)
+        objects.update(books_dict)
 
-        # Books items
+        for object in objects.values():
+            if self.current_mode == "edition":
+                if object == self.shelf:
+                    continue
 
-        for book in books_dict.values():
-            book_title_item = QtGui.QStandardItem(
-                book.title + (f" ({book.title_suffix})" if book.title_suffix else "")
-            )
-            book_title_item.setData(book)
-            book_title_item.setCheckable(True)
-            book_author_item = QtGui.QStandardItem(
-                book.authors if book.authors else "Unknown"
-            )
-            book_edition_item = QtGui.QStandardItem(
-                book.edition if book.edition else "Unknown"
-            )
-            self.books_tree_model.appendRow(
-                (book_title_item, book_author_item, book_edition_item)
-            )
-            self.books_title_items.append(book_title_item)
+                if object in self.shelf._parent_shelves:
+                    continue
 
-        self.books_tree.setColumnWidth(0, 150)
-        self.books_tree.setColumnWidth(1, 150)
-        self.books_tree.setColumnWidth(2, 150)
-        self.books_tree.setEditTriggers(
+            object_type_item = QtGui.QStandardItem("N/A")
+            title_item = QtGui.QStandardItem(
+                utils_funcs.add_title_suffix(object.title, object.title_suffix)
+            )
+            title_item.setData(object)
+            title_item.setCheckable(True)
+
+            object_author_item = QtGui.QStandardItem("N/A")
+            object_edition_item = QtGui.QStandardItem("N/A")
+
+            if isinstance(object, book_sys.Book):
+                object_type_item.setText(
+                    self.langs_handler.tr("book.infos.object_type")
+                )
+                object_type_item.setAccessibleText(
+                    self.langs_handler.tr("book.infos.object_type")
+                )
+                object_author_item.setText(
+                    object.authors if object.authors else "Unknown"
+                )
+                object_edition_item = QtGui.QStandardItem(
+                    object.edition if object.edition else "Unknown"
+                )
+
+            elif isinstance(object, book_sys.Shelf):
+                object_type_item.setText(
+                    self.langs_handler.tr("shelf.infos.object_type")
+                )
+                object_type_item.setAccessibleText(
+                    self.langs_handler.tr("shelf.infos.object_type")
+                )
+            self.children_tree_model.appendRow(
+                (object_type_item, title_item, object_author_item, object_edition_item)
+            )
+            self.objects_title_items.append(title_item)
+
+        self.children_tree.setColumnWidth(0, 150)
+        self.children_tree.setColumnWidth(1, 150)
+        self.children_tree.setColumnWidth(2, 150)
+        self.children_tree.setEditTriggers(
             QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
         )
 
-        self.main_lyt.addWidget(self.books_tree, 6, 0, 1, 2)
+        self.main_lyt.addWidget(self.children_tree, 7, 0, 1, 2)
 
     def get_matches(self, title) -> list:
         """
@@ -337,10 +388,15 @@ class ShelfCreationPage(base_page.BasePage):
                 return
 
         books: book_sys.BooksList = []
+        child_shelves: book_sys.ShelvesList = []
 
-        for book_title_item in self.books_title_items:
-            if book_title_item.checkState() == QtCore.Qt.CheckState.Checked:
-                books.append(book_title_item.data())
+        for object_title_item in self.objects_title_items:
+            if object_title_item.checkState() == QtCore.Qt.CheckState.Checked:
+                if isinstance(object_title_item.data(), book_sys.Book):
+                    books.append(object_title_item.data())
+
+                elif isinstance(object_title_item.data(), book_sys.Shelf):
+                    child_shelves.append(object_title_item.data())
 
         final_img_path = self.current_shelf_cover
 
@@ -357,10 +413,16 @@ class ShelfCreationPage(base_page.BasePage):
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(final_img_path)
 
+        parents_shelves = []
+        if self.current_mode == "edition":
+            parents_shelves = self.shelf._parent_shelves
+
         return {
             "title": shelf_title,
             "title_suffix": title_suffix,
             "books": books,
+            "parents_shelves": parents_shelves,
+            "children_shelves": child_shelves,
             "id": id,
             "cover_path": self.current_shelf_cover
             if self.current_shelf_cover != self.default_shelf_cover
@@ -385,16 +447,25 @@ class ShelfCreationPage(base_page.BasePage):
         query = self.book_research_e.text()
 
         if query:
-            query_results = self.books_handler.get_books(title=(query, False))
-            matches = {}
+            shelves_matches = self.books_handler.get_shelfs(title=(query, False))
+            books_matches = self.books_handler.get_books(title=(query, False))
 
-            for result in query_results:
-                matches[result.id] = result
+            shelves_matches_obj_with_id = {}
+            books_matches_obj_with_id = {}
+            for shelf in shelves_matches:
+                shelves_matches_obj_with_id[shelf.id] = shelf
 
-            self.draw_books_tree(matches)
+            for book in books_matches:
+                books_matches_obj_with_id[book.id] = book
+
+            self.draw_children_tree(
+                shelves_matches_obj_with_id, books_matches_obj_with_id
+            )
 
         else:
-            self.draw_books_tree(self.books_handler.books)
+            self.draw_children_tree(
+                self.books_handler.shelves, self.books_handler.books
+            )
 
     def create_shelf(self):
         shelf_infos = self.get_shelf_infos()

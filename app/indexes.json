@@ -29,7 +29,8 @@
       "done": "check.svg",
       "new_book": "book-plus.svg",
       "view_books": "library.svg",
-      "settings": "settings.svg"
+      "settings": "settings.svg",
+      "remove_img": "image-off.svg"
     },
     "splashscreen": {
       "_base_": "splashscreen",

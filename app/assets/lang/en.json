@@ -13,11 +13,13 @@
         "book": "Search for books",
         "shelf": "Search for shelves"
       },
+      "see_details": "Details",
       "close": "Close",
       "open_settings": "Open settings",
       "book_creation": "New book",
       "shelf_creation": "New shelf",
-      "go_to": "Go to :"
+      "go_to": "Go to :",
+      "restore_default_cover": "Restore default cover"
     },
     "basic_error_notification": {
       "title": "Warning",
@@ -39,6 +41,7 @@
       "indev_warn": "This program is in developement ! If you encounter bugs, or wish to suggest new features, please let us know <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>"
     },
     "infos": {
+      "type": "Type",
       "status": "Status",
       "title": "Title : ",
       "author": "Author : ",
@@ -49,6 +52,7 @@
   },
   "book": {
     "infos": {
+      "object_type": "Book",
       "alr_read_pages": "Read pages : ",
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
@@ -65,6 +69,7 @@
   },
   "shelf": {
     "infos": {
+      "object_type": "Shelf",
       "title": "Titre : ",
       "default_shelf_title": "All Books"
     },

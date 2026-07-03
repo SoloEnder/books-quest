@@ -212,122 +212,37 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         langs_handler,
     ):
-        super().__init__(None, None)
         self.shelf = shelf
         self.books_handler = books_handler
         self.res_handler = res_handler
         self.qt_signals_handler = qt_signals_handler
         self.langs_handler = langs_handler
-        self.redundant_lang_path = "main_pages.shelfs_view_page"
+        super().__init__(None, None)
         self.logger = logging.getLogger(__name__)
 
         self.setProperty("role", "shelf_widget")
         self.main_layout = QtWidgets.QGridLayout(self)
-        self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
-
-        if self.shelf.cover_path:
-            if os.path.exists(self.shelf.cover_path):
-                self.displayed_cover = self.shelf.cover_path
-
-            else:
-                self.displayed_cover = self.default_cover
-                self.logger.warning(
-                    f"Couldn't found shelf cover file at {self.shelf.cover_path}, switching to default cover"
-                )
-
-        else:
-            self.displayed_cover = self.default_cover
-
+        self.sub_widget = SubShelfWidget(
+            self.shelf,
+            self.books_handler,
+            self.res_handler,
+            self.qt_signals_handler,
+            self.langs_handler,
+        )
+        self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
         self.title_lb = QtWidgets.QLabel(
             utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
         )
-
-        self.title_lb.setWordWrap(True)
         self.title_lb.setProperty("role", "h3")
-        self.cover_pm = QtGui.QPixmap(self.displayed_cover)
-        self.cover_lb = QtWidgets.QLabel()
-        self.cover_lb.setPixmap(self.cover_pm)
-        self.name_w_sa = QtWidgets.QScrollArea()
-        self.name_w_sa.setWidgetResizable(True)
-        self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
-        self.total_books.setObjectName("total_books_lb")
-        self.unread_books_count = 0
-        self.on_reading_books_count = 0
-        self.finished_books_count = 0
-
-        for book in self.shelf._books:
-            if book.status == "unread":
-                self.unread_books_count += 1
-
-            elif book.status == "on_reading":
-                self.on_reading_books_count += 1
-
-            elif book.status == "finished":
-                self.finished_books_count += 1
-
-        self.unread_books_lb = QtWidgets.QLabel(f"{self.unread_books_count} non lus")
-        self.on_reading_books_lb = QtWidgets.QLabel(
-            f"{self.on_reading_books_count} en cours de lecture"
+        self.main_layout.addWidget(
+            self.title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.finished_books_lb = QtWidgets.QLabel(
-            f"{self.finished_books_count} terminés"
+        self.main_layout.addWidget(
+            self.sub_widget, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.unread_books_lb.setIndent(10)
-        self.on_reading_books_lb.setIndent(10)
-        self.finished_books_lb.setIndent(10)
-
-        self.button_size = QtWidgets.QSizePolicy()
-        self.view_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shelf.actions.view_books")
-        )
-        self.view_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.view_books"))
-        )
-        self.view_b.setSizePolicy(self.button_size)
-        self.view_b.clicked.connect(
-            lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "SHELF_DETAILS_PAGE", True, {"shelf": self.shelf}
-            )
-        )
-
-        self.edit_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.edit")
-        )
-        self.edit_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
-        )
-        self.edit_b.clicked.connect(
-            lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "SHELF_CREATION_PAGE", True, {"mode": "edition", "shelf": self.shelf}
-            )
-        )
-        self.edit_b.setSizePolicy(self.button_size)
-
-        self.delete_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.delete")
-        )
-        self.delete_b.setProperty("role", "delete_b")
-        self.delete_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
-        )
-        self.delete_b.setSizePolicy(self.button_size)
-        self.delete_b.clicked.connect(self.delete_shelf)
-
-        self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-        self.main_layout.addWidget(self.title_lb, 0, 0, 1, 2)
-        self.main_layout.addWidget(self.cover_lb, 1, 0, 8, 1)
-        self.main_layout.addWidget(self.total_books, 1, 1)
-        self.main_layout.addWidget(self.unread_books_lb, 2, 1)
-        self.main_layout.addWidget(self.on_reading_books_lb, 3, 1)
-        self.main_layout.addWidget(self.finished_books_lb, 4, 1)
-        self.main_layout.addWidget(self.view_b, 5, 1)
-        self.main_layout.addWidget(self.edit_b, 6, 1)
-        self.main_layout.addWidget(self.delete_b, 7, 1)
-
-        # The book creation information
 
     def delete_shelf(self):
-        self.logger.debug(f"Attempting to delete shelf (ID={self.shelf.id})...")
+        self.logger.info(f"Attempting to delete shelf (ID={self.shelf.id})...")
         self.books_handler.delete_shelf(self.shelf.str_id())
 
         if self.pages_widgets_handler:
@@ -365,23 +280,119 @@ class DefaultShelfWidget(ShelfWidget):
             qt_signals_handler,
             langs_handler,
         )
-        self.edit_b.hide()
-        self.delete_b.hide()
-        self.main_layout.removeWidget(self.cover_lb)
-        self.main_layout.addWidget(self.cover_lb, 1, 0, 6, 1)
+        self.sub_widget.edit_b.setVisible(False)
+        self.sub_widget.delete_b.setVisible(False)
 
 
-class ShelfNameWidget(QtWidgets.QWidget):
+class SubShelfWidget(QtWidgets.QWidget):
     def __init__(
         self,
-        parent: QtWidgets.QWidget | None,
-        label_text: str,
-        label_name: str = "name_lb",
+        shelf: book_sys.Shelf,
+        books_handler: book_sys.BooksHandler,
+        res_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        langs_handler,
     ):
-        super().__init__(parent)
+        super().__init__(None)
+        self.shelf = shelf
+        self.books_handler = books_handler
+        self.res_handler = res_handler
+        self.qt_signals_handler = qt_signals_handler
+        self.langs_handler = langs_handler
+        self.redundant_lang_path = "main_pages.shelfs_view_page"
+        self.logger = logging.getLogger(__name__)
 
-        self.main_lyt = QtWidgets.QVBoxLayout()
-        self.setLayout(self.main_lyt)
-        self.label = QtWidgets.QLabel(label_text)
-        self.label.setObjectName(label_name)
-        self.main_lyt.addWidget(self.label)
+        self.setProperty("role", "sub_shelf_widget")
+        self.main_layout = QtWidgets.QGridLayout(self)
+        self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
+
+        if self.shelf.cover_path:
+            if os.path.exists(self.shelf.cover_path):
+                self.displayed_cover = self.shelf.cover_path
+
+            else:
+                self.displayed_cover = self.default_cover
+                self.logger.warning(
+                    f"Couldn't found shelf cover file at {self.shelf.cover_path}, switching to default cover"
+                )
+
+        else:
+            self.displayed_cover = self.default_cover
+        self.cover_pm = QtGui.QPixmap(self.displayed_cover)
+        self.cover_lb = QtWidgets.QLabel()
+        self.cover_lb.setPixmap(self.cover_pm)
+        self.name_w_sa = QtWidgets.QScrollArea()
+        self.name_w_sa.setWidgetResizable(True)
+        self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
+        self.total_books.setObjectName("total_books_lb")
+        self.unread_books_count = 0
+        self.on_reading_books_count = 0
+        self.finished_books_count = 0
+
+        for book in self.shelf._books:
+            if book.status == "unread":
+                self.unread_books_count += 1
+
+            elif book.status == "on_reading":
+                self.on_reading_books_count += 1
+
+            elif book.status == "finished":
+                self.finished_books_count += 1
+
+        self.unread_books_lb = QtWidgets.QLabel(f"{self.unread_books_count} non lus")
+        self.on_reading_books_lb = QtWidgets.QLabel(
+            f"{self.on_reading_books_count} en cours de lecture"
+        )
+        self.finished_books_lb = QtWidgets.QLabel(
+            f"{self.finished_books_count} terminés"
+        )
+        self.unread_books_lb.setIndent(10)
+        self.on_reading_books_lb.setIndent(10)
+        self.finished_books_lb.setIndent(10)
+
+        self.button_size = QtWidgets.QSizePolicy()
+        self.view_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.see_details")
+        )
+        self.view_b.setObjectName("see_details_b")
+        self.view_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.view_books"))
+        )
+        self.view_b.setSizePolicy(self.button_size)
+        self.view_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "SHELF_DETAILS_PAGE", True, {"shelf": self.shelf}
+            )
+        )
+
+        self.edit_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.edit")
+        )
+        self.edit_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
+        )
+        self.edit_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "SHELF_CREATION_PAGE", True, {"mode": "edition", "shelf": self.shelf}
+            )
+        )
+        self.edit_b.setSizePolicy(self.button_size)
+
+        self.delete_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.delete")
+        )
+        self.delete_b.setProperty("role", "delete_b")
+        self.delete_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
+        )
+        self.delete_b.setSizePolicy(self.button_size)
+
+        self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.main_layout.addWidget(self.cover_lb, 0, 0, 8, 1)
+        self.main_layout.addWidget(self.total_books, 0, 1)
+        self.main_layout.addWidget(self.unread_books_lb, 1, 1)
+        self.main_layout.addWidget(self.on_reading_books_lb, 2, 1)
+        self.main_layout.addWidget(self.finished_books_lb, 3, 1)
+        self.main_layout.addWidget(self.view_b, 4, 1)
+        self.main_layout.addWidget(self.edit_b, 5, 1)
+        self.main_layout.addWidget(self.delete_b, 6, 1)
