@@ -104,6 +104,8 @@ class ShelfDetailsPage(base_page.BasePage):
                 widgets=[],
             )
         )
+        self.sep = QtWidgets.QFrame()
+        self.sep.setFrameShape(QtWidgets.QFrame.Shape.VLine)
         self.widgets_pagination_view_handler.setObjectName("ShelfContentViewer")
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
             self.langs_handler.tr("shared.msg.nothing_to_show")
@@ -135,12 +137,13 @@ class ShelfDetailsPage(base_page.BasePage):
 
         # Adding widgets to layout
         self.main_lyt.addWidget(
-            self.search_le, 0, 1, QtCore.Qt.AlignmentFlag.AlignRight
+            self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
         self.main_lyt.addWidget(
             self.shelf_basic_infos_w, 1, 0, QtCore.Qt.AlignmentFlag.AlignTop
         )
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 1)
+        self.main_lyt.addWidget(self.sep, 1, 1)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 2)
 
     def create_children_widgets(
         self, books: book_sys.BooksList, shelves: book_sys.ShelvesList
