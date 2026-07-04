@@ -82,7 +82,7 @@ class ShelfDetailsPage(base_page.BasePage):
         self.search_le.setProperty("role", "search_field")
         self.search_le.setObjectName("search_in_shelf_field")
         self.search_le.setPlaceholderText(
-            self.langs_handler.tr("shared.actions.search.book")
+            self.langs_handler.tr("shared.actions.search.base")
         )
         self.search_le.setSizePolicy(*self.fix_min_exp_sp)
         self.search_le.setMinimumWidth(200)
@@ -105,7 +105,7 @@ class ShelfDetailsPage(base_page.BasePage):
             )
         )
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-            self.langs_handler.tr("shelf.msg.empty_shelf")
+            self.langs_handler.tr("shared.msg.nothing_to_show")
         )
         self.add_book_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.book_creation")
@@ -115,8 +115,19 @@ class ShelfDetailsPage(base_page.BasePage):
                 "BOOK_CREATION_PAGE", True, {}
             )
         )
+        self.add_shelf_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.shelf_creation")
+        )
+        self.add_shelf_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "SHELF_CREATION_PAGE", True, {"mode": "creation"}
+            )
+        )
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
             self.add_book_b, 1, 0, QtGui.Qt.AlignmentFlag.AlignCenter
+        )
+        self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
+            self.add_shelf_b, 2, 0, QtGui.Qt.AlignmentFlag.AlignCenter
         )
         # books widgets
         self.generate_widgets_pages()
