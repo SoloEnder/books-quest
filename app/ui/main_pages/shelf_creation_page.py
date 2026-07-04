@@ -358,6 +358,31 @@ class ShelfCreationPage(base_page.BasePage):
 
         return matches
 
+    def get_title_suffix(
+        self, shelves_with_the_same_title: book_sys.ShelvesList
+    ) -> int:
+        """
+        Select an appropriate title suffix (the number following the shelf title) for the shelf being created;
+        the suffix is initially set based on the number of shelves with the same name,
+        and is then determined by adding 1 to the highest title suffix found among shelves sharing the same name as the one being created.
+
+        Parameters
+        ----------
+        shelves_with_the_same_title (ShelvesList): a list of shelves that share the same title as the one being created
+
+        Returns
+        -------
+        int: the title suffix found
+        """
+        title_suffix = len(shelves_with_the_same_title)
+
+        for shelf in shelves_with_the_same_title:
+            if shelf.title_suffix:
+                if shelf.title_suffix >= title_suffix:
+                    title_suffix = shelf.title_suffix + 1
+
+        return title_suffix
+
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
@@ -376,15 +401,14 @@ class ShelfCreationPage(base_page.BasePage):
         matches = self.get_matches(shelf_title)
 
         if matches:
+            title_suffix = self.get_title_suffix(matches)
+
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({len(matches)})'"
+                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
             )
             self.existence_msgbox.exec()
 
-            if self.existence_msgbox.clickedButton() == self.rename_b:
-                title_suffix = len(matches)
-
-            else:
+            if not self.existence_msgbox.clickedButton() == self.rename_b:
                 return
 
         books: book_sys.BooksList = []
