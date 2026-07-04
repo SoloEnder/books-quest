@@ -610,9 +610,10 @@ class BooksHandler:
                     book_data["parents_shelves_ids"].append(shelf.str_id())
 
             del book_data["parents_shelves"]
+            book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
-        self.jfm.write_json(filepath, data, catch_error=False)
+        self.jfm.write_json(filepath, data, catch_error=True)
 
     def load_books(self, filepath: str):
         self.logger.info(f"Loading books data from {filepath}...")
@@ -649,10 +650,33 @@ class BooksHandler:
                 shelf_data["books_ids"].append(book.str_id())
 
             del shelf_data["books"]
-
+            shelf_data = self._remove_empty_items(shelf_data)
             data.append(shelf_data)
 
         self.jfm.write_json(filepath=filepath, data=data, catch_error=False)
+
+    def _remove_empty_items(
+        self, data: dict, ignore_keys: list | None = None, ignore_int_float: bool = True
+    ):
+        """Removes items that have boolean value equal to False.
+
+        Parameters
+        ----------
+        - data (dict): a dictionnary containing the data to analyze
+        - ignore_keys (list): a list of key to ignore during the analyze
+        - ignore_int_float (bool=True): whether to ignore items that have an integer/float as value
+        """
+        ignored_keys = ignore_keys or []
+
+        for key, value in data.copy().items():
+            if key not in ignored_keys:
+                if ignore_int_float and type(value) in (int, float):
+                    continue
+
+                else:
+                    if not value:
+                        del data[key]
+        return data
 
     def load_shelves(self, filepath):
         """
@@ -671,9 +695,9 @@ class BooksHandler:
                 shelf_data["books"] = books
                 shelf_data["id"] = uuid.UUID(shelf_data["id"])
                 self.new_shelf(**shelf_data)
-                deferred_adoption_data[str(shelf_data["id"])] = shelf_data[
-                    "parents_shelves_ids"
-                ]
+                deferred_adoption_data[str(shelf_data["id"])] = shelf_data.get(
+                    "parents_shelves_ids", []
+                )
             self.defered_shelf_adoption(deferred_adoption_data)
 
     def defered_shelf_adoption(self, data: dict[str, list[str]]):
