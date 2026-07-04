@@ -79,8 +79,8 @@ class ShelfDetailsPage(base_page.BasePage):
         self.shelf_content_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
-        self.search_le.setProperty("role", "search_field")
-        self.search_le.setObjectName("search_in_shelf_field")
+        self.search_le.setProperty("role", "SearchField")
+        self.search_le.setObjectName("SearchInShelfField")
         self.search_le.setPlaceholderText(
             self.langs_handler.tr("shared.actions.search.base")
         )
@@ -104,6 +104,7 @@ class ShelfDetailsPage(base_page.BasePage):
                 widgets=[],
             )
         )
+        self.widgets_pagination_view_handler.setObjectName("ShelfContentViewer")
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
             self.langs_handler.tr("shared.msg.nothing_to_show")
         )
@@ -315,7 +316,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.langs_handler,
             self.qt_signals_handler,
         )
-        self.book_title_lb.setObjectName("book_title_lb")
+        self.book_title_lb.setObjectName("BookTitleLabel")
         self.sub_widget.delete_b.clicked.connect(self.delete_book)
         self.max_sp = QtWidgets.QSizePolicy()
         self.max_sp.setVerticalPolicy(QtWidgets.QSizePolicy.Policy.Maximum)
@@ -412,17 +413,17 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_authors_lb = QtWidgets.QLabel(
             self.book.authors if self.book.authors else "Unknown"
         )
-        self.book_authors_lb.setObjectName("book_authors_lb")
+        self.book_authors_lb.setObjectName("BookAuthorLabel")
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setMinimumSize(350, 120)
         self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
-        self.book_summary_te.setObjectName("book_summary_te")
+        self.book_summary_te.setObjectName("BookSummary")
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
-        self.edit_b.setObjectName("edit_b")
+        self.edit_b.setObjectName("EditButton")
         self.edit_b.setIcon(
             images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
         )
@@ -441,7 +442,7 @@ class SubBookWidget(QtWidgets.QWidget):
             images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
         )
         self.delete_b.setSizePolicy(self.fixed_sp)
-        self.delete_b.setObjectName("delete_b")
+        self.delete_b.setObjectName("DeleteButton")
         self.main_layout.addWidget(self.book_authors_lb, 0, 1)
         self.main_layout.addWidget(
             self.book_summary_te,

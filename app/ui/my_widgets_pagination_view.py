@@ -69,7 +69,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         if len(self.pages_numbers_lyt_widgets) > 1:
             last_button = self.pages_numbers_lyt_widgets[-1]
             last_button.setText(f". . . {last_button.text()}")
-            last_button.setObjectName("last_page_b")
+            last_button.setObjectName("LastPageButton")
 
     def _jump_to_page(self, given_input):
 
@@ -91,7 +91,7 @@ class NothingToShowPage(QtWidgets.QWidget):
         self.main_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.main_lyt)
         self.label = QtWidgets.QLabel(text)
-        self.label.setProperty("role", "nothing_to_show_lb")
+        self.label.setProperty("role", "NothingToShowLabel")
         self.main_lyt.addWidget(self.label, 0, 0, QtGui.Qt.AlignmentFlag.AlignCenter)
 
     def edit_label_text(self, new_text: str):

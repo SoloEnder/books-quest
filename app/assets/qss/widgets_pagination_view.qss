@@ -1,4 +1,4 @@
 
-QPushButton#last_page_b {
+QPushButton#LastPageButton {
     font-weight: bold;
 }

@@ -1,5 +1,5 @@
 
-QLabel#total_elements_lb {
+QLabel#ShelfElementsCount {
     font-size: 17px;
 }
 

@@ -27,7 +27,7 @@ class SettingsPage(base_page.BasePage):
         self.PAGE_NAME = "SETTINGS_PAGE"
         self.nav_bar = MainNavigationBar(None)
         self.main_lyt.addWidget(self.nav_bar)
-        self.setObjectName("settings_page")
+        self.setObjectName("SettingsPage")
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.settings_page"),
             widget=self,
@@ -394,7 +394,7 @@ class UpdateSettings(SettingsSection):
                 "https://github.com/SoloEnder/books-quest/releases"
             )
         )
-        self.check_update_b.setObjectName("check_update_button")
+        self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.base_lyt.addWidget(
             self.check_update_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
@@ -487,7 +487,7 @@ class MainNavigationBar(QtWidgets.QWidget):
 
         if section_name not in self._sections_buttons.keys():
             button = QtWidgets.QPushButton(displayed_text)
-            button.setProperty("role", "nav_button")
+            button.setProperty("role", "NaviguationButton")
             button.clicked.connect(lambda: self.section_requested_sg.emit(section_name))
             self._sections_buttons[section_name] = button
             self.lyt.addWidget(button)
