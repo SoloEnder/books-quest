@@ -182,6 +182,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.history = []
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
+        self.qt_signals_handler.refresh_page_sg.connect(self.refresh)
+        self.qt_signals_handler.refresh_current_page_sg.connect(
+            self.refresh_current_page
+        )
         utils_funcs.load_and_set_ss(
             self.res_handler.get_res("assets.qss.general"), widget=self
         )
@@ -233,7 +237,8 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         #             self.pages[history_copy[1]].variables_kw
         #         )
 
-    def refresh(self, page_name, page_args):
+    @QtCore.Slot(str, dict)
+    def refresh(self, page_name: str, page_args: dict):
         self.logger.debug(f"Refreshing {page_name} with kwargs {page_args}")
 
         if page_name == "SETTINGS_PAGE":
@@ -313,6 +318,21 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         else:
             raise ValueError(f"Unknown page : '{page_name}'")
+
+    @QtCore.Slot()
+    def refresh_current_page(self):
+        """
+        Refresh the current page.
+        """
+        self.logger.info("Refreshing current page...")
+        self.refresh(self.current_page_infos[0], self.current_page_infos[2])
+        new_page_infos = (
+            self.current_page_infos[0],
+            self.pages[self.current_page_infos[0]],
+            self.current_page_infos[2],
+        )
+        self.setCurrentWidget(new_page_infos[1])
+        self.current_page_infos = new_page_infos
 
 
 class IndevWarnWidget(QtWidgets.QMessageBox):

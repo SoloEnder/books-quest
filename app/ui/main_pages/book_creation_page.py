@@ -575,3 +575,4 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_addition_success"),
                     )
+                    self.qt_signals_handler.refresh_current_page_sg.emit()

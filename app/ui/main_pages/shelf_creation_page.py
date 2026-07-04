@@ -475,6 +475,7 @@ class ShelfCreationPage(base_page.BasePage):
                 QtWidgets.QMessageBox.information(
                     self, "Success", self.langs_handler.tr("shelf.msg.creation_success")
                 )
+                self.qt_signals_handler.refresh_current_page_sg.emit()
 
             elif self.current_mode == "edition":
                 if self.shelf:
@@ -485,3 +486,4 @@ class ShelfCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("shelf.msg.edition_success"),
                     )
+                self.qt_signals_handler.close_page_sg.emit()
