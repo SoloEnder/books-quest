@@ -444,6 +444,7 @@ class BooksHandler:
 
         if shelf.str_id() not in self.shelves.keys():
             self.shelves[shelf.str_id()] = shelf
+            self.default_shelf.add_child_shelf(shelf)
 
         else:
             raise my_exceptions.BooksShelfExistsError(
@@ -640,6 +641,8 @@ class BooksHandler:
             shelf_data["parents_shelves_ids"] = [
                 shelf.str_id() for shelf in shelf_data["parents_shelves"]
             ]
+            if self.default_shelf.str_id() in shelf_data["parents_shelves_ids"]:
+                shelf_data["parents_shelves_ids"].remove(self.default_shelf.str_id())
             del shelf_data["children_shelves"]
             del shelf_data["parents_shelves"]
             for book in shelf_data["books"]:
