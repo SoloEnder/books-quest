@@ -9,7 +9,7 @@
       "rename": "Renommer",
       "cancel": "Annuler",
       "search": {
-        "base": "Search",
+        "base": "Rechercher",
         "book": "Rechercher des livres",
         "shelf": "Rechercher des étagères"
       },
@@ -55,7 +55,12 @@
       "alr_read_pages": "Pages lues : ",
       "starting_read_date": "Lecture commencé le : ",
       "end_read_date": "Lecture terminée le : ",
-      "shelfs_selection": "Etagères : "
+      "shelfs_selection": "Etagères : ",
+      "reading_state": {
+        "unread": "Non lut",
+        "finished": "Terminé",
+        "currently_reading": "En cours de lecture"
+      }
     },
     "msg": {
       "book_not_found": "Livre introuvable !",
@@ -80,7 +85,8 @@
       "shelf_deletion": "Suppression de /f:<count>/f étagères...",
       "empty_shelf": "Il n'y a pas de livres ici... \nPourquoi ne pas en ajouter un ?",
       "edition_success": "Informations de l'étagère mises à jour",
-      "creation_success": "Etagère ajoutée !"
+      "creation_success": "Etagère ajoutée !",
+      "shelf_not_found": "Etagère introuvable !"
     },
     "actions": {
       "view_books": "Voir les livres",

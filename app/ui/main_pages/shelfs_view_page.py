@@ -220,7 +220,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
         super().__init__(None, None)
         self.logger = logging.getLogger(__name__)
 
-        self.setProperty("role", "shelf_widget")
+        self.setProperty("role", "ShelfWidget")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.sub_widget = SubShelfWidget(
             self.shelf,
@@ -302,7 +302,7 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.redundant_lang_path = "main_pages.shelfs_view_page"
         self.logger = logging.getLogger(__name__)
 
-        self.setProperty("role", "sub_shelf_widget")
+        self.setProperty("role", "SubShelfWidget")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
 
@@ -321,10 +321,10 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.cover_pm = QtGui.QPixmap(self.displayed_cover)
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
-        self.name_w_sa = QtWidgets.QScrollArea()
-        self.name_w_sa.setWidgetResizable(True)
-        self.total_books = QtWidgets.QLabel(f"{len(self.shelf._books)} livres")
-        self.total_books.setObjectName("total_books_lb")
+        self.total_elements = QtWidgets.QLabel(
+            f"{len(self.shelf._books)} {self.langs_handler.tr('book.infos.object_type')}, {len(self.shelf._children_shelves)} {self.langs_handler.tr('shelf.infos.object_type')}"
+        )
+        self.total_elements.setObjectName("ShelfElementsCount")
         self.unread_books_count = 0
         self.on_reading_books_count = 0
         self.finished_books_count = 0
@@ -339,12 +339,14 @@ class SubShelfWidget(QtWidgets.QWidget):
             elif book.status == "finished":
                 self.finished_books_count += 1
 
-        self.unread_books_lb = QtWidgets.QLabel(f"{self.unread_books_count} non lus")
+        self.unread_books_lb = QtWidgets.QLabel(
+            f"{self.unread_books_count} {self.langs_handler.tr('book.infos.reading_state.unread').lower()}"
+        )
         self.on_reading_books_lb = QtWidgets.QLabel(
-            f"{self.on_reading_books_count} en cours de lecture"
+            f"{self.on_reading_books_count} {self.langs_handler.tr('book.infos.reading_state.currently_reading').lower()}"
         )
         self.finished_books_lb = QtWidgets.QLabel(
-            f"{self.finished_books_count} terminés"
+            f"{self.finished_books_count} {self.langs_handler.tr('book.infos.reading_state.finished').lower()}"
         )
         self.unread_books_lb.setIndent(10)
         self.on_reading_books_lb.setIndent(10)
@@ -354,7 +356,7 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.view_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.see_details")
         )
-        self.view_b.setObjectName("see_details_b")
+        self.view_b.setObjectName("SeeDetailsButton")
         self.view_b.setIcon(
             images_tools.get_svg(self.res_handler.get_res("assets.icons.view_books"))
         )
@@ -381,7 +383,7 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.delete_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.delete")
         )
-        self.delete_b.setProperty("role", "delete_b")
+        self.delete_b.setProperty("role", "DeleteButton")
         self.delete_b.setIcon(
             images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
@@ -389,7 +391,7 @@ class SubShelfWidget(QtWidgets.QWidget):
 
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.main_layout.addWidget(self.cover_lb, 0, 0, 8, 1)
-        self.main_layout.addWidget(self.total_books, 0, 1)
+        self.main_layout.addWidget(self.total_elements, 0, 1)
         self.main_layout.addWidget(self.unread_books_lb, 1, 1)
         self.main_layout.addWidget(self.on_reading_books_lb, 2, 1)
         self.main_layout.addWidget(self.finished_books_lb, 3, 1)

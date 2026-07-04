@@ -104,9 +104,7 @@ class AppSystem:
             f"Initialised app in {self.boot_end_time - self.boot_start_time:.3f}s"
         )
 
-        if self.app_infos["version"][
-            "semantic"
-        ] == "indev" and self.settings_handler.get_setting_value(
+        if self.settings_handler.get_setting_value(
             "developer_settings.show_indev_warning"
         ):
             self.show_indev_warn()

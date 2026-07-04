@@ -124,9 +124,16 @@ class BookCreationPage(base_page.BasePage):
             self.langs_handler.tr("shared.infos.status")
         )
         self.book_status_combob = QtWidgets.QComboBox()
-        self.book_status_combob.addItem("Non lut", "unread")
-        self.book_status_combob.addItem("En cours", "on_reading")
-        self.book_status_combob.addItem("Terminé", "finished")
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.unread"), "unread"
+        )
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.currently_reading"),
+            "on_reading",
+        )
+        self.book_status_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.finished"), "finished"
+        )
         self.book_status_combob.currentIndexChanged.connect(
             lambda: self.set_book_status(self.book_status_combob.currentData())
         )
@@ -474,16 +481,17 @@ class BookCreationPage(base_page.BasePage):
         matches = self.get_matches(books_infos["title"], books_infos.get("authors"))
 
         if matches:
+            title_suffix = utils_funcs.get_title_suffix(matches)
             self.logger.debug(
-                f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
+                f"Found {title_suffix} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({len(matches)})'"
+                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({title_suffix})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({title_suffix})'"
             )
             self.existence_msgbox.exec()
 
             if self.existence_msgbox.clickedButton() == self.rename_b:
-                books_infos["title_suffix"] = len(matches)
+                books_infos["title_suffix"] = title_suffix
 
             else:
                 return
@@ -525,10 +533,6 @@ class BookCreationPage(base_page.BasePage):
             books_infos["end_read_date"] = self.end_read_date_de.date().toString(
                 QtCore.Qt.DateFormat.ISODate
             )
-        self.logger.debug(
-            f"{books_infos.get('starting_read_date')=}, {books_infos.get('end_read_date')=}"
-        )
-
         return books_infos
 
     def create_book(self):
@@ -571,3 +575,4 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_addition_success"),
                     )
+                    self.qt_signals_handler.refresh_current_page_sg.emit()

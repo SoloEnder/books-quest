@@ -376,15 +376,14 @@ class ShelfCreationPage(base_page.BasePage):
         matches = self.get_matches(shelf_title)
 
         if matches:
+            title_suffix = utils_funcs.get_title_suffix(matches)
+
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({len(matches)})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({len(matches)})'"
+                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
             )
             self.existence_msgbox.exec()
 
-            if self.existence_msgbox.clickedButton() == self.rename_b:
-                title_suffix = len(matches)
-
-            else:
+            if not self.existence_msgbox.clickedButton() == self.rename_b:
                 return
 
         books: book_sys.BooksList = []
@@ -476,6 +475,7 @@ class ShelfCreationPage(base_page.BasePage):
                 QtWidgets.QMessageBox.information(
                     self, "Success", self.langs_handler.tr("shelf.msg.creation_success")
                 )
+                self.qt_signals_handler.refresh_current_page_sg.emit()
 
             elif self.current_mode == "edition":
                 if self.shelf:
@@ -486,3 +486,4 @@ class ShelfCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("shelf.msg.edition_success"),
                     )
+                self.qt_signals_handler.close_page_sg.emit()

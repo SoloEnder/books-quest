@@ -56,7 +56,12 @@
       "alr_read_pages": "Read pages : ",
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
-      "shelfs_selection": "Bookshelves : "
+      "shelfs_selection": "Bookshelves : ",
+      "reading_state": {
+        "unread": "Unread",
+        "finished": "Finished",
+        "currently_reading": "Currently reading"
+      }
     },
     "msg": {
       "invalid_title": "Book title is not valid !",
@@ -80,7 +85,8 @@
       "shelf_deletion": "Deleting /f:<count>/f shelves...",
       "empty_shelf": "There are no books here... \nWhy not add some ?",
       "creation_success": "Shelf added !",
-      "edition_success": "Shelf infos updated !"
+      "edition_success": "Shelf infos updated !",
+      "shelf_not_found": "Shelf not found"
     },
     "actions": {
       "select_books": "Select books :",

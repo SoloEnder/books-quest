@@ -9,7 +9,7 @@ from app.src import book_sys, langs_handler
 from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
-from app.ui.main_pages.shelfs_view_page import ShelfWidget
+from app.ui.main_pages.shelfs_view_page import DefaultShelfWidget, ShelfWidget
 from app.utils import images_tools, my_exceptions, utils_funcs
 
 
@@ -58,11 +58,31 @@ class ShelfDetailsPage(base_page.BasePage):
             widget=self,
             logger=self.logger,
         )
-        self.books_widgets = []
+        if self.shelf != self.books_handler.default_shelf:
+            self.shelf_basic_infos_w = BasicShelfInfosWidget(
+                self.shelf,
+                self.books_handler,
+                self.res_handler,
+                self.qt_signals_handler,
+                self.langs_handler,
+            )
+
+        else:
+            self.shelf_basic_infos_w = DefaultShelfWidget(
+                self.shelf,
+                self.books_handler,
+                self.res_handler,
+                self.qt_signals_handler,
+                self.langs_handler,
+            )
+        self.shelf_basic_infos_w.sub_widget.view_b.setVisible(False)
+        self.shelf_content_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
+        self.search_le.setProperty("role", "SearchField")
+        self.search_le.setObjectName("SearchInShelfField")
         self.search_le.setPlaceholderText(
-            self.langs_handler.tr("shared.actions.search.book")
+            self.langs_handler.tr("shared.actions.search.base")
         )
         self.search_le.setSizePolicy(*self.fix_min_exp_sp)
         self.search_le.setMinimumWidth(200)
@@ -84,8 +104,11 @@ class ShelfDetailsPage(base_page.BasePage):
                 widgets=[],
             )
         )
+        self.sep = QtWidgets.QFrame()
+        self.sep.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        self.widgets_pagination_view_handler.setObjectName("ShelfContentViewer")
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-            self.langs_handler.tr("shelf.msg.empty_shelf")
+            self.langs_handler.tr("shared.msg.nothing_to_show")
         )
         self.add_book_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.book_creation")
@@ -95,15 +118,32 @@ class ShelfDetailsPage(base_page.BasePage):
                 "BOOK_CREATION_PAGE", True, {}
             )
         )
+        self.add_shelf_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.shelf_creation")
+        )
+        self.add_shelf_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "SHELF_CREATION_PAGE", True, {"mode": "creation"}
+            )
+        )
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
             self.add_book_b, 1, 0, QtGui.Qt.AlignmentFlag.AlignCenter
+        )
+        self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
+            self.add_shelf_b, 2, 0, QtGui.Qt.AlignmentFlag.AlignCenter
         )
         # books widgets
         self.generate_widgets_pages()
 
         # Adding widgets to layout
-        self.main_lyt.addWidget(self.search_le, 0, 0)
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 0)
+        self.main_lyt.addWidget(
+            self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight
+        )
+        self.main_lyt.addWidget(
+            self.shelf_basic_infos_w, 1, 0, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.main_lyt.addWidget(self.sep, 1, 1)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 2)
 
     def create_children_widgets(
         self, books: book_sys.BooksList, shelves: book_sys.ShelvesList
@@ -186,15 +226,15 @@ class ShelfDetailsPage(base_page.BasePage):
     def exit_search(self):
 
         if not self.search_le.text():
-            for widget in self.books_widgets:
+            for widget in self.shelf_content_widgets:
                 if shiboken6.isValid(widget):
                     widget.deleteLater()
 
-            self.books_widgets = self.create_children_widgets(
+            self.shelf_content_widgets = self.create_children_widgets(
                 list(self.shelf._books),
                 list(self.shelf._children_shelves),
             )
-            self.widgets_pagination_view_handler.widgets = self.books_widgets
+            self.widgets_pagination_view_handler.widgets = self.shelf_content_widgets
 
             for widget in self.research_result_widgets:
                 widget.deleteLater()
@@ -203,6 +243,51 @@ class ShelfDetailsPage(base_page.BasePage):
             self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
                 self.langs_handler.tr("shelf.msg.empty_shelf")
             )
+
+
+class BasicShelfInfosWidget(ShelfWidget):
+    def __init__(
+        self, shelf, books_handler, res_handler, qt_signals_handler, langs_handler
+    ):
+        super().__init__(
+            shelf, books_handler, res_handler, qt_signals_handler, langs_handler
+        )
+        self.sub_widget.delete_b.clicked.disconnect(self.delete_shelf)
+        self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
+        self.sub_widget.view_b.hide()
+
+    @QtCore.Slot()
+    def delete_shelf(self):
+        """
+        An override of the `delete_shelf` method, which do basically the same, without deleting this widget from the widgets pagination handler, since there is *no* pagination handler
+        """
+        self.qt_signals_handler.edit_progress_msg.emit(
+            self.langs_handler.tr("shelf.msg.shelf_deletion", count=1)
+        )
+        self.logger.error(f"Deleting 1 Shelf (ID={self.shelf.id})...")
+        try:
+            print(self.shelf.str_id())
+            self.books_handler.delete_shelf(self.shelf.str_id())
+
+        except my_exceptions.BooksShelfNotFoundError:
+            self.logger.error(
+                f"Unable to delete Shelf (ID={self.shelf.id}) : Shelf not found !"
+            )
+            self.qt_signals_handler.notify_sg.emit(
+                "error", "", self.langs_handler.tr("shelf.msg.shelf_not_found"), ""
+            )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+        except Exception:
+            self.logger.exception(
+                f"Unable to delete Shelf (ID={self.shelf.id}) : due to the following exception : "
+            )
+            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+
+        else:
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals_handler.close_page_sg.emit()
 
 
 class BookWidget(widgets_pagination_view.InPageWidget):
@@ -234,7 +319,7 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             self.langs_handler,
             self.qt_signals_handler,
         )
-        self.book_title_lb.setObjectName("book_title_lb")
+        self.book_title_lb.setObjectName("BookTitleLabel")
         self.sub_widget.delete_b.clicked.connect(self.delete_book)
         self.max_sp = QtWidgets.QSizePolicy()
         self.max_sp.setVerticalPolicy(QtWidgets.QSizePolicy.Policy.Maximum)
@@ -331,17 +416,17 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_authors_lb = QtWidgets.QLabel(
             self.book.authors if self.book.authors else "Unknown"
         )
-        self.book_authors_lb.setObjectName("book_authors_lb")
+        self.book_authors_lb.setObjectName("BookAuthorLabel")
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setMinimumSize(350, 120)
         self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
-        self.book_summary_te.setObjectName("book_summary_te")
+        self.book_summary_te.setObjectName("BookSummary")
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
-        self.edit_b.setObjectName("edit_b")
+        self.edit_b.setObjectName("EditButton")
         self.edit_b.setIcon(
             images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
         )
@@ -360,7 +445,7 @@ class SubBookWidget(QtWidgets.QWidget):
             images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
         )
         self.delete_b.setSizePolicy(self.fixed_sp)
-        self.delete_b.setObjectName("delete_b")
+        self.delete_b.setObjectName("DeleteButton")
         self.main_layout.addWidget(self.book_authors_lb, 0, 1)
         self.main_layout.addWidget(
             self.book_summary_te,
