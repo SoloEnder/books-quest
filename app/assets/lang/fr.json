@@ -9,7 +9,7 @@
       "rename": "Renommer",
       "cancel": "Annuler",
       "search": {
-        "base": "Search",
+        "base": "Rechercher",
         "book": "Rechercher des livres",
         "shelf": "Rechercher des étagères"
       },
