@@ -11,7 +11,8 @@ SUPPORTED_UPDATES_FORMATS = ("1",)
 _doing_operation_on_installation = False
 
 
-def run(installation_path: str):
+def run(installation_path: str, window):
+    global _doing_operation_on_installation
     upgrader_filepath = sys.executable
     upgrader_folder = str(pathlib.Path(upgrader_filepath).parent)
     manifest = check_update(str(upgrader_folder), installation_path)
@@ -39,26 +40,28 @@ def run(installation_path: str):
     undo_filepath = os.path.join(backup_folder, "undo.json")
     utils.check_and_make_folder(backup_folder)
     utils.write_json(undo_filepath, [])
-    apply_patch(
+    apply_update(
         update_instructions,
         installation_path,
         backup_folder,
         upgrader_folder,
         undo_filepath,
         manifest["type"],
+        window.update_progress_sc,
     )
     update_state_data["state"] = "COMPLETED"
     update_state_data["ended_at"] = str(dt.datetime.now())
     utils.write_json(update_state_filepath, update_state_data)
 
 
-def apply_patch(
+def apply_update(
     instructions: list,
     installation_folder,
     backup_folder,
     update_content_folder: str,
     undo_filepath: str,
     update_type: typing.Literal["FULL", "PATCH"],
+    progress_gui,
 ):
     """
     Apply the patch instructions
@@ -76,7 +79,7 @@ def apply_patch(
     - InvalidUpdateInstructions: if `from_` or `to` does not respect the allowed syntax
     """
     undo = []
-
+    progress_gui.set_operations_count(len(instructions))
     for step in instructions:
         if step["type"] == "move":
             content_folder = (
@@ -92,10 +95,12 @@ def apply_patch(
                 undo,
             )
             utils.write_json(undo_filepath, undo)
+            progress_gui.progress(1)
 
         elif step["type"] == "remove":
             remove_item(step["path"], installation_folder, backup_folder, undo)
             utils.write_json(undo_filepath, undo)
+            progress_gui.progress(1)
 
         else:
             raise InvalidUpdateInstructions
@@ -199,16 +204,22 @@ def check_update(upgrader_folder: str, installation_path: str) -> dict:
     dict: the update infos (usually found in the `manifest.json` file)
     """
     upgrader_folder_content = os.listdir(upgrader_folder)
-    manifest_data = get_manifest(upgrader_folder)
+    manifest_data = utils.get_manifest(upgrader_folder)
 
     update_type = manifest_data["type"]
     if update_type == "PATCH":
-        excepted_content = ["content", "update_instructions.json", "upgrader.exe"]
+        excepted_content = [
+            "content",
+            "update_instructions.json",
+            "upgrader.exe",
+            "update_mnifest.json",
+        ]
 
     elif update_type == "FULL":
         excepted_content = [
             "update_manifest.json",
             "update_instructions.json",
+            "updater.exe",
             "upgrader.exe",
             "books-quest.exe",
             "app",
@@ -251,13 +262,6 @@ def check_update(upgrader_folder: str, installation_path: str) -> dict:
             installation_infos["version"]["readable"],
         )
     return manifest_data
-
-
-def get_manifest(patch_path: str) -> dict:
-    """
-    Returns the content of `infos.json` file in the patch
-    """
-    return utils.read_json(os.path.join(patch_path, "update_manifest.json"))
 
 
 class MyBaseException(Exception):
