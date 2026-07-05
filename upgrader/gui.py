@@ -11,13 +11,11 @@ class Window(tk.Tk):
         self.update_progress_sc = UpdateProgressScreen(self)
         self.update_error_sc = UpdateErrorScreen(self)
         self.update_success_sc = UpdateSuccessScreen(self)
-        self.update_finish_progress_sc = UpdateFinishProgress(self)
         self.screens = {
             "installation_selection_screen": self.installation_selection_sc,
             "update_progress_screen": self.update_progress_sc,
             "update_error_screen": self.update_error_sc,
             "update_success_screen": self.update_success_sc,
-            "update_finish_progress_screen": self.update_finish_progress_sc,
         }
         self.current_screen_infos: tuple[str, tk.Frame] = (
             "installation_selection_screen",
@@ -95,10 +93,19 @@ class UpdateProgressScreen(tk.Frame):
 class UpdateErrorScreen(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
-        self.error_t = tk.Text(self)
-        self.error_t.pack()
+        self.error = ""
+        self.error_lb = tk.Label(
+            self,
+            text="Sorry, an error occurred and the update could not be completed successfully !",
+        )
+        self.error_lb.pack()
         self.cancel_b = tk.Button(self, text="Cancel")
         self.cancel_b.pack()
+        self.show_error_b = tk.Button(self, text="Show error", command=self.show_error)
+        self.show_error_b.pack()
+
+    def show_error(self):
+        tkinter.messagebox.showerror("Upgrader error", message=self.error)
 
 
 class UpdateFinishProgress(tk.Frame):

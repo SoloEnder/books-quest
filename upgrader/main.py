@@ -45,7 +45,6 @@ def finish_update(
     installation_path: str,
 ):
     w.protocol("WM_DELETE_WINDOW", no_exit)
-    w.switch_screen("update_finish_progress_screen")
     p = subprocess.run(
         [
             updater_path,
@@ -57,7 +56,7 @@ def finish_update(
     if p.returncode != 0:
         tkinter.messagebox.showerror(
             title="Upgrader error",
-            message=f"Unable to finish properly update due to the following error : \n{p.stderr or p.stdout}",
+            message="Unable to finish properly update, Your installation may be corrupted !",
         )
     w.destroy()
     input("Type Something to exit")
@@ -80,24 +79,19 @@ def try_update():
             applier.run(installation_path)
 
         except Exception:
-            w.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: finish_update(updater_path, installation_path),
-            )
-            w.update_error_sc.cancel_b.config(
-                command=lambda: finish_update(updater_path, installation_path)
-            )
-            w.update_error_sc.error_t.insert(
-                0.0,
-                f"Couldn't perform update due to the follwing error :\n{traceback.format_exc()}",
-            )
+            w.update_error_sc.error = f"Couldn't perform update due to the follwing error :\n{traceback.format_exc()}"
             w.switch_screen("update_error_screen")
 
+            if applier._doing_operation_on_installation:
+                w.update_error_sc.cancel_b.config(
+                    command=lambda: finish_update(updater_path, installation_path)
+                )
+
+            else:
+                w.update_error_sc.cancel_b.config(command=w.destroy)
+
         else:
-            w.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: finish_update(updater_path, installation_path),
-            )
+            finish_update(updater_path, installation_path)
             w.switch_screen("update_success_screen")
 
 

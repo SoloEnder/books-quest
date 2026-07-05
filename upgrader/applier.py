@@ -8,6 +8,7 @@ import typing
 import utils
 
 SUPPORTED_UPDATES_FORMATS = ("1",)
+_doing_operation_on_installation = False
 
 
 def run(installation_path: str):
@@ -30,6 +31,7 @@ def run(installation_path: str):
         "ended_at": None,
         "backup_folder": backup_folder,
     }
+    _doing_operation_on_installation = True
     utils.write_json(update_state_filepath, update_state_data)
     update_instructions = utils.read_json(
         os.path.join(upgrader_folder, "update_instructions.json")
