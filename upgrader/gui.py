@@ -63,7 +63,7 @@ class InstallationSelectionScreen(tk.Frame):
         self.installation_path_lb.grid(row=0, column=0, columnspan=2)
         self.warning_lb = ttk.Label(
             self,
-            text="!!! Please ensure that the instance is not active, and make sure to remove quotation marks around the path !!!",
+            text="!!! 1) Please ensure that the instance is not active. \n2) and make sure to remove quotation marks around the path !!!",
         )
         self.warning_lb.grid(row=1, column=0, columnspan=2)
         self.installation_path_sv = tk.StringVar(self)

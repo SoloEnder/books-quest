@@ -109,6 +109,32 @@ class AppSystem:
         ):
             self.show_indev_warn()
 
+    def clean_upgrader_files(self):
+        if paths.MODE == "frozen":
+            to_remove_files = (
+                os.path.join(paths.BASE_PATH, "update_instructions.json"),
+                os.path.join(paths.BASE_PATH, "update_manifest.json"),
+                os.path.join(paths.BASE_PATH, "upgrader.exe"),
+            )
+            for file in to_remove_files:
+                try:
+                    os.remove(file)
+
+                except FileNotFoundError:
+                    self.logger.error(
+                        f"Coundn't remove upgrade file '{file}' : file not found !"
+                    )
+
+                except PermissionError:
+                    self.logger.error(
+                        f"Coundn't remove upgrade file '{file}' : permission denied !"
+                    )
+
+                except Exception:
+                    self.logger.exception(
+                        f"Coundn't remove upgrade file '{file}' due to the following error :\n"
+                    )
+
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
@@ -201,6 +227,8 @@ class AppSystem:
             else:
                 with open(filepath, "w") as f:
                     f.write(str(data))
+
+        self.clean_upgrader_files()
 
     def check_folder(self, *folders):
         """
