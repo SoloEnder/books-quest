@@ -62,7 +62,6 @@ def finish_update(updater_path, installation_path: str, destroy_w: bool = True):
 
     if destroy_w:
         w.destroy()
-        input("Type Something to exit")
 
 
 def try_update():
@@ -84,8 +83,6 @@ def try_update():
         except Exception:
             w.update_error_sc.error = f"Couldn't perform update due to the follwing error :\n{traceback.format_exc()}"
             w.switch_screen("update_error_screen")
-
-            print(applier._doing_operation_on_installation)
 
             if applier._doing_operation_on_installation:
                 w.update_error_sc.cancel_b.config(
