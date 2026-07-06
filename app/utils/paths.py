@@ -4,7 +4,7 @@ import sys
 import typing
 from pathlib import Path
 
-print(f"{sys.executable=}")
+MODE: typing.Literal["frozen", "unfrozen"] = "unfrozen"
 
 
 def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> str:
@@ -27,6 +27,6 @@ def get_base_path(mode: typing.Literal["frozen", "unfrozen"] = "unfrozen") -> st
     return str(path)
 
 
-BASE_PATH = get_base_path()
+BASE_PATH = get_base_path(MODE)
 APP_PATH = os.path.join(BASE_PATH, "app")
 RESS_INDEXES_FILEPATH = os.path.join(APP_PATH, "indexes.json")

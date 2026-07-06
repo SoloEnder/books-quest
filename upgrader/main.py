@@ -7,7 +7,7 @@ import applier
 import gui
 import utils
 
-UPGRADER_VERSION = "1.0.0"
+UPGRADER_VERSION = "1.1.0"
 
 w = gui.Window()
 w.switch_screen("installation_selection_screen")
@@ -16,6 +16,10 @@ w.upgrader_version = UPGRADER_VERSION
 
 def no_exit():
     pass
+
+
+def destroy_window():
+    w.destroy()
 
 
 class InvalidInstallationError(utils.MyBaseException):
@@ -40,12 +44,8 @@ def check_installation(installation_path: str):
             raise InvalidInstallationError(installation_path)
 
 
-def finish_update(
-    updater_path,
-    installation_path: str,
-):
-    w.protocol("WM_DELETE_WINDOW", no_exit)
-    w.switch_screen("update_finish_progress_screen")
+def finish_update(updater_path, installation_path: str, destroy_w: bool = True):
+    w.wm_protocol("WM_DELETE_WINDOW", no_exit)
     p = subprocess.run(
         [
             updater_path,
@@ -57,10 +57,11 @@ def finish_update(
     if p.returncode != 0:
         tkinter.messagebox.showerror(
             title="Upgrader error",
-            message=f"Unable to finish properly update due to the following error : \n{p.stderr or p.stdout}",
+            message="Unable to finish properly update, Your installation may be corrupted !",
         )
-    w.destroy()
-    input("Type Something to exit")
+
+    if destroy_w:
+        w.destroy()
 
 
 def try_update():
@@ -77,28 +78,25 @@ def try_update():
         try:
             w.switch_screen("update_progress_screen")
             w.protocol("WM_DELETE_WINDOW", func=no_exit)
-            applier.run(installation_path)
+            applier.run(installation_path, w)
 
         except Exception:
-            w.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: finish_update(updater_path, installation_path),
-            )
-            w.update_error_sc.cancel_b.config(
-                command=lambda: finish_update(updater_path, installation_path)
-            )
-            w.update_error_sc.error_t.insert(
-                0.0,
-                f"Couldn't perform update due to the follwing error :\n{traceback.format_exc()}",
-            )
+            w.update_error_sc.error = f"Couldn't perform update due to the follwing error :\n{traceback.format_exc()}"
             w.switch_screen("update_error_screen")
 
+            if applier._doing_operation_on_installation:
+                w.update_error_sc.cancel_b.config(
+                    command=lambda: finish_update(updater_path, installation_path)
+                )
+
+            else:
+                w.wm_protocol("WM_DELETE_WINDOW", destroy_window)
+                w.update_error_sc.cancel_b.config(command=w.destroy)
+
         else:
-            w.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: finish_update(updater_path, installation_path),
-            )
+            finish_update(updater_path, installation_path, False)
             w.switch_screen("update_success_screen")
+            w.wm_protocol("WM_DELETE_WINDOW", destroy_window)
 
 
 w.installation_selection_sc.confirm_b.config(command=try_update)

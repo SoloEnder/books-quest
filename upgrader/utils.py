@@ -24,6 +24,13 @@ def get_installation_infos(installation_path: str) -> dict:
         return json.load(f)
 
 
+def get_manifest(update_path: str) -> dict:
+    """
+    Returns the content of `infos.json` file in the update
+    """
+    return read_json(os.path.join(update_path, "update_manifest.json"))
+
+
 def read_json(filepath: str):
 
     with open(filepath, "r", encoding="utf-8") as f:
