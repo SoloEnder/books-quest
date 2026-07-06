@@ -35,4 +35,4 @@ BooksQuest is under development, so you may encounter bugs (report them [here](h
 ## About
 BooksQuest is developed by [SoloEnder](https://github.com/SoloEnder) under the MIT licenses.
 It is packaged using PyInstaller, and the graphical user interface is built with the PySide6 library.
-Current Version : 0.1.0
+Current Version : 0.2.0
