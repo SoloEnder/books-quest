@@ -401,7 +401,7 @@ class ShelfCreationPage(base_page.BasePage):
 
         if self.current_shelf_cover != self.default_shelf_cover:
             final_img_path = os.path.join(
-                self.res_handler.get_res("data.bookshelves.covers"),
+                self.res_handler.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
             done = self.move_cover_img(final_img_path)

@@ -500,7 +500,7 @@ class BookCreationPage(base_page.BasePage):
 
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
-                self.res_handler.get_res("data.books.covers"),
+                self.res_handler.get_res("data.user.books.covers"),
                 f"{str(books_infos['id'])}.png",
             )
             self.logger.debug(f"Final book cover path : {final_cover_image}")
@@ -509,7 +509,7 @@ class BookCreationPage(base_page.BasePage):
                 shutil.copy2(
                     self.cover_image,
                     os.path.join(
-                        self.res_handler.get_res("data.books.covers"),
+                        self.res_handler.get_res("data.user.books.covers"),
                         final_cover_image,
                     ),
                 )

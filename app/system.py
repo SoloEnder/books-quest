@@ -26,8 +26,8 @@ class AppSystem:
             self.jfm, {}, paths.APP_PATH
         )
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
+        self.boots_count = self.get_boots_count()
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
-        self.app_infos["boot_count"] += 1
         first_boot = self.check_first_boot()
         if first_boot:
             self.logger.info("Processing first boot operations...")
@@ -37,19 +37,20 @@ class AppSystem:
             self.check_folder(
                 self.res_handler.get_res("data"),
                 self.res_handler.get_res("assets"),
-                self.res_handler.get_res("data.books"),
-                self.res_handler.get_res("data.books.covers"),
-                self.res_handler.get_res("data.bookshelves"),
-                self.res_handler.get_res("data.bookshelves.covers"),
+                self.res_handler.get_res("data.user"),
+                self.res_handler.get_res("data.user.books"),
+                self.res_handler.get_res("data.user.books.covers"),
+                self.res_handler.get_res("data.user.bookshelves"),
+                self.res_handler.get_res("data.user.bookshelves.covers"),
             )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler(
             jfm=self.jfm,
             res_handler=self.res_handler,
         )
-        self.books_handler.load_books(self.res_handler.get_res("data.books.books"))
+        self.books_handler.load_books(self.res_handler.get_res("data.user.books.books"))
         self.books_handler.load_shelves(
-            self.res_handler.get_res("data.bookshelves.bookshelves")
+            self.res_handler.get_res("data.user.bookshelves.bookshelves")
         )
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.settings_handler = settings_handler.SettingsHandler(self.jfm)
@@ -65,12 +66,12 @@ class AppSystem:
 
     def load_and_apply_settings(self):
         self.settings_handler.load_base_settings(
-            self.res_handler.get_res("data.settings.base")
+            self.res_handler.get_res("data.app.static.base_settings")
         )
 
         try:
             self.settings_handler.load_user_settings(
-                self.res_handler.get_res("data.settings.user")
+                self.res_handler.get_res("data.user.settings")
             )
 
         except FileNotFoundError:
@@ -84,6 +85,7 @@ class AppSystem:
 
     def start(self):
         self.start_ui()
+        self.boots_count += 1
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
@@ -138,15 +140,15 @@ class AppSystem:
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.save_app_infos(self.res_handler.get_res("app_infos"))
-        self.books_handler.save_books(self.res_handler.get_res("data.books.books"))
+        self.save_boots_count()
+        self.books_handler.save_books(self.res_handler.get_res("data.user.books.books"))
         self.books_handler.save_shelfs(
-            self.res_handler.get_res("data.bookshelves.bookshelves")
+            self.res_handler.get_res("data.user.bookshelves.bookshelves")
         )
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         self.settings_handler.save_settings(
-            self.res_handler.get_res("data.settings.base"),
-            self.res_handler.get_res("data.settings.user"),
+            self.res_handler.get_res("data.app.static.base_settings"),
+            self.res_handler.get_res("data.user.settings"),
         )
         self.logger.info("Exiting app...")
 
@@ -174,23 +176,58 @@ class AppSystem:
                     f"Unable to destroy file '{element}' in the temporary folder !"
                 )
 
+    def get_boots_count(self):
+
+        try:
+            with open(self.res_handler.get_res("data.app.boots_count"), "r") as f:
+                boots_count = int(f.read())
+
+        except FileNotFoundError:
+            self.logger.warning("Boots count file not found, setting boot count to 0")
+            boots_count = 0
+
+        except PermissionError:
+            self.logger.warning(
+                "Could not load boot count file due to PermissionError, setting boot count to 0"
+            )
+            boots_count = 0
+
+        except ValueError:
+            self.logger.warning("Invalid boots count, setting boots count to 0")
+            boots_count = 0
+
+        return boots_count
+
+    def save_boots_count(self):
+        try:
+            with open(self.res_handler.get_res("data.app.boots_count"), "w") as f:
+                f.write(str(self.boots_count))
+
+        except PermissionError:
+            self.logger.error(
+                "Could not save boot count in file due to PermissionError !"
+            )
+
     def check_first_boot(self):
-        if self.app_infos:
-            if self.app_infos["boot_count"] == 1:
-                return True
+        if self.boots_count == 0:
+            return True
+
+        else:
+            return False
 
     def first_boot_operations(self):
         folder_to_make = (
-            self.res_handler.get_res("data.books"),
-            self.res_handler.get_res("data.books.covers"),
-            self.res_handler.get_res("data.bookshelves"),
-            self.res_handler.get_res("data.bookshelves.covers"),
+            self.res_handler.get_res("data.user"),
+            self.res_handler.get_res("data.user.books"),
+            self.res_handler.get_res("data.user.books.covers"),
+            self.res_handler.get_res("data.user.bookshelves"),
+            self.res_handler.get_res("data.user.bookshelves.covers"),
             self.res_handler.get_res("tmp"),
         )
         file_to_make = (
-            (self.res_handler.get_res("data.books.books"), []),
-            (self.res_handler.get_res("data.bookshelves.bookshelves"), []),
-            (self.res_handler.get_res("data.settings.user"), {}),
+            (self.res_handler.get_res("data.user.books.books"), []),
+            (self.res_handler.get_res("data.user.bookshelves.bookshelves"), []),
+            (self.res_handler.get_res("data.user.settings"), {}),
         )
 
         for folder in folder_to_make:
@@ -249,23 +286,28 @@ class AppSystem:
         Args:
         - filepath (str, pathlib.Path): the app infos file path
         """
-        app_infos = self.jfm.read_json(filepath, catch_error=False)
+        try:
+            app_infos = self.jfm.read_json(filepath, catch_error=False)
+
+        except (FileNotFoundError, PermissionError):
+            self.logger.error("Could not find app infos file !")
+            app_infos = None
 
         if not app_infos:
-            app_infos = {
-                "version": {
-                    "readable": "Unknown",
-                    "semantic": "Unknown",
-                },
-                "boot_count": 0,
-            }
             self.logger.warning(
-                "App infos file empty or corrupted, writing default app infos."
+                "App infos file not found or corrupted, using default app infos"
             )
+            app_infos = {
+                "app_version": "0.3.0",
+                "root_directory_content": [
+                    "app",
+                    "licenses",
+                    "LICENSE",
+                    "THIRD_PARTY_NOTICE.txt",
+                    "main.py",
+                ],
+            }
         return app_infos
-
-    def save_app_infos(self, filepath: str | pathlib.Path):
-        self.jfm.write_json(filepath, data=self.app_infos, catch_error=False)
 
     def show_indev_warn(self):
         """
