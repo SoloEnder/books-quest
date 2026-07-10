@@ -26,10 +26,9 @@ class AppSystem:
             self.jfm, {}, paths.APP_PATH
         )
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
-        self.boots_count = self.get_boots_count()
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
-        first_boot = self.check_first_boot()
-        if first_boot:
+        self.installation_infos = self.get_installation_infos()
+        if self.check_first_boot():
             self.logger.info("Processing first boot operations...")
             self.first_boot_operations()
 
@@ -64,6 +63,29 @@ class AppSystem:
         self.logger.info("Erasing files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
 
+    def get_installation_infos(self):
+        installation_infos = self.jfm.read_json(
+            self.res_handler.get_res("data.app.installation_infos"), catch_error=True
+        )
+
+        if not installation_infos:
+            self.logger.warning(
+                "Could not get valid installation infos from file, writting default installation infos"
+            )
+            installation_infos = {
+                "boots_count": 0,
+                "app_version": self.app_infos["app_version"],
+                "previous_versions": [],
+                "last_update_date": None,
+            }
+        return installation_infos
+
+    def save_installation_infos(self):
+        self.jfm.write_json(
+            self.res_handler.get_res("data.app.installation_infos"),
+            self.installation_infos,
+        )
+
     def load_and_apply_settings(self):
         self.settings_handler.load_base_settings(
             self.res_handler.get_res("data.app.static.base_settings")
@@ -85,7 +107,7 @@ class AppSystem:
 
     def start(self):
         self.start_ui()
-        self.boots_count += 1
+        self.installation_infos["boots_count"] += 1
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
@@ -140,16 +162,16 @@ class AppSystem:
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.save_boots_count()
         self.books_handler.save_books(self.res_handler.get_res("data.user.books.books"))
         self.books_handler.save_shelfs(
             self.res_handler.get_res("data.user.bookshelves.bookshelves")
         )
-        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         self.settings_handler.save_settings(
             self.res_handler.get_res("data.app.static.base_settings"),
             self.res_handler.get_res("data.user.settings"),
         )
+        self.save_installation_infos()
+        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
         self.logger.info("Exiting app...")
 
     def set_instance_locker(self, instance_locker: QtCore.QLockFile):
@@ -176,40 +198,8 @@ class AppSystem:
                     f"Unable to destroy file '{element}' in the temporary folder !"
                 )
 
-    def get_boots_count(self):
-
-        try:
-            with open(self.res_handler.get_res("data.app.boots_count"), "r") as f:
-                boots_count = int(f.read())
-
-        except FileNotFoundError:
-            self.logger.warning("Boots count file not found, setting boot count to 0")
-            boots_count = 0
-
-        except PermissionError:
-            self.logger.warning(
-                "Could not load boot count file due to PermissionError, setting boot count to 0"
-            )
-            boots_count = 0
-
-        except ValueError:
-            self.logger.warning("Invalid boots count, setting boots count to 0")
-            boots_count = 0
-
-        return boots_count
-
-    def save_boots_count(self):
-        try:
-            with open(self.res_handler.get_res("data.app.boots_count"), "w") as f:
-                f.write(str(self.boots_count))
-
-        except PermissionError:
-            self.logger.error(
-                "Could not save boot count in file due to PermissionError !"
-            )
-
     def check_first_boot(self):
-        if self.boots_count == 0:
+        if self.installation_infos["boots_count"] == 0:
             return True
 
         else:

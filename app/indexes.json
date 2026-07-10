@@ -50,7 +50,7 @@
         "_base_": "static",
         "base_settings": "base_settings.json"
       },
-      "boots_count": "boots_count.txt"
+      "installation_infos": "installation_infos.json"
     },
     "user": {
       "_base_": "user_data",
