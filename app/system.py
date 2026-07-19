@@ -296,7 +296,15 @@ class AppSystem:
                     "THIRD_PARTY_NOTICE.txt",
                     "main.py",
                 ],
+                "elements_to_preserve": [
+                    "app/data/user_data/books_data",
+                    "app/data/user_data/bookshelves_data",
+                ],
             }
+            self.jfm.write_json(
+                filepath,
+                app_infos,
+            )
         return app_infos
 
     def show_indev_warn(self):
