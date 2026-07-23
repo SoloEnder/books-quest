@@ -24,13 +24,6 @@ def get_installation_infos(installation_path: str) -> dict:
         return json.load(f)
 
 
-def get_manifest(update_path: str) -> dict:
-    """
-    Returns the content of `infos.json` file in the update
-    """
-    return read_json(os.path.join(update_path, "update_manifest.json"))
-
-
 def read_json(filepath: str):
 
     with open(filepath, "r", encoding="utf-8") as f:
@@ -43,13 +36,13 @@ def write_json(filepath: str, data):
         json.dump(data, f)
 
 
-def check_and_make_folder(folder: str):
+def check_and_make_folder(extraction_folder: str):
     """
     Checks if a folder exists, and make it otherwise
 
     Parameters
     ----------
-    - folder: the folder to check
+    - extraction_folder: the folder to check
     """
-    if not os.path.exists(folder):
-        os.mkdir(folder)
+    if not os.path.exists(extraction_folder):
+        os.mkdir(extraction_folder)

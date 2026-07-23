@@ -1,7 +1,10 @@
+import logging
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
 from tkinter import ttk
+
+logger = logging.getLogger("updater.gui")
 
 
 class Window(tk.Tk):
@@ -9,12 +12,12 @@ class Window(tk.Tk):
         super().__init__()
         self.geometry("450x300")
         self.installation_selection_sc = InstallationSelectionScreen(self)
-        self.update_progress_sc = UpdateProgressScreen(self)
+        self.work_in_progress_sc = WorkInProgressScreen(self)
         self.update_error_sc = UpdateErrorScreen(self)
         self.update_success_sc = UpdateSuccessScreen(self)
         self.screens = {
             "installation_selection_screen": self.installation_selection_sc,
-            "update_progress_screen": self.update_progress_sc,
+            "work_in_progress_screen": self.work_in_progress_sc,
             "update_error_screen": self.update_error_sc,
             "update_success_screen": self.update_success_sc,
         }
@@ -82,27 +85,115 @@ class InstallationSelectionScreen(tk.Frame):
         self.installation_path_sv.set(tkinter.filedialog.askdirectory())
 
 
-class UpdateProgressScreen(tk.Frame):
+class WorkInProgressScreen(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
-        self.update_in_progress_lb = ttk.Label(
+        self.operations_groups = {
+            "default": {
+                "name": "default",
+                "msg": "Work in progress, please wait...",
+                "operations_count": 1,
+                "progress": 0,
+            }
+        }
+        self.work_in_progress_lb = ttk.Label(
             self,
-            text="Update in progress, do not close the program or launch the update installation...",
+            text="Work in progress, do not close the program or launch the installation...",
         )
-        self.update_in_progress_lb.pack()
-        self.operations_count = 1
-        self.update_in_progress_pb = ttk.Progressbar(
+        self.current_operations_group = self.operations_groups["default"]
+        self.work_in_progress_lb.pack()
+        self.current_operations_group_msg_lb = tk.Label(
+            self, text=self.current_operations_group["msg"], anchor="w"
+        )
+        self.current_operations_group_msg_lb.pack(pady=5)
+        self.work_in_progress_pb = ttk.Progressbar(
             self, mode="determinate", orient="horizontal", length=300
         )
-        self.update_in_progress_pb.pack()
+        self.work_in_progress_pb.pack()
 
-    def set_operations_count(self, count: int):
-        self.operations_count = count if count != 0 else 1
+    def progress_group(self, group_name: str | None = None, step: int = 1):
+        if group_name:
+            group = self.operations_groups[group_name]
 
-    def progress(self, step):
-        value = (step / self.operations_count) * 100
-        self.update_in_progress_pb["value"] += value
+        else:
+            group = self.current_operations_group
+
+        group["progress"] += step
+        self.work_in_progress_pb["value"] = (
+            group["progress"] / group["operations_count"] * 100
+        )
         self.update()
+
+    def add_operations_group(
+        self,
+        group_name: str,
+        group_msg: str,
+        operations_count: int = 1,
+        progress: int = 0,
+        set_as_current: bool = True,
+    ):
+        """
+        Adds an new group of operations.
+
+        Parameters
+        ----------
+        group_name (str): the name of the group (e.g. "files_removing")
+        group_msg (str): the message displayed to the user for this group (e.g. "Removing files...")
+        operations_count (int): the count of operation that this group do
+        progress (int=0): the progress of the operations, used to update the progress bar
+        set_default (bool=True): wether to set the created operations group as the current operations group
+        """
+        logger.info(f"Adding new operations group '{group_name}'")
+        self.operations_groups[group_name] = {
+            "name": group_name,
+            "msg": group_msg,
+            "operations_count": operations_count,
+            "progress": progress,
+        }
+
+        if set_as_current:
+            self.set_current_operations_group(group_name)
+            return
+        self._update_current_operation_group()
+
+    def set_current_operations_group(self, group_name: str):
+        """
+        Set the current operation group
+
+        Parameters
+        ----------
+        - group_name (str): the group name to set.
+        """
+        logger.info(f"Setting current operations group as '{group_name}'")
+        self.current_operations_group = self.operations_groups[group_name]
+        self._update_current_operation_group()
+
+    def _update_current_operation_group(self):
+        self.current_operations_group_msg_lb.config(
+            text=self.current_operations_group["msg"]
+        )
+        self.progress_group(step=0)
+
+    def edit_operations_group(self, group_name: str | None = None, **kwargs):
+        """
+        Edits the data of an operation group
+
+        Parameters
+        ----------
+        - group_name (str|None=None): the name of the group to edit. If equal to None, then the current operations group is used.
+        - **kwargs: the key of the entries to edit, and their new values
+        """
+
+        if group_name:
+            group = self.operations_groups[group_name]
+
+        else:
+            group = self.current_operations_group
+
+        for key, value in kwargs:
+            group[key] = value
+
+        self._update_current_operation_group()
 
 
 class UpdateErrorScreen(tk.Frame):
@@ -131,16 +222,6 @@ class UpdateErrorScreen(tk.Frame):
         tkinter.messagebox.showinfo(
             title="BooksQuest Upgrader", message="Error copied to clipboard"
         )
-
-
-class UpdateFinishProgress(tk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.cancel_progress_lb = ttk.Label(
-            self,
-            text="Finishing update, do not close the window or launch the installation",
-        )
-        self.cancel_progress_lb.pack()
 
 
 class UpdateSuccessScreen(tk.Frame):
