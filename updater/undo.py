@@ -36,6 +36,10 @@ class UndoActionsHandler(utils.UpdateActionsHandler):
         ---------
         - updater_to_replace: the path to the updater to replace
         - new_updater: the path to the new updater
+
+        Returns
+        -------
+        - bool: if an exit of the current program is need or not
         """
         logger.info(
             f"Preparing the replacement of the updater at {updater_to_replace} by updater at {new_updater}..."
@@ -50,7 +54,7 @@ class UndoActionsHandler(utils.UpdateActionsHandler):
             )
             self.remove_element(updater_to_replace, backup=False)
             self.copy(from_=new_updater, to=updater_to_replace, add_undo=False)
-            return
+            return False
 
         updater_to_replace_filename, updater_to_replace_ext = os.path.splitext(
             updater_to_replace_abs_path
@@ -76,6 +80,7 @@ class UndoActionsHandler(utils.UpdateActionsHandler):
                 "check-debris",
             ]
         )
+        return True
 
     def replace_updater(self, old_updater: str, new_updater: str, **kwargs):
         """
@@ -126,14 +131,18 @@ class UndoActionsHandler(utils.UpdateActionsHandler):
                 self.done_undo(instruction)
 
             elif instruction["type"] == "PREPARE_UPDATER_REPLACEMENT":
-                self.prepare_updater_replacement(**instruction)
+                need_exit = self.prepare_updater_replacement(**instruction)
                 self.done_undo(instruction)
-                tkinter.messagebox.showinfo(
-                    title="Updater",
-                    message="The updater will restart to continue the update cancelation, simply click on 'ok'",
-                )
-                logger.info("Exiting current updater and launching other updater...")
-                sys.exit()
+
+                if need_exit:
+                    tkinter.messagebox.showinfo(
+                        title="Updater",
+                        message="The updater will restart to continue the update cancelation, simply click on 'ok'",
+                    )
+                    logger.info(
+                        "Exiting current updater and launching other updater..."
+                    )
+                    sys.exit()
 
             elif instruction["type"] == "REPLACE_UPDATER":
                 logger.info(

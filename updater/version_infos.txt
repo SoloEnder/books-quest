@@ -30,13 +30,13 @@ VSVersionInfo(
       StringTable(
         '040904B0',
         [StringStruct('CompanyName', 'SoloEnder'),
-        StringStruct('FileDescription', 'Updates existing BooksQuest installations'),
-        StringStruct('FileVersion', '1.1.0.0'),
-        StringStruct('InternalName', 'upgrader'),
+        StringStruct('FileDescription', 'Perform or cancel incomplete update on BooksQuest installations'),
+        StringStruct('FileVersion', '2.0.0.0'),
+        StringStruct('InternalName', 'updater'),
         StringStruct('LegalCopyright', 'Copyright (c) 2026 SoloEnder'),
-        StringStruct('OriginalFilename', 'upgrader.exe'),
-        StringStruct('ProductName', 'BooksQuest Upgrader'),
-        StringStruct('ProductVersion', '1.1.0.0')])
+        StringStruct('OriginalFilename', 'updater.exe'),
+        StringStruct('ProductName', 'BooksQuest Updater'),
+        StringStruct('ProductVersion', '2.0.0.0')])
       ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]

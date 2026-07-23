@@ -40,7 +40,6 @@ def gen_instructions(update_res: utils.UpdateRes) -> list[dict[str, str]]:
             {
                 "type": "REMOVE",
                 "path": f"{update_res.installation_alias}::{element}",
-                "state": "not_started",
             }
         )
 
@@ -50,7 +49,6 @@ def gen_instructions(update_res: utils.UpdateRes) -> list[dict[str, str]]:
                 "type": "COPY",
                 "from_": f"{update_res.update_alias}::{element}",
                 "to": f"{update_res.installation_alias}::{element}",
-                "status": "not_started",
             }
         )
 

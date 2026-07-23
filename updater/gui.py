@@ -25,7 +25,7 @@ class Window(tk.Tk):
             "installation_selection_screen",
             self.screens["installation_selection_screen"],
         )
-        self.upgrader_version = ""
+        self.updater_version = ""
         self.about_b = ttk.Button(self, text="About", command=self.about)
         self.about_b.pack(pady=20)
         self.switch_screen(self.current_screen_infos[0])
@@ -33,7 +33,7 @@ class Window(tk.Tk):
     def about(self):
         tkinter.messagebox.showinfo(
             title="About",
-            message=f"Books Quest Upgrader version {self.upgrader_version}",
+            message=f"Books Quest Updater version {self.updater_version}",
         )
 
     def switch_screen(self, screen_name: str) -> tk.Frame:

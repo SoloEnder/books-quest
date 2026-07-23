@@ -5,7 +5,6 @@ import logging.handlers
 import os
 import pathlib
 import sys
-import threading
 import tkinter.messagebox
 import traceback
 
@@ -241,6 +240,7 @@ def some_compatibility(installation_app_infos: dict):
 
 
 def try_update():
+    check_debris_mode(installation_folder=window.get_installation_folder())
     result = check_before_start()
     if not result:
         return
@@ -277,7 +277,6 @@ def try_update():
 
     else:
         installation_infos = {}
-    check_debris_mode()
     update_state_data = {
         "started_at": str(start),
         "ended_at": None,
@@ -354,6 +353,7 @@ mode_arg, unknown_args = mode_parser.parse_known_args()
 
 
 window = gui.Window()
+window.updater_version = VERSION
 updater_file = sys.executable
 updater_folder = str(pathlib.Path(updater_file).parent.resolve())
 
@@ -376,14 +376,12 @@ def update_mode():
         try_update()
 
     else:
-        check_debris_mode()
         window.installation_selection_sc.confirm_b.config(command=try_update)
 
 
-def check_debris_mode():
+def check_debris_mode(installation_folder: str = updater_folder):
     logger.info("Starting 'check-debris' mode")
     try:
-        installation_folder = updater_folder
         update_state_filepath = os.path.join(installation_folder, "update_state.json")
 
         if os.path.exists(update_state_filepath):
@@ -432,6 +430,10 @@ def check_debris_mode():
         )
         if update_state_data["status"] == "IN_PROGRESS":
             logger.info("Update marked as in progress, cancelling update")
+            tkinter.messagebox.showinfo(
+                title="Updater",
+                message="An incomplete update has been detected in your installation\nThis update must be canceled before performing any other action",
+            )
             cancel_update(after_update_res)
 
     except Exception:
@@ -467,8 +469,5 @@ elif mode_arg.mode == "check-debris":
     logger.info("Launching in 'check-debris' mode")
     check_debris_mode()
     complete_exit()
-
-    for t in threading.enumerate():
-        print(t.name, t.daemon)
 
 window.mainloop()
