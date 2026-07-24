@@ -9,6 +9,15 @@ import utils
 logger = logging.getLogger("updater.applier")
 
 
+class UnknownUpdateTypeError(utils.MyBaseException):
+    def __init__(self, update_type):
+        """
+        Unknown update type
+        """
+        self.update_type = update_type
+        self.msg = f"Unknown update type '{self.update_type}'"
+
+
 def run(
     update_res: utils.UpdateRes,
     update_actions_handler: utils.UpdateActionsHandler,
@@ -34,3 +43,6 @@ def run(
             update_actions_handler,
             window,
         )
+
+    else:
+        raise UnknownUpdateTypeError(update_infos["type"])
