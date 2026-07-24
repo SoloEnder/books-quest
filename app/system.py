@@ -28,6 +28,7 @@ class AppSystem:
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
+        self.clean_updater_files()
         if self.check_first_boot():
             self.logger.info("Processing first boot operations...")
             self.first_boot_operations()
@@ -133,8 +134,8 @@ class AppSystem:
         ):
             self.show_indev_warn()
 
-    def clean_upgrader_files(self):
-        if paths.MODE == "frozen":
+    def clean_updater_files(self):
+        if paths.MODE == "frozen" and self.installation_infos["boots_count"] > 5:
             to_remove_files = (
                 os.path.join(paths.BASE_PATH, "update_instructions.json"),
                 os.path.join(paths.BASE_PATH, "update_manifest.json"),
@@ -254,8 +255,6 @@ class AppSystem:
             else:
                 with open(filepath, "w") as f:
                     f.write(str(data))
-
-        self.clean_upgrader_files()
 
     def check_folder(self, *folders):
         """
