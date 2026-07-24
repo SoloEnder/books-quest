@@ -383,6 +383,7 @@ class UpdateActionsHandler:
             self.copy(
                 f"{self.update_res.backup_alias}::{element}",
                 f"{self.update_res.installation_alias}::{element}",
+                ignore_missing_src=True,
             )
             self.window.work_in_progress_sc.progress_group()
 
