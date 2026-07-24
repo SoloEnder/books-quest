@@ -73,8 +73,7 @@ def check_update() -> dict | None:
                 title="Updater", message=f"File '{file}' is missing in updater !"
             )
             return
-    else:
-        return update_infos
+    return update_infos
 
 
 def check_before_start() -> dict[str, dict] | None:
@@ -160,6 +159,8 @@ def try_cancel(update_res: utils.UpdateRes):
         window.update_error_sc.error_lb.config(
             text="The update has been successfully canceled, you can close this window\nTo help us improve the service, you can report the error at https://github.com/SoloEnder/books-quest/issues"
         )
+        window.switch_screen("update_error_screen")
+        window.protocol("WM_DELETE_WINDOW", complete_exit)
         window.update_error_sc.cancel_b.config(text="Quit", command=complete_exit)
         tkinter.messagebox.showinfo(
             title="Books Quest Updater", message="Update canceled sucessfully"
@@ -303,7 +304,7 @@ def try_update():
     logger.info("Creating update backup folder...")
     utils.check_and_make_folder(backup_folder)
     logger.info("Writing undo.json for the first time...")
-    utils.write_json(undo_filepath, list())
+    utils.write_json(undo_filepath, [])
     update_actions_handler = utils.UpdateActionsHandler(update_res, window)
     migrations_handler = migrate.MigrationsHandler(
         update_res, update_actions_handler, window
@@ -420,9 +421,9 @@ def check_debris_mode(installation_folder: str = updater_folder):
             backup_folder,
             update_state_filepath,
             undo_filepath,
-            dict(),
+            {},
             installation_app_infos,
-            dict(),
+            {},
             update_state_data,
             "INSTALLATION",
             "UPDATE",
