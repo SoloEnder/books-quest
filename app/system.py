@@ -325,24 +325,24 @@ class AppSystem:
         ----------
         print_console (bool=True): whether to show the infos in the console too
         """
-        QtWidgets.QMessageBox.about(
-            None,
-            self.langs_handler.tr("about.title"),
-            self.langs_handler.tr(
-                "about.msg",
-                version=self.app_infos["version"]["readable"],
-                developer="SoloEnder",
-                license="MIT",
-            ),
-        )
         if print_console:
             print(f"===== {self.langs_handler.tr('about.title')} =====")
             print(
                 self.langs_handler.tr(
                     "about.msg",
-                    version=self.app_infos["version"]["readable"],
+                    version=self.app_infos["app_version"],
                     developer="SoloEnder",
                     license="MIT",
                 )
             )
             print("=============================")
+        QtWidgets.QMessageBox.about(
+            None,
+            self.langs_handler.tr("about.title"),
+            self.langs_handler.tr(
+                "about.msg",
+                version=self.app_infos["app_version"],
+                developer="SoloEnder",
+                license="MIT",
+            ),
+        )
