@@ -443,8 +443,7 @@ def ishigher(version_a: str, version_b: str) -> bool:
         if int(version_a_part) > int(version_b_parts[index]):
             return True
 
-    else:
-        return False
+    return False
 
 
 def get_installation_app_infos(installation_path: str) -> dict:
