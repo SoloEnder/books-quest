@@ -118,7 +118,7 @@ class WorkInProgressScreen(tk.Frame):
         else:
             group = self.current_operations_group
 
-        if group["operation_count"] < 1:
+        if group["operations_count"] < 1:
             logger.error(
                 f"Aborting operations progress for operations group '{group_name}', because operations count is under 0 !"
             )
