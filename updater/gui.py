@@ -10,6 +10,7 @@ logger = logging.getLogger("updater.gui")
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.title("Updater")
         self.geometry("450x300")
         self.installation_selection_sc = InstallationSelectionScreen(self)
         self.work_in_progress_sc = WorkInProgressScreen(self)
