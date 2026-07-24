@@ -118,6 +118,11 @@ class WorkInProgressScreen(tk.Frame):
         else:
             group = self.current_operations_group
 
+        if group["operation_count"] < 1:
+            logger.error(
+                f"Aborting operations progress for operations group '{group_name}', because operations count is under 0 !"
+            )
+            return
         group["progress"] += step
         self.work_in_progress_pb["value"] = (
             group["progress"] / group["operations_count"] * 100
