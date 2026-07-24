@@ -36,7 +36,7 @@ def run(
         update_res.installation_folder, "update_state.json"
     )
     utils.write_json(update_state_filepath, update_state_data)
-    if update_infos["type"] == "FULL":
+    if update_infos["type"] == "FULL_UPDATE":
         logger.info("Starting full update...")
         full_update.full_update(
             update_res,
