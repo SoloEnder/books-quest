@@ -310,7 +310,10 @@ class BookCreationPage(base_page.BasePage):
 
         self.logger.info("Appling edition mode...")
         if self.book:
-            self.cover_image = self.book.cover_path or self.default_cover_img
+            self.cover_image = (
+                self.books_handler.get_book_cover_path(self.book, False)
+                or self.default_cover_img
+            )
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
             for book_attr in self.basic_book_infos:
                 value = getattr(self.book, book_attr)
@@ -498,6 +501,10 @@ class BookCreationPage(base_page.BasePage):
 
         books_infos["id"] = uuid.uuid4()
 
+        # If in edition mode, the ID of the currently being edited book is used
+        if self.edition_mode_enabled:
+            books_infos["id"] = self.book.id  # type: ignore
+
         if str(self.cover_image) != self.default_cover_img:
             final_cover_image = os.path.join(
                 self.res_handler.get_res("data.user.books.covers"),
@@ -548,7 +555,6 @@ class BookCreationPage(base_page.BasePage):
                 books_infos["parents_shelves"] = shelves
 
                 if self.edition_mode_enabled and self.book:
-                    books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
                     self.books_handler.edit_book(self.book.id, new_book)

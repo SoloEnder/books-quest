@@ -305,20 +305,10 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.setProperty("role", "SubShelfWidget")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
-
-        if self.shelf.cover_path:
-            if os.path.exists(self.shelf.cover_path):
-                self.displayed_cover = self.shelf.cover_path
-
-            else:
-                self.displayed_cover = self.default_cover
-                self.logger.warning(
-                    f"Couldn't found shelf cover file at {self.shelf.cover_path}, switching to default cover"
-                )
-
-        else:
-            self.displayed_cover = self.default_cover
-        self.cover_pm = QtGui.QPixmap(self.displayed_cover)
+        QtGui.QPixmap(self.default_cover)
+        self.cover_pm = QtGui.QPixmap(
+            str(self.books_handler.get_shelf_cover_path(self.shelf))
+        )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
         self.total_elements = QtWidgets.QLabel(

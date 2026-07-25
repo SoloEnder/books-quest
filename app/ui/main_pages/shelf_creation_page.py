@@ -223,8 +223,12 @@ class ShelfCreationPage(base_page.BasePage):
 
     def edition_mode(self):
         if self.shelf:
-            if self.shelf.cover_path:
-                self.current_shelf_cover = self.shelf.cover_path
+            # Replace the displayed cover by the shelf's cover
+            shelf_cover_path = self.books_handler.get_shelf_cover_path(
+                self.shelf, False
+            )
+            if shelf_cover_path:
+                self.current_shelf_cover = shelf_cover_path
                 self.set_cover_lb_pixmap(self.current_shelf_cover)
             self.title_e.setText(self.shelf.title)
 
@@ -361,6 +365,9 @@ class ShelfCreationPage(base_page.BasePage):
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
+        if self.current_mode == "edition":
+            id = self.shelf.id
+
         shelf_title = self.title_e.text().strip()
         title_suffix = None
 
@@ -423,9 +430,6 @@ class ShelfCreationPage(base_page.BasePage):
             "parents_shelves": parents_shelves,
             "children_shelves": child_shelves,
             "id": id,
-            "cover_path": self.current_shelf_cover
-            if self.current_shelf_cover != self.default_shelf_cover
-            else None,
         }
 
     def move_cover_img(self, dest_path):
