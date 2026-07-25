@@ -260,6 +260,11 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Set the cover image to the default value
         """
+        if self.current_mode == "edition":
+            shelf_cover = self.books_handler.get_shelf_cover_path(self.shelf, False)
+
+            if shelf_cover:
+                self.books_handler._delete_cover(shelf_cover)
         self.current_shelf_cover = self.default_shelf_cover
         self.set_cover_lb_pixmap(self.current_shelf_cover)
 

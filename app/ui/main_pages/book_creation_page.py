@@ -421,6 +421,12 @@ class BookCreationPage(base_page.BasePage):
         """
         Set the cover image to the default value
         """
+        # -- Removes the previous cover file
+        if self.edition_mode_enabled:
+            book_cover = self.books_handler.get_book_cover_path(self.book, False)  # type: ignore
+
+            if book_cover:
+                self.books_handler._delete_cover(book_cover)
         self.cover_image = self.default_cover_img
         self.set_cover_lb_pixmap(self.cover_image)
 
