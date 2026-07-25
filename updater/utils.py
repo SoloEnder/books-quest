@@ -305,20 +305,30 @@ class UpdateActionsHandler:
         else:
             shutil.copy(from_, to)
 
-    def make_dir(self, path: str, add_undo: bool = True, **kwargs):
+    def make_dir(
+        self, path: str, exists_ok: bool = False, add_undo: bool = True, **kwargs
+    ):
         """
         Make a dir at `dir_path`
 
         Parameters
         ----------
         - path (str): the path to the directory to create
-        - add_undo (bool=True): wheter to add an undo for this action.
+        - exists_ok: whether to cancel the creation if the directory already exists
+        - add_undo (bool=True): wheter to add an undo for this action, note that this parameters is ignored of `exists_ok` is set to `True`
         """
-        logger.info(f"Making directory at {path} with {add_undo}")
+        logger.info(f"Making directory at {path} with {add_undo=} and {exists_ok=}")
         final_path = get_abs_path(path, self.update_res)
+
+        if os.path.exists(final_path):
+            if not exists_ok:
+                raise FileExistsError(
+                    f"Could not create directory at {final_path}: directory already exists !"
+                )
+            return
         os.mkdir(final_path)
 
-        if add_undo:
+        if add_undo and not exists_ok:
             self.add_undo({"type": "remove", "path": f"{path}", "add_undo": False})
 
     def apply_instructions(

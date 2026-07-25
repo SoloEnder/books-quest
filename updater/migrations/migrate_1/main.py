@@ -35,7 +35,7 @@ def run(
         new_user_data_folder, "user_settings.json"
     )
 
-    update_actions_handler.make_dir(new_user_data_folder)
+    update_actions_handler.make_dir(path=new_user_data_folder, exists_ok=True)
 
     if os.path.exists(utils.get_abs_path(old_books_data_folder, update_res)):
         update_actions_handler.copy(old_books_data_folder, new_books_data_folder)
