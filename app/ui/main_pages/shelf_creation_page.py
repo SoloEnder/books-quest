@@ -416,10 +416,16 @@ class ShelfCreationPage(base_page.BasePage):
                 self.res_handler.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
-            done = self.move_cover_img(final_img_path)
+            self.logger.debug(f"Final shelf cover image path = {final_img_path}")
+            if (
+                self.books_handler.get_cover_path(self.shelf, True)
+                != self.current_shelf_cover
+            ):  # type: ignore
+                self.copy_cover_img(final_img_path)
+                done = self.copy_cover_img(final_img_path)
 
-            if not done:
-                return
+                if not done:
+                    return
 
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(final_img_path)
@@ -437,7 +443,7 @@ class ShelfCreationPage(base_page.BasePage):
             "id": id,
         }
 
-    def move_cover_img(self, dest_path):
+    def copy_cover_img(self, dest_path):
 
         try:
             shutil.copy2(self.current_shelf_cover, dest_path)  # type: ignore
