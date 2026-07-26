@@ -242,6 +242,7 @@ def some_compatibility(installation_app_infos: dict):
 
 def try_update():
     check_debris_mode(installation_folder=window.get_installation_folder())
+    window.switch_screen("installation_selection_screen")
     result = check_before_start()
     if not result:
         return
@@ -382,6 +383,7 @@ def update_mode():
 
 def check_debris_mode(installation_folder: str = updater_folder):
     logger.info("Starting 'check-debris' mode")
+    window.switch_screen("check_update_debris_screen")
     try:
         update_state_filepath = os.path.join(installation_folder, "update_state.json")
 

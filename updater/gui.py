@@ -16,11 +16,13 @@ class Window(tk.Tk):
         self.work_in_progress_sc = WorkInProgressScreen(self)
         self.update_error_sc = UpdateErrorScreen(self)
         self.update_success_sc = UpdateSuccessScreen(self)
+        self.check_update_debris_sc = CheckUpdateDebrisScreen(self)
         self.screens = {
             "installation_selection_screen": self.installation_selection_sc,
             "work_in_progress_screen": self.work_in_progress_sc,
             "update_error_screen": self.update_error_sc,
             "update_success_screen": self.update_success_sc,
+            "check_update_debris_screen": self.check_update_debris_sc,
         }
         self.current_screen_infos: tuple[str, tk.Frame] = (
             "installation_selection_screen",
@@ -238,3 +240,10 @@ class UpdateSuccessScreen(tk.Frame):
             text="Your BooksQuest instance has been successfully updated\nYou can close this window",
         )
         self.success_lb.pack()
+
+
+class CheckUpdateDebrisScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.label = tk.Label(self, text="Checking for update debris, please wait...")
+        self.label.pack()
