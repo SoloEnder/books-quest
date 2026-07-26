@@ -456,6 +456,10 @@ class BooksHandler:
             shelf.remove_all_books()
             shelf.remove_all_parents()
             shelf.remove_all_child()
+            cover_path = self.get_shelf_cover_path(shelf, False)
+            if cover_path:
+                self._delete_cover(cover_path)
+
             del self.shelves[id]
 
         else:
