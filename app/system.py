@@ -349,9 +349,9 @@ class AppSystem:
         )
 
     @QtCore.Slot(dict)
-    def get_app_infos(self, dictionnary: dict):
+    def get_app_infos(self, dictionary: dict):
         """
         Add the app infos to `dictionnary`
         Usefull if you want to get the app infos without directly accessing them
         """
-        dictionnary.update(self.app_infos)
+        dictionary.update(self.app_infos)
