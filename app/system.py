@@ -123,6 +123,7 @@ class AppSystem:
         )
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         self.ui.qt_signals_handler.show_about_sg.connect(self.about)
+        self.ui.qt_signals_handler.get_app_infos_sg.connect(self.get_app_infos)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(
@@ -346,3 +347,11 @@ class AppSystem:
                 license="MIT",
             ),
         )
+
+    @QtCore.Slot(dict)
+    def get_app_infos(self, dictionnary: dict):
+        """
+        Add the app infos to `dictionnary`
+        Usefull if you want to get the app infos without directly accessing them
+        """
+        dictionnary.update(self.app_infos)

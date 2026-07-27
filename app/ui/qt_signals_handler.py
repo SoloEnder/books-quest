@@ -12,6 +12,9 @@ class QtSignalsHandler(QtCore.QObject):
     add_action_sg = QtCore.Signal(list[QtGui.QAction])
     edit_progress_msg = QtCore.Signal(str)
     show_about_sg = QtCore.Signal(bool)
+    get_app_infos_sg = QtCore.Signal(
+        dict
+    )  # Get the app infos by adding them to the dictionnary argument
 
     def __init__(self):
         super().__init__()
