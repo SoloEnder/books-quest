@@ -72,7 +72,9 @@ class AppSystem:
         Connect signals to the already loaded slots
         """
         self.qt_signals_handler.show_about_sg.connect(self.about)
-        self.qt_signals_handler.get_app_infos_sg.connect(self.get_app_infos)
+        self.qt_signals_handler.write_version_on_widget_sg.connect(
+            self.write_version_on_widget
+        )
 
     def get_installation_infos(self):
         installation_infos = self.jfm.read_json(
@@ -357,10 +359,10 @@ class AppSystem:
             ),
         )
 
-    @QtCore.Slot(dict)
-    def get_app_infos(self, dictionary: dict):
+    @QtCore.Slot(QtWidgets.QWidget)
+    def write_version_on_widget(self, widget):
         """
-        Add the app infos to `dictionnary`
-        Usefull if you want to get the app infos without directly accessing them
+        Set the text of `widget` to the current app version
+        Only works with widgets that has the `setText` method
         """
-        dictionary.update(self.app_infos)
+        widget.setText(self.app_infos["app_version"])

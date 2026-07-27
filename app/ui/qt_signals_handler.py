@@ -1,4 +1,4 @@
-from PySide6 import QtCore, QtGui
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class QtSignalsHandler(QtCore.QObject):
@@ -12,9 +12,9 @@ class QtSignalsHandler(QtCore.QObject):
     add_action_sg = QtCore.Signal(list[QtGui.QAction])
     edit_progress_msg = QtCore.Signal(str)
     show_about_sg = QtCore.Signal(bool)
-    get_app_infos_sg = QtCore.Signal(
-        dict
-    )  # Get the app infos by adding them to the dictionnary argument
+    write_version_on_widget_sg = QtCore.Signal(
+        QtWidgets.QWidget
+    )  # Write the app current version on an widget that support `setText` method
 
     def __init__(self):
         super().__init__()
