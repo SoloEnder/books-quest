@@ -20,6 +20,7 @@ class UI(QtWidgets.QMainWindow):
         self,
         books_handler,
         res_handler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         settings_handler: settings_handler.SettingsHandler,
         langs_handler: langs_handler.LangsHandler,
     ):
@@ -29,7 +30,7 @@ class UI(QtWidgets.QMainWindow):
         self.res_handler = res_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
-        self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
+        self.qt_signals_handler = qt_signals_handler
         self.notification_service = notification_service.NotificationService(
             self, self.langs_handler
         )

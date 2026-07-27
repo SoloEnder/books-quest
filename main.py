@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -44,6 +45,15 @@ if not lock_result:
     logger.error(msg)
     logger.info("Exiting...")
     sys.exit()
+
+if paths.MODE == "frozen":
+    logger.info(
+        "Application is an executable, launching updater in 'check-debris' mode..."
+    )
+    subprocess.run([os.path.join(paths.BASE_PATH, "updater.exe"), "-m", "check-debris"])
+
+else:
+    logger.info("Application is not an executable")
 
 try:
     splash_screen = QtWidgets.QSplashScreen(

@@ -310,7 +310,10 @@ class BookCreationPage(base_page.BasePage):
 
         self.logger.info("Appling edition mode...")
         if self.book:
-            self.cover_image = self.book.cover_path or self.default_cover_img
+            self.cover_image = (
+                self.books_handler.get_book_cover_path(self.book, False)
+                or self.default_cover_img
+            )
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
             for book_attr in self.basic_book_infos:
                 value = getattr(self.book, book_attr)
@@ -418,6 +421,12 @@ class BookCreationPage(base_page.BasePage):
         """
         Set the cover image to the default value
         """
+        # -- Removes the previous cover file
+        if self.edition_mode_enabled:
+            book_cover = self.books_handler.get_book_cover_path(self.book, False)  # type: ignore
+
+            if book_cover:
+                self.books_handler._delete_cover(book_cover)
         self.cover_image = self.default_cover_img
         self.set_cover_lb_pixmap(self.cover_image)
 
@@ -451,6 +460,27 @@ class BookCreationPage(base_page.BasePage):
             )
 
         return matches
+
+    def copy_book_cover(self, cover_path: str, dest_path: str, set_as_new: bool = True):
+        """
+        Copy the books cover from `cover_path` to `dest_path`:
+
+        Parameters
+        ----------
+        - cover_path (str): the original book cover
+        - dest_path (str): the path where to moves the cover
+        - set_as_new (bool=True): wether to set `dest_path` as the current book cover
+        """
+
+        if cover_path != self.default_cover_img:
+            self.logger.debug(f"Final book cover path : {dest_path}")
+            shutil.copy2(
+                cover_path,
+                dest_path,
+            )
+            if set_as_new:
+                self.cover_image = dest_path
+                self.set_cover_lb_pixmap(self.cover_image)
 
     def get_book_infos(self):
         books_infos = {}
@@ -498,25 +528,40 @@ class BookCreationPage(base_page.BasePage):
 
         books_infos["id"] = uuid.uuid4()
 
-        if str(self.cover_image) != self.default_cover_img:
-            final_cover_image = os.path.join(
-                self.res_handler.get_res("data.books.covers"),
-                f"{str(books_infos['id'])}.png",
-            )
-            self.logger.debug(f"Final book cover path : {final_cover_image}")
+        # If in edition mode, the ID of the currently being edited book is used
+        if self.edition_mode_enabled:
+            books_infos["id"] = self.book.id  # type: ignore
 
-            if os.path.exists(self.cover_image):
-                shutil.copy2(
-                    self.cover_image,
-                    os.path.join(
-                        self.res_handler.get_res("data.books.covers"),
-                        final_cover_image,
-                    ),
+        cover_dest_path = os.path.join(
+            self.res_handler.get_res("data.user.books.covers"),
+            f"{str(books_infos['id'])}.png",
+        )
+
+        # Checking if the final cover path and the current cover path are different (very important)
+        if self.cover_image != self.books_handler.get_cover_path(self.book, True):  # type: ignore
+            try:
+                self.copy_book_cover(self.cover_image, cover_dest_path)
+
+            except FileNotFoundError:
+                self.logger.error(
+                    "Could not copy cover file to books covers folder : file not found"
                 )
-                self.cover_image = final_cover_image
-                self.set_cover_lb_pixmap(self.cover_image)
+                self.qt_signals_handler.notify_sg.emit(
+                    "error", "Cover not found", "Cover file not found", ""
+                )
+                return
 
-            books_infos["cover_path"] = str(self.cover_image)
+            except PermissionError:
+                self.logger.error(
+                    "Could not copy cover file to books covers folder : Permission denied"
+                )
+                self.qt_signals_handler.notify_sg.emit(
+                    "error",
+                    "Permission denied",
+                    "Access to original cover file denied",
+                    "",
+                )
+                return
 
         books_infos["status"] = self.book_status_combob.currentData()
 
@@ -548,7 +593,6 @@ class BookCreationPage(base_page.BasePage):
                 books_infos["parents_shelves"] = shelves
 
                 if self.edition_mode_enabled and self.book:
-                    books_infos["id"] = self.book.id
                     self.book.delete_from_parents()
                     new_book = self.books_handler.create_book(**books_infos)
                     self.books_handler.edit_book(self.book.id, new_book)

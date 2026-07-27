@@ -5,7 +5,6 @@ from app.src import my_logging_stuff
 from app.utils import paths
 
 logger = logging.getLogger("app")
-logger = logging.getLogger(__name__)
 log_msg_formatter = logging.Formatter(
     fmt="[{asctime}] - [{name}/{levelname}] : {message}", style="{"
 )

@@ -2,3 +2,7 @@ QPushButton[role="NaviguationButton"] {
     font-weight: 600;
     font-size: 14px;
 }
+
+QLabel#AppVersionLabel {
+    color: #a0a0a0;
+}

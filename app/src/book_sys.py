@@ -89,7 +89,6 @@ class Shelf:
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
         self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
         self._books: BooksList = kwargs.get("books", [])
-        self.cover_path = kwargs.get("cover_path")
         self.id = kwargs.get("id", uuid.uuid4())
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
@@ -231,7 +230,6 @@ class Shelf:
             "children_shelves": self._children_shelves,
             "parents_shelves": self._parent_shelves,
             "books": self._books,
-            "cover_path": self.cover_path,
         }
 
     def str_id(self) -> str:
@@ -249,7 +247,6 @@ class Book:
         self.edition = kwargs.get("edition")
         self.summary = kwargs.get("summary")
         self.isbn = kwargs.get("isbn")
-        self.cover_path = kwargs.get("cover_path")
         self.starting_read_date = kwargs.get("starting_read_date")
         self.end_read_date = kwargs.get("end_read_date")
         self.status = kwargs.get("status")
@@ -271,7 +268,6 @@ class Book:
             "title": self.title,
             "title_suffix": self.title_suffix,
             "authors": self.authors,
-            "cover_path": self.cover_path,
             "edition": self.edition,
             "summary": self.summary,
             "isbn": self.isbn,
@@ -355,9 +351,9 @@ class BooksHandler:
         if book_id in self.books.keys():
             self.logger.debug(f"Deleting book with ID '{book_id}'...")
             book_obj: Book = self.books[book_id]
-
-            if book_obj.cover_path:
-                self._delete_cover(book_obj.cover_path, True)
+            cover_path = self.get_book_cover_path(book_obj, False)
+            if cover_path:
+                self._delete_cover(cover_path, True)
             book_obj.delete_from_parents()
             del self.books[str(book_obj.id)]
 
@@ -457,12 +453,13 @@ class BooksHandler:
         if id in self.shelves.keys():
             shelf = self.shelves[id]
 
-            if shelf.cover_path:
-                self._delete_cover(shelf.cover_path)
-
             shelf.remove_all_books()
             shelf.remove_all_parents()
             shelf.remove_all_child()
+            cover_path = self.get_shelf_cover_path(shelf, False)
+            if cover_path:
+                self._delete_cover(cover_path)
+
             del self.shelves[id]
 
         else:
@@ -487,6 +484,63 @@ class BooksHandler:
 
         else:
             raise my_exceptions.BooksShelfNotFoundError(shelf_id)
+
+    def get_cover_path(self, object: Shelf | Book, return_default: bool = True):
+        """
+        Constructs and returns the path to the `object` (an `Shelf`/`Book` instance) cover file.
+
+        Parameters
+        ----------
+        shelf (book_sys.Shelf|book_sys.Book): the shelf/book object
+        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        """
+        if isinstance(object, Book):
+            excepted_path = (
+                os.path.join(
+                    self.res_handler.get_res("data.user.books.covers"),
+                    object.str_id(),
+                )
+                + ".png"
+            )
+
+        elif isinstance(object, Shelf):
+            excepted_path = (
+                os.path.join(
+                    self.res_handler.get_res("data.user.bookshelves.covers"),
+                    object.str_id(),
+                )
+                + ".png"
+            )
+
+        if os.path.exists(excepted_path):
+            return excepted_path
+
+        if return_default:
+            return self.res_handler.get_res("assets.defaults_covers.shelf")
+
+    def get_shelf_cover_path(
+        self, shelf: Shelf, return_default: bool = True
+    ) -> str | None:
+        """
+        Constructs and returns the path to the `shelf` cover file.
+
+        Parameters
+        ----------
+        shelf (book_sys.Shelf): the shelf object
+        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        """
+        return self.get_cover_path(shelf, return_default)
+
+    def get_book_cover_path(self, book: Book, return_default: bool = True):
+        """
+        Constructs and returns the path to the `book` cover file.
+
+        Parameters
+        ----------
+        shelf (book_sys.Book): the book object
+        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        """
+        return self.get_cover_path(book, return_default)
 
     def get_books(self, **kwargs):
         """

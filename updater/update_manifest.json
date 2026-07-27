@@ -1,0 +1,14 @@
+{
+  "type": "FULL_UPDATE",
+  "update_to": "0.3.0",
+  "updater_files": ["update_manifest.json", "update_instructions.json"],
+  "update_root_directory_content": [
+    "books-quest.exe",
+    "updater.exe",
+    "app",
+    "LICENSE",
+    "_internal",
+    "licenses",
+    "THIRD_PARTY_NOTICE.txt"
+  ]
+}

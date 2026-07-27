@@ -386,6 +386,14 @@ class UpdateSettings(SettingsSection):
         self.header_lb.setStatusTip(
             self.langs_handler.tr("settings.general.update.section_description")
         )
+
+        # Label that display app current version
+        self.current_version_lb = QtWidgets.QLabel()
+        self.current_version_lb.setObjectName("AppVersionLabel")
+        self.qt_signals_handler.write_version_on_widget_sg.emit(self.current_version_lb)
+        self.current_version_lb.setText(
+            f"Books Quest v{self.current_version_lb.text()}"
+        )
         self.check_update_b = QtWidgets.QPushButton(
             self.langs_handler.tr("settings.general.update.actions.check_update")
         )
@@ -397,7 +405,11 @@ class UpdateSettings(SettingsSection):
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.base_lyt.addWidget(
-            self.check_update_b, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.current_version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+        self.base_lyt.addWidget(
+            self.check_update_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
 
 
