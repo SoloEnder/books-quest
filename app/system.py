@@ -11,7 +11,7 @@ from app.src import (
     resources_handler,
     settings_handler,
 )
-from app.ui import ui
+from app.ui import qt_signals_handler, ui
 from app.utils import json_file_manager, paths
 
 
@@ -26,6 +26,7 @@ class AppSystem:
             self.jfm, {}, paths.APP_PATH
         )
         self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
+        self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
@@ -61,8 +62,17 @@ class AppSystem:
                 f"assets.langs.{self.settings_handler.get_setting_value('general.appearance.language')}"
             )
         )
+        self.logger.info("Connecting signals to loaded slots...")
+        self.connect_signals()
         self.logger.info("Erasing files in temporary folder...")
         self.empty_tmp_folder(self.res_handler.get_res("tmp"))
+
+    def connect_signals(self):
+        """
+        Connect signals to the already loaded slots
+        """
+        self.qt_signals_handler.show_about_sg.connect(self.about)
+        self.qt_signals_handler.get_app_infos_sg.connect(self.get_app_infos)
 
     def get_installation_infos(self):
         installation_infos = self.jfm.read_json(
@@ -118,12 +128,11 @@ class AppSystem:
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
+            self.qt_signals_handler,
             self.settings_handler,
             self.langs_handler,
         )
         self.jfm.set_signals_handler(self.ui.qt_signals_handler)
-        self.ui.qt_signals_handler.show_about_sg.connect(self.about)
-        self.ui.qt_signals_handler.get_app_infos_sg.connect(self.get_app_infos)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(
