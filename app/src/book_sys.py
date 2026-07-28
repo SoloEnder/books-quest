@@ -512,6 +512,9 @@ class BooksHandler:
                 + ".png"
             )
 
+        else:
+            raise TypeError(f"Could not get cover for object of type {type(object)}")
+
         if os.path.exists(excepted_path):
             return excepted_path
 
