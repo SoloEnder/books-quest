@@ -9,7 +9,6 @@ class QtSignalsHandler(QtCore.QObject):
     switch_page_sg = QtCore.Signal(str, bool, dict)
     close_page_sg = QtCore.Signal()
     notify_sg = QtCore.Signal(str, str, str, str)
-    add_action_sg = QtCore.Signal(list[QtGui.QAction])
     edit_progress_msg = QtCore.Signal(str)
     show_about_sg = QtCore.Signal(bool)
     write_version_on_widget_sg = QtCore.Signal(

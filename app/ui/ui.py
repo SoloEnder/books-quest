@@ -79,7 +79,6 @@ class UI(QtWidgets.QMainWindow):
 
         self.toolbar = ToolBar(self, self.my_actions)
         self.addToolBar(self.toolbar)
-        self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
