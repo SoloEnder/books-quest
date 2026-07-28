@@ -336,19 +336,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.current_page_infos = new_page_infos
 
 
-class IndevWarnWidget(QtWidgets.QMessageBox):
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent)
-
-        # Setting window title
-        self.setWindowTitle("Indev Warning")
-
-        # Setting text
-        self.setText(
-            "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>"
-        )
-
-
 class ToolBar(QtWidgets.QToolBar):
     def __init__(self, parent: QtWidgets.QWidget | None, res_handler, langs_handler):
         super().__init__(parent)
