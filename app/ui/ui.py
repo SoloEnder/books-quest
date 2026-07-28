@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -35,6 +36,7 @@ class UI(QtWidgets.QMainWindow):
             self, self.langs_handler
         )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
+        self.menus = []  # Contains all the menus
         self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
@@ -58,9 +60,15 @@ class UI(QtWidgets.QMainWindow):
         )
         self.logger.info("Refreshing UI...")
 
+        # Removes actions
         if hasattr(self, "my_actions"):
             [action.deleteLater() for action in self.my_actions.values()]
         self.set_actions()
+
+        # Removes menus
+        [menu.deleteLater() for menu in self.menus]
+        self.menus.clear()
+        self.config_menus()
 
         if hasattr(self, "my_stacked_widgets"):
             self.my_stacked_widgets.deleteLater()
@@ -117,6 +125,12 @@ class UI(QtWidgets.QMainWindow):
                     self.res_handler.get_res("assets.icons.settings")
                 ),
             ),
+            "quit_app": QtGui.QAction(
+                "Quit Books Quest",
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.exit")
+                ),
+            ),
         }
         self.my_actions["close_page"].triggered.connect(
             lambda: self.my_stacked_widgets.close_page()
@@ -124,6 +138,15 @@ class UI(QtWidgets.QMainWindow):
         self.my_actions["open_settings"].triggered.connect(
             lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
         )
+        self.my_actions["quit_app"].triggered.connect(QtWidgets.QApplication.quit)
+
+    def config_menus(self):
+        """
+        Adds menus to the menu bar
+        """
+        self.app_menu = self.menuBar().addMenu("Books Quest")
+        self.app_menu.addAction(self.my_actions["open_settings"])
+        self.app_menu.addAction(self.my_actions["quit_app"])
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
@@ -362,4 +385,3 @@ class ToolBar(QtWidgets.QToolBar):
         super().__init__(parent)
         self.my_actions = actions
         self.addAction(self.my_actions["close_page"])
-        self.addAction(self.my_actions["open_settings"])
