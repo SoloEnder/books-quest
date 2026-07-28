@@ -471,16 +471,14 @@ class BookCreationPage(base_page.BasePage):
         - dest_path (str): the path where to moves the cover
         - set_as_new (bool=True): wether to set `dest_path` as the current book cover
         """
-
-        if cover_path != self.default_cover_img:
-            self.logger.debug(f"Final book cover path : {dest_path}")
-            shutil.copy2(
-                cover_path,
-                dest_path,
-            )
-            if set_as_new:
-                self.cover_image = dest_path
-                self.set_cover_lb_pixmap(self.cover_image)
+        self.logger.debug(f"Final book cover path : {dest_path}")
+        shutil.copy2(
+            cover_path,
+            dest_path,
+        )
+        if set_as_new:
+            self.cover_image = dest_path
+            self.set_cover_lb_pixmap(self.cover_image)
 
     def get_book_infos(self):
         books_infos = {}
@@ -538,9 +536,12 @@ class BookCreationPage(base_page.BasePage):
         )
 
         # Checking if the final cover path and the current cover path are different (very important)
-        if self.cover_image != self.books_handler.get_cover_path(self.book, True):  # type: ignore
+        if (
+            self.cover_image != self.default_cover_img
+            and self.cover_image != self.books_handler.get_cover_path(self.book, True)  # type: ignore
+        ):
             try:
-                self.copy_book_cover(self.cover_image, cover_dest_path)
+                self.copy_book_cover("uwu", cover_dest_path)
 
             except FileNotFoundError:
                 self.logger.error(
