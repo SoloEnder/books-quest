@@ -58,6 +58,10 @@ class UI(QtWidgets.QMainWindow):
         )
         self.logger.info("Refreshing UI...")
 
+        if hasattr(self, "my_actions"):
+            [action.deleteLater() for action in self.my_actions.values()]
+        self.set_actions()
+
         if hasattr(self, "my_stacked_widgets"):
             self.my_stacked_widgets.deleteLater()
 
@@ -73,14 +77,8 @@ class UI(QtWidgets.QMainWindow):
             self.removeToolBar(self.toolbar)
             self.toolbar.deleteLater()
 
-        self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
+        self.toolbar = ToolBar(self, self.my_actions)
         self.addToolBar(self.toolbar)
-        self.toolbar.close_page_act.triggered.connect(
-            lambda: self.my_stacked_widgets.close_page()
-        )
-        self.toolbar.open_settings_act.triggered.connect(
-            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
-        )
         self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(
@@ -105,6 +103,28 @@ class UI(QtWidgets.QMainWindow):
     def set_progress_msg(self, msg: str):
         self.progress_info_lb.setText(msg)
         QtWidgets.QApplication.processEvents()
+
+    def set_actions(self):
+        self.my_actions = {
+            "close_page": QtGui.QAction(
+                self.langs_handler.tr("shared.actions.close"),
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.exit"), "red"
+                ),
+            ),
+            "open_settings": QtGui.QAction(
+                self.langs_handler.tr("shared.actions.open_settings"),
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.settings")
+                ),
+            ),
+        }
+        self.my_actions["close_page"].triggered.connect(
+            lambda: self.my_stacked_widgets.close_page()
+        )
+        self.my_actions["open_settings"].triggered.connect(
+            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
+        )
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
@@ -337,23 +357,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
 
 class ToolBar(QtWidgets.QToolBar):
-    def __init__(self, parent: QtWidgets.QWidget | None, res_handler, langs_handler):
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, actions: dict[str, QtGui.QAction]
+    ):
         super().__init__(parent)
-        self.res_handler = res_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "toolbar"
-
-        self.close_page_act = QtGui.QAction(
-            self.langs_handler.tr("shared.actions.close")
-        )
-        self.close_page_act.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
-        )
-        self.open_settings_act = QtGui.QAction(
-            self.langs_handler.tr("shared.actions.open_settings")
-        )
-        self.open_settings_act.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.settings"))
-        )
-        self.addAction(self.close_page_act)
-        self.addAction(self.open_settings_act)
+        self.my_actions = actions
+        self.addAction(self.my_actions["close_page"])
+        self.addAction(self.my_actions["open_settings"])
