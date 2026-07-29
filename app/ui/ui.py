@@ -147,6 +147,7 @@ class UI(QtWidgets.QMainWindow):
         self.app_menu = self.menuBar().addMenu("Books Quest")
         self.app_menu.addAction(self.my_actions["open_settings"])
         self.app_menu.addAction(self.my_actions["quit_app"])
+        self.menus.append(self.app_menu)
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
