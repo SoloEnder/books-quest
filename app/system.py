@@ -124,9 +124,6 @@ class AppSystem:
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
-
-        if hasattr(self, "ui"):
-            self.ui.deleteLater()
         self.ui = ui.UI(
             self.books_handler,
             self.res_handler,
