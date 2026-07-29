@@ -68,6 +68,8 @@ class UI(QtWidgets.QMainWindow):
         self.config_menus()
 
         if hasattr(self, "my_stacked_widgets"):
+            if self.centralWidget() == self.my_stacked_widgets:
+                self.takeCentralWidget()
             self.my_stacked_widgets.deleteLater()
 
         self.my_stacked_widgets = MyStackedWidgets(
