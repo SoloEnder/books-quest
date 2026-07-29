@@ -1,5 +1,4 @@
 import logging
-import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -36,7 +35,6 @@ class UI(QtWidgets.QMainWindow):
             self, self.langs_handler
         )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
-        self.menus = []  # Contains all the menus
         self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
@@ -66,8 +64,7 @@ class UI(QtWidgets.QMainWindow):
         self.set_actions()
 
         # Removes menus
-        [menu.deleteLater() for menu in self.menus]
-        self.menus.clear()
+        self.menuBar().clear()
         self.config_menus()
 
         if hasattr(self, "my_stacked_widgets"):
@@ -83,6 +80,7 @@ class UI(QtWidgets.QMainWindow):
         )
         if hasattr(self, "toolbar"):
             self.removeToolBar(self.toolbar)
+            self.toolbar.clear()
             self.toolbar.deleteLater()
 
         self.toolbar = ToolBar(self, self.my_actions)
@@ -99,8 +97,12 @@ class UI(QtWidgets.QMainWindow):
         Refresh the UI
         """
         self.logger.info("Refreshing UI...")
-        current_page_infos_before_redraw = self.my_stacked_widgets.current_page_infos
+        current_page_infos_before_redraw = (
+            self.my_stacked_widgets.current_page_infos[0],
+            self.my_stacked_widgets.current_page_infos[2],
+        )
         self.draw_ui()
+        QtWidgets.QApplication.processEvents()
         self.qt_signals_handler.switch_page_sg.emit(
             current_page_infos_before_redraw[0],
             True,
@@ -147,7 +149,6 @@ class UI(QtWidgets.QMainWindow):
         self.app_menu = self.menuBar().addMenu("Books Quest")
         self.app_menu.addAction(self.my_actions["open_settings"])
         self.app_menu.addAction(self.my_actions["quit_app"])
-        self.menus.append(self.app_menu)
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
