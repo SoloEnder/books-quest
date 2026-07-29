@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -35,6 +36,7 @@ class UI(QtWidgets.QMainWindow):
             self, self.langs_handler
         )
         self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
+        self.menus = []  # Contains all the menus
         self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
@@ -58,6 +60,16 @@ class UI(QtWidgets.QMainWindow):
         )
         self.logger.info("Refreshing UI...")
 
+        # Removes actions
+        if hasattr(self, "my_actions"):
+            [action.deleteLater() for action in self.my_actions.values()]
+        self.set_actions()
+
+        # Removes menus
+        [menu.deleteLater() for menu in self.menus]
+        self.menus.clear()
+        self.config_menus()
+
         if hasattr(self, "my_stacked_widgets"):
             self.my_stacked_widgets.deleteLater()
 
@@ -73,15 +85,8 @@ class UI(QtWidgets.QMainWindow):
             self.removeToolBar(self.toolbar)
             self.toolbar.deleteLater()
 
-        self.toolbar = ToolBar(self, self.res_handler, self.langs_handler)
+        self.toolbar = ToolBar(self, self.my_actions)
         self.addToolBar(self.toolbar)
-        self.toolbar.close_page_act.triggered.connect(
-            lambda: self.my_stacked_widgets.close_page()
-        )
-        self.toolbar.open_settings_act.triggered.connect(
-            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
-        )
-        self.qt_signals_handler.add_action_sg.connect(self.toolbar.addActions)
         self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
@@ -105,6 +110,43 @@ class UI(QtWidgets.QMainWindow):
     def set_progress_msg(self, msg: str):
         self.progress_info_lb.setText(msg)
         QtWidgets.QApplication.processEvents()
+
+    def set_actions(self):
+        self.my_actions = {
+            "close_page": QtGui.QAction(
+                self.langs_handler.tr("shared.actions.close"),
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.exit"), "red"
+                ),
+            ),
+            "open_settings": QtGui.QAction(
+                self.langs_handler.tr("shared.actions.open_settings"),
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.settings")
+                ),
+            ),
+            "quit_app": QtGui.QAction(
+                "Quit Books Quest",
+                icon=images_tools.get_svg(
+                    self.res_handler.get_res("assets.icons.exit")
+                ),
+            ),
+        }
+        self.my_actions["close_page"].triggered.connect(
+            lambda: self.my_stacked_widgets.close_page()
+        )
+        self.my_actions["open_settings"].triggered.connect(
+            lambda: self.my_stacked_widgets.switch_page("SETTINGS_PAGE", True, {})
+        )
+        self.my_actions["quit_app"].triggered.connect(QtWidgets.QApplication.quit)
+
+    def config_menus(self):
+        """
+        Adds menus to the menu bar
+        """
+        self.app_menu = self.menuBar().addMenu("Books Quest")
+        self.app_menu.addAction(self.my_actions["open_settings"])
+        self.app_menu.addAction(self.my_actions["quit_app"])
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
@@ -336,37 +378,10 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.current_page_infos = new_page_infos
 
 
-class IndevWarnWidget(QtWidgets.QMessageBox):
-    def __init__(self, parent: QtWidgets.QWidget | None):
-        super().__init__(parent)
-
-        # Setting window title
-        self.setWindowTitle("Indev Warning")
-
-        # Setting text
-        self.setText(
-            "This program is in developement ! If you see any bug which is not already reported, please report it <a href='https://github.com/SoloEnder/books-quest/issues'>here</a>"
-        )
-
-
 class ToolBar(QtWidgets.QToolBar):
-    def __init__(self, parent: QtWidgets.QWidget | None, res_handler, langs_handler):
+    def __init__(
+        self, parent: QtWidgets.QWidget | None, actions: dict[str, QtGui.QAction]
+    ):
         super().__init__(parent)
-        self.res_handler = res_handler
-        self.langs_handler = langs_handler
-        self.redundant_lang_path = "toolbar"
-
-        self.close_page_act = QtGui.QAction(
-            self.langs_handler.tr("shared.actions.close")
-        )
-        self.close_page_act.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
-        )
-        self.open_settings_act = QtGui.QAction(
-            self.langs_handler.tr("shared.actions.open_settings")
-        )
-        self.open_settings_act.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.settings"))
-        )
-        self.addAction(self.close_page_act)
-        self.addAction(self.open_settings_act)
+        self.my_actions = actions
+        self.addAction(self.my_actions["close_page"])
