@@ -1,5 +1,4 @@
 import logging
-import os
 
 import shiboken6
 import widgets_pagination_view
@@ -63,6 +62,9 @@ class ShelfsViewPage(base_page.BasePage):
         self.book_creation_b.setIcon(self.book_creation_ico)
         self.shelf_creation_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.shelf_creation")
+        )
+        self.shelf_creation_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.shelf"))
         )
         self.shelf_creation_b.clicked.connect(
             lambda: qt_signals_handler.switch_page_sg.emit(

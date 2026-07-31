@@ -30,7 +30,8 @@
       "new_book": "book-plus.svg",
       "view_books": "library.svg",
       "settings": "settings.svg",
-      "remove_img": "image-off.svg"
+      "remove_img": "image-off.svg",
+      "shelf": "square-library.svg"
     },
     "splashscreen": {
       "_base_": "splashscreen",

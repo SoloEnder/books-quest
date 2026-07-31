@@ -1,8 +1,14 @@
 import collections
+import copy
+import logging
 import pathlib
+
+from dicts_paths_handler import InvalidDictPathError
 
 from app.src import json_dicts_paths_handler
 from app.utils import json_file_manager
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
@@ -22,7 +28,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         When the 'apply_user_settings()' method is called, the base_settings file and the user_settings file are merged into one dict, where the user_settings override the defaults values.
         """
         super().__init__(jfm, None)
-        self.settings = self.base_dict
+        self.settings = {}
         self.base_settings = base_settings or {}
         self.user_settings = user_settings or {}
 
@@ -44,6 +50,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         if self.is_valid_setting(setting_path):
             setting_infos = self.get_value(setting_path)
             if new_value in setting_infos["choices"]:
+                self.edit_user_setting(f"{setting_path}.current", new_value)
                 self.edit_value(f"{setting_path}.current", new_value)
 
             else:
@@ -52,6 +59,21 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
                 )
         else:
             raise InvalidSettingFormat(setting_path)
+
+    def edit_user_setting(self, setting_path: str, value):
+        parts = setting_path.split(".")
+        current_value = self.user_settings
+
+        for part in parts[
+            :-1
+        ]:  # Last element is ignored, because this is the new value of the settings path
+            if part not in current_value:
+                current_value[
+                    part
+                ] = {}  # Creating the missing key and assigning an empty dict as value
+            current_value = current_value[part]
+
+        current_value[parts[-1]] = value
 
     def get_setting_value(self, setting_path: str):
         """
@@ -63,7 +85,6 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         InvalidSettingFormat: if the setting at `setting_path` is not valid
         See `get_value` method raises if `setting_path` end with '.current'
         """
-
         if setting_path.endswith(".current"):
             return self.get_value(setting_path)
 
@@ -141,11 +162,34 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         """
         Merge the base_settings dictionary and the user_settings dictionary into one, thus forming a complete settings dictionary.
         """
+        self.settings = copy.deepcopy(self.base_settings)
+        self.base_dict = copy.deepcopy(self.user_settings)
+        user_settings_path_list = self.get_all_dicts_paths("")
+        user_settings_path_dict = {}
 
-        self.settings = dict(
-            collections.ChainMap(self.base_settings, self.user_settings)
-        )
+        for setting_path in user_settings_path_list:
+            if setting_path.endswith(".current"):  # Ignore invalid settings path
+                user_settings_path_dict[setting_path] = self.get_setting_value(
+                    setting_path
+                )
+
+        # Overide base settings by user settings
         self.base_dict = self.settings
+        invalid_settings_count = 0
+        valid_settings_count = 1
+        for setting_path, setting_value in user_settings_path_dict.items():
+            try:
+                self.edit_value(setting_path, setting_value)
+
+            except InvalidDictPathError:
+                invalid_settings_count += 1
+
+            else:
+                valid_settings_count += 1
+
+        logger.info(
+            f"Applied {valid_settings_count} user settings, ignored {invalid_settings_count} invalid settings"
+        )
 
     def save_user_settings(self, filepath: str | pathlib.Path):
         """

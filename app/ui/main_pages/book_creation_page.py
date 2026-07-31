@@ -536,12 +536,10 @@ class BookCreationPage(base_page.BasePage):
         )
 
         # Checking if the final cover path and the current cover path are different (very important)
-        if (
-            self.cover_image != self.default_cover_img
-            and self.cover_image != self.books_handler.get_cover_path(self.book, True)  # type: ignore
-        ):
+        #
+        if not self.is_original_cover():
             try:
-                self.copy_book_cover("uwu", cover_dest_path)
+                self.copy_book_cover(self.cover_image, cover_dest_path)
 
             except FileNotFoundError:
                 self.logger.error(
@@ -580,6 +578,17 @@ class BookCreationPage(base_page.BasePage):
                 QtCore.Qt.DateFormat.ISODate
             )
         return books_infos
+
+    def is_original_cover(self):
+        """
+        Check if the current book cover is it's original cover (the one he had before any changes were made)
+        """
+        original_cover = self.default_cover_img
+
+        if self.edition_mode_enabled:
+            original_cover = self.books_handler.get_book_cover_path(self.book)  # type: ignore
+
+        return original_cover == self.cover_image
 
     def create_book(self):
         books_infos = self.get_book_infos()
