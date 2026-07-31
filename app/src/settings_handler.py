@@ -3,6 +3,8 @@ import copy
 import logging
 import pathlib
 
+from dicts_paths_handler import InvalidDictPathError
+
 from app.src import json_dicts_paths_handler
 from app.utils import json_file_manager
 
@@ -164,19 +166,30 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         self.base_dict = copy.deepcopy(self.user_settings)
         user_settings_path_list = self.get_all_dicts_paths("")
         user_settings_path_dict = {}
-        user_settings_count = 0
 
         for setting_path in user_settings_path_list:
             if setting_path.endswith(".current"):  # Ignore invalid settings path
-                user_settings_count += 1
                 user_settings_path_dict[setting_path] = self.get_setting_value(
                     setting_path
                 )
 
         # Overide base settings by user settings
         self.base_dict = self.settings
+        invalid_settings_count = 0
+        valid_settings_count = 1
         for setting_path, setting_value in user_settings_path_dict.items():
-            self.edit_value(setting_path, setting_value)
+            try:
+                self.edit_value(setting_path, setting_value)
+
+            except InvalidDictPathError:
+                invalid_settings_count += 1
+
+            else:
+                valid_settings_count += 1
+
+        logger.info(
+            f"Applied {valid_settings_count} user settings, ignored {invalid_settings_count} invalid settings"
+        )
 
     def save_user_settings(self, filepath: str | pathlib.Path):
         """
