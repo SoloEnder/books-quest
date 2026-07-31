@@ -100,6 +100,7 @@ class UI(QtWidgets.QMainWindow):
         """
         self.logger.info("Refreshing UI...")
         images_tools.clear_all_caches()
+        self.langs_handler.tr.cache_clear()
         current_page_infos_before_redraw = (
             self.my_stacked_widgets.current_page_infos[0],
             self.my_stacked_widgets.current_page_infos[2],
