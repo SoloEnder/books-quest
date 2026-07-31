@@ -163,7 +163,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(self.confirm_b, 8, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
     @property
-    def current_mode(self):
+    def current_mode(self) -> Literal["edition", "creation"]:
         """
         Getter of property 'current_mode'
         """
@@ -411,21 +411,16 @@ class ShelfCreationPage(base_page.BasePage):
 
         final_img_path = self.current_shelf_cover
 
-        if self.current_shelf_cover != self.default_shelf_cover:
+        if not self.is_original_cover():
             final_img_path = os.path.join(
                 self.res_handler.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
             self.logger.debug(f"Final shelf cover image path = {final_img_path}")
-            if (
-                self.books_handler.get_cover_path(self.shelf, True)
-                != self.current_shelf_cover
-            ):  # type: ignore
-                self.copy_cover_img(final_img_path)
-                done = self.copy_cover_img(final_img_path)
-
-                if not done:
-                    return
+            self.copy_cover_img(final_img_path)
+            done = self.copy_cover_img(final_img_path)
+            if not done:
+                return
 
             self.current_shelf_cover = final_img_path
             self.set_cover_lb_pixmap(final_img_path)
@@ -442,6 +437,17 @@ class ShelfCreationPage(base_page.BasePage):
             "children_shelves": child_shelves,
             "id": id,
         }
+
+    def is_original_cover(self):
+        """
+        Check if the current shelf cover is it's original cover (the one it had before any changes were made)
+        """
+        original_cover = self.default_shelf_cover
+
+        if self.current_mode == "edition":
+            original_cover = self.books_handler.get_book_cover_path(self.shelf)  # type: ignore
+
+        return original_cover == self.current_shelf_cover
 
     def copy_cover_img(self, dest_path):
 
