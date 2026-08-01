@@ -103,6 +103,14 @@
       "appearance": {
         "section_title": "Apparence",
         "section_description": "Paramètres concernant l'apparence de l'application",
+        "theme": {
+          "section_title": "Theme",
+          "section_description": "Paramètre concernant le thème de l'interface",
+          "interface_theme": "Thème de l'interface",
+          "light_theme": "Clair",
+          "dark_theme": "Sombre",
+          "follow_system_theme": "Thème système"
+        },
         "language": {
           "section_title": "Language",
           "section_description": "Paramètres concernant la langue de l'interface",

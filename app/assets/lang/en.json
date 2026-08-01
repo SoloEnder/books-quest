@@ -103,6 +103,14 @@
       "appearance": {
         "section_title": "Appearance",
         "section_description": "Settings related to the apparence of the applicaion",
+        "theme": {
+          "section_title": "Theme",
+          "section_description": "Color theme settings",
+          "interface_theme": "Interface theme",
+          "light_theme": "Light",
+          "dark_theme": "Dark",
+          "follow_system_theme": "Follow system"
+        },
         "language": {
           "section_title": "Language",
           "section_description": "Interface language settings",
