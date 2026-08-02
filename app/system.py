@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import time
+import webbrowser
 
 from PySide6 import QtCore, QtWidgets
 
@@ -12,7 +13,7 @@ from app.src import (
     settings_handler,
 )
 from app.ui import qt_signals_handler, ui
-from app.utils import json_file_manager, paths
+from app.utils import json_file_manager, paths, update_tools
 
 
 class AppSystem:
@@ -121,6 +122,7 @@ class AppSystem:
     def start(self):
         self.start_ui()
         self.installation_infos["boots_count"] += 1
+        self.check_for_update()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
@@ -363,3 +365,51 @@ class AppSystem:
         Only works with widgets that has the `setText` method
         """
         widget.setText(self.app_infos["app_version"])
+
+    def check_for_update(self, show_up_to_date_msg: bool = False):
+        self.logger.info("Checking for updates...")
+        release_infos = update_tools.get_latest_release_infos(
+            "https://api.github.com/repos/soloender/books-quest/releases/latest",
+            self.app_infos["app_version"],
+            show_up_to_date_msg,
+        )
+        if not release_infos:
+            return
+
+        release_version = release_infos[
+            "tag_name"
+        ]  # Should be formatted like this : 'vminor.major.patch'. The 'v' is not a mistake
+
+        # Checking if the latest release is an update
+        try:
+            is_update = update_tools.is_higher_version(
+                release_version.split("v")[1], self.app_infos["app_version"]
+            )
+
+        except update_tools.UncomparablesVersionsError:
+            self.logger.error(
+                f"Could not compare latest release version to app version tag name='{release_version}', app_version='{self.app_infos['app_version']}'"
+            )
+            self.qt_signals_handler.notify_sg.emit(
+                "error",
+                "Check for Updates",
+                "Could not compare latest release version to app version",
+                "",
+            )
+            return
+
+        if not is_update:
+            self.logger.info("App is up-to-date")
+            if show_up_to_date_msg:
+                self.qt_signals_handler.notify_sg.emit(
+                    "info", "Check for Updates", "You are up-to-date", ""
+                )
+            return
+
+        # Show pop up to download the update
+        download = update_tools.download_pop_up(release_infos)
+        if download:
+            self.logger.info(
+                f"Opening update page url ({release_infos['html_url']}) in web browser"
+            )
+            webbrowser.open_new_tab(release_infos["html_url"])
