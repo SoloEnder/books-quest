@@ -370,12 +370,14 @@ class AppSystem:
     @QtCore.Slot(bool)
     def check_for_update(self, show_up_to_date_msg: bool = False):
         self.logger.info("Checking for updates...")
+        self.qt_signals_handler.edit_progress_msg.emit("Checking for updates...")
         release_infos = update_tools.get_latest_release_infos(
             "https://api.github.com/repos/soloender/books-quest/releases/latest",
             self.app_infos["app_version"],
             show_up_to_date_msg,
         )
         if not release_infos:
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
         release_version = release_infos[
@@ -398,6 +400,7 @@ class AppSystem:
                 "Could not compare latest release version to app version",
                 "",
             )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
         if not is_update:
@@ -406,6 +409,7 @@ class AppSystem:
                 self.qt_signals_handler.notify_sg.emit(
                     "info", "Check for Updates", "You are up-to-date", ""
                 )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
         # Show pop up to download the update
@@ -415,3 +419,4 @@ class AppSystem:
                 f"Opening update page url ({release_infos['html_url']}) in web browser"
             )
             webbrowser.open_new_tab(release_infos["html_url"])
+        self.qt_signals_handler.edit_progress_msg.emit(" ")
