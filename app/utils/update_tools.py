@@ -3,6 +3,8 @@ import logging
 import requests
 from PySide6 import QtWidgets
 
+from app.src.langs_handler import LangsHandler
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,9 +32,7 @@ def show_error(title: str | None = None, *, msg: str):
     QtWidgets.QMessageBox.critical(None, title or "Check for Updates", msg)
 
 
-def get_latest_release_infos(
-    url: str, app_version, show_up_to_date_msg: bool = False
-) -> None | dict:
+def get_latest_release_infos(url: str, langs_handler: LangsHandler) -> None | dict:
     logger.info(f"Getting latest release infos from {url}...")
 
     try:
@@ -40,29 +40,35 @@ def get_latest_release_infos(
         response.raise_for_status()
 
     except requests.Timeout:
-        error = "Could not get app latest release infos : request timed out"
-        logger.error(error)
-        show_error(msg=error)
+        logger.error("Could not get app latest release infos : request timed out")
+        show_error(
+            msg=langs_handler.tr(
+                "updates.errors.latest_release_infos.request_timed_out"
+            )
+        )
         return
 
     except requests.HTTPError as httperr:
-        error = f"Could not get app latest release infos : {httperr}"
-        logger.error(error)
-        show_error(msg=error)
+        logger.error(f"Could not get app latest release infos : {httperr}")
+        show_error(
+            msg=langs_handler.tr(
+                "updates.errors.latest_release_infos.httperr", httperr=httperr
+            )
+        )
         return
 
     return response.json()
 
 
-def download_pop_up(release_infos: dict):
+def download_pop_up(release_infos: dict, title, msg, download_button_text: str):
     pop_up = QtWidgets.QMessageBox(
         QtWidgets.QMessageBox.Icon.Information,
-        "Check for Updates",
-        f"Books Quest {release_infos['tag_name']} is available !",
+        title,
+        msg,
         QtWidgets.QMessageBox.StandardButton.Cancel,
     )
     download_button = pop_up.addButton(
-        "Download", QtWidgets.QMessageBox.ButtonRole.YesRole
+        download_button_text, QtWidgets.QMessageBox.ButtonRole.YesRole
     )
     pop_up.exec()
     return pop_up.clickedButton() == download_button

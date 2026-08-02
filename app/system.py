@@ -370,16 +370,17 @@ class AppSystem:
     @QtCore.Slot(bool)
     def check_for_update(self, show_up_to_date_msg: bool = False):
         self.logger.info("Checking for updates...")
-        self.qt_signals_handler.edit_progress_msg.emit("Checking for updates...")
+        self.qt_signals_handler.edit_progress_msg.emit(
+            self.langs_handler.tr("updates.infos.checking_for_updates")
+        )
         release_infos = update_tools.get_latest_release_infos(
             "https://api.github.com/repos/soloender/books-quest/releases/latest",
-            self.app_infos["app_version"],
-            show_up_to_date_msg,
+            self.langs_handler,
         )
         if not release_infos:
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
-
+        pop_up_title = self.langs_handler.tr("updates.download_pop_up_title")
         release_version = release_infos[
             "tag_name"
         ]  # Should be formatted like this : 'vminor.major.patch'. The 'v' is not a mistake
@@ -396,8 +397,8 @@ class AppSystem:
             )
             self.qt_signals_handler.notify_sg.emit(
                 "error",
-                "Check for Updates",
-                "Could not compare latest release version to app version",
+                pop_up_title,
+                self.langs_handler.tr("updates.errors.uncomparables_versions"),
                 "",
             )
             self.qt_signals_handler.edit_progress_msg.emit(" ")
@@ -407,13 +408,23 @@ class AppSystem:
             self.logger.info("App is up-to-date")
             if show_up_to_date_msg:
                 self.qt_signals_handler.notify_sg.emit(
-                    "info", "Check for Updates", "You are up-to-date", ""
+                    "info",
+                    pop_up_title,
+                    self.langs_handler.tr("updates.infos.up_to_date"),
+                    "",
                 )
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
         # Show pop up to download the update
-        download = update_tools.download_pop_up(release_infos)
+        download = update_tools.download_pop_up(
+            release_infos,
+            pop_up_title,
+            self.langs_handler.tr(
+                "updates.infos.update_available", update_version=release_version
+            ),
+            self.langs_handler.tr("shared.actions.download"),
+        )
         if download:
             self.logger.info(
                 f"Opening update page url ({release_infos['html_url']}) in web browser"

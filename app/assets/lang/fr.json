@@ -19,7 +19,8 @@
       "book_creation": "Nouveau livre",
       "shelf_creation": "Nouvelle étagère",
       "go_to": "Aller à:",
-      "restore_default_cover": "Restaurer la couverture par défaut"
+      "restore_default_cover": "Restaurer la couverture par défaut",
+      "download": "Télécharger"
     },
     "basic_error_notification": {
       "title": "Avertissement",
@@ -92,6 +93,21 @@
       "view_books": "Voir les livres",
       "select_books": "Selectionner des livres :"
     }
+  },
+  "updates": {
+    "errors": {
+      "uncomparables_versions": "Impossible de comparer la version de la dernière release avec celle de l'application",
+      "latest_release_infos": {
+        "request_timed_out": "Impossible d'obtenir les informations de la dernière release, car l'API à mis trop de temps à répondre.",
+        "httperr": "Impossible d'obtenir les informations de la dernière release : /f:<httperr>/f"
+      }
+    },
+    "infos": {
+      "up_to_date": "Books Quest est à jour",
+      "checking_for_updates": "Recherche de mises à jour...",
+      "update_available": "Books Quest /f:<update_version>f est disponible !"
+    },
+    "download_pop_up_title": "Recherche de mise à jour"
   },
   "settings": {
     "msg": {
