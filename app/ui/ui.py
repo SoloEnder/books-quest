@@ -53,6 +53,7 @@ class UI(QtWidgets.QMainWindow):
         self.langs_handler.set_current_language(
             self.settings_handler.get_setting_value("general.appearance.language")
         )
+        self.set_app_theme()
         self.books_handler.edit_default_shelf(
             title=self.langs_handler.tr("shelf.infos.default_shelf_title")
         )
@@ -94,11 +95,29 @@ class UI(QtWidgets.QMainWindow):
         self.my_stacked_widgets.switch_page("SHELFS_VIEW_PAGE")
         self.setCentralWidget(self.my_stacked_widgets)
 
+    def set_app_theme(self):
+        """
+        Sets the app theme according to the settings
+        """
+        style_hints = QtWidgets.QApplication.styleHints()
+        theme = self.settings_handler.get_setting_value("general.appearance.theme")
+
+        if theme == "light":
+            style_hints.setColorScheme(QtCore.Qt.ColorScheme.Light)
+
+        elif theme == "dark":
+            style_hints.setColorScheme(QtCore.Qt.ColorScheme.Dark)
+
+        elif theme == "system":
+            style_hints.unsetColorScheme()
+
     def refresh_ui(self):
         """
         Refresh the UI
         """
         self.logger.info("Refreshing UI...")
+        images_tools.clear_all_caches()
+        self.langs_handler.tr.cache_clear()
         current_page_infos_before_redraw = (
             self.my_stacked_widgets.current_page_infos[0],
             self.my_stacked_widgets.current_page_infos[2],

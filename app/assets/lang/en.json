@@ -19,7 +19,8 @@
       "book_creation": "New book",
       "shelf_creation": "New shelf",
       "go_to": "Go to :",
-      "restore_default_cover": "Restore default cover"
+      "restore_default_cover": "Restore default cover",
+      "download": "Download"
     },
     "basic_error_notification": {
       "title": "Warning",
@@ -93,6 +94,21 @@
       "view_books": "See books"
     }
   },
+  "updates": {
+    "errors": {
+      "uncomparables_versions": "Could not compare latest release version to app version",
+      "latest_release_infos": {
+        "request_timed_out": "Could not get app latest release infos : request timed out",
+        "httperr": "Could not get app latest release infos : /f:<httperr>/f"
+      }
+    },
+    "infos": {
+      "up_to_date": "Books Quest is up-to-date",
+      "checking_for_updates": "Checking for updates...",
+      "update_available": "Books Quest /f:<update_version>/f is available !"
+    },
+    "download_pop_up_title": "Check for Updates"
+  },
   "settings": {
     "msg": {
       "applying_changes": "Applying settings changes...",
@@ -103,6 +119,14 @@
       "appearance": {
         "section_title": "Appearance",
         "section_description": "Settings related to the apparence of the applicaion",
+        "theme": {
+          "section_title": "Theme",
+          "section_description": "Color theme settings",
+          "interface_theme": "Interface theme",
+          "light_theme": "Light",
+          "dark_theme": "Dark",
+          "follow_system_theme": "Follow system"
+        },
         "language": {
           "section_title": "Language",
           "section_description": "Interface language settings",

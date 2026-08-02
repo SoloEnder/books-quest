@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import time
+import webbrowser
 
 from PySide6 import QtCore, QtWidgets
 
@@ -12,7 +13,7 @@ from app.src import (
     settings_handler,
 )
 from app.ui import qt_signals_handler, ui
-from app.utils import json_file_manager, paths
+from app.utils import json_file_manager, paths, update_tools
 
 
 class AppSystem:
@@ -72,6 +73,7 @@ class AppSystem:
         Connect signals to the already loaded slots
         """
         self.qt_signals_handler.show_about_sg.connect(self.about)
+        self.qt_signals_handler.check_for_updates_sg.connect(self.check_for_update)
         self.qt_signals_handler.write_version_on_widget_sg.connect(
             self.write_version_on_widget
         )
@@ -121,6 +123,7 @@ class AppSystem:
     def start(self):
         self.start_ui()
         self.installation_infos["boots_count"] += 1
+        self.check_for_update()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
@@ -363,3 +366,68 @@ class AppSystem:
         Only works with widgets that has the `setText` method
         """
         widget.setText(self.app_infos["app_version"])
+
+    @QtCore.Slot(bool)
+    def check_for_update(self, show_up_to_date_msg: bool = False):
+        self.logger.info("Checking for updates...")
+        self.qt_signals_handler.edit_progress_msg.emit(
+            self.langs_handler.tr("updates.infos.checking_for_updates")
+        )
+        release_infos = update_tools.get_latest_release_infos(
+            "https://api.github.com/repos/soloender/books-quest/releases/latest",
+            self.langs_handler,
+        )
+        if not release_infos:
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            return
+        pop_up_title = self.langs_handler.tr("updates.download_pop_up_title")
+        release_version = release_infos[
+            "tag_name"
+        ]  # Should be formatted like this : 'vminor.major.patch'. The 'v' is not a mistake
+
+        # Checking if the latest release is an update
+        try:
+            is_update = update_tools.is_higher_version(
+                release_version.split("v")[1], self.app_infos["app_version"]
+            )
+
+        except update_tools.UncomparablesVersionsError:
+            self.logger.error(
+                f"Could not compare latest release version to app version tag name='{release_version}', app_version='{self.app_infos['app_version']}'"
+            )
+            self.qt_signals_handler.notify_sg.emit(
+                "error",
+                pop_up_title,
+                self.langs_handler.tr("updates.errors.uncomparables_versions"),
+                "",
+            )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            return
+
+        if not is_update:
+            self.logger.info("App is up-to-date")
+            if show_up_to_date_msg:
+                self.qt_signals_handler.notify_sg.emit(
+                    "info",
+                    pop_up_title,
+                    self.langs_handler.tr("updates.infos.up_to_date"),
+                    "",
+                )
+            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            return
+
+        # Show pop up to download the update
+        download = update_tools.download_pop_up(
+            release_infos,
+            pop_up_title,
+            self.langs_handler.tr(
+                "updates.infos.update_available", update_version=release_version
+            ),
+            self.langs_handler.tr("shared.actions.download"),
+        )
+        if download:
+            self.logger.info(
+                f"Opening update page url ({release_infos['html_url']}) in web browser"
+            )
+            webbrowser.open_new_tab(release_infos["html_url"])
+        self.qt_signals_handler.edit_progress_msg.emit(" ")

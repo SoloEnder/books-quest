@@ -1,3 +1,5 @@
+import functools
+
 from app.src import json_dicts_paths_handler, resources_handler
 
 
@@ -14,6 +16,7 @@ class LangsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         """
         self.load_from_file(self.res_handler.get_res(f"assets.langs.{language}"))
 
+    @functools.cache  # Warning ignored, as these instances are singletons created at startup and destroyed at the end of the program.
     def tr(self, lang_dict_path: str, **kwargs):
         text = self.get_value(lang_dict_path)
 

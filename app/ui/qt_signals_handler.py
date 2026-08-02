@@ -14,6 +14,9 @@ class QtSignalsHandler(QtCore.QObject):
     write_version_on_widget_sg = QtCore.Signal(
         QtWidgets.QWidget
     )  # Write the app current version on an widget that support `setText` method
+    check_for_updates_sg = QtCore.Signal(
+        bool
+    )  # Checks for update. First argument indicates whether to show a pop-up when app is up to date
 
     def __init__(self):
         super().__init__()

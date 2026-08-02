@@ -295,7 +295,78 @@ class AppearanceSettings(SettingsSection):
             self.langs_handler,
             qt_signals_handler,
         )
+        self.theme_settings = ThemeSettings(
+            None,
+            settings_handler,
+            self.langs_handler,
+            qt_signals_handler,
+        )
+        self.add_child_section(self.theme_settings)
         self.add_child_section(self.langs_settings)
+
+
+class ThemeSettings(SettingsSection):
+    """
+    The SettingsSection for the languages options
+    """
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+    ):
+        super().__init__(
+            parent,
+            "THEME_SETTINGS",
+            "settings.general.appearance.theme.section_title",
+            settings_handler,
+            langs_handler,
+            qt_signals_handler,
+        )
+        self.header_lb.setProperty("role", "h4")
+        self.header_lb.setStatusTip(
+            self.langs_handler.tr(
+                "settings.general.appearance.theme.section_description"
+            )
+        )
+        self.edit_theme_lb = QtWidgets.QLabel(
+            self.langs_handler.tr("settings.general.appearance.theme.interface_theme")
+        )
+        self.theme_selection_combob = QtWidgets.QComboBox()
+        self.theme_opt_indexes = {
+            "light": 0,
+            "system": 1,
+            "dark": 2,
+        }
+        self.theme_selection_combob.addItem(
+            self.langs_handler.tr("settings.general.appearance.theme.light_theme"),
+            "light",
+        )
+        self.theme_selection_combob.addItem(
+            self.langs_handler.tr(
+                "settings.general.appearance.theme.follow_system_theme"
+            ),
+            "system",
+        )
+        self.theme_selection_combob.addItem(
+            self.langs_handler.tr("settings.general.appearance.theme.dark_theme"),
+            "dark",
+        )
+        self.theme_selection_combob.setCurrentIndex(
+            self.theme_opt_indexes[
+                str(self.settings_handler.get_setting_value("general.appearance.theme"))
+            ]
+        )
+        self.base_lyt.addWidget(self.edit_theme_lb)
+        self.base_lyt.addWidget(self.theme_selection_combob, 1, 1)
+
+    def apply_settings(self):
+        self.settings_handler.set_setting_value(
+            "general.appearance.theme",
+            self.theme_selection_combob.currentData(),
+        )
 
 
 class LangsSettings(SettingsSection):
@@ -398,9 +469,7 @@ class UpdateSettings(SettingsSection):
             self.langs_handler.tr("settings.general.update.actions.check_update")
         )
         self.check_update_b.clicked.connect(
-            lambda: webbrowser.open_new_tab(
-                "https://github.com/SoloEnder/books-quest/releases"
-            )
+            lambda: self.qt_signals_handler.check_for_updates_sg.emit(True)
         )
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())

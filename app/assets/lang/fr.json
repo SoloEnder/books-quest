@@ -19,7 +19,8 @@
       "book_creation": "Nouveau livre",
       "shelf_creation": "Nouvelle étagère",
       "go_to": "Aller à:",
-      "restore_default_cover": "Restaurer la couverture par défaut"
+      "restore_default_cover": "Restaurer la couverture par défaut",
+      "download": "Télécharger"
     },
     "basic_error_notification": {
       "title": "Avertissement",
@@ -93,6 +94,21 @@
       "select_books": "Selectionner des livres :"
     }
   },
+  "updates": {
+    "errors": {
+      "uncomparables_versions": "Impossible de comparer la version de la dernière release avec celle de l'application",
+      "latest_release_infos": {
+        "request_timed_out": "Impossible d'obtenir les informations de la dernière release, car l'API à mis trop de temps à répondre.",
+        "httperr": "Impossible d'obtenir les informations de la dernière release : /f:<httperr>/f"
+      }
+    },
+    "infos": {
+      "up_to_date": "Books Quest est à jour",
+      "checking_for_updates": "Recherche de mises à jour...",
+      "update_available": "Books Quest /f:<update_version>f est disponible !"
+    },
+    "download_pop_up_title": "Recherche de mise à jour"
+  },
   "settings": {
     "msg": {
       "applying_changes": "Application des nouveaux paramètres...",
@@ -103,6 +119,14 @@
       "appearance": {
         "section_title": "Apparence",
         "section_description": "Paramètres concernant l'apparence de l'application",
+        "theme": {
+          "section_title": "Theme",
+          "section_description": "Paramètre concernant le thème de l'interface",
+          "interface_theme": "Thème de l'interface",
+          "light_theme": "Clair",
+          "dark_theme": "Sombre",
+          "follow_system_theme": "Thème système"
+        },
         "language": {
           "section_title": "Language",
           "section_description": "Paramètres concernant la langue de l'interface",
