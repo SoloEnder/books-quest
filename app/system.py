@@ -73,6 +73,7 @@ class AppSystem:
         Connect signals to the already loaded slots
         """
         self.qt_signals_handler.show_about_sg.connect(self.about)
+        self.qt_signals_handler.check_for_updates_sg.connect(self.check_for_update)
         self.qt_signals_handler.write_version_on_widget_sg.connect(
             self.write_version_on_widget
         )
@@ -366,6 +367,7 @@ class AppSystem:
         """
         widget.setText(self.app_infos["app_version"])
 
+    @QtCore.Slot(bool)
     def check_for_update(self, show_up_to_date_msg: bool = False):
         self.logger.info("Checking for updates...")
         release_infos = update_tools.get_latest_release_infos(

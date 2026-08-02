@@ -469,9 +469,7 @@ class UpdateSettings(SettingsSection):
             self.langs_handler.tr("settings.general.update.actions.check_update")
         )
         self.check_update_b.clicked.connect(
-            lambda: webbrowser.open_new_tab(
-                "https://github.com/SoloEnder/books-quest/releases"
-            )
+            lambda: self.qt_signals_handler.check_for_updates_sg.emit(True)
         )
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
