@@ -471,14 +471,32 @@ class UpdateSettings(SettingsSection):
         self.check_update_b.clicked.connect(
             lambda: self.qt_signals_handler.check_for_updates_sg.emit(True)
         )
+        self.auto_check_for_update_cb = QtWidgets.QCheckBox(
+            self.langs_handler.tr(
+                "settings.general.update.actions.enable_auto_update_check"
+            )
+        )
+        self.auto_check_for_update_cb.setChecked(
+            self.settings_handler.get_setting_value(
+                "general.update.auto_update_check_enabled"
+            )
+        )
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.base_lyt.addWidget(
             self.current_version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-
         self.base_lyt.addWidget(
-            self.check_update_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.auto_check_for_update_cb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.check_update_b, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+    def apply_settings(self):
+        self.settings_handler.set_setting_value(
+            "general.update.auto_update_check_enabled",
+            self.auto_check_for_update_cb.isChecked(),
         )
 
 

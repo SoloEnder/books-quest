@@ -137,7 +137,8 @@
         "section_title": "Mises à jour",
         "section_description": "Paramètres concernant les mises à jour de l'application",
         "actions": {
-          "check_update": "Vérifier les mises à jour"
+          "check_update": "Vérifier les mises à jour",
+          "enable_auto_update_check": "Vérifier automatiquement les mise à jour (au démarrage)"
         }
       },
       "help": {
