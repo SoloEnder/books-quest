@@ -1,7 +1,7 @@
-import collections
 import copy
 import logging
 import pathlib
+import typing
 
 from dicts_paths_handler import InvalidDictPathError
 
@@ -75,7 +75,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
 
         current_value[parts[-1]] = value
 
-    def get_setting_value(self, setting_path: str):
+    def get_setting_value(self, setting_path: str) -> typing.Any:
         """
         Get the value of the `current` key from a setting.
         If `setting_path` already end with '.current', then this method do the same as `get_value` method
@@ -109,7 +109,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         setting_infos = self.get_value(setting_path)
 
         if isinstance(setting_infos, dict):
-            if setting_infos.get("choices") and setting_infos.get("current"):
+            if "choices" in setting_infos and "current" in setting_infos:
                 setting_choices = setting_infos["choices"]
                 if isinstance(setting_choices, list):
                     return True
