@@ -3,12 +3,12 @@ from __future__ import annotations
 import logging
 import webbrowser
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import utils_funcs
+from app.utils import images_tools, utils_funcs
 
 
 class SettingsPage(base_page.BasePage):
@@ -45,13 +45,32 @@ class SettingsPage(base_page.BasePage):
             self.set_displayed_section
         )  # The naviguation bar
         self.appearance_settings = AppearanceSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            images_tools.get_svg(
+                self.res_handler.get_res("assets.icons.color_palette")
+            ),
         )
         self.update_settings = UpdateSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.refresh")),
         )
         self.about_settings = HelpSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            images_tools.get_svg(
+                self.res_handler.get_res("assets.icons.question_circle")
+            ),
         )
 
         self.apply_button = QtWidgets.QPushButton(
@@ -143,7 +162,9 @@ class SettingsPage(base_page.BasePage):
         if not self.has_section(section):
             self._sections[section.SECTION_NAME] = section
             self._sections_displayer.addWidget(section)
-            self.nav_bar.add_section_button(section.SECTION_NAME, nav_button_text)
+            self.nav_bar.add_section_button(
+                section.SECTION_NAME, nav_button_text, section.icon
+            )
 
         else:
             raise ValueError(
@@ -185,15 +206,19 @@ class SettingsSection(QtWidgets.QWidget):
         section_name: str,
         header_lang_path: str,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(parent)
         self.SECTION_NAME = section_name
         self.header_lang_path = header_lang_path
+        self.res_handler = res_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
         self.qt_signals_handler = qt_signals_handler
+        self.icon = icon
 
         self.base_lyt = QtWidgets.QGridLayout()
         self.setLayout(self.base_lyt)
@@ -256,16 +281,20 @@ class GeneralSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "General",
             "settings.general.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
 
 
@@ -274,16 +303,20 @@ class AppearanceSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "APPEARANCE",
             "settings.general.appearance.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
         self.header_lb.setStatusTip(
             self.langs_handler.tr("settings.general.appearance.section_description")
@@ -292,12 +325,14 @@ class AppearanceSettings(SettingsSection):
         self.langs_settings = LangsSettings(
             None,
             settings_handler,
+            self.res_handler,
             self.langs_handler,
             qt_signals_handler,
         )
         self.theme_settings = ThemeSettings(
             None,
             settings_handler,
+            self.res_handler,
             self.langs_handler,
             qt_signals_handler,
         )
@@ -314,16 +349,20 @@ class ThemeSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "THEME_SETTINGS",
             "settings.general.appearance.theme.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
         self.header_lb.setProperty("role", "h4")
         self.header_lb.setStatusTip(
@@ -378,16 +417,20 @@ class LangsSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "LANGS_SETTINGS",
             "settings.general.appearance.language.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
         self.header_lb.setProperty("role", "h4")
         self.header_lb.setStatusTip(
@@ -442,16 +485,20 @@ class UpdateSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "update_settings",
             "settings.general.update.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
@@ -471,14 +518,32 @@ class UpdateSettings(SettingsSection):
         self.check_update_b.clicked.connect(
             lambda: self.qt_signals_handler.check_for_updates_sg.emit(True)
         )
+        self.auto_check_for_update_cb = QtWidgets.QCheckBox(
+            self.langs_handler.tr(
+                "settings.general.update.actions.enable_auto_update_check"
+            )
+        )
+        self.auto_check_for_update_cb.setChecked(
+            self.settings_handler.get_setting_value(
+                "general.update.auto_update_check_enabled"
+            )
+        )
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.base_lyt.addWidget(
             self.current_version_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-
         self.base_lyt.addWidget(
-            self.check_update_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            self.auto_check_for_update_cb, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+        self.base_lyt.addWidget(
+            self.check_update_b, 3, 0, QtCore.Qt.AlignmentFlag.AlignLeft
+        )
+
+    def apply_settings(self):
+        self.settings_handler.set_setting_value(
+            "general.update.auto_update_check_enabled",
+            self.auto_check_for_update_cb.isChecked(),
         )
 
 
@@ -487,16 +552,20 @@ class HelpSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "help_settings",
             "settings.general.help.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
+            icon,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
@@ -552,7 +621,9 @@ class MainNavigationBar(QtWidgets.QWidget):
         else:
             return False
 
-    def add_section_button(self, section_name: str, displayed_text: str):
+    def add_section_button(
+        self, section_name: str, displayed_text: str, icon: QtGui.QIcon | None = None
+    ):
         """
         Add a new button for naviguate to a settings section with `section_name`
 
@@ -568,6 +639,8 @@ class MainNavigationBar(QtWidgets.QWidget):
 
         if section_name not in self._sections_buttons.keys():
             button = QtWidgets.QPushButton(displayed_text)
+            if icon:
+                button.setIcon(icon)
             button.setProperty("role", "NaviguationButton")
             button.clicked.connect(lambda: self.section_requested_sg.emit(section_name))
             self._sections_buttons[section_name] = button

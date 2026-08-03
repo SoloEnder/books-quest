@@ -123,7 +123,11 @@ class AppSystem:
     def start(self):
         self.start_ui()
         self.installation_infos["boots_count"] += 1
-        self.check_for_update()
+
+        if self.settings_handler.get_setting_value(
+            "general.update.auto_update_check_enabled"
+        ):
+            self.check_for_update()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")

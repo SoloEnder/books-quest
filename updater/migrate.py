@@ -38,8 +38,11 @@ class MigrationsHandler:
             logger.debug(
                 f"Checking appliability of migration with infos={migration.MIGRATION_INFOS}..."
             )
-            if utils.ishigher(
-                version, self.update_res.installation_app_infos["app_version"]
+            if (
+                utils.compare_versions(
+                    version, self.update_res.installation_app_infos["app_version"]
+                )
+                == "higher"
             ):
                 self.appliable_migrations.append(migration)
             self.window.work_in_progress_sc.progress_group()

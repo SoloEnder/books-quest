@@ -1,1 +1,1 @@
-{"general": {"appearance": {"theme": {"current": "dark", "choices": ["light", "system", "dark"]}, "language": {"current": "en", "choices": ["fr", "en"]}}}, "developer_settings": {"show_indev_warning": {"current": true, "choices": [true, false]}}}
+{"general": {"appearance": {"theme": {"current": "dark", "choices": ["light", "system", "dark"]}, "language": {"current": "en", "choices": ["fr", "en"]}}, "update": {"auto_update_check_enabled": {"current": true, "choices": [true, false]}}}, "developer_settings": {"show_indev_warning": {"current": true, "choices": [true, false]}}}
