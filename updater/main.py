@@ -50,12 +50,15 @@ def check_installation(installation_path: str, update_infos: dict) -> dict | Non
 
     some_compatibility(installation_app_infos)
 
-    if utils.ishigher(installation_app_infos["app_version"], update_infos["update_to"]):
+    if utils.is_higher_version(
+        installation_app_infos["app_version"], update_infos["update_to"]
+    ):
         logger.error(
             f"Installation version ({installation_app_infos['app_version']}) is higher than update version {update_infos['update_to']}, aborting update."
         )
         tkinter.messagebox.showerror(
-            f"The installation version ({installation_app_infos['app_version']}) is already higher than this update ({update_infos['update_to']})"
+            title="Updater",
+            message=f"The installation version ({installation_app_infos['app_version']}) is already higher than this update ({update_infos['update_to']})",
         )
         return
 
@@ -249,7 +252,7 @@ def try_update():
 
     installation_app_infos, update_infos = result.values()
     window.update_error_sc.cancel_b.config(command=sys.exit)
-    if not utils.ishigher(installation_app_infos["app_version"], "0.2.0"):
+    if not utils.is_higher_version(installation_app_infos["app_version"], "0.2.0"):
         installation_app_infos["root_directory_content"] = [
             "app",
             "licenses",

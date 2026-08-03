@@ -38,7 +38,7 @@ class MigrationsHandler:
             logger.debug(
                 f"Checking appliability of migration with infos={migration.MIGRATION_INFOS}..."
             )
-            if utils.ishigher(
+            if utils.is_higher_version(
                 version, self.update_res.installation_app_infos["app_version"]
             ):
                 self.appliable_migrations.append(migration)

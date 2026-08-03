@@ -430,7 +430,7 @@ def get_path_alias_value(alias: str, update_res: UpdateRes) -> str:
         raise InvalidPathAliasError(alias)
 
 
-def ishigher(version_a: str, version_b: str) -> bool:
+def is_higher_version(version_a: str, version_b: str) -> bool:
     """
     Checks whether `version_a` is higher than `version_b`
 
@@ -450,10 +450,10 @@ def ishigher(version_a: str, version_b: str) -> bool:
         raise UncomparablesVersionsError(version_a, version_b)
 
     for index, version_a_part in enumerate(version_a_parts):
-        if int(version_a_part) > int(version_b_parts[index]):
-            return True
+        if int(version_a_part) < int(version_b_parts[index]):
+            return False
 
-    return False
+    return True
 
 
 def get_installation_app_infos(installation_path: str) -> dict:
