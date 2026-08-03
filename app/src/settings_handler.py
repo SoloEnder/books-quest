@@ -176,7 +176,7 @@ class SettingsHandler(json_dicts_paths_handler.JSONDictPathHandler):
         # Overide base settings by user settings
         self.base_dict = self.settings
         invalid_settings_count = 0
-        valid_settings_count = 1
+        valid_settings_count = 0
         for setting_path, setting_value in user_settings_path_dict.items():
             try:
                 self.edit_value(setting_path, setting_value)
