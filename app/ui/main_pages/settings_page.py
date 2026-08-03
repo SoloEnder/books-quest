@@ -45,13 +45,25 @@ class SettingsPage(base_page.BasePage):
             self.set_displayed_section
         )  # The naviguation bar
         self.appearance_settings = AppearanceSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
         )
         self.update_settings = UpdateSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
         )
         self.about_settings = HelpSettings(
-            None, self.settings_handler, self.langs_handler, self.qt_signals_handler
+            None,
+            self.settings_handler,
+            self.res_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
         )
 
         self.apply_button = QtWidgets.QPushButton(
@@ -185,12 +197,14 @@ class SettingsSection(QtWidgets.QWidget):
         section_name: str,
         header_lang_path: str,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
         super().__init__(parent)
         self.SECTION_NAME = section_name
         self.header_lang_path = header_lang_path
+        self.res_handler = res_handler
         self.settings_handler = settings_handler
         self.langs_handler = langs_handler
         self.qt_signals_handler = qt_signals_handler
@@ -256,6 +270,7 @@ class GeneralSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -264,6 +279,7 @@ class GeneralSettings(SettingsSection):
             "General",
             "settings.general.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
@@ -274,6 +290,7 @@ class AppearanceSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -282,6 +299,7 @@ class AppearanceSettings(SettingsSection):
             "APPEARANCE",
             "settings.general.appearance.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
@@ -292,12 +310,14 @@ class AppearanceSettings(SettingsSection):
         self.langs_settings = LangsSettings(
             None,
             settings_handler,
+            self.res_handler,
             self.langs_handler,
             qt_signals_handler,
         )
         self.theme_settings = ThemeSettings(
             None,
             settings_handler,
+            self.res_handler,
             self.langs_handler,
             qt_signals_handler,
         )
@@ -314,6 +334,7 @@ class ThemeSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -322,6 +343,7 @@ class ThemeSettings(SettingsSection):
             "THEME_SETTINGS",
             "settings.general.appearance.theme.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
@@ -378,6 +400,7 @@ class LangsSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler: settings_handler.SettingsHandler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -386,6 +409,7 @@ class LangsSettings(SettingsSection):
             "LANGS_SETTINGS",
             "settings.general.appearance.language.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
@@ -442,6 +466,7 @@ class UpdateSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -450,6 +475,7 @@ class UpdateSettings(SettingsSection):
             "update_settings",
             "settings.general.update.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
@@ -505,6 +531,7 @@ class HelpSettings(SettingsSection):
         self,
         parent: QtWidgets.QWidget | None,
         settings_handler,
+        res_handler: resources_handler.RessourcesHandler,
         langs_handler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
     ):
@@ -513,6 +540,7 @@ class HelpSettings(SettingsSection):
             "help_settings",
             "settings.general.help.section_title",
             settings_handler,
+            res_handler,
             langs_handler,
             qt_signals_handler,
         )
