@@ -30,7 +30,7 @@ VSVersionInfo(
       StringTable(
         '040904B0',
         [StringStruct('CompanyName', 'SoloEnder'),
-        StringStruct('FileDescription', 'BooksQuest application launcher'),
+        StringStruct('FileDescription', 'Books Quest'),
         StringStruct('FileVersion', '0.3.0.0'),
         StringStruct('InternalName', 'books-quest'),
         StringStruct('LegalCopyright', 'Copyright (c) 2026 SoloEnder'),
