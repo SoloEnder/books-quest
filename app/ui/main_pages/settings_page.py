@@ -50,6 +50,9 @@ class SettingsPage(base_page.BasePage):
             self.res_handler,
             self.langs_handler,
             self.qt_signals_handler,
+            images_tools.get_svg(
+                self.res_handler.get_res("assets.icons.color_palette")
+            ),
         )
         self.update_settings = UpdateSettings(
             None,
@@ -57,6 +60,7 @@ class SettingsPage(base_page.BasePage):
             self.res_handler,
             self.langs_handler,
             self.qt_signals_handler,
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.refresh")),
         )
         self.about_settings = HelpSettings(
             None,
@@ -64,6 +68,9 @@ class SettingsPage(base_page.BasePage):
             self.res_handler,
             self.langs_handler,
             self.qt_signals_handler,
+            images_tools.get_svg(
+                self.res_handler.get_res("assets.icons.question_circle")
+            ),
         )
 
         self.apply_button = QtWidgets.QPushButton(

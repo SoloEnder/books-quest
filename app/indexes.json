@@ -31,7 +31,10 @@
       "view_books": "library.svg",
       "settings": "settings.svg",
       "remove_img": "image-off.svg",
-      "shelf": "square-library.svg"
+      "shelf": "square-library.svg",
+      "color_palette": "palette.svg",
+      "refresh": "refresh-cw.svg",
+      "question_circle": "help-circle.svg"
     },
     "splashscreen": {
       "_base_": "splashscreen",
