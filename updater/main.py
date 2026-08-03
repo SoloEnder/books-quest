@@ -125,15 +125,6 @@ def check_before_start() -> dict[str, dict] | None:
                         "update_infos": update_infos,
                     }
 
-                else:
-                    logger.error(
-                        f"Selected folder {installation_folder} is not recognized as a valid books-quest installation, aborting update"
-                    )
-                    tkinter.messagebox.showerror(
-                        title="Updater",
-                        message="The selected folder is not recognized as a valid books-quest installation",
-                    )
-
 
 def try_cancel(update_res: utils.UpdateRes):
 
