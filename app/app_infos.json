@@ -6,5 +6,6 @@
     "LICENSE",
     "THIRD_PARTY_NOTICE.txt",
     "main.py"
-  ]
+  ],
+  "elements_to_preserve": ["app", "app/logs", "app/data/user_data"]
 }
