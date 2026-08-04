@@ -105,7 +105,7 @@
     "infos": {
       "up_to_date": "Books Quest est à jour",
       "checking_for_updates": "Recherche de mises à jour...",
-      "update_available": "Books Quest /f:<update_version>f est disponible !"
+      "update_available": "Books Quest /f:<update_version>/f est disponible !"
     },
     "download_pop_up_title": "Recherche de mise à jour"
   },
