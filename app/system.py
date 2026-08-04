@@ -420,6 +420,7 @@ class AppSystem:
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
+        self.logger.info(f"Books Quest {release_version} is available")
         # Show pop up to download the update
         download = update_tools.download_pop_up(
             release_infos,
