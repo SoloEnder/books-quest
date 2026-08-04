@@ -163,7 +163,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(self.confirm_b, 8, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
     @property
-    def current_mode(self):
+    def current_mode(self) -> Literal["edition", "creation"]:
         """
         Getter of property 'current_mode'
         """
@@ -223,8 +223,12 @@ class ShelfCreationPage(base_page.BasePage):
 
     def edition_mode(self):
         if self.shelf:
-            if self.shelf.cover_path:
-                self.current_shelf_cover = self.shelf.cover_path
+            # Replace the displayed cover by the shelf's cover
+            shelf_cover_path = self.books_handler.get_shelf_cover_path(
+                self.shelf, False
+            )
+            if shelf_cover_path:
+                self.current_shelf_cover = shelf_cover_path
                 self.set_cover_lb_pixmap(self.current_shelf_cover)
             self.title_e.setText(self.shelf.title)
 
@@ -256,6 +260,11 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Set the cover image to the default value
         """
+        if self.current_mode == "edition":
+            shelf_cover = self.books_handler.get_shelf_cover_path(self.shelf, False)
+
+            if shelf_cover:
+                self.books_handler._delete_cover(shelf_cover)
         self.current_shelf_cover = self.default_shelf_cover
         self.set_cover_lb_pixmap(self.current_shelf_cover)
 
@@ -361,6 +370,9 @@ class ShelfCreationPage(base_page.BasePage):
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
+        if self.current_mode == "edition":
+            id = self.shelf.id
+
         shelf_title = self.title_e.text().strip()
         title_suffix = None
 
@@ -399,13 +411,14 @@ class ShelfCreationPage(base_page.BasePage):
 
         final_img_path = self.current_shelf_cover
 
-        if self.current_shelf_cover != self.default_shelf_cover:
+        if not self.is_original_cover():
             final_img_path = os.path.join(
-                self.res_handler.get_res("data.bookshelves.covers"),
+                self.res_handler.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
-            done = self.move_cover_img(final_img_path)
-
+            self.logger.debug(f"Final shelf cover image path = {final_img_path}")
+            self.copy_cover_img(final_img_path)
+            done = self.copy_cover_img(final_img_path)
             if not done:
                 return
 
@@ -423,12 +436,20 @@ class ShelfCreationPage(base_page.BasePage):
             "parents_shelves": parents_shelves,
             "children_shelves": child_shelves,
             "id": id,
-            "cover_path": self.current_shelf_cover
-            if self.current_shelf_cover != self.default_shelf_cover
-            else None,
         }
 
-    def move_cover_img(self, dest_path):
+    def is_original_cover(self):
+        """
+        Check if the current shelf cover is it's original cover (the one it had before any changes were made)
+        """
+        original_cover = self.default_shelf_cover
+
+        if self.current_mode == "edition":
+            original_cover = self.books_handler.get_book_cover_path(self.shelf)  # type: ignore
+
+        return original_cover == self.current_shelf_cover
+
+    def copy_cover_img(self, dest_path):
 
         try:
             shutil.copy2(self.current_shelf_cover, dest_path)  # type: ignore

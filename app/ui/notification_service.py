@@ -26,7 +26,7 @@ class NotificationService:
             self.show_info(title, msg)  # type: ignore
 
     def show_error(self, title: str | None, msg: str | None):
-        QtWidgets.QMessageBox.warning(
+        QtWidgets.QMessageBox.critical(
             self.widget_parent,
             title if title else self.default_warning_infos["title"],
             msg if msg else self.default_warning_infos["msg"],

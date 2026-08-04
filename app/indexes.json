@@ -30,7 +30,11 @@
       "new_book": "book-plus.svg",
       "view_books": "library.svg",
       "settings": "settings.svg",
-      "remove_img": "image-off.svg"
+      "remove_img": "image-off.svg",
+      "shelf": "square-library.svg",
+      "color_palette": "palette.svg",
+      "refresh": "refresh-cw.svg",
+      "question_circle": "help-circle.svg"
     },
     "splashscreen": {
       "_base_": "splashscreen",
@@ -44,24 +48,31 @@
   },
   "data": {
     "_base_": "data",
-    "books": {
-      "_base_": "books_data",
-      "books": "books.json",
-      "covers": {
-        "_base_": "covers"
-      }
+    "app": {
+      "_base_": "app_data",
+      "static": {
+        "_base_": "static",
+        "base_settings": "base_settings.json"
+      },
+      "installation_infos": "installation_infos.json"
     },
-    "bookshelves": {
-      "_base_": "bookshelves_data",
-      "bookshelves": "bookshelves.json",
-      "covers": {
-        "_base_": "covers"
+    "user": {
+      "_base_": "user_data",
+      "settings": "user_settings.json",
+      "books": {
+        "_base_": "books_data",
+        "books": "books.json",
+        "covers": {
+          "_base_": "covers"
+        }
+      },
+      "bookshelves": {
+        "_base_": "bookshelves_data",
+        "bookshelves": "bookshelves.json",
+        "covers": {
+          "_base_": "covers"
+        }
       }
-    },
-    "settings": {
-      "_base_": "settings",
-      "base": "base_settings.json",
-      "user": "user_settings.json"
     }
   },
   "tmp": {

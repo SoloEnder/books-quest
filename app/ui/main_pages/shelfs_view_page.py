@@ -1,5 +1,4 @@
 import logging
-import os
 
 import shiboken6
 import widgets_pagination_view
@@ -63,6 +62,9 @@ class ShelfsViewPage(base_page.BasePage):
         self.book_creation_b.setIcon(self.book_creation_ico)
         self.shelf_creation_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.shelf_creation")
+        )
+        self.shelf_creation_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.shelf"))
         )
         self.shelf_creation_b.clicked.connect(
             lambda: qt_signals_handler.switch_page_sg.emit(
@@ -305,20 +307,10 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.setProperty("role", "SubShelfWidget")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.default_cover = self.res_handler.get_res("assets.defaults_covers.shelf")
-
-        if self.shelf.cover_path:
-            if os.path.exists(self.shelf.cover_path):
-                self.displayed_cover = self.shelf.cover_path
-
-            else:
-                self.displayed_cover = self.default_cover
-                self.logger.warning(
-                    f"Couldn't found shelf cover file at {self.shelf.cover_path}, switching to default cover"
-                )
-
-        else:
-            self.displayed_cover = self.default_cover
-        self.cover_pm = QtGui.QPixmap(self.displayed_cover)
+        QtGui.QPixmap(self.default_cover)
+        self.cover_pm = QtGui.QPixmap(
+            str(self.books_handler.get_shelf_cover_path(self.shelf))
+        )
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
         self.total_elements = QtWidgets.QLabel(

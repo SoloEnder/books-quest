@@ -387,28 +387,11 @@ class SubBookWidget(QtWidgets.QWidget):
         )
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
-
-        if self.book.cover_path:
-            if os.path.exists(self.book.cover_path):
-                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.book.cover_path))
-
-            else:
-                if self.book.cover_path != self.res_handler.get_res(
-                    "assets.defaults_covers.default_book_cover"
-                ):
-                    self.logger.warning(
-                        f"Couldn't found cover file for book with ID={self.book.id}, switching to default cover"
-                    )
-                    self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
-
-                else:
-                    self.logger.error(
-                        f"Couldn't found a valid cover for BookWidget ({self}) !"
-                    )
-
-        else:
-            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_path))
-
+        self.cover_path = (
+            self.books_handler.get_book_cover_path(self.book, False)
+            or self.default_cover_path
+        )
+        self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_path))
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.fixed_sp = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed

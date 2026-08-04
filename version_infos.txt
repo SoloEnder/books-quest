@@ -6,8 +6,8 @@ VSVersionInfo(
   ffi=FixedFileInfo(
     # filevers and prodvers should be always a tuple with four items: (1, 2, 3, 4)
     # Set not needed items to zero 0.
-    filevers=(0, 2, 0, 0),
-    prodvers=(0, 2, 0, 0),
+    filevers=(0, 3, 0, 0),
+    prodvers=(0, 3, 0, 0),
     # Contains a bitmask that specifies the valid bits 'flags'r
     mask=0x3f,
     # Contains a bitmask that specifies the Boolean attributes of the file.
@@ -30,13 +30,13 @@ VSVersionInfo(
       StringTable(
         '040904B0',
         [StringStruct('CompanyName', 'SoloEnder'),
-        StringStruct('FileDescription', 'BooksQuest application launcher'),
-        StringStruct('FileVersion', '0.2.0.0'),
+        StringStruct('FileDescription', 'Books Quest'),
+        StringStruct('FileVersion', '0.3.0.0'),
         StringStruct('InternalName', 'books-quest'),
         StringStruct('LegalCopyright', 'Copyright (c) 2026 SoloEnder'),
         StringStruct('OriginalFilename', 'books-quest.exe'),
         StringStruct('ProductName', 'BooksQuest launcher'),
-        StringStruct('ProductVersion', '0.2.0.0')])
+        StringStruct('ProductVersion', '0.3.0.0')])
       ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]

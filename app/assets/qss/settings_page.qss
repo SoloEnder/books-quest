@@ -1,4 +1,12 @@
 QPushButton[role="NaviguationButton"] {
     font-weight: 600;
     font-size: 14px;
+    text-align: left;
+    padding: 5px, 5px;
+    padding-right: 5px;
+    padding-left: 7px;
+}
+
+QLabel#AppVersionLabel {
+    color: #a0a0a0;
 }

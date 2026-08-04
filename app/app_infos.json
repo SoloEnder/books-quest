@@ -1,1 +1,1 @@
-{ "version": { "readable": "0.2.0", "semantic": "020" }, "boot_count": 0 }
+{"app_version": "0.3.0", "root_directory_content": ["app", "licenses", "LICENSE", "THIRD_PARTY_NOTICE.txt", "main.py"]}

@@ -1,6 +1,8 @@
 import logging.handlers
 import os
 import pathlib
+import traceback
+
 from PySide6 import QtWidgets
 
 
@@ -41,10 +43,17 @@ class SensitiveInfoFilter(logging.Filter):
 
         return True
 
+
 class ErrorsFilter(logging.Filter):
     def filter(self, record):
 
         if record.levelname == "ERROR" or record.levelname == "CRITICAL":
-            QtWidgets.QMessageBox.warning(None, "Error", record.getMessage())
+            error_window = QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Icon.Critical,
+                "Error",
+                record.getMessage(),
+                detailedText=traceback.format_exc(),
+            )
+            error_window.exec()
 
         return True
