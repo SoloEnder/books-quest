@@ -1,6 +1,6 @@
 {
   "type": "FULL_UPDATE",
-  "update_to": "0.3.0",
+  "update_to": "0.3.1",
   "updater_files": ["update_manifest.json", "update_instructions.json"],
   "update_root_directory_content": [
     "books-quest.exe",
