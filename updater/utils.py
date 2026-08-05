@@ -455,10 +455,15 @@ def compare_versions(
         return "equal"
 
     for index, version_a_part in enumerate(version_a_parts):
-        if int(version_a_part) < int(version_b_parts[index]):
+        version_a_part = int(version_a_part)
+        version_b_part = int(version_b_parts[index])
+        if version_a_part > version_b_part:
+            return "higher"
+
+        elif version_a_part < version_b_part:
             return "lower"
 
-    return "higher"
+    return "lower"
 
 
 def get_installation_app_infos(installation_path: str) -> dict:

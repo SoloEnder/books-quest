@@ -31,20 +31,16 @@ class AppSystem:
         self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
-        if self.check_first_boot():
-            self.logger.info("Processing first boot operations...")
-            self.first_boot_operations()
-
-        else:
-            self.check_folder(
-                self.res_handler.get_res("data"),
-                self.res_handler.get_res("assets"),
-                self.res_handler.get_res("data.user"),
-                self.res_handler.get_res("data.user.books"),
-                self.res_handler.get_res("data.user.books.covers"),
-                self.res_handler.get_res("data.user.bookshelves"),
-                self.res_handler.get_res("data.user.bookshelves.covers"),
-            )
+        self.check_and_make_missing()
+        self.check_folder(
+            self.res_handler.get_res("data"),
+            self.res_handler.get_res("assets"),
+            self.res_handler.get_res("data.user"),
+            self.res_handler.get_res("data.user.books"),
+            self.res_handler.get_res("data.user.books.covers"),
+            self.res_handler.get_res("data.user.bookshelves"),
+            self.res_handler.get_res("data.user.bookshelves.covers"),
+        )
         self.logger.info("Initialising application...")
         self.books_handler = book_sys.BooksHandler(
             jfm=self.jfm,
@@ -222,7 +218,7 @@ class AppSystem:
         else:
             return False
 
-    def first_boot_operations(self):
+    def check_and_make_missing(self):
         folder_to_make = (
             self.res_handler.get_res("data.user"),
             self.res_handler.get_res("data.user.books"),
@@ -420,6 +416,7 @@ class AppSystem:
             self.qt_signals_handler.edit_progress_msg.emit(" ")
             return
 
+        self.logger.info(f"Books Quest {release_version} is available")
         # Show pop up to download the update
         download = update_tools.download_pop_up(
             release_infos,

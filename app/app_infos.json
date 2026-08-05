@@ -1,1 +1,11 @@
-{"app_version": "0.3.0", "root_directory_content": ["app", "licenses", "LICENSE", "THIRD_PARTY_NOTICE.txt", "main.py"]}
+{
+  "app_version": "0.3.1",
+  "root_directory_content": [
+    "app",
+    "licenses",
+    "LICENSE",
+    "THIRD_PARTY_NOTICE.txt",
+    "main.py"
+  ],
+  "elements_to_preserve": ["app", "app/logs", "app/data/user_data"]
+}
