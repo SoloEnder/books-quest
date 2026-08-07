@@ -88,6 +88,12 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             QtCore.Qt.AlignmentFlag.AlignLeft,
             QtCore.Qt.AlignmentFlag.AlignTop,
         )
+        utils_funcs.load_and_set_ss(
+            self.res_handler.get_res("assets.qss.general"),
+            self.res_handler.get_res("assets.qss.book_widget"),
+            widget=self,
+            logger=self.logger,
+        )
 
     def delete_book(self):
 
