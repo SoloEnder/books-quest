@@ -48,7 +48,8 @@
       "author": "Author : ",
       "edition": "Edition : ",
       "summary": "Summary : ",
-      "pages_count": "Total pages count"
+      "pages_count": "Total pages count",
+      "pages_count_args": "/f:<count>/f pages"
     }
   },
   "book": {

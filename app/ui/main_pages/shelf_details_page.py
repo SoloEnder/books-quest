@@ -400,6 +400,9 @@ class SubBookWidget(QtWidgets.QWidget):
             self.book.authors if self.book.authors else "Unknown"
         )
         self.book_authors_lb.setObjectName("BookAuthorLabel")
+        self.book_reading_state_lb = QtWidgets.QLabel()
+        self.book_reading_state_lb.setObjectName("BookReadingStateLabel")
+        self.display_reading_state()
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setMinimumSize(350, 120)
@@ -430,27 +433,52 @@ class SubBookWidget(QtWidgets.QWidget):
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setObjectName("DeleteButton")
         self.main_layout.addWidget(self.book_authors_lb, 0, 1)
+        self.main_layout.addWidget(self.book_reading_state_lb, 1, 1)
         self.main_layout.addWidget(
             self.book_summary_te,
-            1,
+            2,
             1,
             QtCore.Qt.AlignmentFlag.AlignLeft,
             QtCore.Qt.AlignmentFlag.AlignTop,
         )
         self.main_layout.addWidget(
             self.edit_b,
-            2,
+            3,
             1,
         )
         self.main_layout.addWidget(
             self.delete_b,
-            3,
+            4,
             1,
         )
         self.main_layout.addWidget(
             self.book_cover_lb,
             0,
             0,
-            4,
+            5,
             1,
         )
+
+    def display_reading_state(self):
+        """
+        Set the text displayed by the book reading state label
+        """
+        if self.book.status == "unread":
+            self.book_reading_state_lb.setText(
+                f"{self.langs_handler.tr('book.infos.reading_state.unread')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
+            )
+
+        elif self.book.status == "on_reading":
+            self.book_reading_state_lb.setText(
+                f"{self.langs_handler.tr('book.infos.reading_state.currently_reading')} - {self.book.alr_read_pages}/{self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
+            )
+
+        elif self.book.status == "finished":
+            self.book_reading_state_lb.setText(
+                f"{self.langs_handler.tr('book.infos.reading_state.finished')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
+            )
+
+        else:
+            self.logger.warning(
+                f"Book ID={self.book.id} has an unknown reading state '{self.book.status}'"
+            )
