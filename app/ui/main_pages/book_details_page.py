@@ -158,6 +158,15 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("BookSummary")
+        self.book_details_b = QtWidgets.QPushButton(
+            self.langs_handler.tr("shared.actions.see_details")
+        )
+        self.book_details_b.setObjectName("SeeDetailsButton")
+        self.book_details_b.clicked.connect(
+            lambda: self.qt_signals_handler.switch_page_sg.emit(
+                "BookDetailsPage", True, {"book": self.book}
+            )
+        )
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
@@ -196,15 +205,20 @@ class SubBookWidget(QtWidgets.QWidget):
             1,
         )
         self.main_layout.addWidget(
-            self.delete_b,
+            self.book_details_b,
             4,
+            1,
+        )
+        self.main_layout.addWidget(
+            self.delete_b,
+            5,
             1,
         )
         self.main_layout.addWidget(
             self.book_cover_lb,
             0,
             0,
-            5,
+            6,
             1,
         )
 
