@@ -7,6 +7,7 @@ from app.ui import notification_service, qt_signals_handler
 from app.ui.main_pages import (
     base_page,
     book_creation_page,
+    book_details_page,
     settings_page,
     shelf_creation_page,
     shelf_details_page,
@@ -234,17 +235,28 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.langs_handler,
             mode="creation",
         )
+        self.book_details_page = book_details_page.BookDetailsPage(
+            self,
+            self.res_handler,
+            self.settings_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            self.books_handler,
+            book_sys.Book(title="DefaultBook"),
+        )
         self.pages = {
             "SETTINGS_PAGE": self.settings_page,
             "SHELFS_VIEW_PAGE": self.shelfs_view_page,
             "SHELF_DETAILS_PAGE": self.shelf_details_page,
             "BOOK_CREATION_PAGE": self.book_creation_page,
             "SHELF_CREATION_PAGE": self.shelf_creation_page,
+            "BookDetailsPage": self.book_details_page,
         }
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.book_creation_page)
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
+        self.addWidget(self.book_details_page)
         self.history = []
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
@@ -381,6 +393,21 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             )
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
+
+        elif page_name == "BookDetailsPage":
+            self.removeWidget(self.book_details_page)
+            self.book_details_page.deleteLater()
+            self.book_details_page = book_details_page.BookDetailsPage(
+                self,
+                self.res_handler,
+                self.settings_handler,
+                self.langs_handler,
+                self.qt_signals_handler,
+                self.books_handler,
+                book_sys.Book(title="DefaultBook"),
+            )
+            self.pages["BookDetailsPage"] = self.book_details_page
+            self.addWidget(self.book_details_page)
 
         else:
             raise ValueError(f"Unknown page : '{page_name}'")
