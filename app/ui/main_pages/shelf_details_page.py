@@ -428,10 +428,10 @@ class SubBookWidget(QtWidgets.QWidget):
             self.langs_handler.tr("shared.actions.delete")
         )  # type: ignore
         self.delete_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"))
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.exit"), "red")
         )
         self.delete_b.setSizePolicy(self.fixed_sp)
-        self.delete_b.setObjectName("DeleteButton")
+        self.delete_b.setProperty("role", "DeleteButton")
         self.main_layout.addWidget(self.book_authors_lb, 0, 1)
         self.main_layout.addWidget(self.book_reading_state_lb, 1, 1)
         self.main_layout.addWidget(
