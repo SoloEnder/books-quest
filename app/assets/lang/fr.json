@@ -100,7 +100,8 @@
       "latest_release_infos": {
         "request_timed_out": "Impossible d'obtenir les informations de la dernière release, car l'API à mis trop de temps à répondre.",
         "httperr": "Impossible d'obtenir les informations de la dernière release : /f:<httperr>/f"
-      }
+      },
+      "unable_to_check_for_updates": "Impossible de vérifier les mises à jour"
     },
     "infos": {
       "up_to_date": "Books Quest est à jour",

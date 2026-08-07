@@ -100,7 +100,8 @@
       "latest_release_infos": {
         "request_timed_out": "Could not get app latest release infos : request timed out",
         "httperr": "Could not get app latest release infos : /f:<httperr>/f"
-      }
+      },
+      "unable_to_check_for_updates": "Unable to check for updates"
     },
     "infos": {
       "up_to_date": "Books Quest is up-to-date",
