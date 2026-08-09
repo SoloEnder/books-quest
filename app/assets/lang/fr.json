@@ -42,7 +42,7 @@
     },
     "infos": {
       "type": "Type",
-      "status": "Status",
+      "status": "Status : ",
       "title": "Titre : ",
       "author": "Auteur : ",
       "edition": "Edition : ",
