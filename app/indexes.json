@@ -11,6 +11,7 @@
       "_base_": "qss",
       "general": "general.qss",
       "book_widget": "book_widget.qss",
+      "book_details_page": "book_details_page.qss",
       "widgets_pagination_view": "widgets_pagination_view.qss",
       "shelf_details_page": "shelf_details_page.qss",
       "shelfs_view_page": "shelfs_view_page.qss",

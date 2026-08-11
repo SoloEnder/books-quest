@@ -71,8 +71,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
 
         self.logger = logging.getLogger(__name__)
         self.fixed_sp = QtWidgets.QSizePolicy()
-        self.main_lyt = QtWidgets.QGridLayout()
-        self.main_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.main_lyt = QtWidgets.QVBoxLayout()
         self.main_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.setLayout(self.main_lyt)
 
@@ -122,6 +121,12 @@ class DetailedBookInfos(QtWidgets.QWidget):
             ),
         }
         self.config_basic_infos_widgets()
+        utils_funcs.load_and_set_ss(
+            self.res_handler.get_res("assets.qss.general"),
+            self.res_handler.get_res("assets.qss.book_details_page"),
+            widget=self,
+            logger=self.logger,
+        )
 
     def config_basic_infos_widgets(self):
         for key, value in self.book_basic_infos.items():
@@ -138,7 +143,8 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 value = (value[0], str(value[1]))
 
             title_lb = QtWidgets.QLabel(value[0])
-            title_lb.setProperty("role", "BookDetailHeader")
+            title_lb.setProperty("role", "h5")
+            title_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
             if key == "summary":
                 value_widget = QtWidgets.QTextEdit(value[1])
@@ -149,14 +155,12 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 value_widget = QtWidgets.QLabel(value[1])
 
             value_widget.setProperty("role", "BookDetailValue")
+            value_widget.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
             self.main_lyt.addWidget(
-                title_lb, self.main_lyt.rowCount(), 0, QtCore.Qt.AlignmentFlag.AlignLeft
+                title_lb,
             )
             self.main_lyt.addWidget(
                 value_widget,
-                self.main_lyt.rowCount(),
-                0,
-                QtCore.Qt.AlignmentFlag.AlignLeft,
             )
 
     @property
