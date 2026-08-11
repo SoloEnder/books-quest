@@ -32,7 +32,132 @@ class BookDetailsPage(base_page.BasePage):
             self.langs_handler,
             self.qt_signals_handler,
         )
-        self.main_lyt.addWidget(self.book_widget)
+        # All the details about the book
+        self.detailed_book_infos = DetailedBookInfos(
+            self,
+            self.res_handler,
+            self.settings_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            self.book,
+        )
+        self.main_sep = QtWidgets.QFrame()
+        self.main_sep.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        self.main_lyt.addWidget(self.book_widget, 0, 0)
+        self.main_lyt.addWidget(self.main_sep, 0, 1)
+        self.main_lyt.addWidget(self.detailed_book_infos, 0, 2)
+
+    @property
+    def book(self):
+        return self._book
+
+
+class DetailedBookInfos(QtWidgets.QWidget):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        res_handler: resources_handler.RessourcesHandler,
+        settings_handler: settings_handler.SettingsHandler,
+        langs_handler: langs_handler.LangsHandler,
+        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        book: book_sys.Book,
+    ):
+        super().__init__(parent)
+        self.res_handler = res_handler
+        self.settings_handler = settings_handler
+        self.langs_handler = langs_handler
+        self.qt_signals_handler = qt_signals_handler
+        self._book = book
+
+        self.logger = logging.getLogger(__name__)
+        self.fixed_sp = QtWidgets.QSizePolicy()
+        self.main_lyt = QtWidgets.QGridLayout()
+        self.main_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.main_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.setLayout(self.main_lyt)
+
+        self.book_reading_status_lang_path = {
+            "unread": "unread",
+            "on_reading": "currently_reading",
+            "finished": "finished",
+        }  # This variable should be deleted soooon
+        self.book_basic_infos = {
+            "title": (
+                self.langs_handler.tr("shared.infos.title"),
+                utils_funcs.add_title_suffix(self.book.title, self.book.title_suffix),
+            ),  # Basic info:(title, value)
+            "authors": (
+                self.langs_handler.tr("shared.infos.author"),
+                self.book.authors or "Unknown",
+            ),
+            "edition": (
+                self.langs_handler.tr("shared.infos.edition"),
+                self.book.edition or "Unknown",
+            ),
+            "summary": (
+                self.langs_handler.tr("shared.infos.summary"),
+                self.book.summary or "Unknown",
+            ),
+            "total_pages_count": (
+                self.langs_handler.tr("shared.infos.pages_count"),
+                self.book.tot_pages,
+            ),
+            "status": (
+                self.langs_handler.tr("shared.infos.status"),
+                self.langs_handler.tr(
+                    f"book.infos.reading_state.{self.book_reading_status_lang_path[self.book.status or 'unread']}"
+                ),
+            ),
+            "alr_read_pages": (
+                self.langs_handler.tr("book.infos.alr_read_pages"),
+                self.book.alr_read_pages,
+            ),
+            "starting_reading_date": (
+                self.langs_handler.tr("book.infos.starting_read_date"),
+                self.book.starting_read_date,
+            ),
+            "end_reading_date": (
+                self.langs_handler.tr("book.infos.end_read_date"),
+                self.book.end_read_date,
+            ),
+        }
+        self.config_basic_infos_widgets()
+
+    def config_basic_infos_widgets(self):
+        for key, value in self.book_basic_infos.items():
+            if key == "starting_reading_date" and self.book.status == "unread":
+                continue
+
+            if key == "alr_read_pages" and self.book.status != "on_reading":
+                continue
+
+            if key == "end_reading_date" and self.book.status != "finished":
+                continue
+
+            if type(value[1]) is int:
+                value = (value[0], str(value[1]))
+
+            title_lb = QtWidgets.QLabel(value[0])
+            title_lb.setProperty("role", "BookDetailHeader")
+
+            if key == "summary":
+                value_widget = QtWidgets.QTextEdit(value[1])
+                value_widget.setMinimumSize(350, 120)
+                value_widget.setMaximumSize(400, 120)
+
+            else:
+                value_widget = QtWidgets.QLabel(value[1])
+
+            value_widget.setProperty("role", "BookDetailValue")
+            self.main_lyt.addWidget(
+                title_lb, self.main_lyt.rowCount(), 0, QtCore.Qt.AlignmentFlag.AlignLeft
+            )
+            self.main_lyt.addWidget(
+                value_widget,
+                self.main_lyt.rowCount(),
+                0,
+                QtCore.Qt.AlignmentFlag.AlignLeft,
+            )
 
     @property
     def book(self):
