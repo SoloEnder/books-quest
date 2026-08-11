@@ -156,11 +156,18 @@ class DetailedBookInfos(QtWidgets.QWidget):
 
             value_widget.setProperty("role", "BookDetailValue")
             value_widget.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+
+            sep = QtWidgets.QFrame()
+            sep.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+            sep.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
             self.main_lyt.addWidget(
                 title_lb,
             )
             self.main_lyt.addWidget(
                 value_widget,
+            )
+            self.main_lyt.addWidget(
+                sep,
             )
 
     @property
