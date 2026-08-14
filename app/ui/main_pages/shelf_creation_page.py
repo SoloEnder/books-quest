@@ -493,6 +493,7 @@ class ShelfCreationPage(base_page.BasePage):
         if shelf_infos:
             if self.current_mode == "creation":
                 self.books_handler.new_shelf(**shelf_infos)
+                self.qt_signals_handler.shelf_added_sg.emit(shelf_infos["id"])
                 QtWidgets.QMessageBox.information(
                     self, "Success", self.langs_handler.tr("shelf.msg.creation_success")
                 )
@@ -502,6 +503,7 @@ class ShelfCreationPage(base_page.BasePage):
                 if self.shelf:
                     edited_shelf = self.books_handler.create_shelf(**shelf_infos)
                     self.books_handler.edit_shelf(self.shelf.str_id(), edited_shelf)
+                    self.qt_signals_handler.shelf_edited_sg.emit(self.shelf.id)
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",

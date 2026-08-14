@@ -10,7 +10,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools, utils_funcs
+from app.utils import images_tools, my_exceptions, utils_funcs
 
 
 class EditionModeNotEnabled(Exception):
@@ -621,6 +621,7 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_edition_success"),
                     )
+                    self.qt_signals_handler.book_edited_sg.emit(self.book.id)  # type: ignore
                     self.qt_signals_handler.close_page_sg.emit()
 
                 else:
@@ -629,4 +630,5 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_addition_success"),
                     )
+                    self.qt_signals_handler.book_added_sg.emit(books_infos["id"])
                     self.qt_signals_handler.refresh_current_page_sg.emit()
