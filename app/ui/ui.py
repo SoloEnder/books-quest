@@ -404,7 +404,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.langs_handler,
                 self.qt_signals_handler,
                 self.books_handler,
-                page_args["book"],
+                page_args["book_id"],
             )
             self.pages["BookDetailsPage"] = self.book_details_page
             self.addWidget(self.book_details_page)

@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import widgets_pagination_view
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -7,6 +8,8 @@ from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
 from app.utils import images_tools, my_exceptions, utils_funcs
+
+logger = logging.getLogger(__name__)
 
 
 class BookDetailsPage(base_page.BasePage):
@@ -18,13 +21,20 @@ class BookDetailsPage(base_page.BasePage):
         langs_handler: langs_handler.LangsHandler,
         qt_signals_handler: qt_signals_handler.QtSignalsHandler,
         books_handler: book_sys.BooksHandler,
-        book: book_sys.Book,
+        book_id: uuid.UUID,
     ):
         super().__init__(
             parent, res_handler, settings_handler, langs_handler, qt_signals_handler
         )
         self.books_handler = books_handler
-        self._book = book
+        self._book_id = book_id
+        self._book = (
+            self.books_handler.default_book
+            if self.book_id == self.books_handler.default_book.id
+            else self.books_handler.books[str(book_id)]
+        )
+
+        # Connecting signals to slot
         self.book_widget = BookWidget(
             self.book,
             self.books_handler,
@@ -46,6 +56,16 @@ class BookDetailsPage(base_page.BasePage):
         self.main_lyt.addWidget(self.book_widget, 0, 0)
         self.main_lyt.addWidget(self.main_sep, 0, 1)
         self.main_lyt.addWidget(self.detailed_book_infos, 0, 2)
+
+    @property
+    def book_id(self):
+        return self._book_id
+
+    @book_id.setter
+    def book_id(self, new_value: uuid.UUID):
+        if isinstance(new_value, uuid.UUID):
+            self._book_id = new_value
+            self.qt_signals_handler.refresh_current_page_sg.emit()
 
     @property
     def book(self):
@@ -306,7 +326,7 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_details_b.setObjectName("SeeDetailsButton")
         self.book_details_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "BookDetailsPage", True, {"book": self.book}
+                "BookDetailsPage", True, {"book_id": self.book.id}
             )
         )
         self.edit_b = QtWidgets.QPushButton(
