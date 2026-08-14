@@ -344,6 +344,7 @@ class BooksHandler:
         self.jfm = jfm
         self.shelves = shelves or {}
         self.default_shelf = Shelf(title="All", books=self.books.values())
+        self.default_book = Book(title="DefaultBook")
 
     def delete_book(self, book_id: str):
         book_id = book_id

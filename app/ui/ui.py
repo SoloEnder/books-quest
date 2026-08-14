@@ -242,7 +242,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.langs_handler,
             self.qt_signals_handler,
             self.books_handler,
-            book_sys.Book(title="DefaultBook"),
+            self.books_handler.default_book.id,
         )
         self.pages = {
             "SETTINGS_PAGE": self.settings_page,
