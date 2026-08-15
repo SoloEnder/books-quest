@@ -322,13 +322,13 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.finished_books_count = 0
 
         for book in self.shelf._books:
-            if book.status == "unread":
+            if book.status == book_sys.Book.ReadingState.UNREAD:
                 self.unread_books_count += 1
 
-            elif book.status == "on_reading":
+            elif book.status == book_sys.Book.ReadingState.CURRENTLY_READING:
                 self.on_reading_books_count += 1
 
-            elif book.status == "finished":
+            elif book.status == book_sys.Book.ReadingState.FINISHED:
                 self.finished_books_count += 1
 
         self.unread_books_lb = QtWidgets.QLabel(

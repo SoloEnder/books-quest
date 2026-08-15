@@ -125,14 +125,16 @@ class BookCreationPage(base_page.BasePage):
         )
         self.book_status_combob = QtWidgets.QComboBox()
         self.book_status_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.unread"), "unread"
+            self.langs_handler.tr("book.infos.reading_state.unread"),
+            book_sys.Book.ReadingState.UNREAD,
         )
         self.book_status_combob.addItem(
             self.langs_handler.tr("book.infos.reading_state.currently_reading"),
-            "on_reading",
+            book_sys.Book.ReadingState.CURRENTLY_READING,
         )
         self.book_status_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.finished"), "finished"
+            self.langs_handler.tr("book.infos.reading_state.finished"),
+            book_sys.Book.ReadingState.FINISHED,
         )
         self.book_status_combob.currentIndexChanged.connect(
             lambda: self.set_book_status(self.book_status_combob.currentData())
@@ -169,7 +171,7 @@ class BookCreationPage(base_page.BasePage):
         self.end_read_date_de.setMaximumDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
-        self.set_book_status("unread")
+        self.set_book_status(book_sys.Book.ReadingState.UNREAD)
         self.book_status_widget_layout.addWidget(self.alr_read_pages_lb, 0, 0)
         self.book_status_widget_layout.addWidget(self.alr_read_pages_le, 0, 1)
         self.book_status_widget_layout.addWidget(self.starting_read_date_lb, 1, 0)
@@ -322,12 +324,12 @@ class BookCreationPage(base_page.BasePage):
                 )
 
             combob_choices_indexes = {
-                "unread": 0,
-                "on_reading": 1,
-                "finished": 2,
+                "UNREAD": 0,
+                "CURRENTLY_READING": 1,
+                "FINISHED": 2,
             }
             self.book_status_combob.setCurrentIndex(
-                combob_choices_indexes[getattr(self.book, "status", "unread")]
+                combob_choices_indexes[self.book.status.value]
             )
             self.alr_read_pages_le.setText(self.book.alr_read_pages or "0")
 
@@ -358,24 +360,24 @@ class BookCreationPage(base_page.BasePage):
             for shelf in self.book._parents_shelves:
                 self.shelfs_selection_cbs[shelf.str_id()].setChecked(True)
 
-    def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
+    def set_book_status(self, status: book_sys.Book.ReadingState):
         """
         Set the book status and draw the appriopriate widgets
 
         Args:
-        - status (str): the book status ("finished", "on_read" or "unread")
+        - status (Book.ReadingState): the book reading state
         """
-        if status == "finished":
+        if status == book_sys.Book.ReadingState.FINISHED:
             self.alr_read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(True)
 
-        elif status == "on_reading":
+        elif status == book_sys.Book.ReadingState.CURRENTLY_READING:
             self.alr_read_pages_le.setEnabled(True)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(False)
 
-        elif status == "unread":
+        elif status == book_sys.Book.ReadingState.UNREAD:
             self.alr_read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)

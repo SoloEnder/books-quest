@@ -123,9 +123,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
             ),
             "status": (
                 self.langs_handler.tr("shared.infos.status"),
-                self.langs_handler.tr(
-                    f"book.infos.reading_state.{self.book_reading_status_lang_path[self.book.status or 'unread']}"
-                ),
+                utils_funcs.get_reading_state_tr(self.book.status, self.langs_handler),
             ),
             "alr_read_pages": (
                 self.langs_handler.tr("book.infos.alr_read_pages"),
@@ -150,13 +148,22 @@ class DetailedBookInfos(QtWidgets.QWidget):
 
     def config_basic_infos_widgets(self):
         for key, value in self.book_basic_infos.items():
-            if key == "starting_reading_date" and self.book.status == "unread":
+            if (
+                key == "starting_reading_date"
+                and self.book.status == book_sys.Book.ReadingState.UNREAD
+            ):
                 continue
 
-            if key == "alr_read_pages" and self.book.status != "on_reading":
+            if (
+                key == "alr_read_pages"
+                and self.book.status != book_sys.Book.ReadingState.CURRENTLY_READING
+            ):
                 continue
 
-            if key == "end_reading_date" and self.book.status != "finished":
+            if (
+                key == "end_reading_date"
+                and self.book.status != book_sys.Book.ReadingState.FINISHED
+            ):
                 continue
 
             if type(value[1]) is int:
@@ -388,17 +395,17 @@ class SubBookWidget(QtWidgets.QWidget):
         """
         Set the text displayed by the book reading state label
         """
-        if self.book.status == "unread":
+        if self.book.status == book_sys.Book.ReadingState.UNREAD:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.unread')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
-        elif self.book.status == "on_reading":
+        elif self.book.status == book_sys.Book.ReadingState.CURRENTLY_READING:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.currently_reading')} - {self.book.alr_read_pages}/{self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
-        elif self.book.status == "finished":
+        elif self.book.status == book_sys.Book.ReadingState.FINISHED:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.finished')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )

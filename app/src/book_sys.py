@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import logging
 import os
 import pathlib
@@ -237,6 +238,11 @@ class Shelf:
 
 
 class Book:
+    class ReadingState(enum.Enum):
+        UNREAD = "UNREAD"
+        CURRENTLY_READING = "CURRENTLY_READING"
+        FINISHED = "FINISHED"
+
     def __init__(self, **kwargs):
         """
         The base class for the books
@@ -249,7 +255,7 @@ class Book:
         self.isbn = kwargs.get("isbn")
         self.starting_read_date = kwargs.get("starting_read_date")
         self.end_read_date = kwargs.get("end_read_date")
-        self.status = kwargs.get("status")
+        self.status: Book.ReadingState = kwargs.get("status", Book.ReadingState.UNREAD)
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.alr_read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
@@ -666,6 +672,8 @@ class BooksHandler:
                     book_data["parents_shelves_ids"].append(shelf.str_id())
 
             del book_data["parents_shelves"]
+
+            book_data["status"] = book.status.value
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
@@ -679,6 +687,7 @@ class BooksHandler:
         if data:
             for book_data in data:
                 book_data["id"] = uuid.UUID(book_data["id"])
+                book_data["status"] = Book.ReadingState[book_data["status"]]
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):
