@@ -331,7 +331,7 @@ class BookCreationPage(base_page.BasePage):
             self.book_status_combob.setCurrentIndex(
                 combob_choices_indexes[self.book.status.value]
             )
-            self.alr_read_pages_le.setText(self.book.alr_read_pages or "0")
+            self.alr_read_pages_le.setText(str(self.book.alr_read_pages))
 
             if self.book.starting_read_date:
                 starting_read_date_dt = QtCore.QDate()
@@ -568,7 +568,7 @@ class BookCreationPage(base_page.BasePage):
 
         if self.alr_read_pages_le.isEnabled():
             text = self.alr_read_pages_le.text()
-            books_infos["alr_read_pages"] = int(text) if text else 0
+            books_infos["read_pages"] = int(text) if text else 0
 
         if self.starting_read_date_de.isEnabled():
             books_infos["starting_read_date"] = (

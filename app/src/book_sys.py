@@ -281,7 +281,7 @@ class Book:
             "starting_read_date": self.starting_read_date,
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
-            "alr_read_pages": self.alr_read_pages,
+            "read_pages": self.alr_read_pages,
             "parents_shelves": self._parents_shelves,
         }
 
