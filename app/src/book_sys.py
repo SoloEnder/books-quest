@@ -255,7 +255,9 @@ class Book:
         self.isbn = kwargs.get("isbn")
         self.starting_read_date = kwargs.get("starting_read_date")
         self.end_read_date = kwargs.get("end_read_date")
-        self.status: Book.ReadingState = kwargs.get("status", Book.ReadingState.UNREAD)
+        self.reading_state: Book.ReadingState = kwargs.get(
+            "reading_state", Book.ReadingState.UNREAD
+        )
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
@@ -277,7 +279,7 @@ class Book:
             "edition": self.edition,
             "summary": self.summary,
             "isbn": self.isbn,
-            "status": self.status,
+            "reading_state": self.reading_state,
             "starting_read_date": self.starting_read_date,
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
@@ -673,7 +675,7 @@ class BooksHandler:
 
             del book_data["parents_shelves"]
 
-            book_data["status"] = book.status.value
+            book_data["reading_state"] = book.reading_state.value
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
@@ -687,7 +689,9 @@ class BooksHandler:
         if data:
             for book_data in data:
                 book_data["id"] = uuid.UUID(book_data["id"])
-                book_data["status"] = Book.ReadingState[book_data["status"]]
+                book_data["reading_state"] = Book.ReadingState[
+                    book_data["reading_state"]
+                ]
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):

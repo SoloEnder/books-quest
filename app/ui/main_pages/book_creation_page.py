@@ -120,28 +120,28 @@ class BookCreationPage(base_page.BasePage):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shared.infos.status")
+        self.reading_state_lb = QtWidgets.QLabel(
+            self.langs_handler.tr("book.infos.reading_state_header")
         )
-        self.book_status_combob = QtWidgets.QComboBox()
-        self.book_status_combob.addItem(
+        self.book_reading_state_combob = QtWidgets.QComboBox()
+        self.book_reading_state_combob.addItem(
             self.langs_handler.tr("book.infos.reading_state.unread"),
             book_sys.Book.ReadingState.UNREAD,
         )
-        self.book_status_combob.addItem(
+        self.book_reading_state_combob.addItem(
             self.langs_handler.tr("book.infos.reading_state.currently_reading"),
             book_sys.Book.ReadingState.CURRENTLY_READING,
         )
-        self.book_status_combob.addItem(
+        self.book_reading_state_combob.addItem(
             self.langs_handler.tr("book.infos.reading_state.finished"),
             book_sys.Book.ReadingState.FINISHED,
         )
-        self.book_status_combob.currentIndexChanged.connect(
-            lambda: self.set_book_status(self.book_status_combob.currentData())
+        self.book_reading_state_combob.currentIndexChanged.connect(
+            lambda: self.set_book_status(self.book_reading_state_combob.currentData())
         )
-        self.book_status_widget = QtWidgets.QWidget(self)
-        self.book_status_widget_layout = QtWidgets.QGridLayout()
-        self.book_status_widget.setLayout(self.book_status_widget_layout)
+        self.book_reading_state_widget = QtWidgets.QWidget(self)
+        self.book_reading_state_widget_layout = QtWidgets.QGridLayout()
+        self.book_reading_state_widget.setLayout(self.book_reading_state_widget_layout)
         self.read_pages_lb = QtWidgets.QLabel(
             self.langs_handler.tr("book.infos.read_pages")
         )
@@ -170,12 +170,16 @@ class BookCreationPage(base_page.BasePage):
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
         self.set_book_status(book_sys.Book.ReadingState.UNREAD)
-        self.book_status_widget_layout.addWidget(self.read_pages_lb, 0, 0)
-        self.book_status_widget_layout.addWidget(self.read_pages_le, 0, 1)
-        self.book_status_widget_layout.addWidget(self.starting_read_date_lb, 1, 0)
-        self.book_status_widget_layout.addWidget(self.starting_read_date_de, 1, 1)
-        self.book_status_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
-        self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
+        self.book_reading_state_widget_layout.addWidget(self.read_pages_lb, 0, 0)
+        self.book_reading_state_widget_layout.addWidget(self.read_pages_le, 0, 1)
+        self.book_reading_state_widget_layout.addWidget(
+            self.starting_read_date_lb, 1, 0
+        )
+        self.book_reading_state_widget_layout.addWidget(
+            self.starting_read_date_de, 1, 1
+        )
+        self.book_reading_state_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
+        self.book_reading_state_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         # Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel(
@@ -220,12 +224,12 @@ class BookCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self.restore_default_cover_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.book_status_lb, self.main_lyt.rowCount() + 1, 0)
+        self.main_lyt.addWidget(self.reading_state_lb, self.main_lyt.rowCount() + 1, 0)
         self.main_lyt.addWidget(
-            self.book_status_combob, self.main_lyt.rowCount() + 1, 0
+            self.book_reading_state_combob, self.main_lyt.rowCount() + 1, 0
         )
         self.main_lyt.addWidget(
-            self.book_status_widget,
+            self.book_reading_state_widget,
             self.main_lyt.rowCount() + 1,
             0,
             2,
@@ -326,8 +330,8 @@ class BookCreationPage(base_page.BasePage):
                 "CURRENTLY_READING": 1,
                 "FINISHED": 2,
             }
-            self.book_status_combob.setCurrentIndex(
-                combob_choices_indexes[self.book.status.value]
+            self.book_reading_state_combob.setCurrentIndex(
+                combob_choices_indexes[self.book.reading_state.value]
             )
             self.read_pages_le.setText(str(self.book.read_pages))
 
@@ -562,7 +566,7 @@ class BookCreationPage(base_page.BasePage):
                 )
                 return
 
-        books_infos["status"] = self.book_status_combob.currentData()
+        books_infos["status"] = self.book_reading_state_combob.currentData()
 
         if self.read_pages_le.isEnabled():
             text = self.read_pages_le.text()

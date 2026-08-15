@@ -59,6 +59,7 @@
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
       "shelfs_selection": "Bookshelves : ",
+      "reading_state_header": "Reading state : ",
       "reading_state": {
         "unread": "Unread",
         "finished": "Finished",

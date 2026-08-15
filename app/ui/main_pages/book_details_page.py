@@ -94,12 +94,6 @@ class DetailedBookInfos(QtWidgets.QWidget):
         self.main_lyt = QtWidgets.QVBoxLayout()
         self.main_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.setLayout(self.main_lyt)
-
-        self.book_reading_status_lang_path = {
-            "unread": "unread",
-            "on_reading": "currently_reading",
-            "finished": "finished",
-        }  # This variable should be deleted soooon
         self.book_basic_infos = {
             "title": (
                 self.langs_handler.tr("shared.infos.title"),
@@ -121,9 +115,11 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 self.langs_handler.tr("shared.infos.pages_count"),
                 self.book.tot_pages,
             ),
-            "status": (
-                self.langs_handler.tr("shared.infos.status"),
-                utils_funcs.get_reading_state_tr(self.book.status, self.langs_handler),
+            "reading_state": (
+                self.langs_handler.tr("book.infos.reading_state_header"),
+                utils_funcs.get_reading_state_tr(
+                    self.book.reading_state, self.langs_handler
+                ),
             ),
             "read_pages": (
                 self.langs_handler.tr("book.infos.read_pages"),
@@ -150,19 +146,20 @@ class DetailedBookInfos(QtWidgets.QWidget):
         for key, value in self.book_basic_infos.items():
             if (
                 key == "starting_reading_date"
-                and self.book.status == book_sys.Book.ReadingState.UNREAD
+                and self.book.reading_state == book_sys.Book.ReadingState.UNREAD
             ):
                 continue
 
             if (
                 key == "read_pages"
-                and self.book.status != book_sys.Book.ReadingState.CURRENTLY_READING
+                and self.book.reading_state
+                != book_sys.Book.ReadingState.CURRENTLY_READING
             ):
                 continue
 
             if (
                 key == "end_reading_date"
-                and self.book.status != book_sys.Book.ReadingState.FINISHED
+                and self.book.reading_state != book_sys.Book.ReadingState.FINISHED
             ):
                 continue
 
@@ -395,22 +392,22 @@ class SubBookWidget(QtWidgets.QWidget):
         """
         Set the text displayed by the book reading state label
         """
-        if self.book.status == book_sys.Book.ReadingState.UNREAD:
+        if self.book.reading_state == book_sys.Book.ReadingState.UNREAD:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.unread')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
-        elif self.book.status == book_sys.Book.ReadingState.CURRENTLY_READING:
+        elif self.book.reading_state == book_sys.Book.ReadingState.CURRENTLY_READING:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.currently_reading')} - {self.book.read_pages}/{self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
-        elif self.book.status == book_sys.Book.ReadingState.FINISHED:
+        elif self.book.reading_state == book_sys.Book.ReadingState.FINISHED:
             self.book_reading_state_lb.setText(
                 f"{self.langs_handler.tr('book.infos.reading_state.finished')} - {self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
         else:
             self.logger.warning(
-                f"Book ID={self.book.id} has an unknown reading state '{self.book.status}'"
+                f"Book ID={self.book.id} has an unknown reading state '{self.book.reading_state}'"
             )
