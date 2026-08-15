@@ -142,16 +142,14 @@ class BookCreationPage(base_page.BasePage):
         self.book_status_widget = QtWidgets.QWidget(self)
         self.book_status_widget_layout = QtWidgets.QGridLayout()
         self.book_status_widget.setLayout(self.book_status_widget_layout)
-        self.alr_read_pages_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.alr_read_pages")
+        self.read_pages_lb = QtWidgets.QLabel(
+            self.langs_handler.tr("book.infos.read_pages")
         )
-        self.alr_read_pages_le = QtWidgets.QLineEdit()
-        self.alr_read_pages_le.textEdited.connect(
-            lambda: self.check_int(
-                self.alr_read_pages_le.text(), self.alr_read_pages_le
-            )
+        self.read_pages_le = QtWidgets.QLineEdit()
+        self.read_pages_le.textEdited.connect(
+            lambda: self.check_int(self.read_pages_le.text(), self.read_pages_le)
         )
-        self.alr_read_pages_le.setMaximumWidth(300)
+        self.read_pages_le.setMaximumWidth(300)
         self.today_date = QtCore.QDate(
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
@@ -172,8 +170,8 @@ class BookCreationPage(base_page.BasePage):
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
         self.set_book_status(book_sys.Book.ReadingState.UNREAD)
-        self.book_status_widget_layout.addWidget(self.alr_read_pages_lb, 0, 0)
-        self.book_status_widget_layout.addWidget(self.alr_read_pages_le, 0, 1)
+        self.book_status_widget_layout.addWidget(self.read_pages_lb, 0, 0)
+        self.book_status_widget_layout.addWidget(self.read_pages_le, 0, 1)
         self.book_status_widget_layout.addWidget(self.starting_read_date_lb, 1, 0)
         self.book_status_widget_layout.addWidget(self.starting_read_date_de, 1, 1)
         self.book_status_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
@@ -331,7 +329,7 @@ class BookCreationPage(base_page.BasePage):
             self.book_status_combob.setCurrentIndex(
                 combob_choices_indexes[self.book.status.value]
             )
-            self.alr_read_pages_le.setText(str(self.book.alr_read_pages))
+            self.read_pages_le.setText(str(self.book.read_pages))
 
             if self.book.starting_read_date:
                 starting_read_date_dt = QtCore.QDate()
@@ -368,17 +366,17 @@ class BookCreationPage(base_page.BasePage):
         - status (Book.ReadingState): the book reading state
         """
         if status == book_sys.Book.ReadingState.FINISHED:
-            self.alr_read_pages_le.setEnabled(False)
+            self.read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(True)
 
         elif status == book_sys.Book.ReadingState.CURRENTLY_READING:
-            self.alr_read_pages_le.setEnabled(True)
+            self.read_pages_le.setEnabled(True)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(False)
 
         elif status == book_sys.Book.ReadingState.UNREAD:
-            self.alr_read_pages_le.setEnabled(False)
+            self.read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)
 
@@ -566,8 +564,8 @@ class BookCreationPage(base_page.BasePage):
 
         books_infos["status"] = self.book_status_combob.currentData()
 
-        if self.alr_read_pages_le.isEnabled():
-            text = self.alr_read_pages_le.text()
+        if self.read_pages_le.isEnabled():
+            text = self.read_pages_le.text()
             books_infos["read_pages"] = int(text) if text else 0
 
         if self.starting_read_date_de.isEnabled():

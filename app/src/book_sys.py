@@ -257,7 +257,7 @@ class Book:
         self.end_read_date = kwargs.get("end_read_date")
         self.status: Book.ReadingState = kwargs.get("status", Book.ReadingState.UNREAD)
         self.tot_pages = kwargs.get("tot_pages", 1)
-        self.alr_read_pages = kwargs.get("read_pages", 0)
+        self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
@@ -281,7 +281,7 @@ class Book:
             "starting_read_date": self.starting_read_date,
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
-            "read_pages": self.alr_read_pages,
+            "read_pages": self.read_pages,
             "parents_shelves": self._parents_shelves,
         }
 

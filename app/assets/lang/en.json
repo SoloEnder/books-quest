@@ -55,7 +55,7 @@
   "book": {
     "infos": {
       "object_type": "Book",
-      "alr_read_pages": "Read pages : ",
+      "read_pages": "Read pages : ",
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
       "shelfs_selection": "Bookshelves : ",

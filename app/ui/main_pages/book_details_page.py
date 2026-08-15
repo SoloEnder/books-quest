@@ -125,9 +125,9 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 self.langs_handler.tr("shared.infos.status"),
                 utils_funcs.get_reading_state_tr(self.book.status, self.langs_handler),
             ),
-            "alr_read_pages": (
-                self.langs_handler.tr("book.infos.alr_read_pages"),
-                self.book.alr_read_pages,
+            "read_pages": (
+                self.langs_handler.tr("book.infos.read_pages"),
+                self.book.read_pages,
             ),
             "starting_reading_date": (
                 self.langs_handler.tr("book.infos.starting_read_date"),
@@ -155,7 +155,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 continue
 
             if (
-                key == "alr_read_pages"
+                key == "read_pages"
                 and self.book.status != book_sys.Book.ReadingState.CURRENTLY_READING
             ):
                 continue
@@ -402,7 +402,7 @@ class SubBookWidget(QtWidgets.QWidget):
 
         elif self.book.status == book_sys.Book.ReadingState.CURRENTLY_READING:
             self.book_reading_state_lb.setText(
-                f"{self.langs_handler.tr('book.infos.reading_state.currently_reading')} - {self.book.alr_read_pages}/{self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
+                f"{self.langs_handler.tr('book.infos.reading_state.currently_reading')} - {self.book.read_pages}/{self.langs_handler.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
 
         elif self.book.status == book_sys.Book.ReadingState.FINISHED:

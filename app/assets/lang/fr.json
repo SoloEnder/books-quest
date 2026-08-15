@@ -54,7 +54,7 @@
   "book": {
     "infos": {
       "object_type": "Livre",
-      "alr_read_pages": "Pages lues : ",
+      "read_pages": "Pages lues : ",
       "starting_read_date": "Lecture commencé le : ",
       "end_read_date": "Lecture terminée le : ",
       "shelfs_selection": "Etagères : ",
