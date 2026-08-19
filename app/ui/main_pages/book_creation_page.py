@@ -584,7 +584,7 @@ class BookCreationPage(base_page.BasePage):
                 )
                 return
 
-        books_infos["status"] = self.book_reading_state_combob.currentData()
+        books_infos["reading_state"] = self.book_reading_state_combob.currentData()
 
         if self.read_pages_le.isEnabled():
             text = self.read_pages_le.text()
