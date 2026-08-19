@@ -84,8 +84,8 @@ class InvalidUUIDError(Exception):
 
 
 class Shelf:
-    def __init__(self, **kwargs):
-        self.title = kwargs["title"]
+    def __init__(self, title: str, **kwargs):
+        self.title = title
         self.title_suffix = kwargs.get("title_suffix")
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
         self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
@@ -243,11 +243,11 @@ class Book:
         CURRENTLY_READING = "CURRENTLY_READING"
         FINISHED = "FINISHED"
 
-    def __init__(self, **kwargs):
+    def __init__(self, title, **kwargs):
         """
         The base class for the books
         """
-        self.title = kwargs["title"]
+        self.title = title
         self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
         self.edition = kwargs.get("edition")
