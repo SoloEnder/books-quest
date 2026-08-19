@@ -161,6 +161,8 @@ class BookCreationPage(base_page.BasePage):
         self.starting_read_date_de.setMaximumDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
+        # -- Automatically sets the minimum date for book end read date as the starting read date --
+        self.starting_read_date_de.dateChanged.connect(self.set_end_read_min_date)
         self.end_read_date_lb = QtWidgets.QLabel(
             self.langs_handler.tr("book.infos.end_read_date")
         )
@@ -169,6 +171,8 @@ class BookCreationPage(base_page.BasePage):
         self.end_read_date_de.setMaximumDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
+        # Prevent starting read date from being superior than end reading date
+        self.end_read_date_de.dateChanged.connect(self.set_starting_read_max_date)
         self.set_book_status(book_sys.Book.ReadingState.UNREAD)
         self.book_reading_state_widget_layout.addWidget(self.read_pages_lb, 0, 0)
         self.book_reading_state_widget_layout.addWidget(self.read_pages_le, 0, 1)
@@ -306,6 +310,20 @@ class BookCreationPage(base_page.BasePage):
 
         self.logger.info("Appling normal mode...")
         self.qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {})
+
+    @QtCore.Slot()
+    def set_starting_read_max_date(self):
+        """
+        Sets the maximum starting reading date to the current end read date
+        """
+        self.starting_read_date_de.setMaximumDate(self.end_read_date_de.date())
+
+    @QtCore.Slot()
+    def set_end_read_min_date(self):
+        """
+        Sets the minimum date for end reading date to the current value of starting read date
+        """
+        self.end_read_date_de.setMinimumDate(self.starting_read_date_de.date())
 
     def apply_edition_mode(self):
         """
