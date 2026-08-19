@@ -492,7 +492,7 @@ class BookCreationPage(base_page.BasePage):
                 text = w.text()
 
                 if key == "tot_pages":
-                    books_infos[key] = text if text else 0
+                    books_infos[key] = int(text) if text else 0
 
                 else:
                     if text:
