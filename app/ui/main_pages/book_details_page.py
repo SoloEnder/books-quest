@@ -371,12 +371,12 @@ class SubBookWidget(QtWidgets.QWidget):
             QtCore.Qt.AlignmentFlag.AlignTop,
         )
         self.main_layout.addWidget(
-            self.edit_b,
+            self.book_details_b,
             3,
             1,
         )
         self.main_layout.addWidget(
-            self.book_details_b,
+            self.edit_b,
             4,
             1,
         )
