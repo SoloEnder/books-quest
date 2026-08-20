@@ -327,12 +327,16 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_details_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.see_details")
         )
+        self.book_details_b.setIcon(
+            images_tools.get_svg(self.res_handler.get_res("assets.icons.infos"))
+        )
         self.book_details_b.setObjectName("SeeDetailsButton")
         self.book_details_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
                 "BookDetailsPage", True, {"book_id": self.book.id}
             )
         )
+        self.book_details_b.setSizePolicy(self.fixed_sp)
         self.edit_b = QtWidgets.QPushButton(
             self.langs_handler.tr("shared.actions.edit")
         )  # type: ignore
