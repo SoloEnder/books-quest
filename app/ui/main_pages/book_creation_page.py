@@ -112,6 +112,7 @@ class BookCreationPage(base_page.BasePage):
 
             elif key == "tot_pages":
                 ew.textEdited.connect(lambda: self.check_int(ew.text(), ew))  # type: ignore
+                ew.setText("1")
 
             ew.setMaximumWidth(300)
             self.main_lyt.addWidget(lb, row, 0)
@@ -145,7 +146,7 @@ class BookCreationPage(base_page.BasePage):
         self.read_pages_lb = QtWidgets.QLabel(
             self.langs_handler.tr("book.infos.read_pages")
         )
-        self.read_pages_le = QtWidgets.QLineEdit()
+        self.read_pages_le = QtWidgets.QLineEdit("0")
         self.read_pages_le.textEdited.connect(
             lambda: self.check_int(self.read_pages_le.text(), self.read_pages_le)
         )
@@ -510,7 +511,7 @@ class BookCreationPage(base_page.BasePage):
                 text = w.text()
 
                 if key == "tot_pages":
-                    books_infos[key] = int(text) if text else 0
+                    books_infos[key] = int(text) if text else 1
 
                 else:
                     if text:
@@ -589,6 +590,16 @@ class BookCreationPage(base_page.BasePage):
         if self.read_pages_le.isEnabled():
             text = self.read_pages_le.text()
             books_infos["read_pages"] = int(text) if text else 0
+
+            # Checking if read pages are less than total pages
+            if books_infos["read_pages"] > books_infos["tot_pages"]:
+                self.qt_signals_handler.notify_sg.emit(
+                    "error",
+                    "Books Quest",
+                    self.langs_handler.tr("book.msg.invalid_read_pages_count.too_high"),
+                    "",
+                )
+                return
 
         if self.starting_read_date_de.isEnabled():
             books_infos["starting_read_date"] = (

@@ -72,7 +72,11 @@
       "book_edition_success": "Book updated !",
       "book_already_exists": "Found one or several books with this name",
       "book_deletion": "Deleting /f:<count>/f book(s)...",
-      "book_not_found": "Book not found !"
+      "book_not_found": "Book not found !",
+      "invalid_read_pages_count": {
+        "negative": "Invalid read pages count",
+        "too_high": "Read pages count cannot be higher than total pages count"
+      }
     }
   },
   "shelf": {
