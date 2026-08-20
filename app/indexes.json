@@ -24,6 +24,7 @@
     },
     "icons": {
       "_base_": "icons/lucide",
+      "infos": "info.svg",
       "add": "plus-circle.svg",
       "go_back": "move-left.svg",
       "exit": "x.svg",
