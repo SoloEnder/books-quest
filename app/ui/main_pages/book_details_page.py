@@ -42,6 +42,7 @@ class BookDetailsPage(base_page.BasePage):
             self.langs_handler,
             self.qt_signals_handler,
         )
+        self.book_widget.sub_widget.book_details_b.setVisible(False)
         # All the details about the book
         self.detailed_book_infos = DetailedBookInfos(
             self,
