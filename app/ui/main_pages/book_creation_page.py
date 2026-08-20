@@ -511,7 +511,17 @@ class BookCreationPage(base_page.BasePage):
                 text = w.text()
 
                 if key == "tot_pages":
-                    books_infos[key] = int(text) if text else 1
+                    value = int(text) if text else 1
+
+                    if value <= 0:
+                        self.qt_signals_handler.notify_sg.emit(
+                            "error",
+                            "Books Quest",
+                            self.langs_handler.tr("book.msg.invalid_pages_count"),
+                            "",
+                        )
+                        return
+                    books_infos[key] = value
 
                 else:
                     if text:
