@@ -334,7 +334,7 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_details_b.setObjectName("SeeDetailsButton")
         self.book_details_b.clicked.connect(
             lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "BookDetailsPage", True, {"book_id": self.book.id}
+                "BOOK_DETAILS_PAGE", True, {"book_id": self.book.id}
             )
         )
         self.book_details_b.setSizePolicy(self.fixed_sp)

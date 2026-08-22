@@ -250,7 +250,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             "SHELF_DETAILS_PAGE": self.shelf_details_page,
             "BOOK_CREATION_PAGE": self.book_creation_page,
             "SHELF_CREATION_PAGE": self.shelf_creation_page,
-            "BookDetailsPage": self.book_details_page,
+            "BOOK_DETAILS_PAGE": self.book_details_page,
         }
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.book_creation_page)
@@ -394,7 +394,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
 
-        elif page_name == "BookDetailsPage":
+        elif page_name == "BOOK_DETAILS_PAGE":
             self.removeWidget(self.book_details_page)
             self.book_details_page.deleteLater()
             self.book_details_page = book_details_page.BookDetailsPage(
@@ -406,7 +406,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
                 self.books_handler,
                 page_args["book_id"],
             )
-            self.pages["BookDetailsPage"] = self.book_details_page
+            self.pages["BOOK_DETAILS_PAGE"] = self.book_details_page
             self.addWidget(self.book_details_page)
 
         else:
