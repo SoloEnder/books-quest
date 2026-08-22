@@ -290,7 +290,15 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.current_page_infos = (page_name, page_obj, page_args)
-            self.history.insert(0, self.current_page_infos)
+
+            if (
+                len(self.history) >= 1
+                and self.history[0][0] == self.current_page_infos[0]
+            ):
+                self.history[0] = self.current_page_infos
+
+            else:
+                self.history.insert(0, self.current_page_infos)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
