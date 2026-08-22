@@ -89,6 +89,14 @@ class AppSystem:
                 "previous_versions": [],
                 "last_update_date": None,
             }
+
+        if installation_infos["app_version"] != self.app_infos["app_version"]:
+            installation_infos["previous_versions"].append(
+                installation_infos["app_version"]
+            )
+            installation_infos["app_version"] = self.app_infos[
+                "app_version"
+            ]  # Force synchronisation with app infos
         return installation_infos
 
     def save_installation_infos(self):
