@@ -1,5 +1,7 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from app.src.book_sys import Book, Shelf
+
 
 class QtSignalsHandler(QtCore.QObject):
     apply_settings_sg = QtCore.Signal()
@@ -17,6 +19,13 @@ class QtSignalsHandler(QtCore.QObject):
     check_for_updates_sg = QtCore.Signal(
         bool
     )  # Checks for update. First argument indicates whether to show a pop-up when app is up to date
+    # ---- Signal emited when user add/edit an object in the library. First parameter is the object ID
+    book_added_sg = QtCore.Signal(str)
+    book_edited_sg = QtCore.Signal(str)
+    book_removed_sg = QtCore.Signal(str)
+    shelf_added_sg = QtCore.Signal(str)
+    shelf_edited_sg = QtCore.Signal(str)
+    shelf_removed_sg = QtCore.Signal(str)
 
     def __init__(self):
         super().__init__()

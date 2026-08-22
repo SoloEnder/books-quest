@@ -42,21 +42,23 @@
     },
     "infos": {
       "type": "Type",
-      "status": "Status",
+      "status": "Status : ",
       "title": "Titre : ",
       "author": "Auteur : ",
       "edition": "Edition : ",
       "summary": "Résumé : ",
-      "pages_count": "Nombre total de pages :"
+      "pages_count": "Nombre total de pages :",
+      "pages_count_args": "/f:<count>/f pages"
     }
   },
   "book": {
     "infos": {
       "object_type": "Livre",
-      "alr_read_pages": "Pages lues : ",
+      "read_pages": "Pages lues : ",
       "starting_read_date": "Lecture commencé le : ",
       "end_read_date": "Lecture terminée le : ",
       "shelfs_selection": "Etagères : ",
+      "reading_state_header": "Statut de lecture : ",
       "reading_state": {
         "unread": "Non lut",
         "finished": "Terminé",
@@ -70,7 +72,12 @@
       "book_edition_success": "Livre modifié !",
       "book_already_exists": "Un ou plusieurs livres avec ce noms ont été trouvés",
       "book_deletion": "Suppression de /f:<count>/f livres(s)...",
-      "book_deletion_error": "Livre introuvable !"
+      "book_deletion_error": "Livre introuvable !",
+      "invalid_pages_count": "Le nombre total de pages est invalide",
+      "invalid_read_pages_count": {
+        "negative": "Le nombre de pages luent est invalide",
+        "too_high": "Le nombre de pages luent doit être inférieur au nombre total de pages !"
+      }
     }
   },
   "shelf": {
@@ -100,7 +107,8 @@
       "latest_release_infos": {
         "request_timed_out": "Impossible d'obtenir les informations de la dernière release, car l'API à mis trop de temps à répondre.",
         "httperr": "Impossible d'obtenir les informations de la dernière release : /f:<httperr>/f"
-      }
+      },
+      "unable_to_check_for_updates": "Impossible de vérifier les mises à jour"
     },
     "infos": {
       "up_to_date": "Books Quest est à jour",

@@ -104,9 +104,7 @@ class SettingsPage(base_page.BasePage):
         self.qt_signals_handler.edit_progress_msg.emit(
             self.langs_handler.tr("settings.msg.applying_changes")
         )
-        self.logger.debug("Sending new settings save request...")
         self.qt_signals_handler.apply_settings_sg.emit()
-        self.logger.debug("Sending UI refresh request...")
         self.qt_signals_handler.refresh_ui_sg.emit()
         self.qt_signals_handler.edit_progress_msg.emit(" ")
         QtWidgets.QMessageBox.information(
@@ -374,6 +372,8 @@ class ThemeSettings(SettingsSection):
             self.langs_handler.tr("settings.general.appearance.theme.interface_theme")
         )
         self.theme_selection_combob = QtWidgets.QComboBox()
+        self.theme_selection_combob.setFixedSize(200, 25)
+        self.theme_selection_combob.setObjectName("ThemeSelectionCombobox")
         self.theme_opt_indexes = {
             "light": 0,
             "system": 1,
@@ -398,6 +398,7 @@ class ThemeSettings(SettingsSection):
                 str(self.settings_handler.get_setting_value("general.appearance.theme"))
             ]
         )
+        self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.base_lyt.addWidget(self.edit_theme_lb)
         self.base_lyt.addWidget(self.theme_selection_combob, 1, 1)
 
@@ -446,6 +447,7 @@ class LangsSettings(SettingsSection):
             )
         )
         self.lang_selection_combob = QtWidgets.QComboBox()
+        self.lang_selection_combob.setFixedSize(200, 25)
         self.languages_opts_indexes = {
             "fr": 0,
             "en": 1,

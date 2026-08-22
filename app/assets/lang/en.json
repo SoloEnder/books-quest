@@ -43,21 +43,23 @@
     },
     "infos": {
       "type": "Type",
-      "status": "Status",
+      "status": "Status : ",
       "title": "Title : ",
       "author": "Author : ",
       "edition": "Edition : ",
       "summary": "Summary : ",
-      "pages_count": "Total pages count"
+      "pages_count": "Total pages count",
+      "pages_count_args": "/f:<count>/f pages"
     }
   },
   "book": {
     "infos": {
       "object_type": "Book",
-      "alr_read_pages": "Read pages : ",
+      "read_pages": "Read pages : ",
       "starting_read_date": "Started reading on : ",
       "end_read_date": "Finished reading on : ",
       "shelfs_selection": "Bookshelves : ",
+      "reading_state_header": "Reading state : ",
       "reading_state": {
         "unread": "Unread",
         "finished": "Finished",
@@ -70,7 +72,12 @@
       "book_edition_success": "Book updated !",
       "book_already_exists": "Found one or several books with this name",
       "book_deletion": "Deleting /f:<count>/f book(s)...",
-      "book_not_found": "Book not found !"
+      "book_not_found": "Book not found !",
+      "invalid_pages_count": "Invalid pages count",
+      "invalid_read_pages_count": {
+        "negative": "Invalid read pages count",
+        "too_high": "Read pages count cannot be higher than total pages count"
+      }
     }
   },
   "shelf": {
@@ -100,7 +107,8 @@
       "latest_release_infos": {
         "request_timed_out": "Could not get app latest release infos : request timed out",
         "httperr": "Could not get app latest release infos : /f:<httperr>/f"
-      }
+      },
+      "unable_to_check_for_updates": "Unable to check for updates"
     },
     "infos": {
       "up_to_date": "Books Quest is up-to-date",

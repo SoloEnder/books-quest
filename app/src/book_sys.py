@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import logging
 import os
 import pathlib
@@ -83,8 +84,8 @@ class InvalidUUIDError(Exception):
 
 
 class Shelf:
-    def __init__(self, **kwargs):
-        self.title = kwargs["title"]
+    def __init__(self, title: str, **kwargs):
+        self.title = title
         self.title_suffix = kwargs.get("title_suffix")
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
         self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
@@ -237,11 +238,16 @@ class Shelf:
 
 
 class Book:
-    def __init__(self, **kwargs):
+    class ReadingState(enum.Enum):
+        UNREAD = "UNREAD"
+        CURRENTLY_READING = "CURRENTLY_READING"
+        FINISHED = "FINISHED"
+
+    def __init__(self, title, **kwargs):
         """
         The base class for the books
         """
-        self.title = kwargs["title"]
+        self.title = title
         self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
         self.edition = kwargs.get("edition")
@@ -249,9 +255,11 @@ class Book:
         self.isbn = kwargs.get("isbn")
         self.starting_read_date = kwargs.get("starting_read_date")
         self.end_read_date = kwargs.get("end_read_date")
-        self.status = kwargs.get("status")
+        self.reading_state: Book.ReadingState = kwargs.get(
+            "reading_state", Book.ReadingState.UNREAD
+        )
         self.tot_pages = kwargs.get("tot_pages", 1)
-        self.alr_read_pages = kwargs.get("read_pages", 0)
+        self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
@@ -271,11 +279,11 @@ class Book:
             "edition": self.edition,
             "summary": self.summary,
             "isbn": self.isbn,
-            "status": self.status,
+            "reading_state": self.reading_state,
             "starting_read_date": self.starting_read_date,
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
-            "alr_read_pages": self.alr_read_pages,
+            "read_pages": self.read_pages,
             "parents_shelves": self._parents_shelves,
         }
 
@@ -344,12 +352,13 @@ class BooksHandler:
         self.jfm = jfm
         self.shelves = shelves or {}
         self.default_shelf = Shelf(title="All", books=self.books.values())
+        self.default_book = Book(title="DefaultBook")
 
     def delete_book(self, book_id: str):
         book_id = book_id
 
         if book_id in self.books.keys():
-            self.logger.debug(f"Deleting book with ID '{book_id}'...")
+            self.logger.debug(f"Removing book with ID '{book_id}' from BooksHandler...")
             book_obj: Book = self.books[book_id]
             cover_path = self.get_book_cover_path(book_obj, False)
             if cover_path:
@@ -448,7 +457,7 @@ class BooksHandler:
             )
 
     def delete_shelf(self, id: str):
-        self.logger.debug(f"Deleting shelf with ID : '{id}'...")
+        self.logger.debug(f"Removing shelf with ID : '{id}' from BooksHandler...")
 
         if id in self.shelves.keys():
             shelf = self.shelves[id]
@@ -665,6 +674,8 @@ class BooksHandler:
                     book_data["parents_shelves_ids"].append(shelf.str_id())
 
             del book_data["parents_shelves"]
+
+            book_data["reading_state"] = book.reading_state.value
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
@@ -678,6 +689,9 @@ class BooksHandler:
         if data:
             for book_data in data:
                 book_data["id"] = uuid.UUID(book_data["id"])
+                book_data["reading_state"] = Book.ReadingState[
+                    book_data["reading_state"]
+                ]
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):

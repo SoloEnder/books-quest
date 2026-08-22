@@ -7,6 +7,7 @@ from app.ui import notification_service, qt_signals_handler
 from app.ui.main_pages import (
     base_page,
     book_creation_page,
+    book_details_page,
     settings_page,
     shelf_creation_page,
     shelf_details_page,
@@ -234,17 +235,28 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.langs_handler,
             mode="creation",
         )
+        self.book_details_page = book_details_page.BookDetailsPage(
+            self,
+            self.res_handler,
+            self.settings_handler,
+            self.langs_handler,
+            self.qt_signals_handler,
+            self.books_handler,
+            self.books_handler.default_book.id,
+        )
         self.pages = {
             "SETTINGS_PAGE": self.settings_page,
             "SHELFS_VIEW_PAGE": self.shelfs_view_page,
             "SHELF_DETAILS_PAGE": self.shelf_details_page,
             "BOOK_CREATION_PAGE": self.book_creation_page,
             "SHELF_CREATION_PAGE": self.shelf_creation_page,
+            "BOOK_DETAILS_PAGE": self.book_details_page,
         }
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.book_creation_page)
         self.addWidget(self.shelfs_view_page)
         self.addWidget(self.shelf_creation_page)
+        self.addWidget(self.book_details_page)
         self.history = []
         self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
         self.qt_signals_handler.close_page_sg.connect(self.close_page)
@@ -278,7 +290,15 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.setCurrentWidget(page_obj)
 
             self.current_page_infos = (page_name, page_obj, page_args)
-            self.history.insert(0, self.current_page_infos)
+
+            if (
+                len(self.history) >= 1
+                and self.history[0][0] == self.current_page_infos[0]
+            ):
+                self.history[0] = self.current_page_infos
+
+            else:
+                self.history.insert(0, self.current_page_infos)
             self.qt_signals_handler.edit_progress_msg.emit(" ")
 
         else:
@@ -381,6 +401,21 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             )
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
+
+        elif page_name == "BOOK_DETAILS_PAGE":
+            self.removeWidget(self.book_details_page)
+            self.book_details_page.deleteLater()
+            self.book_details_page = book_details_page.BookDetailsPage(
+                self,
+                self.res_handler,
+                self.settings_handler,
+                self.langs_handler,
+                self.qt_signals_handler,
+                self.books_handler,
+                page_args["book_id"],
+            )
+            self.pages["BOOK_DETAILS_PAGE"] = self.book_details_page
+            self.addWidget(self.book_details_page)
 
         else:
             raise ValueError(f"Unknown page : '{page_name}'")

@@ -29,6 +29,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             **config,
         )
         self.logger = logging.getLogger(__name__ + "WidgetsPaginationView")
+        self.logger.setLevel(logging.INFO)
         self.res_handler = res_handler
         self.langs_handler = langs_handler
         self.qt_qignals_handler = qt_signals_handler

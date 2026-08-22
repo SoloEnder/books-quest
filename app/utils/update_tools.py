@@ -57,6 +57,11 @@ def get_latest_release_infos(url: str, langs_handler: LangsHandler) -> None | di
         )
         return
 
+    except Exception:
+        logger.exception("Unable to get latest release infos : ")
+        show_error(msg=langs_handler.tr("updates.errors.unable_to_check_for_updates"))
+        return
+
     return response.json()
 
 

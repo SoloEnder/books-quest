@@ -10,7 +10,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools, utils_funcs
+from app.utils import images_tools, my_exceptions, utils_funcs
 
 
 class EditionModeNotEnabled(Exception):
@@ -50,8 +50,6 @@ class BookCreationPage(base_page.BasePage):
 
         self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-        self.logger.debug(f"{self._edition_mode_enabled=}")
-        self.logger.debug(f"{self._book=}")
 
         if self._edition_mode_enabled and not self._book:
             self.logger.info(
@@ -112,6 +110,7 @@ class BookCreationPage(base_page.BasePage):
 
             elif key == "tot_pages":
                 ew.textEdited.connect(lambda: self.check_int(ew.text(), ew))  # type: ignore
+                ew.setText("1")
 
             ew.setMaximumWidth(300)
             self.main_lyt.addWidget(lb, row, 0)
@@ -120,36 +119,36 @@ class BookCreationPage(base_page.BasePage):
             row += 1
 
         # Book status widgets
-        self.book_status_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shared.infos.status")
+        self.reading_state_lb = QtWidgets.QLabel(
+            self.langs_handler.tr("book.infos.reading_state_header")
         )
-        self.book_status_combob = QtWidgets.QComboBox()
-        self.book_status_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.unread"), "unread"
+        self.book_reading_state_combob = QtWidgets.QComboBox()
+        self.book_reading_state_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.unread"),
+            book_sys.Book.ReadingState.UNREAD,
         )
-        self.book_status_combob.addItem(
+        self.book_reading_state_combob.addItem(
             self.langs_handler.tr("book.infos.reading_state.currently_reading"),
-            "on_reading",
+            book_sys.Book.ReadingState.CURRENTLY_READING,
         )
-        self.book_status_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.finished"), "finished"
+        self.book_reading_state_combob.addItem(
+            self.langs_handler.tr("book.infos.reading_state.finished"),
+            book_sys.Book.ReadingState.FINISHED,
         )
-        self.book_status_combob.currentIndexChanged.connect(
-            lambda: self.set_book_status(self.book_status_combob.currentData())
+        self.book_reading_state_combob.currentIndexChanged.connect(
+            lambda: self.set_book_status(self.book_reading_state_combob.currentData())
         )
-        self.book_status_widget = QtWidgets.QWidget(self)
-        self.book_status_widget_layout = QtWidgets.QGridLayout()
-        self.book_status_widget.setLayout(self.book_status_widget_layout)
-        self.alr_read_pages_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.alr_read_pages")
+        self.book_reading_state_widget = QtWidgets.QWidget(self)
+        self.book_reading_state_widget_layout = QtWidgets.QGridLayout()
+        self.book_reading_state_widget.setLayout(self.book_reading_state_widget_layout)
+        self.read_pages_lb = QtWidgets.QLabel(
+            self.langs_handler.tr("book.infos.read_pages")
         )
-        self.alr_read_pages_le = QtWidgets.QLineEdit()
-        self.alr_read_pages_le.textEdited.connect(
-            lambda: self.check_int(
-                self.alr_read_pages_le.text(), self.alr_read_pages_le
-            )
+        self.read_pages_le = QtWidgets.QLineEdit("0")
+        self.read_pages_le.textEdited.connect(
+            lambda: self.check_int(self.read_pages_le.text(), self.read_pages_le)
         )
-        self.alr_read_pages_le.setMaximumWidth(300)
+        self.read_pages_le.setMaximumWidth(300)
         self.today_date = QtCore.QDate(
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
@@ -161,6 +160,8 @@ class BookCreationPage(base_page.BasePage):
         self.starting_read_date_de.setMaximumDate(self.today_date)
         self.starting_read_date_de.setCalendarPopup(True)
         self.starting_read_date_de.setMaximumWidth(300)
+        # -- Automatically sets the minimum date for book end read date as the starting read date --
+        self.starting_read_date_de.dateChanged.connect(self.set_end_read_min_date)
         self.end_read_date_lb = QtWidgets.QLabel(
             self.langs_handler.tr("book.infos.end_read_date")
         )
@@ -169,13 +170,19 @@ class BookCreationPage(base_page.BasePage):
         self.end_read_date_de.setMaximumDate(self.today_date)
         self.end_read_date_de.setCalendarPopup(True)
         self.end_read_date_de.setMaximumWidth(300)
-        self.set_book_status("unread")
-        self.book_status_widget_layout.addWidget(self.alr_read_pages_lb, 0, 0)
-        self.book_status_widget_layout.addWidget(self.alr_read_pages_le, 0, 1)
-        self.book_status_widget_layout.addWidget(self.starting_read_date_lb, 1, 0)
-        self.book_status_widget_layout.addWidget(self.starting_read_date_de, 1, 1)
-        self.book_status_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
-        self.book_status_widget_layout.addWidget(self.end_read_date_de, 2, 1)
+        # Prevent starting read date from being superior than end reading date
+        self.end_read_date_de.dateChanged.connect(self.set_starting_read_max_date)
+        self.set_book_status(book_sys.Book.ReadingState.UNREAD)
+        self.book_reading_state_widget_layout.addWidget(self.read_pages_lb, 0, 0)
+        self.book_reading_state_widget_layout.addWidget(self.read_pages_le, 0, 1)
+        self.book_reading_state_widget_layout.addWidget(
+            self.starting_read_date_lb, 1, 0
+        )
+        self.book_reading_state_widget_layout.addWidget(
+            self.starting_read_date_de, 1, 1
+        )
+        self.book_reading_state_widget_layout.addWidget(self.end_read_date_lb, 2, 0)
+        self.book_reading_state_widget_layout.addWidget(self.end_read_date_de, 2, 1)
 
         # Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel(
@@ -220,12 +227,12 @@ class BookCreationPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self.restore_default_cover_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignLeft
         )
-        self.main_lyt.addWidget(self.book_status_lb, self.main_lyt.rowCount() + 1, 0)
+        self.main_lyt.addWidget(self.reading_state_lb, self.main_lyt.rowCount() + 1, 0)
         self.main_lyt.addWidget(
-            self.book_status_combob, self.main_lyt.rowCount() + 1, 0
+            self.book_reading_state_combob, self.main_lyt.rowCount() + 1, 0
         )
         self.main_lyt.addWidget(
-            self.book_status_widget,
+            self.book_reading_state_widget,
             self.main_lyt.rowCount() + 1,
             0,
             2,
@@ -303,6 +310,20 @@ class BookCreationPage(base_page.BasePage):
         self.logger.info("Appling normal mode...")
         self.qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {})
 
+    @QtCore.Slot()
+    def set_starting_read_max_date(self):
+        """
+        Sets the maximum starting reading date to the current end read date
+        """
+        self.starting_read_date_de.setMaximumDate(self.end_read_date_de.date())
+
+    @QtCore.Slot()
+    def set_end_read_min_date(self):
+        """
+        Sets the minimum date for end reading date to the current value of starting read date
+        """
+        self.end_read_date_de.setMinimumDate(self.starting_read_date_de.date())
+
     def apply_edition_mode(self):
         """
         Switch the page to edition mode
@@ -322,22 +343,19 @@ class BookCreationPage(base_page.BasePage):
                 )
 
             combob_choices_indexes = {
-                "unread": 0,
-                "on_reading": 1,
-                "finished": 2,
+                "UNREAD": 0,
+                "CURRENTLY_READING": 1,
+                "FINISHED": 2,
             }
-            self.book_status_combob.setCurrentIndex(
-                combob_choices_indexes[getattr(self.book, "status", "unread")]
+            self.book_reading_state_combob.setCurrentIndex(
+                combob_choices_indexes[self.book.reading_state.value]
             )
-            self.alr_read_pages_le.setText(self.book.alr_read_pages or "0")
+            self.read_pages_le.setText(str(self.book.read_pages))
 
             if self.book.starting_read_date:
                 starting_read_date_dt = QtCore.QDate()
                 starting_read_date_dt = starting_read_date_dt.fromString(
                     self.book.starting_read_date, QtCore.Qt.DateFormat.ISODate
-                )
-                self.logger.debug(
-                    f"Book started read at {starting_read_date_dt.currentDate()}"
                 )
 
             else:
@@ -358,25 +376,25 @@ class BookCreationPage(base_page.BasePage):
             for shelf in self.book._parents_shelves:
                 self.shelfs_selection_cbs[shelf.str_id()].setChecked(True)
 
-    def set_book_status(self, status: Literal["finished", "on_reading", "unread"]):
+    def set_book_status(self, status: book_sys.Book.ReadingState):
         """
         Set the book status and draw the appriopriate widgets
 
         Args:
-        - status (str): the book status ("finished", "on_read" or "unread")
+        - status (Book.ReadingState): the book reading state
         """
-        if status == "finished":
-            self.alr_read_pages_le.setEnabled(False)
+        if status == book_sys.Book.ReadingState.FINISHED:
+            self.read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(True)
 
-        elif status == "on_reading":
-            self.alr_read_pages_le.setEnabled(True)
+        elif status == book_sys.Book.ReadingState.CURRENTLY_READING:
+            self.read_pages_le.setEnabled(True)
             self.starting_read_date_de.setEnabled(True)
             self.end_read_date_de.setEnabled(False)
 
-        elif status == "unread":
-            self.alr_read_pages_le.setEnabled(False)
+        elif status == book_sys.Book.ReadingState.UNREAD:
+            self.read_pages_le.setEnabled(False)
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)
 
@@ -438,23 +456,19 @@ class BookCreationPage(base_page.BasePage):
         matches = []
         if self.edition_mode_enabled and self.book:
             if self.book.title != title:
-                self.logger.debug(
-                    "Searching for matches in EDITION mode because Book title has been modified !"
-                )
                 matches = self.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
             elif self.book.authors != authors:
-                self.logger.debug(
-                    "Searching for matches in EDITION mode because Book authors has been modified !"
-                )
                 matches = self.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
         elif not self.edition_mode_enabled:
-            self.logger.debug("Searching for matches...")
+            self.logger.debug(
+                "Searching for books the same title and authors as the currently being created book..."
+            )
             matches = self.books_handler.get_books(
                 title=(title, True, False), authors=(authors, True, False)
             )
@@ -471,7 +485,6 @@ class BookCreationPage(base_page.BasePage):
         - dest_path (str): the path where to moves the cover
         - set_as_new (bool=True): wether to set `dest_path` as the current book cover
         """
-        self.logger.debug(f"Final book cover path : {dest_path}")
         shutil.copy2(
             cover_path,
             dest_path,
@@ -488,7 +501,17 @@ class BookCreationPage(base_page.BasePage):
                 text = w.text()
 
                 if key == "tot_pages":
-                    books_infos[key] = text if text else 0
+                    value = int(text) if text else 1
+
+                    if value <= 0:
+                        self.qt_signals_handler.notify_sg.emit(
+                            "error",
+                            "Books Quest",
+                            self.langs_handler.tr("book.msg.invalid_pages_count"),
+                            "",
+                        )
+                        return
+                    books_infos[key] = value
 
                 else:
                     if text:
@@ -562,11 +585,21 @@ class BookCreationPage(base_page.BasePage):
                 )
                 return
 
-        books_infos["status"] = self.book_status_combob.currentData()
+        books_infos["reading_state"] = self.book_reading_state_combob.currentData()
 
-        if self.alr_read_pages_le.isEnabled():
-            text = self.alr_read_pages_le.text()
-            books_infos["alr_read_pages"] = int(text) if text else 0
+        if self.read_pages_le.isEnabled():
+            text = self.read_pages_le.text()
+            books_infos["read_pages"] = int(text) if text else 0
+
+            # Checking if read pages are less than total pages
+            if books_infos["read_pages"] > books_infos["tot_pages"]:
+                self.qt_signals_handler.notify_sg.emit(
+                    "error",
+                    "Books Quest",
+                    self.langs_handler.tr("book.msg.invalid_read_pages_count.too_high"),
+                    "",
+                )
+                return
 
         if self.starting_read_date_de.isEnabled():
             books_infos["starting_read_date"] = (
@@ -621,6 +654,7 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_edition_success"),
                     )
+                    self.qt_signals_handler.book_edited_sg.emit(self.book.id)  # type: ignore
                     self.qt_signals_handler.close_page_sg.emit()
 
                 else:
@@ -629,4 +663,5 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs_handler.tr("book.msg.book_addition_success"),
                     )
+                    self.qt_signals_handler.book_added_sg.emit(books_infos["id"])
                     self.qt_signals_handler.refresh_current_page_sg.emit()
