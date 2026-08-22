@@ -104,9 +104,7 @@ class SettingsPage(base_page.BasePage):
         self.qt_signals_handler.edit_progress_msg.emit(
             self.langs_handler.tr("settings.msg.applying_changes")
         )
-        self.logger.debug("Sending new settings save request...")
         self.qt_signals_handler.apply_settings_sg.emit()
-        self.logger.debug("Sending UI refresh request...")
         self.qt_signals_handler.refresh_ui_sg.emit()
         self.qt_signals_handler.edit_progress_msg.emit(" ")
         QtWidgets.QMessageBox.information(

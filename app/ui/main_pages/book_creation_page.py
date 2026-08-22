@@ -50,8 +50,6 @@ class BookCreationPage(base_page.BasePage):
 
         self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-        self.logger.debug(f"{self._edition_mode_enabled=}")
-        self.logger.debug(f"{self._book=}")
 
         if self._edition_mode_enabled and not self._book:
             self.logger.info(
@@ -359,9 +357,6 @@ class BookCreationPage(base_page.BasePage):
                 starting_read_date_dt = starting_read_date_dt.fromString(
                     self.book.starting_read_date, QtCore.Qt.DateFormat.ISODate
                 )
-                self.logger.debug(
-                    f"Book started read at {starting_read_date_dt.currentDate()}"
-                )
 
             else:
                 starting_read_date_dt = self.today_date
@@ -461,23 +456,19 @@ class BookCreationPage(base_page.BasePage):
         matches = []
         if self.edition_mode_enabled and self.book:
             if self.book.title != title:
-                self.logger.debug(
-                    "Searching for matches in EDITION mode because Book title has been modified !"
-                )
                 matches = self.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
             elif self.book.authors != authors:
-                self.logger.debug(
-                    "Searching for matches in EDITION mode because Book authors has been modified !"
-                )
                 matches = self.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
         elif not self.edition_mode_enabled:
-            self.logger.debug("Searching for matches...")
+            self.logger.debug(
+                "Searching for books the same title and authors as the currently being created book..."
+            )
             matches = self.books_handler.get_books(
                 title=(title, True, False), authors=(authors, True, False)
             )
@@ -494,7 +485,6 @@ class BookCreationPage(base_page.BasePage):
         - dest_path (str): the path where to moves the cover
         - set_as_new (bool=True): wether to set `dest_path` as the current book cover
         """
-        self.logger.debug(f"Final book cover path : {dest_path}")
         shutil.copy2(
             cover_path,
             dest_path,

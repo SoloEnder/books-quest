@@ -241,7 +241,6 @@ class ShelfCreationPage(base_page.BasePage):
 
     def set_shelf_cover(self):
         infos = images_tools.select_image()
-        self.logger.debug(f"Shelf cover infos={infos}")
 
         if infos and infos[0]:
             img_path = infos[0]
@@ -416,7 +415,6 @@ class ShelfCreationPage(base_page.BasePage):
                 self.res_handler.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
-            self.logger.debug(f"Final shelf cover image path = {final_img_path}")
             self.copy_cover_img(final_img_path)
             done = self.copy_cover_img(final_img_path)
             if not done:

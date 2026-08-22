@@ -358,7 +358,7 @@ class BooksHandler:
         book_id = book_id
 
         if book_id in self.books.keys():
-            self.logger.debug(f"Deleting book with ID '{book_id}'...")
+            self.logger.debug(f"Removing book with ID '{book_id}' from BooksHandler...")
             book_obj: Book = self.books[book_id]
             cover_path = self.get_book_cover_path(book_obj, False)
             if cover_path:
@@ -457,7 +457,7 @@ class BooksHandler:
             )
 
     def delete_shelf(self, id: str):
-        self.logger.debug(f"Deleting shelf with ID : '{id}'...")
+        self.logger.debug(f"Removing shelf with ID : '{id}' from BooksHandler...")
 
         if id in self.shelves.keys():
             shelf = self.shelves[id]
