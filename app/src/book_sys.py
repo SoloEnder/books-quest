@@ -13,7 +13,7 @@ from app.utils import json_file_manager as jfm
 class BooksShelfExistsError(Exception):
     def __init__(self, shelf_id: uuid.UUID | str, msg: str | None = None):
         self.shelf_id = shelf_id
-        self.msg = msg or f"Book shelf with the ID {shelf_id} already exists !"
+        self.msg = msg or f"Shelf with the ID '{shelf_id}' already exists in !"
         super().__init__(self.msg)
 
     def __str__(self):
@@ -33,11 +33,11 @@ class BooksShelfNotFoundError(Exception):
 
 
 class BookNotFoundError(Exception):
-    def __init__(self, book_id: uuid.UUID | str, container, msg: str | None = None):
+    def __init__(self, book_id: uuid.UUID | str, msg: str | None = None):
         self.book_id = book_id
         self.msg = (
             msg
-            or f"Book with ID {book_id} dosen't exists in {container} ! Has been it deleted ?"
+            or f"Book with ID {book_id} dosen't exists in BooksHandler ! Has been it deleted ?"
         )
         super().__init__()
 
@@ -46,11 +46,9 @@ class BookNotFoundError(Exception):
 
 
 class BookExistsError(Exception):
-    def __init__(
-        self, book_id: uuid.UUID | str, container_name: str, msg: str | None = None
-    ):
+    def __init__(self, book_id: uuid.UUID | str, msg: str | None = None):
         self.book_id = book_id
-        self.msg = msg or f"Book with ID {book_id} arleady exists in {container_name} !"
+        self.msg = msg or f"Book with ID {book_id} already exists in BooksHandler !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
