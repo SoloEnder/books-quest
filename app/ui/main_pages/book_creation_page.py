@@ -10,7 +10,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys, langs_handler, resources_handler, settings_handler
 from app.ui import qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools, my_exceptions, utils_funcs
+from app.utils import images_tools, utils_funcs
 
 
 class EditionModeNotEnabled(Exception):
