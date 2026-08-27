@@ -10,7 +10,7 @@ from app.src import resources_handler as res_handler
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page, book_details_page
 from app.ui.main_pages.shelfs_view_page import DefaultShelfWidget, ShelfWidget
-from app.utils import images_tools, my_exceptions, utils_funcs
+from app.utils import images_tools, utils_funcs
 
 
 class UnknownChildrenError(Exception):
@@ -269,7 +269,7 @@ class BasicShelfInfosWidget(ShelfWidget):
             print(self.shelf.str_id())
             self.books_handler.delete_shelf(self.shelf.str_id())
 
-        except my_exceptions.BooksShelfNotFoundError:
+        except book_sys.BooksShelfNotFoundError:
             self.logger.error(
                 f"Unable to delete Shelf (ID={self.shelf.id}) : Shelf not found !"
             )

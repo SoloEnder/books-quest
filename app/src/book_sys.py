@@ -8,7 +8,53 @@ import uuid
 
 from app.src import resources_handler
 from app.utils import json_file_manager as jfm
-from app.utils import my_exceptions
+
+
+class BooksShelfExistsError(Exception):
+    def __init__(self, shelf_id: uuid.UUID | str, msg: str | None = None):
+        self.shelf_id = shelf_id
+        self.msg = msg or f"Book shelf with the ID {shelf_id} already exists !"
+        super().__init__(self.msg)
+
+    def __str__(self):
+        return self.msg
+
+
+class BooksShelfNotFoundError(Exception):
+    def __init__(self, shelf_id: uuid.UUID | str, msg: str | None = None):
+        self.shelf_id = shelf_id
+        self.msg = msg or (
+            f"Book shelf with ID {shelf_id} dosen't exists ! Has been it deleted ?"
+        )
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
+
+
+class BookNotFoundError(Exception):
+    def __init__(self, book_id: uuid.UUID | str, container, msg: str | None = None):
+        self.book_id = book_id
+        self.msg = (
+            msg
+            or f"Book with ID {book_id} dosen't exists in {container} ! Has been it deleted ?"
+        )
+        super().__init__()
+
+    def __str__(self) -> str:
+        return self.msg
+
+
+class BookExistsError(Exception):
+    def __init__(
+        self, book_id: uuid.UUID | str, container_name: str, msg: str | None = None
+    ):
+        self.book_id = book_id
+        self.msg = msg or f"Book with ID {book_id} arleady exists in {container_name} !"
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
 
 
 class DefaultCoverPathDeletion(Exception):
@@ -191,7 +237,7 @@ class Shelf:
             self._books.append(book)
 
         else:
-            my_exceptions.BookExistsError(book.id, f"this Shelf ({self})")
+            BookExistsError(book.id, f"this Shelf ({self})")
 
     def remove_book(self, book: Book):
         """Removes 'book' from this shelf"""
@@ -200,7 +246,7 @@ class Shelf:
             self._books.remove(book)
 
         else:
-            raise my_exceptions.BookNotFoundError(
+            raise BookNotFoundError(
                 book.id,
                 f"Book with (ID={book.id}) is not contained in Shelf (ID={self.id}) !",
             )
@@ -367,7 +413,7 @@ class BooksHandler:
             del self.books[str(book_obj.id)]
 
         else:
-            raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
+            raise BookNotFoundError(book_id, f"BooksHandler ({self})")
 
     def _delete_cover(self, cover_path, check_default: bool = True):
 
@@ -409,9 +455,7 @@ class BooksHandler:
             self.default_shelf.add_book(book_obj)
 
         else:
-            raise my_exceptions.BookExistsError(
-                book_obj.id, f"this BooksHandler ({self})"
-            )
+            raise BookExistsError(book_obj.id, f"this BooksHandler ({self})")
 
     def create_shelf(self, **kwargs) -> Shelf:
         """
@@ -452,7 +496,7 @@ class BooksHandler:
             self.default_shelf.add_child_shelf(shelf)
 
         else:
-            raise my_exceptions.BooksShelfExistsError(
+            raise BooksShelfExistsError(
                 shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !"
             )
 
@@ -472,7 +516,7 @@ class BooksHandler:
             del self.shelves[id]
 
         else:
-            raise my_exceptions.BooksShelfNotFoundError(id)
+            raise BooksShelfNotFoundError(id)
 
     def edit_book(self, book_id: str, new_book: Book):
         self.logger.debug(f"Editing book with id {book_id}...")
@@ -492,7 +536,7 @@ class BooksHandler:
             self.shelves[shelf_id] = new_shelf
 
         else:
-            raise my_exceptions.BooksShelfNotFoundError(shelf_id)
+            raise BooksShelfNotFoundError(shelf_id)
 
     def get_cover_path(self, object: Shelf | Book, return_default: bool = True):
         """
@@ -799,7 +843,7 @@ class BooksHandler:
                 book_obj = self.books[book_id]
 
             except KeyError:
-                raise my_exceptions.BookNotFoundError(book_id, f"BooksHandler ({self})")
+                raise BookNotFoundError(book_id, f"BooksHandler ({self})")
             books_objs[book_id] = book_obj
 
         return books_objs
@@ -812,7 +856,7 @@ class BooksHandler:
                 shelf = self.shelves[id]
 
             except KeyError:
-                raise my_exceptions.BooksShelfNotFoundError(id)
+                raise BooksShelfNotFoundError(id)
 
             else:
                 shelves[id] = shelf

@@ -7,7 +7,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from app.src import book_sys
 from app.ui import my_widgets_pagination_view, qt_signals_handler
 from app.ui.main_pages import base_page
-from app.utils import images_tools, my_exceptions, utils_funcs
+from app.utils import images_tools, utils_funcs
 
 
 class ShelfsViewPage(base_page.BasePage):
@@ -255,7 +255,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
                 self.pages_widgets_handler.delete_widget(self)
                 self.qt_signals_handler.edit_progress_msg.emit(" ")
 
-            except my_exceptions.InvalidWidgetIndexError:
+            except widgets_pagination_view.InvalidWidgetIndexError:
                 self.logger.exception("Unable to delete shelf !")
                 self.qt_signals_handler.notify_sg.emit("error", "", "", "")
                 self.qt_signals_handler.edit_progress_msg.emit(" ")

@@ -1,7 +1,21 @@
 import os
 
+import dicts_paths_handler
+
 from app.src import json_dicts_paths_handler
-from app.utils import my_exceptions
+
+
+class RessBasePathNotFound(Exception):
+    def __init__(self, dict_path, msg: str | None = None):
+        self.dict_path = dict_path
+        self.msg = (
+            msg
+            or f"Unable to make path with dict path '{self.dict_path}' : no valid _base_ key found !"
+        )
+        super().__init__(self.msg)
+
+    def __str__(self) -> str:
+        return self.msg
 
 
 class RessourcesHandler(json_dicts_paths_handler.JSONDictPathHandler):
@@ -25,13 +39,13 @@ class RessourcesHandler(json_dicts_paths_handler.JSONDictPathHandler):
                         ress_path = os.path.join(ress_path, dir_name)
 
                     else:
-                        raise my_exceptions.RessBasePathNotFound(ress_dict_path)
+                        raise RessBasePathNotFound(ress_dict_path)
 
                 else:
                     ress_path = os.path.join(ress_path, current_value)
 
         except KeyError:
-            raise my_exceptions.InvalidDictPathError(ress_dict_path)
+            raise dicts_paths_handler.InvalidDictPathError(ress_dict_path)
 
         else:
             return ress_path
