@@ -1,4 +1,5 @@
 import json
+import logging
 import typing
 
 
@@ -6,6 +7,10 @@ class JSONAPI:
     """
     Supports operations on JSON files
     """
+
+    def __init__(self):
+        self.logger = logging.getLogger(f"{__name__}-JSONAPI")
+        self.logger.info("JSONAPI initialized")
 
     def write(self, filepath: str, data: typing.Any, encoding: str = "utf-8"):
         """
