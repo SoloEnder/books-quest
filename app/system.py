@@ -7,6 +7,7 @@ import webbrowser
 from PySide6 import QtCore, QtWidgets
 
 from app.src import (
+    api,
     book_sys,
     langs_handler,
     resources_handler,
@@ -22,6 +23,7 @@ class AppSystem:
         self.qt_app = qt_app
         self.instance_locker = None
         self.logger = logging.getLogger(__name__)
+        self.api = api.API()
         self.jfm = json_file_manager.JsonFileManager()
         self.res_handler = resources_handler.RessourcesHandler(
             self.jfm, {}, paths.APP_PATH
