@@ -58,7 +58,7 @@ class ResourcesFilesAPI:
         filepath: str,
         data: typing.Any,
         mode: str = "w",
-        encoding: str = "utf-8",
+        encoding: str | None = "utf-8",
         **kwargs,
     ):
         """
@@ -73,7 +73,7 @@ class ResourcesFilesAPI:
         - **kwargs: additionnal arguments to pass to the `open` function
 
         """
-        self.logger.debug(f"Writing in {filepath}...")
+        self.logger.debug(f"Writing in '{filepath}'...")
         if not mode.startswith(("a", "w")):
             raise ValueError(
                 "Opening modes that does not start by 'a' or 'w' are not allowed !"
@@ -113,7 +113,7 @@ class ResourcesFilesAPI:
         self,
         filepath: str,
         mode: str = "r",
-        encoding: str = "utf-8",
+        encoding: str | None = "utf-8",
         reading_length: int = -1,
         **kwargs,
     ) -> typing.Any:
@@ -129,7 +129,7 @@ class ResourcesFilesAPI:
         - **kwargs: additionnal arguments to pass to the `open` function
 
         """
-        self.logger.debug(f"Reading data in {filepath}...")
+        self.logger.debug(f"Reading data in '{filepath}'...")
         if not mode.startswith("r"):
             raise ValueError(
                 "Opening mode that does not start with 'r' are not allowed !"
@@ -142,16 +142,22 @@ class ResourcesFilesAPI:
         with open(filepath, mode=mode, encoding=encoding, **kwargs) as f:
             return f.read(reading_length)
 
-    def delete(self, path: str):
+    def delete(self, path: str, exists_ok: bool = True):
         """
         Delete the element at `path`.
 
         Parameters
         ----------
         - path (str): The path to the element to delete
-
+        - exists_ok (bool=True): If equal to `False`, then `FileNotFoundError` is not raised if the element does not exists
         """
+        if not os.path.exists(path) and not exists_ok:
+            self.logger.debug(
+                f"File or Directory to delete at '{path}' does not exists, but skipping error raising, since `exists_ok=False` "
+            )
+            return
 
+        self.logger.debug(f"Deleting element at {path}...")
         if os.path.isfile(path):
             os.remove(path)
 
@@ -160,6 +166,18 @@ class ResourcesFilesAPI:
 
         else:
             raise FileNotFoundError(path)
+
+    def delete_indexed_file(self, dict_path: str, exists_ok: bool = True):
+        """
+        Delete the indexed element refered by `dict_path`
+
+        Parameters
+        ----------
+        - dict_path (str): The dictionnary path of the element
+        - exists_ok (bool=True): If equal to `False`, then `FileNotFoundError` is not raised if the element does not exists
+        """
+        path = self.get_res(dict_path)
+        return self.delete(path, exists_ok)
 
     def get_res(self, res_dict_path: str):
         """
