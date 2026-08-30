@@ -200,7 +200,7 @@ class ResourcesFilesAPI:
                         res_path = os.path.join(res_path, dir_name)
 
                     else:
-                        raise RessBasePathNotFound(res_dict_path)
+                        raise ResBasePathNotFound(res_dict_path)
 
                 else:
                     res_path = os.path.join(res_path, current_value)
@@ -212,7 +212,7 @@ class ResourcesFilesAPI:
             return res_path
 
 
-class RessBasePathNotFound(Exception):
+class ResBasePathNotFound(Exception):
     def __init__(self, dict_path, msg: str | None = None):
         self.dict_path = dict_path
         self.msg = (
