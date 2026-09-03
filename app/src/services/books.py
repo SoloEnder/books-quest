@@ -1,6 +1,5 @@
 import os
 
-from app.src.apis import res_files
 from app.src.book_sys import (
     Book,
     BooksDict,
@@ -10,11 +9,12 @@ from app.src.book_sys import (
     ShelvesDict,
     ShelvesList,
 )
+from app.src.services import res_files
 from app.utils import paths
 
 
-class BooksAPI:
-    def __init__(self, res_file: res_files.ResourcesFilesAPI):
+class BooksService:
+    def __init__(self, res_file: res_files.ResourcesFilesService):
         self.books_handler = BooksHandler()
         self.res_files_api = res_file
 

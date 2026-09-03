@@ -6,19 +6,19 @@ import typing
 import dicts_paths_handler
 from dicts_paths_handler.dicts_paths_handler import DictsPathsHandler
 
-from app.src.apis import json_api
+from app.src.services import json_service
 
 
-class ResourcesFilesAPI:
+class ResourcesFilesService:
     "Various operations with BooksQuest files and folders"
 
     def __init__(self, base_path: str, indexes_filepath: str):
         self.indexes_filepath = indexes_filepath
         self.base_path = base_path
 
-        self.logger = logging.getLogger(f"{__name__}-ResourcesFilesAPI")
+        self.logger = logging.getLogger(f"{__name__}-ResourcesFiles Service")
         self.dicts_paths_handler = DictsPathsHandler()
-        self.json_api = json_api.JSONAPI()
+        self.json_service = json_service.JSONService()
         self.load_indexes(indexes_filepath)
         self.logger.info("ResourcesFileAPI initialized")
 
@@ -30,7 +30,7 @@ class ResourcesFilesAPI:
         ----------
         filepath (str|None=None): the file from which load the indexes. If not given or None, then `indexes_filepath` attr is used
         """
-        self.dicts_paths_handler.base_dict = self.json_api.read(
+        self.dicts_paths_handler.base_dict = self.json_service.read(
             filepath or self.indexes_filepath
         )
 
@@ -84,7 +84,7 @@ class ResourcesFilesAPI:
 
         if os.path.splitext(filepath)[1] == ".json":
             self.logger.info("File is a JSON file, writing it with JSONAPI")
-            return self.json_api.write(filepath, data)
+            return self.json_service.write(filepath, data)
 
         with open(filepath, mode=mode, encoding=encoding, **kwargs) as f:
             return f.write(data)
@@ -140,7 +140,7 @@ class ResourcesFilesAPI:
 
         if os.path.splitext(filepath)[1] == ".json":
             self.logger.info("File is a JSON file, reading it with JSONAPI")
-            return self.json_api.read(filepath)
+            return self.json_service.read(filepath)
 
         with open(filepath, mode=mode, encoding=encoding, **kwargs) as f:
             return f.read(reading_length)
