@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import enum
+import json
 import logging
 import os
 import pathlib
 import uuid
-
-from app.src import resources_handler
-from app.utils import json_file_manager as jfm
 
 
 class BooksShelfExistsError(Exception):
@@ -382,8 +380,6 @@ IDsList = list[str] | tuple[str, ...] | set[str]
 class BooksHandler:
     def __init__(
         self,
-        jfm: jfm.JsonFileManager,
-        res_handler: resources_handler.RessourcesHandler,
         books: BooksDict | None = None,
         shelves: ShelvesDict | None = None,
     ):
@@ -392,8 +388,6 @@ class BooksHandler:
         """
         self.logger = logging.getLogger(__name__)
         self.books = books or {}
-        self.res_handler = res_handler
-        self.jfm = jfm
         self.shelves = shelves or {}
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
@@ -404,31 +398,11 @@ class BooksHandler:
         if book_id in self.books.keys():
             self.logger.debug(f"Removing book with ID '{book_id}' from BooksHandler...")
             book_obj: Book = self.books[book_id]
-            cover_path = self.get_book_cover_path(book_obj, False)
-            if cover_path:
-                self._delete_cover(cover_path, True)
             book_obj.delete_from_parents()
             del self.books[str(book_obj.id)]
 
         else:
             raise BookNotFoundError(book_id, f"BooksHandler ({self})")
-
-    def _delete_cover(self, cover_path, check_default: bool = True):
-
-        if check_default:
-            if cover_path in (
-                self.res_handler.get_res("assets.defaults_covers.book"),
-                self.res_handler.get_res("assets.defaults_covers.shelf"),
-            ):
-                raise DefaultCoverPathDeletion(cover_path)
-
-        if os.path.exists(cover_path):
-            pathlib.Path(cover_path).unlink()
-
-        else:
-            raise FileNotFoundError(
-                f"Counldn't delete cover at {cover_path} : File not found !"
-            )
 
     def create_book(self, **kwargs) -> Book:
         """
@@ -507,9 +481,6 @@ class BooksHandler:
             shelf.remove_all_books()
             shelf.remove_all_parents()
             shelf.remove_all_child()
-            cover_path = self.get_shelf_cover_path(shelf, False)
-            if cover_path:
-                self._delete_cover(cover_path)
 
             del self.shelves[id]
 
@@ -535,66 +506,6 @@ class BooksHandler:
 
         else:
             raise BooksShelfNotFoundError(shelf_id)
-
-    def get_cover_path(self, object: Shelf | Book, return_default: bool = True):
-        """
-        Constructs and returns the path to the `object` (an `Shelf`/`Book` instance) cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Shelf|book_sys.Book): the shelf/book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        if isinstance(object, Book):
-            excepted_path = (
-                os.path.join(
-                    self.res_handler.get_res("data.user.books.covers"),
-                    object.str_id(),
-                )
-                + ".png"
-            )
-
-        elif isinstance(object, Shelf):
-            excepted_path = (
-                os.path.join(
-                    self.res_handler.get_res("data.user.bookshelves.covers"),
-                    object.str_id(),
-                )
-                + ".png"
-            )
-
-        else:
-            raise TypeError(f"Could not get cover for object of type {type(object)}")
-
-        if os.path.exists(excepted_path):
-            return excepted_path
-
-        if return_default:
-            return self.res_handler.get_res("assets.defaults_covers.shelf")
-
-    def get_shelf_cover_path(
-        self, shelf: Shelf, return_default: bool = True
-    ) -> str | None:
-        """
-        Constructs and returns the path to the `shelf` cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Shelf): the shelf object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        return self.get_cover_path(shelf, return_default)
-
-    def get_book_cover_path(self, book: Book, return_default: bool = True):
-        """
-        Constructs and returns the path to the `book` cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Book): the book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        return self.get_cover_path(book, return_default)
 
     def get_books(self, **kwargs):
         """
@@ -721,12 +632,14 @@ class BooksHandler:
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
-        self.jfm.write_json(filepath, data, catch_error=True)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f)
 
     def load_books(self, filepath: str):
         self.logger.info(f"Loading books data from {filepath}...")
 
-        data = self.jfm.read_json(filepath, catch_error=False)
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
         if data:
             for book_data in data:
@@ -764,7 +677,8 @@ class BooksHandler:
             shelf_data = self._remove_empty_items(shelf_data)
             data.append(shelf_data)
 
-        self.jfm.write_json(filepath=filepath, data=data, catch_error=False)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f)
 
     def _remove_empty_items(
         self, data: dict, ignore_keys: list | None = None, ignore_int_float: bool = True
@@ -795,7 +709,8 @@ class BooksHandler:
         """
         self.logger.debug(f"Loading shelves data from  {filepath}...")
 
-        data: list = self.jfm.read_json(filepath)
+        with open(filepath, "r") as f:
+            data: list = json.load(f)
 
         if data:
             deferred_adoption_data: dict[str, list[str]] = {}
