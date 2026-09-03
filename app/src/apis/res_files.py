@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import typing
 
 import dicts_paths_handler
@@ -9,6 +10,8 @@ from app.src.apis import json_api
 
 
 class ResourcesFilesAPI:
+    "Various operations with BooksQuest files and folders"
+
     def __init__(self, base_path: str, indexes_filepath: str):
         self.indexes_filepath = indexes_filepath
         self.base_path = base_path
@@ -210,6 +213,28 @@ class ResourcesFilesAPI:
 
         else:
             return res_path
+
+    def empty_tmp_folder(self):
+        """
+        Create the tmp directory if it does not exists, or erase its content otherwise
+        """
+        tmp_path = self.get_res("tmp")
+        tmp_path = pathlib.Path(tmp_path)
+
+        if not tmp_path.exists():
+            self.logger.warning(
+                "Temporary directory not found, attempting to make it..."
+            )
+            tmp_path.mkdir()
+
+        for element in tmp_path.iterdir():
+            try:
+                if element.is_file():
+                    element.unlink()
+            except Exception:
+                self.logger.exception(
+                    f"Unable to destroy file '{element}' in the temporary folder !"
+                )
 
 
 class ResBasePathNotFound(Exception):
