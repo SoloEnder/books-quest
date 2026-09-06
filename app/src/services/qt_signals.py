@@ -48,34 +48,63 @@ class QtSignalsService(QtCore.QObject):
 
     def emit_signal(self, signal_name: str, *args):
         """
-        Emit the signal named `signal_name`
+        Emit the signal named `signal_name`.
+        If the signal is not enabled (e.g. it is blacklisted in ENABLED mode or not in the whitelist in DISABLED mode), then he is not emited
 
         Parameters
         ----------
         - signal_name: the name of the signal
         - *args: the arguments to pass to the signal
         """
-
-        try:
-            signal = getattr(
-                self, signal_name
-            )  # Getting signal from the attribute (look below the class definition)
-
-        # The signal is not found
-        except AttributeError:
+        if not self.has_signal(signal_name):
             raise UnknownSignalError(signal_name)
 
+        signal = getattr(self, signal_name)
+
+        if self.signal_enabled(signal_name):
+            self.logger.debug(
+                f"Trying to emit '{signal_name}', but signal is not enabled !"
+            )
+            return signal.emit(*args)
+
+    def has_signal(self, signal_name: str) -> bool:
+        """
+        Checks whether `signal_name` exists
+
+        Parameters
+        ----------
+        - signal_name (str): the name of the signal to check
+
+        Returns
+        -------
+        - bool: whether the signal exists or not
+        """
+        if not getattr(self, signal_name, None):
+            return False
+
+        return True
+
+    def signal_enabled(self, signal_name: str) -> bool:
+        """
+        Checks if `signal_name` is currently enabled or not
+
+        Parameters
+        ----------
+        - signal_name (str): the name of the signal to check
+        """
         if (
             self.state == QtSignalsServiceState.ENABLED
-            and signal_name not in self.blacklist
+            and signal_name in self.blacklist
         ):
-            return signal.emit(*args)
+            return False
 
         if (
             self.state == QtSignalsServiceState.DISABLED
-            and signal_name in self.whitelist
+            and signal_name not in self.whitelist
         ):
-            return signal.emit(*args)
+            return False
+
+        return True
 
     def disable(self, exceptions: list[str]):
         """Disable the `QtSignalsService`, meaning that any emition request with `emit_signal` methods will be ignored
