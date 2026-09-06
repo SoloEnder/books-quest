@@ -1,9 +1,7 @@
 import logging
 from enum import Enum, auto
 
-from PySide6 import QtCore, QtGui, QtWidgets
-
-from app.src.book_sys import Book, Shelf
+from PySide6 import QtCore, QtWidgets
 
 
 class UnknownSignalError(Exception):
