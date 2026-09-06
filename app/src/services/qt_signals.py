@@ -1,4 +1,5 @@
 import logging
+import typing
 from enum import Enum, auto
 
 from PySide6 import QtCore, QtWidgets
@@ -105,6 +106,20 @@ class QtSignalsService(QtCore.QObject):
             return False
 
         return True
+
+    def connect_to_signal(self, signal_name: str, func):
+        """
+        Connects `signal_name` to `func`
+        `func` will be called everytime the signal will be emitted
+
+        Parameters
+        ----------
+        - signal_name (str): The name of the signal
+        - func (a function): The function object to connect
+        """
+        if self.has_signal(signal_name):
+            signal = getattr(self, signal_name)
+            signal.connect(func)
 
     def disable(self, exceptions: list[str]):
         """Disable the `QtSignalsService`, meaning that any emition request with `emit_signal` methods will be ignored
