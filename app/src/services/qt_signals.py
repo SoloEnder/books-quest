@@ -46,6 +46,7 @@ class QtSignalsService(QtCore.QObject):
         self.state = QtSignalsServiceState.ENABLED
         self.whitelist = []  # Signals that are allowed to be emitted in DISABLED mode
         self.blacklist = []  # Signals that are not allowed to be emitted in ENABLED mode
+        self.logger.info("QtSignals Service initialized")
 
     def emit_signal(self, signal_name: str, *args):
         """
