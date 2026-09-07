@@ -6,8 +6,7 @@ from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, langs_handler
-from app.ui import qt_signals_handler
+from app.src import api, book_sys
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -28,23 +27,15 @@ class ShelfCreationPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        books_handler: book_sys.BooksHandler,
-        res_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler,
-        langs_handler,
+        api: api.API,
         **kwargs,
     ):
         super().__init__(
             parent,
-            res_handler,
-            settings_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
         )
         self.PAGE_NAME = "SHELF_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-        self.books_handler = books_handler
         self.modes = ("edition", "creation")
         self._current_mode = kwargs.get("mode")
         self.variables_kw = {**kwargs}
@@ -76,7 +67,7 @@ class ShelfCreationPage(base_page.BasePage):
                 )
 
         # Shelf cover
-        self.default_shelf_cover = self.res_handler.get_res(
+        self.default_shelf_cover = self.res_files.get_res(
             "assets.defaults_covers.shelf"
         )
         self.current_shelf_cover = self.default_shelf_cover
@@ -84,33 +75,35 @@ class ShelfCreationPage(base_page.BasePage):
         self.shelf_cover_lb = QtWidgets.QLabel()
         self.shelf_cover_lb.setPixmap(self.shelf_cover_pm)
         self.cover_selection_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.edit_cover")
+            self.langs.tr("shared.actions.edit_cover")
         )
         self.cover_selection_b_ico = images_tools.get_svg(
-            self.res_handler.get_res("assets.icons.edit")
+            self.res_files.get_res("assets.icons.edit")
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
         self.cover_selection_b.clicked.connect(self.set_shelf_cover)
         self.restore_default_cover_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.restore_default_cover")
+            self.langs.tr("shared.actions.restore_default_cover")
         )
         self.restore_default_cover_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.remove_img"))
+            images_tools.get_svg(self.res_files.get_res("assets.icons.remove_img"))
         )
         self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
         # Shelf name input widget
-        self.title_lb = QtWidgets.QLabel(self.langs_handler.tr("shelf.infos.title"))
+        self.title_lb = QtWidgets.QLabel(self.langs.tr("shelf.infos.title"))
         self.title_e = QtWidgets.QLineEdit()
         self.title_e.setMinimumWidth(300)
 
         # Books selection widgets
         self.books_selection_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shelf.actions.select_books")
+            self.langs.tr("shelf.actions.select_books")
         )
-        self.draw_children_tree(self.books_handler.shelves, self.books_handler.books)
+        self.draw_children_tree(
+            self.books.books_handler.shelves, self.books.books_handler.books
+        )
         self.book_research_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("shared.actions.search.book")
+            self.langs.tr("shared.actions.search.book")
         )
         self.book_research_e = QtWidgets.QLineEdit()
         self.book_research_e.setMinimumWidth(300)
@@ -118,21 +111,19 @@ class ShelfCreationPage(base_page.BasePage):
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
         self.cancel_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.actions.cancel"),
+            self.langs.tr("shared.actions.cancel"),
             QtWidgets.QMessageBox.ButtonRole.RejectRole,
         )
         self.rename_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.actions.rename"),
+            self.langs.tr("shared.actions.rename"),
             QtWidgets.QMessageBox.ButtonRole.AcceptRole,
         )
-        self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
+        self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
         # Confirm widgets
-        self.confirm_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.done")
-        )
+        self.confirm_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.done"))
         self.confirm_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.done"))
+            images_tools.get_svg(self.res_files.get_res("assets.icons.done"))
         )
         self.confirm_b.clicked.connect(self.create_shelf)
 
@@ -217,16 +208,14 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Switch the page to shelf creation mode
         """
-        self.qt_signals_handler.switch_page_sg.emit(
-            "SHELF_CREATION_MODE", True, {"mode": "edition"}
+        self.qt_signals.emit_signal(
+            "switch_page_sg", "SHELF_CREATION_MODE", True, {"mode": "edition"}
         )
 
     def edition_mode(self):
         if self.shelf:
             # Replace the displayed cover by the shelf's cover
-            shelf_cover_path = self.books_handler.get_shelf_cover_path(
-                self.shelf, False
-            )
+            shelf_cover_path = self.books.get_shelf_cover_path(self.shelf, False)
             if shelf_cover_path:
                 self.current_shelf_cover = shelf_cover_path
                 self.set_cover_lb_pixmap(self.current_shelf_cover)
@@ -246,7 +235,7 @@ class ShelfCreationPage(base_page.BasePage):
             img_path = infos[0]
             final_infos = images_tools.prepare_image(
                 img_path,
-                os.path.join(self.res_handler.get_res("tmp"), "shelf_cover.png"),
+                os.path.join(self.res_files.get_res("tmp"), "shelf_cover.png"),
             )
             self.current_shelf_cover = final_infos[0]
             self.set_cover_lb_pixmap(self.current_shelf_cover)
@@ -260,10 +249,10 @@ class ShelfCreationPage(base_page.BasePage):
         Set the cover image to the default value
         """
         if self.current_mode == "edition":
-            shelf_cover = self.books_handler.get_shelf_cover_path(self.shelf, False)
+            shelf_cover = self.books.get_shelf_cover_path(self.shelf, False)
 
             if shelf_cover:
-                self.books_handler._delete_cover(shelf_cover)
+                self.res_files.delete(shelf_cover)
         self.current_shelf_cover = self.default_shelf_cover
         self.set_cover_lb_pixmap(self.current_shelf_cover)
 
@@ -285,10 +274,10 @@ class ShelfCreationPage(base_page.BasePage):
         self.children_tree_model = QtGui.QStandardItemModel()
         self.children_tree_model.setHorizontalHeaderLabels(
             (
-                self.langs_handler.tr("shared.infos.type"),
-                self.langs_handler.tr("shared.infos.title"),
-                self.langs_handler.tr("shared.infos.author"),
-                self.langs_handler.tr("shared.infos.edition"),
+                self.langs.tr("shared.infos.type"),
+                self.langs.tr("shared.infos.title"),
+                self.langs.tr("shared.infos.author"),
+                self.langs.tr("shared.infos.edition"),
             )
         )
         self.children_tree.setModel(self.children_tree_model)
@@ -316,11 +305,9 @@ class ShelfCreationPage(base_page.BasePage):
             object_edition_item = QtGui.QStandardItem("N/A")
 
             if isinstance(object, book_sys.Book):
-                object_type_item.setText(
-                    self.langs_handler.tr("book.infos.object_type")
-                )
+                object_type_item.setText(self.langs.tr("book.infos.object_type"))
                 object_type_item.setAccessibleText(
-                    self.langs_handler.tr("book.infos.object_type")
+                    self.langs.tr("book.infos.object_type")
                 )
                 object_author_item.setText(
                     object.authors if object.authors else "Unknown"
@@ -330,11 +317,9 @@ class ShelfCreationPage(base_page.BasePage):
                 )
 
             elif isinstance(object, book_sys.Shelf):
-                object_type_item.setText(
-                    self.langs_handler.tr("shelf.infos.object_type")
-                )
+                object_type_item.setText(self.langs.tr("shelf.infos.object_type"))
                 object_type_item.setAccessibleText(
-                    self.langs_handler.tr("shelf.infos.object_type")
+                    self.langs.tr("shelf.infos.object_type")
                 )
             self.children_tree_model.appendRow(
                 (object_type_item, title_item, object_author_item, object_edition_item)
@@ -358,11 +343,13 @@ class ShelfCreationPage(base_page.BasePage):
         matches = []
 
         if self.current_mode == "creation":
-            matches = self.books_handler.get_shelfs(title=(title, True, False))
+            matches = self.books.books_handler.get_shelfs(title=(title, True, False))
 
         elif self.current_mode == "edition" and self.shelf:
             if self.shelf.title != title:
-                matches = self.books_handler.get_shelfs(title=(title, True, False))
+                matches = self.books.books_handler.get_shelfs(
+                    title=(title, True, False)
+                )
 
         return matches
 
@@ -377,10 +364,11 @@ class ShelfCreationPage(base_page.BasePage):
 
         if (
             not shelf_title.lower()
-            or shelf_title.lower() == self.books_handler.default_shelf.title.lower()
+            or shelf_title.lower()
+            == self.books.books_handler.default_shelf.title.lower()
         ):  # type: ignore
-            self.qt_signals_handler.notify_sg.emit(
-                "error", "", self.langs_handler.tr("shelf.msg.invalid_title"), ""
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "", self.langs.tr("shelf.msg.invalid_title"), ""
             )
             return
 
@@ -390,7 +378,7 @@ class ShelfCreationPage(base_page.BasePage):
             title_suffix = utils_funcs.get_title_suffix(matches)
 
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
+                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
             )
             self.existence_msgbox.exec()
 
@@ -412,7 +400,7 @@ class ShelfCreationPage(base_page.BasePage):
 
         if not self.is_original_cover():
             final_img_path = os.path.join(
-                self.res_handler.get_res("data.user.bookshelves.covers"),
+                self.res_files.get_res("data.user.bookshelves.covers"),
                 f"{str(id)}.png",
             )
             self.copy_cover_img(final_img_path)
@@ -456,7 +444,7 @@ class ShelfCreationPage(base_page.BasePage):
             self.logger.exception(
                 f"Unable to move cover file from tmp path to '{dest_path}' due to error : "
             )
-            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+            self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
 
         else:
             return True
@@ -465,8 +453,8 @@ class ShelfCreationPage(base_page.BasePage):
         query = self.book_research_e.text()
 
         if query:
-            shelves_matches = self.books_handler.get_shelfs(title=(query, False))
-            books_matches = self.books_handler.get_books(title=(query, False))
+            shelves_matches = self.books.books_handler.get_shelfs(title=(query, False))
+            books_matches = self.books.books_handler.get_books(title=(query, False))
 
             shelves_matches_obj_with_id = {}
             books_matches_obj_with_id = {}
@@ -482,7 +470,7 @@ class ShelfCreationPage(base_page.BasePage):
 
         else:
             self.draw_children_tree(
-                self.books_handler.shelves, self.books_handler.books
+                self.books.books_handler.shelves, self.books.books_handler.books
             )
 
     def create_shelf(self):
@@ -490,21 +478,23 @@ class ShelfCreationPage(base_page.BasePage):
 
         if shelf_infos:
             if self.current_mode == "creation":
-                self.books_handler.new_shelf(**shelf_infos)
-                self.qt_signals_handler.shelf_added_sg.emit(shelf_infos["id"])
+                self.books.books_handler.new_shelf(**shelf_infos)
+                self.qt_signals.emit_signal("shelf_added_sg", shelf_infos["id"])
                 QtWidgets.QMessageBox.information(
-                    self, "Success", self.langs_handler.tr("shelf.msg.creation_success")
+                    self, "Success", self.langs.tr("shelf.msg.creation_success")
                 )
-                self.qt_signals_handler.refresh_current_page_sg.emit()
+                self.qt_signals.emit_signal("refresh_current_page_sg")
 
             elif self.current_mode == "edition":
                 if self.shelf:
-                    edited_shelf = self.books_handler.create_shelf(**shelf_infos)
-                    self.books_handler.edit_shelf(self.shelf.str_id(), edited_shelf)
-                    self.qt_signals_handler.shelf_edited_sg.emit(self.shelf.id)
+                    edited_shelf = self.books.books_handler.create_shelf(**shelf_infos)
+                    self.books.books_handler.edit_shelf(
+                        self.shelf.str_id(), edited_shelf
+                    )
+                    self.qt_signals.emit_signal("shelf_edited_sg", self.shelf.id)
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
-                        self.langs_handler.tr("shelf.msg.edition_success"),
+                        self.langs.tr("shelf.msg.edition_success"),
                     )
-                self.qt_signals_handler.close_page_sg.emit()
+                self.qt_signals.emit_signal("close_page_sg")
