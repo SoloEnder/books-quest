@@ -1,3 +1,4 @@
+import functools
 import logging
 
 from dicts_paths_handler.dicts_paths_handler import DictsPathsHandler
@@ -59,6 +60,7 @@ class LangsService:
         if send_refresh_request:
             self.qt_signals.emit_signal("refresh_ui_sg")
 
+    @functools.cache  # Warning ingored, because these are singletons, instancied only at startup
     def tr(self, lang_dict_path: str, **kwargs):
         text = self.dicts_paths_handler.get_value(lang_dict_path)
 
@@ -68,4 +70,4 @@ class LangsService:
 
             return text
 
-        return str(None)
+        return ""
