@@ -15,6 +15,7 @@ class BasePage(QtWidgets.QWidget):
         """
         # Assigning arguments
         self.api = api
+        self.books = self.api.books
         self.res_files = self.api.res_files
         self.settings = self.api.settings
         self.langs = self.api.langs
