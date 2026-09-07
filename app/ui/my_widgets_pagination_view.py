@@ -3,8 +3,7 @@ import logging
 import widgets_pagination_view
 from PySide6 import QtGui, QtWidgets
 
-from app.src import langs_handler, resources_handler
-from app.ui import qt_signals_handler
+from app.src import api
 from app.utils import utils_funcs
 
 
@@ -12,9 +11,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        res_handler: resources_handler.RessourcesHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        langs_handler: langs_handler.LangsHandler,
+        api: api.API,
         max_loadables_pages_count: int,
         widgets_by_page_count: int,
         widgets: widgets_pagination_view.InPageWidgetsList,
@@ -30,17 +27,18 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
         )
         self.logger = logging.getLogger(__name__ + "WidgetsPaginationView")
         self.logger.setLevel(logging.INFO)
-        self.res_handler = res_handler
-        self.langs_handler = langs_handler
-        self.qt_qignals_handler = qt_signals_handler
+        self.api = api
+        self.res_files = self.api.res_files
+        self.langs = self.api.langs
+        self.qt_qignals = self.api.qt_signals
         self.redundant_lang_path = "my_widgets_pagination_view"
-        self.jump_to_page_lb.setText(self.langs_handler.tr("shared.actions.go_to"))
+        self.jump_to_page_lb.setText(self.langs.tr("shared.actions.go_to"))
         self.nothing_to_show_page = NothingToShowPage(
-            self, self.langs_handler.tr("shared.msg.nothing_to_show")
+            self, self.langs.tr("shared.msg.nothing_to_show")
         )
         self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_res("assets.qss.widgets_pagination_view"),
+            self.res_files.get_res("assets.qss.widgets_pagination_view"),
             widget=self,
             logger=self.logger,
         )
@@ -78,10 +76,11 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             super()._jump_to_page(given_input)
 
         except ValueError:
-            self.qt_qignals_handler.notify_sg.emit(
+            self.qt_qignals.emit_signal(
+                "notify_sg",
                 "error",
                 "Page not found",
-                self.langs_handler.tr("shared.msg.invalid_page_index"),
+                self.langs.tr("shared.msg.invalid_page_index"),
                 "",
             )
 
