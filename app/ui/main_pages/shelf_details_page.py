@@ -1,16 +1,13 @@
 import logging
-import os
 
 import shiboken6
-import widgets_pagination_view
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, langs_handler
-from app.src import resources_handler as res_handler
-from app.ui import my_widgets_pagination_view, qt_signals_handler
+from app.src import api, book_sys
+from app.ui import my_widgets_pagination_view
 from app.ui.main_pages import base_page, book_details_page
 from app.ui.main_pages.shelfs_view_page import DefaultShelfWidget, ShelfWidget
-from app.utils import images_tools, utils_funcs
+from app.utils import utils_funcs
 
 
 class UnknownChildrenError(Exception):
@@ -30,19 +27,12 @@ class ShelfDetailsPage(base_page.BasePage):
         self,
         parent: QtWidgets.QWidget | None,
         shelf: book_sys.Shelf,
-        books_handler: book_sys.BooksHandler,
-        res_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler,
-        langs_handler,
+        api: api.API,
     ):
 
-        super().__init__(
-            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
-        )
+        super().__init__(parent, api)
         self.PAGE_NAME = "SHELF_DETAILS_PAGE"
         self.shelf = shelf
-        self.books_handler = books_handler
         self.variables_kw = {"shelf": self.shelf}
 
         # logger
@@ -54,36 +44,25 @@ class ShelfDetailsPage(base_page.BasePage):
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_res("assets.qss.shelf_details_page"),
+            self.res_files.get_res("assets.qss.shelf_details_page"),
             widget=self,
             logger=self.logger,
         )
-        if self.shelf != self.books_handler.default_shelf:
+        if self.shelf != self.books.books_handler.default_shelf:
             self.shelf_basic_infos_w = BasicShelfInfosWidget(
                 self.shelf,
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.langs_handler,
+                self.api,
             )
 
         else:
-            self.shelf_basic_infos_w = DefaultShelfWidget(
-                self.shelf,
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.langs_handler,
-            )
+            self.shelf_basic_infos_w = DefaultShelfWidget(self.shelf, self.api)
         self.shelf_basic_infos_w.sub_widget.view_b.setVisible(False)
         self.shelf_content_widgets = []
         self.research_result_widgets = []
         self.search_le = QtWidgets.QLineEdit()
         self.search_le.setProperty("role", "SearchField")
         self.search_le.setObjectName("SearchInShelfField")
-        self.search_le.setPlaceholderText(
-            self.langs_handler.tr("shared.actions.search.base")
-        )
+        self.search_le.setPlaceholderText(self.langs.tr("shared.actions.search.base"))
         self.search_le.setSizePolicy(*self.fix_min_exp_sp)
         self.search_le.setMinimumWidth(200)
         self.search_le.setClearButtonEnabled(True)
@@ -96,9 +75,7 @@ class ShelfDetailsPage(base_page.BasePage):
         self.widgets_pagination_view_handler = (
             my_widgets_pagination_view.MyWidgetsPaginationView(
                 parent=self,
-                res_handler=self.res_handler,
-                qt_signals_handler=self.qt_signals_handler,
-                langs_handler=self.langs_handler,
+                api=self.api,
                 max_loadables_pages_count=5,
                 widgets_by_page_count=10,
                 widgets=[],
@@ -108,22 +85,22 @@ class ShelfDetailsPage(base_page.BasePage):
         self.sep.setFrameShape(QtWidgets.QFrame.Shape.VLine)
         self.widgets_pagination_view_handler.setObjectName("ShelfContentViewer")
         self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-            self.langs_handler.tr("shared.msg.nothing_to_show")
+            self.langs.tr("shared.msg.nothing_to_show")
         )
         self.add_book_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.book_creation")
+            self.langs.tr("shared.actions.book_creation")
         )
         self.add_book_b.clicked.connect(
-            lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "BOOK_CREATION_PAGE", True, {}
+            lambda: self.qt_signals.emit_signal(
+                "switch_page_sg", "BOOK_CREATION_PAGE", True, {}
             )
         )
         self.add_shelf_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.shelf_creation")
+            self.langs.tr("shared.actions.shelf_creation")
         )
         self.add_shelf_b.clicked.connect(
-            lambda: self.qt_signals_handler.switch_page_sg.emit(
-                "SHELF_CREATION_PAGE", True, {"mode": "creation"}
+            lambda: self.qt_signals.emit_signal(
+                "switch_page_sg", "SHELF_CREATION_PAGE", True, {"mode": "creation"}
             )
         )
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
@@ -160,19 +137,13 @@ class ShelfDetailsPage(base_page.BasePage):
             if isinstance(object, book_sys.Book):
                 widget = book_details_page.BookWidget(
                     object,
-                    self.books_handler,
-                    self.res_handler,
-                    self.langs_handler,
-                    self.qt_signals_handler,
+                    self.api,
                 )
 
             if isinstance(object, book_sys.Shelf):
                 widget = ShelfWidget(
                     object,
-                    self.books_handler,
-                    self.res_handler,
-                    self.qt_signals_handler,
-                    self.langs_handler,
+                    self.api,
                 )
             children_widgets.append(widget)
 
@@ -194,16 +165,16 @@ class ShelfDetailsPage(base_page.BasePage):
         if given_input:
             # Editing the message displayed on the nothing_to_show page
             self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-                self.langs_handler.tr("shared.msg.no_search_result")
+                self.langs.tr("shared.msg.no_search_result")
             )
 
-            self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.msg.search_in_progress")
+            self.qt_signals.emit_signal(
+                "edit_progress_msg", self.langs.tr("shared.msg.search_in_progress")
             )
-            books_matches = self.books_handler.get_obj(
+            books_matches = self.books.books_handler.get_obj(
                 self.shelf._books, title=(given_input, False, False)
             )
-            shelves_matches = self.books_handler.get_obj(
+            shelves_matches = self.books.books_handler.get_obj(
                 self.shelf._children_shelves, title=(given_input, False, False)
             )
             self.logger.info(
@@ -220,7 +191,7 @@ class ShelfDetailsPage(base_page.BasePage):
 
             else:
                 self.widgets_pagination_view_handler.widgets = []
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
 
     @QtCore.Slot()
     def exit_search(self):
@@ -241,17 +212,17 @@ class ShelfDetailsPage(base_page.BasePage):
 
             self.research_result_widgets.clear()
             self.widgets_pagination_view_handler.nothing_to_show_page.edit_label_text(
-                self.langs_handler.tr("shelf.msg.empty_shelf")
+                self.langs.tr("shelf.msg.empty_shelf")
             )
 
 
 class BasicShelfInfosWidget(ShelfWidget):
     def __init__(
-        self, shelf, books_handler, res_handler, qt_signals_handler, langs_handler
+        self,
+        shelf: book_sys.Shelf,
+        api: api.API,
     ):
-        super().__init__(
-            shelf, books_handler, res_handler, qt_signals_handler, langs_handler
-        )
+        super().__init__(shelf, api)
         self.sub_widget.delete_b.clicked.disconnect(self.delete_shelf)
         self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
         self.sub_widget.view_b.hide()
@@ -261,30 +232,30 @@ class BasicShelfInfosWidget(ShelfWidget):
         """
         An override of the `delete_shelf` method, which do basically the same, without deleting this widget from the widgets pagination handler, since there is *no* pagination handler
         """
-        self.qt_signals_handler.edit_progress_msg.emit(
-            self.langs_handler.tr("shelf.msg.shelf_deletion", count=1)
+        self.qt_signals.emit_signal(
+            "edit_progress_msg", self.langs.tr("shelf.msg.shelf_deletion", count=1)
         )
         self.logger.error(f"Deleting 1 Shelf (ID={self.shelf.id})...")
         try:
             print(self.shelf.str_id())
-            self.books_handler.delete_shelf(self.shelf.str_id())
+            self.books.books_handler.delete_shelf(self.shelf.str_id())
 
         except book_sys.BooksShelfNotFoundError:
             self.logger.error(
                 f"Unable to delete Shelf (ID={self.shelf.id}) : Shelf not found !"
             )
-            self.qt_signals_handler.notify_sg.emit(
-                "error", "", self.langs_handler.tr("shelf.msg.shelf_not_found"), ""
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "", self.langs.tr("shelf.msg.shelf_not_found"), ""
             )
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
 
         except Exception:
             self.logger.exception(
                 f"Unable to delete Shelf (ID={self.shelf.id}) : due to the following exception : "
             )
-            self.qt_signals_handler.notify_sg.emit("error", "", "", "")
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
 
         else:
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
-            self.qt_signals_handler.close_page_sg.emit()
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
+            self.qt_signals.emit_signal("close_page_sg")
