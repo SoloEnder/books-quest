@@ -1,5 +1,7 @@
 import logging
 
+from dicts_paths_handler.dicts_paths_handler import DictsPathsHandler
+
 from app.src.services import qt_signals, res_files, settings
 
 
@@ -29,6 +31,7 @@ class LangsService:
         self.qt_signals = qt_signals
 
         self.logger = logging.getLogger(f"{__name__}-LangsService")
+        self.dicts_paths_handler = DictsPathsHandler()
         self.logger.info("Settings Service initialized")
 
     def set_language(self, language: str, send_refresh_request: bool = True):
@@ -49,6 +52,20 @@ class LangsService:
             raise UnsupportedLanguageError(language)
 
         self.settings.set_setting_value("general.appearance.language", language)
+        self.dicts_paths_handler.base_dict = self.res_files.read_indexed_file(
+            f"assets.langs.{language}"
+        )  # Loading the language file
 
         if send_refresh_request:
             self.qt_signals.emit_signal("refresh_ui_sg")
+
+    def tr(self, lang_dict_path: str, **kwargs):
+        text = self.dicts_paths_handler.get_value(lang_dict_path)
+
+        if isinstance(text, str):
+            for kwarg, value in kwargs.items():
+                text = text.replace(f"/f:<{kwarg}>/f", str(value))
+
+            return text
+
+        return str(None)
