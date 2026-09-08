@@ -13,15 +13,20 @@ class BooksService:
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
     def get_cover_path(
-        self, object: book_sys.Shelf | book_sys.Book, return_default: bool = True
-    ) -> str:
+        self,
+        object: book_sys.Shelf | book_sys.Book,
+        return_default: bool = True,
+        raise_file_not_found: bool = False,
+    ) -> str | None:
         """
         Constructs and returns the path to the `object` (an `Shelf`/`Book` instance) cover file.
 
         Parameters
         ----------
-        shelf (book_sys.Shelf|book_sys.Book): the shelf/book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        - shelf (book_sys.Shelf|book_sys.Book): the shelf/book object
+        - return_default (bool=True): whether to return the default cover path if the constructed path does not exists
+        - raise_file_not_found (bool): whether to raise `FileNotFoundError` instead of returning `None` if the constructed path does not exists and `return_default=False`
+        NOTE : `return_default` has always priority over `raise_file_not_found`
         """
         if isinstance(object, book_sys.Book):
             excepted_path = (
@@ -48,14 +53,20 @@ class BooksService:
             if return_default:
                 return self.res_files_api.get_res("assets.defaults_covers.shelf")
 
-            raise FileNotFoundError(
-                f"No cover file found for Book/Shelf (ID={object.str_id()}) at '{excepted_path}' !"
-            )
+            if raise_file_not_found:
+                raise FileNotFoundError(
+                    f"No cover file found for Book/Shelf (ID={object.str_id()}) at '{excepted_path}' !"
+                )
+
+            return None
 
         return excepted_path
 
     def get_shelf_cover_path(
-        self, shelf: book_sys.Shelf, return_default: bool = True
+        self,
+        shelf: book_sys.Shelf,
+        return_default: bool = True,
+        check_existence: bool = True,
     ) -> str | None:
         """
         Constructs and returns the path to the `shelf` cover file.
@@ -80,8 +91,13 @@ class BooksService:
 
     def delete_book(self, book: book_sys.Book):
         self.books_handler.delete_book(book.id)
-        book_cover_path = self.get_book_cover_path(book, return_default=True)
-        self.res_files_api.delete(book_cover_path)
+        book_cover_path = self.get_book_cover_path(book, return_default=False)
+
+        if book_cover_path:
+            self.res_files_api.delete(book_cover_path)
+            return
+
+        self.logger.warning(f"Could not find cover for book (ID={book.id})")
 
     def delete_book_with_id(self, book_id: str):
         """Permantely removes a book and all its informations"""
@@ -105,12 +121,16 @@ class BooksService:
         # Delete cover path
         cover_path = self.get_shelf_cover_path(shelf, return_default=False)
 
-        if cover_path:
-            self.logger.debug(f"Deleting cover of shelf (ID={shelf.id}")
-            self.res_files_api.delete(cover_path)
-
+        shelf_id = shelf.id
         if del_ref:
             del shelf
+
+        if cover_path:
+            self.logger.debug(f"Deleting cover of shelf (ID={shelf_id}")
+            self.res_files_api.delete(cover_path)
+            return
+
+        self.logger.warning(f"Could not find cover file for shelf (ID={shelf_id}")
 
     def delete_shelf_with_id(self, shelf_id: str, del_ref: bool = True):
         """
