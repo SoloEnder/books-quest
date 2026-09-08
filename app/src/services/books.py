@@ -89,24 +89,52 @@ class BooksService:
         """
         return self.get_cover_path(book, return_default)
 
-    def delete_book(self, book: book_sys.Book):
+    def delete_book(self, book: book_sys.Book, del_ref: bool = True):
+        """
+        Remove `book` and all its data
+
+        Parameters
+        ----------
+        - book (Book) the book to delete
+        - del_ref (bool=True): whether to delete the reference too
+
+        Raises
+        ------
+        - BookNotFoundError: if the book does not exists
+        """
         self.books_handler.delete_book(book.id)
         book_cover_path = self.get_book_cover_path(book, return_default=False)
+        book_id = book.id
+
+        if del_ref:
+            del book
 
         if book_cover_path:
+            self.logger.debug(f"Deleting cover of book (ID={book_id})...")
             self.res_files_api.delete(book_cover_path)
             return
 
-        self.logger.warning(f"Could not find cover for book (ID={book.id})")
+        self.logger.warning(f"Could not find cover for book (ID={book_id})")
 
-    def delete_book_with_id(self, book_id: str):
-        """Permantely removes a book and all its informations"""
+    def delete_book_with_id(self, book_id: str, del_ref: bool = False):
+        """
+        Remove book that's ID is `book_id` and all its data
+
+        Parameters
+        ----------
+        - book_id (str): the ID of the book to delete
+        - del_ref (bool=True): whether to delete the reference too
+
+        Raises
+        -------
+        - BookNotFoundError: If the book does not exists
+        """
         book = self.books_handler.get_books(id=(book_id, True, True))
-        return self.delete_book(book[0])
+        return self.delete_book(book[0], del_ref)
 
     def delete_shelf(self, shelf: book_sys.Shelf, del_ref: bool = True):
         """
-        Removes `shelf` from the shelves.
+        Removes `shelf` and all its data.
 
         Parameters
         ----------
@@ -134,7 +162,7 @@ class BooksService:
 
     def delete_shelf_with_id(self, shelf_id: str, del_ref: bool = True):
         """
-        Removes the shelf that's ID is `shelf_id`
+        Removes the shelf that's ID is `shelf_id` and all its data
 
         Parameters
         ----------
