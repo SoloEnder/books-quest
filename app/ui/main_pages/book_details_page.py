@@ -275,9 +275,7 @@ class SubBookWidget(QtWidgets.QWidget):
         self.default_cover_path = self.res_files.get_res("assets.defaults_covers.book")
         self.main_layout = QtWidgets.QGridLayout(self)
         self.book_cover_lb = QtWidgets.QLabel(self)
-        self.cover_path = (
-            self.books.get_book_cover_path(self.book, False) or self.default_cover_path
-        )
+        self.cover_path = self.books.get_book_cover_path(self.book, True)
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_path))
         self.main_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.fixed_sp = QtWidgets.QSizePolicy(
