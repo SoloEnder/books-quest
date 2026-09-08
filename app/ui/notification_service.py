@@ -4,14 +4,14 @@ from PySide6 import QtCore, QtWidgets
 class NotificationService:
     def __init__(self, widget_parent: QtWidgets.QWidget, langs_handler):
         self.widget_parent = widget_parent
-        self.langs_handler = langs_handler
+        self.langs = langs_handler
         self.redundant_lang_path = "notifications_service"
         self.default_warning_infos = {
-            "title": self.langs_handler.tr("shared.basic_error_notification.title"),
-            "msg": self.langs_handler.tr("shared.basic_error_notification.msg"),
+            "title": self.langs.tr("shared.basic_error_notification.title"),
+            "msg": self.langs.tr("shared.basic_error_notification.msg"),
         }
         self.default_information_infos = {
-            "title": self.langs_handler.tr("shared.basic_info_notification.title")
+            "title": self.langs.tr("shared.basic_info_notification.title")
         }
 
     @QtCore.Slot(str, str, str, str)
