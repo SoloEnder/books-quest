@@ -182,14 +182,14 @@ class Shelf:
         else:
             raise NotAChildShelfError(shelf.id, self.id)
 
-    def remove_all_parents(self):
+    def remove_from_parents(self):
         """
         Removes this shelf from all its parents
         """
         for parent_shelf in self._parent_shelves.copy():
             parent_shelf.remove_child_shelf(self)
 
-    def remove_all_child(self):
+    def remove_from_child_shelves(self):
         """
         Removes this shelf from all its children
         """
@@ -247,7 +247,7 @@ class Shelf:
                 f"Book with (ID={book.id}) is not contained in Shelf (ID={self.id}) !",
             )
 
-    def remove_all_books(self):
+    def remove_from_books(self):
         """
         Remove that shelf from all its books
         """
@@ -478,9 +478,9 @@ class BooksHandler:
         if id in self.shelves.keys():
             shelf = self.shelves[id]
 
-            shelf.remove_all_books()
-            shelf.remove_all_parents()
-            shelf.remove_all_child()
+            shelf.remove_from_books()  # Removes from all the childs books
+            shelf.remove_from_parents()  # Removes from all the parents shelves
+            shelf.remove_from_child_shelves()  # Removes from all its child shelves
 
             del self.shelves[id]
 
