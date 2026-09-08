@@ -63,11 +63,12 @@ class QtSignalsService(QtCore.QObject):
 
         signal = getattr(self, signal_name)
 
-        if self.signal_enabled(signal_name):
+        if not self.signal_enabled(signal_name):
             self.logger.debug(
                 f"Trying to emit '{signal_name}', but signal is not enabled !"
             )
-            return signal.emit(*args)
+            return
+        return signal.emit(*args)
 
     def has_signal(self, signal_name: str) -> bool:
         """
