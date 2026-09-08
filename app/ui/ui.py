@@ -19,8 +19,6 @@ from app.utils import images_tools, utils_funcs
 class UI(QtWidgets.QMainWindow):
     def __init__(
         self,
-        books_handler,
-        res_handler,
         api: api.API,
     ):
         super().__init__()
@@ -227,7 +225,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.qt_signals.connect_to_signal("switch_page_sg", self.switch_page)
         self.qt_signals.connect_to_signal("close_page_sg", self.close_page)
         self.qt_signals.connect_to_signal("refresh_page_sg", self.refresh)
-        self.qt_signals.connect("refresh_current_page_sg", self.refresh_current_page)
+        self.qt_signals.connect_to_signal(
+            "refresh_current_page_sg", self.refresh_current_page
+        )
         utils_funcs.load_and_set_ss(
             self.res_files.get_res("assets.qss.general"), widget=self
         )
