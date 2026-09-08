@@ -3,11 +3,12 @@ import logging
 
 from PySide6 import QtWidgets
 
-from app.src import book_sys, langs_handler
+from app.src import book_sys
+from app.src.services import langs
 
 
 def get_reading_state_tr(
-    reading_state: book_sys.Book.ReadingState, langs_handler: langs_handler.LangsHandler
+    reading_state: book_sys.Book.ReadingState, langs: langs.LangsService
 ) -> str:
     """
     Return the translation of a book reading state
@@ -15,18 +16,16 @@ def get_reading_state_tr(
     Parameters
     ----------
     - reading_state: the reading state of the book
-    - langs_handler: an `LangsHandler` instance
+    - langs: an `LangsService` instance
 
     Returns
     -------
     - str: the translation
     """
     reading_state_tr = {
-        "UNREAD": langs_handler.tr("book.infos.reading_state.unread"),
-        "CURRENTLY_READING": langs_handler.tr(
-            "book.infos.reading_state.currently_reading"
-        ),
-        "FINISHED": langs_handler.tr("book.infos.reading_state.finished"),
+        "UNREAD": langs.tr("book.infos.reading_state.unread"),
+        "CURRENTLY_READING": langs.tr("book.infos.reading_state.currently_reading"),
+        "FINISHED": langs.tr("book.infos.reading_state.finished"),
     }
     return reading_state_tr[reading_state.value]
 

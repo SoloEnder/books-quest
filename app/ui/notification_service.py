@@ -1,10 +1,12 @@
 from PySide6 import QtCore, QtWidgets
 
+from app.src.services import langs
+
 
 class NotificationService:
-    def __init__(self, widget_parent: QtWidgets.QWidget, langs_handler):
+    def __init__(self, widget_parent: QtWidgets.QWidget, langs: langs.LangsService):
         self.widget_parent = widget_parent
-        self.langs = langs_handler
+        self.langs = langs
         self.redundant_lang_path = "notifications_service"
         self.default_warning_infos = {
             "title": self.langs.tr("shared.basic_error_notification.title"),

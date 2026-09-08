@@ -9,12 +9,9 @@ from PySide6 import QtCore, QtWidgets
 from app.src import (
     api,
     book_sys,
-    langs_handler,
-    resources_handler,
-    settings_handler,
 )
 from app.ui import ui
-from app.utils import json_file_manager, paths, update_tools
+from app.utils import paths, update_tools
 
 
 class AppSystem:
