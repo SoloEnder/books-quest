@@ -54,7 +54,7 @@ class AppSystem:
         self.logger.info("Connecting signals to loaded slots...")
         self.connect_signals()
         self.logger.info("Erasing files in temporary folder...")
-        self.empty_tmp_folder(self.res_files.get_res("tmp"))
+        self.res_files.empty_tmp_folder()
 
     def connect_signals(self):
         """
@@ -175,32 +175,11 @@ class AppSystem:
             self.res_files.get_res("data.user.settings"),
         )
         self.save_installation_infos()
-        self.empty_tmp_folder(self.res_files.get_res("tmp"))
+        self.res_files.empty_tmp_folder()
         self.logger.info("Exiting app...")
 
     def set_instance_locker(self, instance_locker: QtCore.QLockFile):
         self.instance_locker = instance_locker
-
-    def empty_tmp_folder(self, dir_path):
-        """
-        Create the tmp directory if it does not exists, then erase its content
-        """
-        tmp_path = pathlib.Path(dir_path)
-
-        if not tmp_path.exists():
-            self.logger.warning(
-                "Temporary directory not found, attempting to make it..."
-            )
-            tmp_path.mkdir()
-
-        for element in tmp_path.iterdir():
-            try:
-                if element.is_file():
-                    element.unlink()
-            except Exception:
-                self.logger.error(
-                    f"Unable to destroy file '{element}' in the temporary folder !"
-                )
 
     def check_first_boot(self):
         if self.installation_infos["boots_count"] == 0:
