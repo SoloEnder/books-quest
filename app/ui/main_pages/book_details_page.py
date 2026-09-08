@@ -69,7 +69,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
         super().__init__(parent)
         self.api = api
         self.res_files = self.api.res_files
-        self.settings_handler = self.api.settings
+        self.settings = self.api.settings
         self.langs = self.api.langs
         self.qt_signals = self.api.qt_signals
         self._book = book
