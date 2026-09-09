@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import os
 import shutil
+import typing
 import uuid
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -613,6 +614,23 @@ class BookCreationPage(base_page.BasePage):
             original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
         return original_cover == self.cover_image
+
+    def get_selected_shelves(self, return_ids_only: bool = False):
+        """
+        Get and return the shelves that has been selected by the user.
+
+        Parameters
+        ----------
+        return_ids_only (bool=False): wether to return only the shelves ids instead of their objects.
+        """
+        shelves = []
+        for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
+            if shelf_selection_cbs.isChecked():
+                if return_ids_only:
+                    shelves.append(shelf_id)
+                    continue
+                shelves.append(self.books.books_handler.shelves[shelf_id])
+        return shelves
 
     def save_modifications(self):
         books_infos = self.get_book_infos()
