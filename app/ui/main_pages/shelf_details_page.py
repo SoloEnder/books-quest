@@ -237,8 +237,7 @@ class BasicShelfInfosWidget(ShelfWidget):
         )
         self.logger.error(f"Deleting 1 Shelf (ID={self.shelf.id})...")
         try:
-            print(self.shelf.str_id())
-            self.books.books_handler.delete_shelf(self.shelf.str_id())
+            self.books.delete_shelf(self.shelf)
 
         except book_sys.BooksShelfNotFoundError:
             self.logger.error(
@@ -251,7 +250,7 @@ class BasicShelfInfosWidget(ShelfWidget):
 
         except Exception:
             self.logger.exception(
-                f"Unable to delete Shelf (ID={self.shelf.id}) : due to the following exception : "
+                f"Unable to delete Shelf (ID={self.shelf.id}) due to the following exception : "
             )
             self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
             self.qt_signals.emit_signal("edit_progress_msg", " ")
