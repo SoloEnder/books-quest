@@ -12,6 +12,58 @@ class BooksService:
         self.res_files_api = res_file
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
+    def edit_book_with_id(
+        self, book_id: str, title: str, replace_old_ref: bool = True, **books_data
+    ):
+        """
+        Replaces the data of the Book that has `book_id` for id with the new `books_data`
+
+        Parameters
+        ----------
+        - book_id (Book): the ID of the book to edit
+        - title (str): the new title of the book
+        - replace_original_ref (bool=True): wether to replace the reference of the old book (the one before the edition) by the new
+        - **books_data: the new data of the book
+
+        Raises
+        ------
+        BookNotFoundError: if no Book has this ID
+        """
+        book = self.books_handler.get_books(id=(book_id, True, True))
+
+        if not book:
+            raise book_sys.BookNotFoundError(book_id)
+
+        return self.edit_book(book[0], title, replace_old_ref, **books_data)
+
+    def edit_book(
+        self,
+        book: book_sys.Book,
+        title: str,
+        replace_old_ref: bool = True,
+        **books_data,
+    ):
+        """
+        Replaces the data of `Book` with the new `books_data`
+
+        Parameters
+        ----------
+        - book (Book): the book to edit
+        - title (str): the new title of the book
+        - replace_original_ref (bool=True): wether to replace the reference of the old book (the one before the edition) by the new
+        - **books_data: the new data of the book
+
+        Raises
+        ------
+        BookNotFoundError: if this Book does not exists
+        """
+        book.delete_from_parents()  # Removes from all the parent to allow proper reset
+        new_book = self.books_handler.create_book(title=title, **books_data)
+        self.books_handler.edit_book(book.id, new_book)
+
+        if replace_old_ref:
+            book = new_book
+
     def get_cover_path(
         self,
         object: book_sys.Shelf | book_sys.Book,
