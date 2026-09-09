@@ -208,7 +208,7 @@ class BookCreationPage(base_page.BasePage):
         self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
         self.add_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.done"))
-        self.add_b.clicked.connect(self.create_book)
+        self.add_b.clicked.connect(self.save_modifications)
 
         # Add the widgets
         self.main_lyt.addWidget(self.book_cover_lb, 0, 0)
@@ -610,11 +610,11 @@ class BookCreationPage(base_page.BasePage):
         original_cover = self.default_cover_img
 
         if self.edition_mode_enabled:
-            original_cover = self.books_handler.get_book_cover_path(self.book)  # type: ignore
+            original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
         return original_cover == self.cover_image
 
-    def create_book(self):
+    def save_modifications(self):
         books_infos = self.get_book_infos()
 
         if books_infos:
