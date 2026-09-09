@@ -474,8 +474,8 @@ class BooksHandler:
 
     def delete_shelf(self, id: str):
         self.logger.debug(f"Removing shelf with ID : '{id}' from BooksHandler...")
-
-        if id in self.shelves.keys():
+        id = str(id)
+        if id in self.shelves:
             shelf = self.shelves[id]
 
             shelf.remove_from_books()  # Removes from all the childs books
