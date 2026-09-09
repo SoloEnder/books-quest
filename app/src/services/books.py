@@ -225,7 +225,7 @@ class BooksService:
         ------
         - BooksShelfNotFoundError: if no shelf with this ID exists
         """
-        result = self.books_handler.get_shelfs(id=(True, True))
+        result = self.books_handler.get_shelfs(id=(shelf_id, True, True))
 
         if not result:
             raise book_sys.BooksShelfNotFoundError(shelf_id)
