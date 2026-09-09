@@ -26,9 +26,14 @@ class AppSystem:
         self.qt_signals = self.api.qt_signals
         self.langs = self.api.langs
         self.settings = self.api.settings
+
+        # Loading data
+        self.res_files.load_indexes()
+        self.books.load_books()
+        self.books.load_shelves()
         self.settings.load_settings()
         self.settings.apply_user_settings()
-        self.res_files.load_indexes()
+
         self.app_infos = self.load_app_infos(self.res_files.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
@@ -43,11 +48,6 @@ class AppSystem:
             self.res_files.get_res("data.user.bookshelves.covers"),
         )
         self.logger.info("Initialising application...")
-        self.books_handler = book_sys.BooksHandler()
-        self.books_handler.load_books(self.res_files.get_res("data.user.books.books"))
-        self.books_handler.load_shelves(
-            self.res_files.get_res("data.user.bookshelves.bookshelves")
-        )
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.load_and_apply_settings()
         self.langs.set_prefered_language()
@@ -166,10 +166,8 @@ class AppSystem:
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.books_handler.save_books(self.res_files.get_res("data.user.books.books"))
-        self.books_handler.save_shelfs(
-            self.res_files.get_res("data.user.bookshelves.bookshelves")
-        )
+        self.books.save_books()
+        self.books.save_shelves()
         self.settings.save_settings(
             self.res_files.get_res("data.app.static.base_settings"),
             self.res_files.get_res("data.user.settings"),
