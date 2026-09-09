@@ -179,3 +179,51 @@ class BooksService:
             raise book_sys.BooksShelfNotFoundError(shelf_id)
 
         return self.delete_shelf(result[0], del_ref)
+
+    def load_books(self, custom_path: str | None = None):
+        """
+        Loads books data from a file.
+
+        Parameters
+        ----------
+        - custom_path (str): the path of the file. If not given/equal to `None`, then the value in the files indexes is used
+        """
+        filepath = custom_path or self.res_files_api.get_res("data.user.books.books")
+        self.books_handler.load_books(filepath)
+
+    def load_shelves(self, custom_path: str | None = None):
+        """
+        Loads shelves data from a file.
+
+        Parameters
+        ----------
+        - custom_path (str): the path of the file. If not given/equal to `None`, then the value in the files indexes is used
+        """
+        filepath = custom_path or self.res_files_api.get_res(
+            "data.user.bookshelves.bookshelves"
+        )
+        self.books_handler.load_shelves(filepath)
+
+    def save_books(self, custom_path: str | None = None):
+        """
+        Saves books data in a file.
+
+        Parameters
+        ----------
+        - custom_path (str): the path of the file. If not given/equal to `None`, then the value in the files indexes is used
+        """
+        filepath = custom_path or self.res_files_api.get_res("data.user.books.books")
+        self.books_handler.save_books(filepath)
+
+    def save_shelves(self, custom_path: str | None = None):
+        """
+        Saves shelves data in a file.
+
+        Parameters
+        ----------
+        - custom_path (str): the path of the file. If not given/equal to `None`, then the value in the files indexes is used
+        """
+        filepath = custom_path or self.res_files_api.get_res(
+            "data.user.bookshelves.bookshelves"
+        )
+        self.books_handler.save_shelfs(filepath)
