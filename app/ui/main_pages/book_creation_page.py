@@ -411,16 +411,15 @@ class BookCreationPage(base_page.BasePage):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
 
     def set_book_cover(self):
-        infos = images_tools.select_image()
+        """
+        Displays a files picker, allowing user to select an image as cover.
+        The selected images is then redimensionned and set as the current cover.
+        """
+        final_infos = self.books.select_book_cover()
 
-        if infos:
-            if infos[0]:
-                final_infos = images_tools.prepare_image(
-                    infos[0],
-                    os.path.join(self.res_files.get_res("tmp"), "book_cover.png"),
-                )
-                self.cover_image = final_infos[0]
-                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+        if final_infos:
+            self.cover_image = final_infos[0]
+            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def set_cover_lb_pixmap(self, new_path):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
