@@ -118,28 +118,37 @@ class BooksService:
         self,
         shelf: book_sys.Shelf,
         return_default: bool = True,
-        check_existence: bool = True,
+        raise_file_not_found: bool = False,
     ) -> str | None:
         """
         Constructs and returns the path to the `shelf` cover file.
 
         Parameters
         ----------
-        shelf (book_sys.Shelf): the shelf object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        -shelf (book_sys.Shelf): the shelf object
+        -return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        - raise_file_not_found (bool): whether to raise `FileNotFoundError` instead of returning `None` if the constructed path does not exists and `return_default=False`
+        NOTE : `return_default` has always priority over `raise_file_not_found`
         """
-        return self.get_cover_path(shelf, return_default)
+        return self.get_cover_path(shelf, return_default, raise_file_not_found)
 
-    def get_book_cover_path(self, book: book_sys.Book, return_default: bool = True):
+    def get_book_cover_path(
+        self,
+        book: book_sys.Book,
+        return_default: bool = True,
+        raise_file_not_found: bool = True,
+    ):
         """
         Constructs and returns the path to the `book` cover file.
 
         Parameters
         ----------
-        shelf (book_sys.Book): the book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        - book (book_sys.Book): the book object
+        - return_default (bool=True): whether to return the default cover path if the constructed path does not exist
+        - raise_file_not_found (bool): whether to raise `FileNotFoundError` instead of returning `None` if the constructed path does not exists and `return_default=False`
+        NOTE : `return_default` has always priority over `raise_file_not_found`
         """
-        return self.get_cover_path(book, return_default)
+        return self.get_cover_path(book, return_default, raise_file_not_found)
 
     def delete_book(self, book: book_sys.Book, del_ref: bool = True):
         """
