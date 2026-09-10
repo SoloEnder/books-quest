@@ -1,9 +1,11 @@
 import logging
 import os
 
+from PIL.Image import Image
+
 from app.src import book_sys
 from app.src.services import res_files
-from app.utils import paths
+from app.utils import images_tools
 
 
 class BooksService:
@@ -11,6 +13,55 @@ class BooksService:
         self.books_handler = book_sys.BooksHandler()
         self.res_files_api = res_file
         self.logger = logging.getLogger(f"{__name__}-BooksService")
+
+    def select_cover(self, save_path: str):
+        """
+        Display an file picker and prepare (copying to the app location, and redimensioning it) the selected image that be used as cover
+
+        Parameters
+        ----------
+        - save_path (str): the path where to save the prepared cover
+
+        Returns
+        -------
+        - tuple[str, PIL.Image.Image]: the filepath to the prepared image, and the prepared Image object
+        - None: if no image is selected by the user
+        """
+        infos = images_tools.select_image()
+        self.logger.debug(f"User selected image with {infos=}")
+
+        if infos and infos[0]:
+            final_infos = images_tools.prepare_image(
+                infos[0],
+                save_path,
+            )
+            return final_infos
+
+    def select_book_cover(self) -> tuple[str, Image] | None:
+        """
+        Display an file picker and prepare (copying to the app location, and redimensioning it) the selected image that be used as cover
+
+        Returns
+        -------
+        - tuple[str, PIL.Image.Image]: the filepath to the prepared image, and the prepared Image object
+        - None: if no image  is selected by the user
+        """
+        return self.select_cover(
+            os.path.join(self.res_files_api.get_res("tmp"), "book_cover.png")
+        )
+
+    def select_shelf_cover(self) -> tuple[str, Image] | None:
+        """
+        Display an file picker and prepare (copying to the app location, and redimensioning it) the selected image that be used as cover
+
+        Returns
+        -------
+        - tuple[str, PIL.Image.Image]: the filepath to the prepared image, and the prepared Image object
+        - None: if no image  is selected by the user
+        """
+        return self.select_cover(
+            os.path.join(self.res_files_api.get_res("tmp"), "shelf_cover.png")
+        )
 
     def edit_book_with_id(
         self, book_id: str, title: str, replace_old_ref: bool = True, **books_data
