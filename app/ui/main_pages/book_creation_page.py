@@ -602,6 +602,9 @@ class BookCreationPage(base_page.BasePage):
             books_infos["end_read_date"] = self.end_read_date_de.date().toString(
                 QtCore.Qt.DateFormat.ISODate
             )
+
+        # Parents shelves
+        books_infos["parents_shelves"] = self.get_selected_shelves()
         return books_infos
 
     def is_original_cover(self):
@@ -637,13 +640,6 @@ class BookCreationPage(base_page.BasePage):
 
         if books_infos:
             try:
-                shelves = []
-                for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
-                    if shelf_selection_cbs.isChecked():
-                        shelves.append(self.books.books_handler.shelves[shelf_id])
-
-                books_infos["parents_shelves"] = shelves
-
                 if self.edition_mode_enabled and self.book:
                     self.book.delete_from_parents()
                     new_book = self.books.books_handler.create_book(**books_infos)
