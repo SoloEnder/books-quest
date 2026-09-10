@@ -641,9 +641,7 @@ class BookCreationPage(base_page.BasePage):
         if books_infos:
             try:
                 if self.edition_mode_enabled and self.book:
-                    self.book.delete_from_parents()
-                    new_book = self.books.books_handler.create_book(**books_infos)
-                    self.books.books_handler.edit_book(self.book.id, new_book)
+                    self.books.edit_book(self.book, **books_infos)
 
                 else:
                     self.books.books_handler.new_book(**books_infos)
