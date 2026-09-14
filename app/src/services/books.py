@@ -1,5 +1,7 @@
 import logging
 import os
+import shutil
+import typing
 
 from PIL.Image import Image
 
@@ -13,6 +15,121 @@ class BooksService:
         self.books_handler = book_sys.BooksHandler()
         self.res_files_api = res_file
         self.logger = logging.getLogger(f"{__name__}-BooksService")
+
+    def set_cover_for(
+        self,
+        object_id: str,
+        cover_path: str,
+        parent_folder: str,
+        cover_exists_ok: bool = False,
+    ):
+        """
+        Copy the object cover, rename it withe it's ID and save it.
+
+        Parameters
+        ----------
+        - object_id (str): the object ID (probably a Book or a Shelf)
+        - cover_path (str): the source cover path.
+        - parent_folder (str): the folder where to copy the cover file.
+        - cover_exists_ok (bool=False): wether to check if a cover is already assigned to this ID in `parent_folder`
+
+        Raises
+        - FileExistsError: if `cover_exists_ok` is `True` and a cover is already assigned to this ID
+
+        """
+
+        # Constructs final cover path
+        cover_dest_path = os.path.join(
+            parent_folder,
+            f"{object_id}.png",
+        )
+
+        if not cover_exists_ok and os.path.exists(cover_dest_path):
+            raise FileExistsError(
+                f"A cover file for object (ID={object_id}) already exists !"
+            )
+
+        # Copying to destination
+        shutil.copy(cover_path, cover_dest_path)
+
+    def set_cover_for_book(
+        self,
+        book_id: str,
+        cover_path: str | None = None,
+        check_book_exists: bool = False,
+        cover_exists_ok: bool = False,
+    ):
+        """
+        Copy the book cover to the app internal covers folder
+
+        Parameters
+        ----------
+        - book_id (str): the book ID
+        - cover_path (str|None): the original cover path. If not given or equal to `None`, then the app tries to find an image named 'book_cover.png' in the temporary folder
+        - check_book_existence (bool=False): wether to check if a Book with this ID exists in the BooksHandler
+        - cover_exists_ok (bool=False): wether to check if a cover is already assigned to this ID
+
+        Raises
+        - BookNotFoundError: if `check_book_existence` is `True` and the book is not found in the BooksHandler
+        - FileNotFoundError: if `cover_path` is not found or no cover is found in the temporary folder
+        - FileExistsError: if `cover_exists_ok` is `True` and a cover is already assigned to this ID
+
+        """
+
+        # If books exitences checking is enabled
+        if check_book_exists and not self.books_handler.books.get(book_id):
+            raise book_sys.BookNotFoundError(book_id)
+
+        default_cover_path = os.path.join(
+            self.res_files_api.get_res("tmp"), "book_cover.png"
+        )
+
+        # Copying to destination
+        self.set_cover_for(
+            book_id,
+            cover_path or default_cover_path,
+            self.res_files_api.get_res("data.user.bookshelves.covers"),
+            cover_exists_ok,
+        )
+
+    def set_cover_for_shelf(
+        self,
+        shelf_id: str,
+        cover_path: str | None = None,
+        check_shelf_exists: bool = False,
+        cover_exists_ok: bool = False,
+    ):
+        """
+        Copy the book cover to the app internal covers folder
+
+        Parameters
+        ----------
+        - shelf_id (str): the Shelf ID
+        - cover_path (str|None): the original cover path. If not given or equal to `None`, then the app tries to find an image named 'shelf_cover.png' in the temporary folder
+        - check_shelf_existence (bool=False): wether to check if a Shelf with this ID exists in the BooksHandler
+        - cover_exists_ok (bool=False): wether to check if a cover is already assigned to this ID
+
+        Raises
+        - BookShelfNotFoundError: if `check_shelf_existence` is `True` and the book is not found in the BooksHandler
+        - FileNotFoundError: if `cover_path` is not found or no cover is found in the temporary folder
+        - FileExistsError: if `cover_exists_ok` is `True` and a cover is already assigned to this ID
+
+        """
+        # If books exitences checking is enabled
+        if check_shelf_exists and not self.books_handler.shelves.get(shelf_id):
+            raise book_sys.BooksShelfNotFoundError(shelf_id)
+
+        default_cover_path = os.path.join(
+            self.res_files_api.get_res("tmp"), "shelf_cover.png"
+        )
+
+        # Copying to destination
+        self.set_cover_for(
+            shelf_id,
+            cover_path or default_cover_path,
+            self.res_files_api.get_res("data.user.bookshelves.covers"),
+            cover_exists_ok,
+        )
 
     def select_cover(self, save_path: str):
         """
