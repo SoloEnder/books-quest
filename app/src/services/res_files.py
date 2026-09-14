@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import shutil
 import typing
 
 import dicts_paths_handler
@@ -193,7 +194,6 @@ class ResourcesFilesService:
 
         try:
             for key in sections:
-                print(key)
                 current_value = current_value[key]
 
                 if isinstance(current_value, dict):
