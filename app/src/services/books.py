@@ -88,7 +88,7 @@ class BooksService:
         self.set_cover_for(
             book_id,
             cover_path or default_cover_path,
-            self.res_files_api.get_res("data.user.bookshelves.covers"),
+            self.res_files_api.get_res("data.user.books.covers"),
             cover_exists_ok,
         )
 
@@ -304,7 +304,7 @@ class BooksService:
         self,
         book: book_sys.Book,
         return_default: bool = True,
-        raise_file_not_found: bool = True,
+        raise_file_not_found: bool = False,
     ):
         """
         Constructs and returns the path to the `book` cover file.
