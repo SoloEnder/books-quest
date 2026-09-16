@@ -44,7 +44,7 @@ class BooksService:
             f"{object_id}.png",
         )
 
-        if not cover_exists_ok and os.path.exists(cover_dest_path):
+        if cover_exists_ok and os.path.exists(cover_dest_path):
             raise FileExistsError(
                 f"A cover file for object (ID={object_id}) already exists !"
             )
