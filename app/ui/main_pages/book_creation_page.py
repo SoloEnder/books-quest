@@ -322,8 +322,7 @@ class BookCreationPage(base_page.BasePage):
         self.logger.info("Appling edition mode...")
         if self.book:
             self.cover_image = (
-                self.books.get_book_cover_path(self.book, False)
-                or self.default_cover_img
+                self.books.get_book_cover_path(self.book) or self.default_cover_img
             )
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
             for book_attr in self.basic_book_infos:
@@ -482,6 +481,43 @@ class BookCreationPage(base_page.BasePage):
             self.cover_image = dest_path
             self.set_cover_lb_pixmap(self.cover_image)
 
+    def attach_cover(self, id: str):
+        """
+        Attach the current cover to the book that has 'id' as ID
+        """
+        try:
+            self.books.set_cover_for_book(id)
+
+        except FileNotFoundError:
+            self.logger.error(
+                f"Could not attach cover file to book (ID='{id}') : File not found"
+            )
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "Cover not found", "Cover file not found", ""
+            )
+            return
+
+        except PermissionError:
+            self.logger.error(
+                f"Could not attach cover to book (ID='{id}') : Permission denied"
+            )
+            self.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Permission denied",
+                "Access to cover file denied !",
+                "",
+            )
+            return
+
+        except FileExistsError:
+            self.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Cover Exists",
+                "A cover file already exists for this book !",
+            )
+
     def get_book_infos(self):
         books_infos = {}
 
@@ -543,39 +579,6 @@ class BookCreationPage(base_page.BasePage):
         if self.edition_mode_enabled:
             books_infos["id"] = self.book.id  # type: ignore
 
-        cover_dest_path = os.path.join(
-            self.res_files.get_res("data.user.books.covers"),
-            f"{str(books_infos['id'])}.png",
-        )
-
-        # Checking if the final cover path and the current cover path are different (very important)
-        #
-        if not self.is_original_cover():
-            try:
-                self.copy_book_cover(self.cover_image, cover_dest_path)
-
-            except FileNotFoundError:
-                self.logger.error(
-                    "Could not copy cover file to books covers folder : file not found"
-                )
-                self.qt_signals.emit_signal(
-                    "notify_sg", "error", "Cover not found", "Cover file not found", ""
-                )
-                return
-
-            except PermissionError:
-                self.logger.error(
-                    "Could not copy cover file to books covers folder : Permission denied"
-                )
-                self.qt_signals.emit_signal(
-                    "notify_sg",
-                    "error",
-                    "Permission denied",
-                    "Access to original cover file denied",
-                    "",
-                )
-                return
-
         books_infos["reading_state"] = self.book_reading_state_combob.currentData()
 
         if self.read_pages_le.isEnabled():
@@ -615,6 +618,7 @@ class BookCreationPage(base_page.BasePage):
         if self.edition_mode_enabled:
             original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
+        print(f"{original_cover=}")
         return original_cover == self.cover_image
 
     def get_selected_shelves(self, return_ids_only: bool = False):
@@ -644,6 +648,15 @@ class BookCreationPage(base_page.BasePage):
 
                 else:
                     self.books.books_handler.new_book(**books_infos)
+
+                if (
+                    not self.is_original_cover()
+                    and self.cover_image != self.default_cover_img
+                ):  # Cheking if the cover has changed, and if it's not the default cover
+                    self.logger.debug(
+                        f"Book cover has changed, attaching new cover to book (ID={books_infos['id']})"
+                    )
+                    self.attach_cover(books_infos["id"])
 
             except Exception:
                 self.logger.exception("Failed to create valid book : ")
