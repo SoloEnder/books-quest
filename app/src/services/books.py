@@ -301,6 +301,7 @@ class BooksService:
                 )
                 + ".png"
             )
+            default_cover = self.res_files_api.get_res("assets.defaults_covers.book")
 
         elif isinstance(object, book_sys.Shelf):
             excepted_path = (
@@ -310,13 +311,14 @@ class BooksService:
                 )
                 + ".png"
             )
+            default_cover = self.res_files_api.get_res("assets.defaults_covers.shelf")
 
         else:
             raise TypeError(f"Could not get cover for object of type {type(object)}")
 
         if not os.path.exists(excepted_path):
             if return_default:
-                return self.res_files_api.get_res("assets.defaults_covers.shelf")
+                return default_cover
 
             if raise_file_not_found:
                 raise FileNotFoundError(
