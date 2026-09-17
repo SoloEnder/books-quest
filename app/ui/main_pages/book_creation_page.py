@@ -618,7 +618,6 @@ class BookCreationPage(base_page.BasePage):
         if self.edition_mode_enabled:
             original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
-        print(f"{original_cover=}")
         return original_cover == self.cover_image
 
     def get_selected_shelves(self, return_ids_only: bool = False):
