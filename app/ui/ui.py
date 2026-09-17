@@ -2,8 +2,8 @@ import logging
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, langs_handler, settings_handler
-from app.ui import notification_service, qt_signals_handler
+from app.src import api
+from app.ui import notification_service
 from app.ui.main_pages import (
     base_page,
     book_creation_page,
@@ -19,31 +19,28 @@ from app.utils import images_tools, utils_funcs
 class UI(QtWidgets.QMainWindow):
     def __init__(
         self,
-        books_handler,
-        res_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler: settings_handler.SettingsHandler,
-        langs_handler: langs_handler.LangsHandler,
+        api: api.API,
     ):
         super().__init__()
         self.logger = logging.getLogger(__name__)
-        self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.qt_signals_handler = qt_signals_handler
+        self.api = api
+        self.books = self.api.books
+        self.res_files = self.api.res_files
+        self.qt_signals = self.api.qt_signals
+        self.langs = self.api.langs
+        self.settings = self.api.settings
         self.notification_service = notification_service.NotificationService(
-            self, self.langs_handler
+            self, self.langs
         )
-        self.qt_signals_handler.notify_sg.connect(self.notification_service.notify)
+        self.qt_signals.connect_to_signal("notify_sg", self.notification_service.notify)
         self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
-        self.qt_signals_handler.edit_progress_msg.connect(self.set_progress_msg)
-        self.qt_signals_handler.refresh_ui_sg.connect(self.refresh_ui)
+        self.qt_signals.connect_to_signal("edit_progress_msg", self.set_progress_msg)
+        self.qt_signals.connect_to_signal("refresh_ui_sg", self.refresh_ui)
         self.setWindowTitle("Books Quest")
         self.setWindowIcon(
-            QtGui.QIcon(self.res_handler.get_res("assets.splashscreen.splashscreen"))
+            QtGui.QIcon(self.res_files.get_res("assets.splashscreen.splashscreen"))
         )
 
     def draw_ui(self):
@@ -51,12 +48,12 @@ class UI(QtWidgets.QMainWindow):
         Draws almost the entire widgets, and remove the existant ones before.
         """
         self.logger.info("Drawing UI...")
-        self.langs_handler.set_current_language(
-            self.settings_handler.get_setting_value("general.appearance.language")
+        self.langs.set_language(
+            self.settings.get_setting_value("general.appearance.language")
         )
         self.set_app_theme()
-        self.books_handler.edit_default_shelf(
-            title=self.langs_handler.tr("shelf.infos.default_shelf_title")
+        self.books.books_handler.edit_default_shelf(
+            title=self.langs.tr("shelf.infos.default_shelf_title")
         )
         self.logger.info("Refreshing UI...")
 
@@ -76,11 +73,7 @@ class UI(QtWidgets.QMainWindow):
 
         self.my_stacked_widgets = MyStackedWidgets(
             self,
-            self.books_handler,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self.api,
         )
         if hasattr(self, "toolbar"):
             self.removeToolBar(self.toolbar)
@@ -89,7 +82,7 @@ class UI(QtWidgets.QMainWindow):
 
         self.toolbar = ToolBar(self, self.my_actions)
         self.addToolBar(self.toolbar)
-        self.gen_qss_filepath = self.res_handler.get_res("assets.qss.general")
+        self.gen_qss_filepath = self.res_files.get_res("assets.qss.general")
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
         )
@@ -101,7 +94,7 @@ class UI(QtWidgets.QMainWindow):
         Sets the app theme according to the settings
         """
         style_hints = QtWidgets.QApplication.styleHints()
-        theme = self.settings_handler.get_setting_value("general.appearance.theme")
+        theme = self.settings.get_setting_value("general.appearance.theme")
 
         if theme == "light":
             style_hints.setColorScheme(QtCore.Qt.ColorScheme.Light)
@@ -118,14 +111,15 @@ class UI(QtWidgets.QMainWindow):
         """
         self.logger.info("Refreshing UI...")
         images_tools.clear_all_caches()
-        self.langs_handler.tr.cache_clear()
+        self.langs.tr.cache_clear()
         current_page_infos_before_redraw = (
             self.my_stacked_widgets.current_page_infos[0],
             self.my_stacked_widgets.current_page_infos[2],
         )
         self.draw_ui()
         QtWidgets.QApplication.processEvents()
-        self.qt_signals_handler.switch_page_sg.emit(
+        self.qt_signals.emit_signal(
+            "switch_page_sg",
             current_page_infos_before_redraw[0],
             True,
             current_page_infos_before_redraw[1],
@@ -138,22 +132,20 @@ class UI(QtWidgets.QMainWindow):
     def set_actions(self):
         self.my_actions = {
             "close_page": QtGui.QAction(
-                self.langs_handler.tr("shared.actions.close"),
+                self.langs.tr("shared.actions.close"),
                 icon=images_tools.get_svg(
-                    self.res_handler.get_res("assets.icons.exit"), "red"
+                    self.res_files.get_res("assets.icons.exit"), "red"
                 ),
             ),
             "open_settings": QtGui.QAction(
-                self.langs_handler.tr("shared.actions.open_settings"),
+                self.langs.tr("shared.actions.open_settings"),
                 icon=images_tools.get_svg(
-                    self.res_handler.get_res("assets.icons.settings")
+                    self.res_files.get_res("assets.icons.settings")
                 ),
             ),
             "quit_app": QtGui.QAction(
                 "Quit Books Quest",
-                icon=images_tools.get_svg(
-                    self.res_handler.get_res("assets.icons.exit")
-                ),
+                icon=images_tools.get_svg(self.res_files.get_res("assets.icons.exit")),
             ),
         }
         self.my_actions["close_page"].triggered.connect(
@@ -177,72 +169,44 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        books_handler: book_sys.BooksHandler,
-        res_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler,
-        langs_handler,
+        api: api.API,
     ):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__)
-        self.books_handler = books_handler
-        self.res_handler = res_handler
-        self.qt_signals_handler = qt_signals_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
+        self.api = api
+        self.books = self.api.books
+        self.res_files = self.api.res_files
+        self.qt_signals = self.api.qt_signals
+        self.langs = self.api.langs
+        self.settings = self.api.settings
         self.redundant_lang_path = ""
         self.current_page_infos: (
             tuple[str, base_page.BasePage, dict] | tuple
         ) = ()  # This tuple should contain 3 values : the current page name the current page object (in this order), and the specials arguments of the current page
         self.settings_page = settings_page.SettingsPage(
             self,
-            self.res_handler,
-            self.settings_handler,
-            self.langs_handler,
-            self.qt_signals_handler,
+            self.api,
         )
         self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
             self,
-            self.books_handler,
-            res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self.api,
         )
         self.shelf_details_page = shelf_details_page.ShelfDetailsPage(
-            self,
-            self.books_handler.default_shelf,
-            self.books_handler,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self, self.books.books_handler.default_shelf, self.api
         )
         self.book_creation_page = book_creation_page.BookCreationPage(
             self,
-            self.books_handler,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self.api,
         )
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
             self,
-            self.books_handler,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self.api,
             mode="creation",
         )
         self.book_details_page = book_details_page.BookDetailsPage(
             self,
-            self.res_handler,
-            self.settings_handler,
-            self.langs_handler,
-            self.qt_signals_handler,
-            self.books_handler,
-            self.books_handler.default_book.id,
+            self.api,
+            self.books.books_handler.default_book.id,
         )
         self.pages = {
             "SETTINGS_PAGE": self.settings_page,
@@ -258,14 +222,14 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.addWidget(self.shelf_creation_page)
         self.addWidget(self.book_details_page)
         self.history = []
-        self.qt_signals_handler.switch_page_sg.connect(self.switch_page)
-        self.qt_signals_handler.close_page_sg.connect(self.close_page)
-        self.qt_signals_handler.refresh_page_sg.connect(self.refresh)
-        self.qt_signals_handler.refresh_current_page_sg.connect(
-            self.refresh_current_page
+        self.qt_signals.connect_to_signal("switch_page_sg", self.switch_page)
+        self.qt_signals.connect_to_signal("close_page_sg", self.close_page)
+        self.qt_signals.connect_to_signal("refresh_page_sg", self.refresh)
+        self.qt_signals.connect_to_signal(
+            "refresh_current_page_sg", self.refresh_current_page
         )
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_res("assets.qss.general"), widget=self
+            self.res_files.get_res("assets.qss.general"), widget=self
         )
 
     @QtCore.Slot(str, bool, dict)
@@ -280,8 +244,8 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
         self.logger.info(f"Switching to page {page_name}...")
         if page_name in self.pages.keys():
-            self.qt_signals_handler.edit_progress_msg.emit(
-                self.langs_handler.tr("shared.msg.loading_page")
+            self.qt_signals.emit_signal(
+                "edit_progress_msg", self.langs.tr("shared.msg.loading_page")
             )
             if refresh:
                 self.refresh(page_name, page_args)
@@ -299,7 +263,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
 
             else:
                 self.history.insert(0, self.current_page_infos)
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
 
         else:
             self.logger.error(f"Page <{page_name}> not found !")
@@ -331,10 +295,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.removeWidget(self.settings_page)
             self.settings_page = settings_page.SettingsPage(
                 self,
-                self.res_handler,
-                self.settings_handler,
-                self.langs_handler,
-                self.qt_signals_handler,
+                self.api,
             )
             self.pages["SETTINGS_PAGE"] = self.settings_page
             self.addWidget(self.settings_page)
@@ -345,11 +306,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.shelfs_view_page.deleteLater()
             self.shelfs_view_page = shelfs_view_page.ShelfsViewPage(
                 self,
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.settings_handler,
-                self.langs_handler,
+                self.api,
             )
             self.pages["SHELFS_VIEW_PAGE"] = self.shelfs_view_page
             self.addWidget(self.shelfs_view_page)
@@ -360,11 +317,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.book_creation_page.deleteLater()
             self.book_creation_page = book_creation_page.BookCreationPage(
                 self,
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.settings_handler,
-                self.langs_handler,
+                self.api,
                 **page_args,
             )
             self.pages["BOOK_CREATION_PAGE"] = self.book_creation_page
@@ -376,11 +329,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.shelf_creation_page.deleteLater()
             self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
                 self,
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.settings_handler,
-                self.langs_handler,
+                self.api,
                 **page_args,
             )
             self.pages["SHELF_CREATION_PAGE"] = self.shelf_creation_page
@@ -393,11 +342,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.shelf_details_page = shelf_details_page.ShelfDetailsPage(
                 self,
                 page_args["shelf"],
-                self.books_handler,
-                self.res_handler,
-                self.qt_signals_handler,
-                self.settings_handler,
-                self.langs_handler,
+                self.api,
             )
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page
             self.addWidget(self.shelf_details_page)
@@ -407,11 +352,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.book_details_page.deleteLater()
             self.book_details_page = book_details_page.BookDetailsPage(
                 self,
-                self.res_handler,
-                self.settings_handler,
-                self.langs_handler,
-                self.qt_signals_handler,
-                self.books_handler,
+                self.api,
                 page_args["book_id"],
             )
             self.pages["BOOK_DETAILS_PAGE"] = self.book_details_page

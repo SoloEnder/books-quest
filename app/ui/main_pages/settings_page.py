@@ -5,8 +5,7 @@ import webbrowser
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import langs_handler, resources_handler, settings_handler
-from app.ui import qt_signals_handler
+from app.src import api
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -15,21 +14,16 @@ class SettingsPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        res_handler: resources_handler.RessourcesHandler,
-        settings_handler: settings_handler.SettingsHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
     ):
-        super().__init__(
-            parent, res_handler, settings_handler, langs_handler, qt_signals_handler
-        )
+        super().__init__(parent, api)
         self.logger = logging.getLogger()
         self.PAGE_NAME = "SETTINGS_PAGE"
         self.nav_bar = MainNavigationBar(None)
         self.main_lyt.addWidget(self.nav_bar)
         self.setObjectName("SettingsPage")
         utils_funcs.load_and_set_ss(
-            self.res_handler.get_res("assets.qss.settings_page"),
+            self.res_files.get_res("assets.qss.settings_page"),
             widget=self,
             logger=self.logger,
         )
@@ -46,48 +40,35 @@ class SettingsPage(base_page.BasePage):
         )  # The naviguation bar
         self.appearance_settings = AppearanceSettings(
             None,
-            self.settings_handler,
-            self.res_handler,
-            self.langs_handler,
-            self.qt_signals_handler,
-            images_tools.get_svg(
-                self.res_handler.get_res("assets.icons.color_palette")
-            ),
+            self.api,
+            images_tools.get_svg(self.res_files.get_res("assets.icons.color_palette")),
         )
         self.update_settings = UpdateSettings(
             None,
-            self.settings_handler,
-            self.res_handler,
-            self.langs_handler,
-            self.qt_signals_handler,
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.refresh")),
+            self.api,
+            images_tools.get_svg(self.res_files.get_res("assets.icons.refresh")),
         )
         self.about_settings = HelpSettings(
             None,
-            self.settings_handler,
-            self.res_handler,
-            self.langs_handler,
-            self.qt_signals_handler,
+            self.api,
             images_tools.get_svg(
-                self.res_handler.get_res("assets.icons.question_circle")
+                self.res_files.get_res("assets.icons.question_circle")
             ),
         )
 
-        self.apply_button = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.done")
-        )
+        self.apply_button = QtWidgets.QPushButton(self.langs.tr("shared.actions.done"))
         self.apply_button.clicked.connect(self.apply_and_refresh)
         self.add_section(
             self.appearance_settings,
-            self.langs_handler.tr("settings.general.appearance.section_title"),
+            self.langs.tr("settings.general.appearance.section_title"),
         )
         self.add_section(
             self.update_settings,
-            self.langs_handler.tr("settings.general.update.section_title"),
+            self.langs.tr("settings.general.update.section_title"),
         )
         self.add_section(
             self.about_settings,
-            self.langs_handler.tr("settings.general.help.section_title"),
+            self.langs.tr("settings.general.help.section_title"),
         )
 
         self.main_lyt.addWidget(self.nav_bar, 0, 0, QtCore.Qt.AlignmentFlag.AlignTop)
@@ -101,14 +82,14 @@ class SettingsPage(base_page.BasePage):
         Send a signal to all SettingsSection to save the settings, and emit the signal to refresh UI
         """
         self.logger.info("Applying new settings...")
-        self.qt_signals_handler.edit_progress_msg.emit(
-            self.langs_handler.tr("settings.msg.applying_changes")
+        self.qt_signals.emit_signal(
+            "edit_progress_msg", self.langs.tr("settings.msg.applying_changes")
         )
-        self.qt_signals_handler.apply_settings_sg.emit()
-        self.qt_signals_handler.refresh_ui_sg.emit()
-        self.qt_signals_handler.edit_progress_msg.emit(" ")
+        self.qt_signals.emit_signal("apply_settings_sg")
+        self.qt_signals.emit_signal("refresh_ui_sg")
+        self.qt_signals.emit_signal("edit_progress_msg", "")
         QtWidgets.QMessageBox.information(
-            None, "Settings", self.langs_handler.tr("settings.msg.settings_updated")
+            None, "Settings", self.langs.tr("settings.msg.settings_updated")
         )
 
     def has_section(self, section: SettingsSection) -> bool:
@@ -203,19 +184,18 @@ class SettingsSection(QtWidgets.QWidget):
         parent: QtWidgets.QWidget | None,
         section_name: str,
         header_lang_path: str,
-        settings_handler: settings_handler.SettingsHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(parent)
         self.SECTION_NAME = section_name
         self.header_lang_path = header_lang_path
-        self.res_handler = res_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.qt_signals_handler = qt_signals_handler
+        self.api = api
+        self.books = self.api.books
+        self.res_files = self.api.res_files
+        self.settings = self.api.settings
+        self.langs = self.api.langs
+        self.qt_signals = self.api.qt_signals
         self.icon = icon
 
         self.base_lyt = QtWidgets.QGridLayout()
@@ -223,12 +203,12 @@ class SettingsSection(QtWidgets.QWidget):
 
         self._child_sections: dict[str, SettingsSection] = {}
 
-        self.header_lb = QtWidgets.QLabel(self.langs_handler.tr(header_lang_path))
+        self.header_lb = QtWidgets.QLabel(self.langs.tr(header_lang_path))
         self.header_lb.setProperty("role", "h2")
         self.base_lyt.addWidget(self.header_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
         # --- Connecting the signal emitted when an appliance of the new settings is request
-        self.qt_signals_handler.apply_settings_sg.connect(self.apply_settings)
+        self.qt_signals.connect_to_signal("apply_settings_sg", self.apply_settings)
 
     def has_child_section(self, section: SettingsSection) -> bool:
         """
@@ -278,20 +258,14 @@ class GeneralSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler: settings_handler.SettingsHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "General",
             "settings.general.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
 
@@ -300,39 +274,27 @@ class AppearanceSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler: settings_handler.SettingsHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "APPEARANCE",
             "settings.general.appearance.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
         self.header_lb.setStatusTip(
-            self.langs_handler.tr("settings.general.appearance.section_description")
+            self.langs.tr("settings.general.appearance.section_description")
         )
         self.header_lb.setProperty("role", "h3")
         self.langs_settings = LangsSettings(
             None,
-            settings_handler,
-            self.res_handler,
-            self.langs_handler,
-            qt_signals_handler,
+            self.api,
         )
         self.theme_settings = ThemeSettings(
             None,
-            settings_handler,
-            self.res_handler,
-            self.langs_handler,
-            qt_signals_handler,
+            self.api,
         )
         self.add_child_section(self.theme_settings)
         self.add_child_section(self.langs_settings)
@@ -346,30 +308,22 @@ class ThemeSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler: settings_handler.SettingsHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "THEME_SETTINGS",
             "settings.general.appearance.theme.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
         self.header_lb.setProperty("role", "h4")
         self.header_lb.setStatusTip(
-            self.langs_handler.tr(
-                "settings.general.appearance.theme.section_description"
-            )
+            self.langs.tr("settings.general.appearance.theme.section_description")
         )
         self.edit_theme_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("settings.general.appearance.theme.interface_theme")
+            self.langs.tr("settings.general.appearance.theme.interface_theme")
         )
         self.theme_selection_combob = QtWidgets.QComboBox()
         self.theme_selection_combob.setFixedSize(200, 25)
@@ -380,22 +334,20 @@ class ThemeSettings(SettingsSection):
             "dark": 2,
         }
         self.theme_selection_combob.addItem(
-            self.langs_handler.tr("settings.general.appearance.theme.light_theme"),
+            self.langs.tr("settings.general.appearance.theme.light_theme"),
             "light",
         )
         self.theme_selection_combob.addItem(
-            self.langs_handler.tr(
-                "settings.general.appearance.theme.follow_system_theme"
-            ),
+            self.langs.tr("settings.general.appearance.theme.follow_system_theme"),
             "system",
         )
         self.theme_selection_combob.addItem(
-            self.langs_handler.tr("settings.general.appearance.theme.dark_theme"),
+            self.langs.tr("settings.general.appearance.theme.dark_theme"),
             "dark",
         )
         self.theme_selection_combob.setCurrentIndex(
             self.theme_opt_indexes[
-                str(self.settings_handler.get_setting_value("general.appearance.theme"))
+                str(self.settings.get_setting_value("general.appearance.theme"))
             ]
         )
         self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -403,7 +355,7 @@ class ThemeSettings(SettingsSection):
         self.base_lyt.addWidget(self.theme_selection_combob, 1, 1)
 
     def apply_settings(self):
-        self.settings_handler.set_setting_value(
+        self.settings.set_setting_value(
             "general.appearance.theme",
             self.theme_selection_combob.currentData(),
         )
@@ -417,34 +369,24 @@ class LangsSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler: settings_handler.SettingsHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "LANGS_SETTINGS",
             "settings.general.appearance.language.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
         self.header_lb.setProperty("role", "h4")
         self.header_lb.setStatusTip(
-            self.langs_handler.tr(
-                "settings.general.appearance.language.section_description"
-            )
+            self.langs.tr("settings.general.appearance.language.section_description")
         )
 
         # --- The widgets for the language selection
         self.lang_selection_lb = QtWidgets.QLabel(
-            self.langs_handler.tr(
-                "settings.general.appearance.language.edit_current_lang"
-            )
+            self.langs.tr("settings.general.appearance.language.edit_current_lang")
         )
         self.lang_selection_combob = QtWidgets.QComboBox()
         self.lang_selection_combob.setFixedSize(200, 25)
@@ -456,11 +398,7 @@ class LangsSettings(SettingsSection):
         self.lang_selection_combob.addItem("English", "en")
         self.lang_selection_combob.setCurrentIndex(
             self.languages_opts_indexes[
-                str(
-                    self.settings_handler.get_setting_value(
-                        "general.appearance.language"
-                    )
-                )
+                str(self.settings.get_setting_value("general.appearance.language"))
             ]
         )
         self.base_lyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
@@ -476,7 +414,7 @@ class LangsSettings(SettingsSection):
         )
 
     def apply_settings(self):
-        self.settings_handler.set_setting_value(
+        self.settings.set_setting_value(
             "general.appearance.language",
             self.lang_selection_combob.currentData(),
         )
@@ -486,49 +424,41 @@ class UpdateSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "update_settings",
             "settings.general.update.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
-            self.langs_handler.tr("settings.general.update.section_description")
+            self.langs.tr("settings.general.update.section_description")
         )
 
         # Label that display app current version
         self.current_version_lb = QtWidgets.QLabel()
         self.current_version_lb.setObjectName("AppVersionLabel")
-        self.qt_signals_handler.write_version_on_widget_sg.emit(self.current_version_lb)
+        self.qt_signals.emit_signal(
+            "write_version_on_widget_sg", self.current_version_lb
+        )
         self.current_version_lb.setText(
             f"Books Quest v{self.current_version_lb.text()}"
         )
         self.check_update_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("settings.general.update.actions.check_update")
+            self.langs.tr("settings.general.update.actions.check_update")
         )
         self.check_update_b.clicked.connect(
-            lambda: self.qt_signals_handler.check_for_updates_sg.emit(True)
+            lambda: self.qt_signals.emit_signal("check_for_updates_sg", True)
         )
         self.auto_check_for_update_cb = QtWidgets.QCheckBox(
-            self.langs_handler.tr(
-                "settings.general.update.actions.enable_auto_update_check"
-            )
+            self.langs.tr("settings.general.update.actions.enable_auto_update_check")
         )
         self.auto_check_for_update_cb.setChecked(
-            self.settings_handler.get_setting_value(
-                "general.update.auto_update_check_enabled"
-            )
+            self.settings.get_setting_value("general.update.auto_update_check_enabled")
         )
         self.check_update_b.setObjectName("CheckUpdateButton")
         self.check_update_b.setSizePolicy(QtWidgets.QSizePolicy())
@@ -543,7 +473,7 @@ class UpdateSettings(SettingsSection):
         )
 
     def apply_settings(self):
-        self.settings_handler.set_setting_value(
+        self.settings.set_setting_value(
             "general.update.auto_update_check_enabled",
             self.auto_check_for_update_cb.isChecked(),
         )
@@ -553,28 +483,22 @@ class HelpSettings(SettingsSection):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        settings_handler,
-        res_handler: resources_handler.RessourcesHandler,
-        langs_handler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
         icon: QtGui.QIcon | None = None,
     ):
         super().__init__(
             parent,
             "help_settings",
             "settings.general.help.section_title",
-            settings_handler,
-            res_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
             icon,
         )
         self.header_lb.setProperty("role", "h3")
         self.header_lb.setStatusTip(
-            self.langs_handler.tr("settings.general.help.section_description")
+            self.langs.tr("settings.general.help.section_description")
         )
         self.report_issues_pb = QtWidgets.QPushButton(
-            self.langs_handler.tr("settings.general.help.actions.report_issues")
+            self.langs.tr("settings.general.help.actions.report_issues")
         )
         self.report_issues_pb.clicked.connect(
             lambda: webbrowser.open_new_tab(
@@ -582,10 +506,10 @@ class HelpSettings(SettingsSection):
             )
         )
         self.about_bq_pb = QtWidgets.QPushButton(
-            self.langs_handler.tr("settings.general.help.actions.about_books_quest")
+            self.langs.tr("settings.general.help.actions.about_books_quest")
         )
         self.about_bq_pb.clicked.connect(
-            lambda: self.qt_signals_handler.show_about_sg.emit(True)
+            lambda: self.qt_signals.emit_signal("show_about_sg", True)
         )
 
         self.about_qt_pb = QtWidgets.QPushButton("About Qt")
