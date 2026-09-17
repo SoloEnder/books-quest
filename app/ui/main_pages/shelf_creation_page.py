@@ -479,23 +479,23 @@ class ShelfCreationPage(base_page.BasePage):
         if shelf_infos:
             if self.current_mode == "creation":
                 self.books.books_handler.new_shelf(**shelf_infos)
+                if not self.is_original_cover():
+                    self.attach_cover(shelf_infos["id"])
                 self.qt_signals.emit_signal("shelf_added_sg", shelf_infos["id"])
                 QtWidgets.QMessageBox.information(
                     self, "Success", self.langs.tr("shelf.msg.creation_success")
                 )
-                if not self.is_original_cover():
-                    self.attach_cover(shelf_infos["id"])
                 self.qt_signals.emit_signal("refresh_current_page_sg")
 
             elif self.current_mode == "edition":
                 if self.shelf:
                     self.books.edit_shelf(self.shelf, **shelf_infos)
+                    if not self.is_original_cover():
+                        self.attach_cover(shelf_infos["id"])
                     self.qt_signals.emit_signal("shelf_edited_sg", self.shelf.id)
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
                         self.langs.tr("shelf.msg.edition_success"),
                     )
-                    if not self.is_original_cover():
-                        self.attach_cover(shelf_infos["id"])
                     self.qt_signals.emit_signal("close_page_sg")
