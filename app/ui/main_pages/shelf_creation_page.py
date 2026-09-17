@@ -125,7 +125,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.confirm_b.setIcon(
             images_tools.get_svg(self.res_files.get_res("assets.icons.done"))
         )
-        self.confirm_b.clicked.connect(self.create_shelf)
+        self.confirm_b.clicked.connect(self.save_modifications)
 
         if self._current_mode == "edition":
             self.edition_mode()
@@ -396,21 +396,6 @@ class ShelfCreationPage(base_page.BasePage):
                 elif isinstance(object_title_item.data(), book_sys.Shelf):
                     child_shelves.append(object_title_item.data())
 
-        final_img_path = self.current_shelf_cover
-
-        if not self.is_original_cover():
-            final_img_path = os.path.join(
-                self.res_files.get_res("data.user.bookshelves.covers"),
-                f"{str(id)}.png",
-            )
-            self.copy_cover_img(final_img_path)
-            done = self.copy_cover_img(final_img_path)
-            if not done:
-                return
-
-            self.current_shelf_cover = final_img_path
-            self.set_cover_lb_pixmap(final_img_path)
-
         parents_shelves = []
         if self.current_mode == "edition":
             parents_shelves = self.shelf._parent_shelves
@@ -431,23 +416,38 @@ class ShelfCreationPage(base_page.BasePage):
         original_cover = self.default_shelf_cover
 
         if self.current_mode == "edition":
-            original_cover = self.books_handler.get_book_cover_path(self.shelf)  # type: ignore
+            original_cover = self.books.get_book_cover_path(self.shelf)  # type: ignore
 
         return original_cover == self.current_shelf_cover
 
-    def copy_cover_img(self, dest_path):
+    def attach_cover(self, id: str):
+        """
+        Attach the current cover to the Shelf with `id`
+        """
 
         try:
-            shutil.copy2(self.current_shelf_cover, dest_path)  # type: ignore
+            self.books.set_cover_for_shelf(id)
 
-        except Exception:
-            self.logger.exception(
-                f"Unable to move cover file from tmp path to '{dest_path}' due to error : "
+        except FileNotFoundError:
+            self.logger.error(
+                f"Unable to attach cover to Shelf (ID={id}) : Cover file not found"
             )
-            self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "Cover Not Found", "Cover file not found !", ""
+            )
 
-        else:
-            return True
+        except PermissionError:
+            self.logger.error(
+                f"Unable to attach cover to Shelf (ID={id}) : Permission denied"
+            )
+            self.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Permisssion Denied",
+                "Access to cover file denied",
+                "",
+            )
+        return True
 
     def search_book(self):
         query = self.book_research_e.text()
@@ -473,7 +473,7 @@ class ShelfCreationPage(base_page.BasePage):
                 self.books.books_handler.shelves, self.books.books_handler.books
             )
 
-    def create_shelf(self):
+    def save_modifications(self):
         shelf_infos = self.get_shelf_infos()
 
         if shelf_infos:
@@ -483,18 +483,19 @@ class ShelfCreationPage(base_page.BasePage):
                 QtWidgets.QMessageBox.information(
                     self, "Success", self.langs.tr("shelf.msg.creation_success")
                 )
+                if not self.is_original_cover():
+                    self.attach_cover(shelf_infos["id"])
                 self.qt_signals.emit_signal("refresh_current_page_sg")
 
             elif self.current_mode == "edition":
                 if self.shelf:
-                    edited_shelf = self.books.books_handler.create_shelf(**shelf_infos)
-                    self.books.books_handler.edit_shelf(
-                        self.shelf.str_id(), edited_shelf
-                    )
+                    self.books.edit_shelf(self.shelf, **shelf_infos)
                     self.qt_signals.emit_signal("shelf_edited_sg", self.shelf.id)
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
                         self.langs.tr("shelf.msg.edition_success"),
                     )
-                self.qt_signals.emit_signal("close_page_sg")
+                    if not self.is_original_cover():
+                        self.attach_cover(shelf_infos["id"])
+                    self.qt_signals.emit_signal("close_page_sg")
