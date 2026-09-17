@@ -213,13 +213,19 @@ class BooksService:
         - **shelf_data: The new data of the shelf
         """
 
+        self.logger.debug(
+            f"Editing Shelf (ID={shelf.id}), shelves={self.books_handler.shelves}"
+        )
         # Remove from parents/child
         shelf.remove_from_books()
         shelf.remove_from_child_shelves()
+        shelf_data["parents_shelves"] = shelf._parent_shelves.copy()
         shelf.remove_from_parents()
 
         # Creating the edited shelf
-        new_shelf = self.books_handler.create_shelf(**shelf_data)
+        new_shelf = self.books_handler.create_shelf(
+            **shelf_data
+        )  # Adding to the default shelf
         self.books_handler.edit_shelf(shelf.str_id(), new_shelf)  # Applying the edition
 
         if replace_old_ref:
