@@ -180,6 +180,46 @@ class BooksService:
             os.path.join(self.res_files_api.get_res("tmp"), "shelf_cover.png")
         )
 
+    def edit_shelf_with_id(self, shelf_id: str, **shelf_data):
+        """
+        Edit the informations of the Shelfw that has `shelf_id`
+
+        Parameters
+        ----------
+        - shelf_id (Shelf): the ID of the shelf to edit
+        - **shelf_data: The new data of the shelf
+        """
+        shelf = self.books_handler.shelves.get(shelf_id)
+
+        # Shelf don't exists
+        if not shelf:
+            raise book_sys.BooksShelfNotFoundError(shelf_id)
+
+        self.edit_shelf(shelf, False, **shelf_data)
+
+    def edit_shelf(
+        self,
+        shelf: book_sys.Shelf,
+        replace_old_ref: bool = True,
+        **shelf_data,
+    ):
+        """
+        Edit the informations of `shelf`
+
+        Parameters
+        ----------
+        - shelf (Shelf): the shelf to edit
+        - replace_old_ref (bool=True): Wehter to replace `shelf` variable by the edited Shelf
+        - **shelf_data: The new data of the shelf
+        """
+
+        # Creating the edited shelf
+        new_shelf = self.books_handler.create_shelf(**shelf_data)
+        self.books_handler.edit_shelf(shelf.id, new_shelf)  # Applying the edition
+
+        if replace_old_ref:
+            shelf = new_shelf
+
     def edit_book_with_id(
         self, book_id: str, title: str, replace_old_ref: bool = True, **books_data
     ):
