@@ -238,7 +238,7 @@ class BooksService:
         ------
         BookNotFoundError: if no Book has this ID
         """
-        book = self.books_handler.books.get(book_id)
+        book = self.books_handler.books.get(str(book_id))
 
         if not book:
             raise book_sys.BookNotFoundError(book_id)
