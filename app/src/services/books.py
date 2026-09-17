@@ -220,34 +220,29 @@ class BooksService:
         if replace_old_ref:
             shelf = new_shelf
 
-    def edit_book_with_id(
-        self, book_id: str, title: str, replace_old_ref: bool = True, **books_data
-    ):
+    def edit_book_with_id(self, book_id: str, **books_data):
         """
         Replaces the data of the Book that has `book_id` for id with the new `books_data`
 
         Parameters
         ----------
         - book_id (Book): the ID of the book to edit
-        - title (str): the new title of the book
-        - replace_original_ref (bool=True): wether to replace the reference of the old book (the one before the edition) by the new
         - **books_data: the new data of the book
 
         Raises
         ------
         BookNotFoundError: if no Book has this ID
         """
-        book = self.books_handler.get_books(id=(book_id, True, True))
+        book = self.books_handler.books.get(book_id)
 
         if not book:
             raise book_sys.BookNotFoundError(book_id)
 
-        return self.edit_book(book[0], title, replace_old_ref, **books_data)
+        return self.edit_book(book, False, **books_data)
 
     def edit_book(
         self,
         book: book_sys.Book,
-        title: str,
         replace_old_ref: bool = True,
         **books_data,
     ):
@@ -257,7 +252,6 @@ class BooksService:
         Parameters
         ----------
         - book (Book): the book to edit
-        - title (str): the new title of the book
         - replace_original_ref (bool=True): wether to replace the reference of the old book (the one before the edition) by the new
         - **books_data: the new data of the book
 
@@ -266,7 +260,7 @@ class BooksService:
         BookNotFoundError: if this Book does not exists
         """
         book.delete_from_parents()  # Removes from all the parent to allow proper reset
-        new_book = self.books_handler.create_book(title=title, **books_data)
+        new_book = self.books_handler.create_book(**books_data)
         self.books_handler.edit_book(book.id, new_book)
 
         if replace_old_ref:
