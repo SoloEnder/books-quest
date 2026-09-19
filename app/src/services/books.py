@@ -232,9 +232,10 @@ class BooksService:
             **shelf_data
         )  # Adding to the default shelf
         self.books_handler.edit_shelf(shelf.str_id(), new_shelf)  # Applying the edition
-
         if replace_old_ref:
             shelf = new_shelf
+
+        self.qt_signals.emit_signal("shelf_edited_sg", shelf.str_id())
 
     def edit_book_with_id(self, book_id: str, **books_data):
         """
@@ -281,6 +282,8 @@ class BooksService:
 
         if replace_old_ref:
             book = new_book
+
+        self.qt_signals.emit_signal("book_edited_sg", book.str_id())
 
     def get_cover_path(
         self,
@@ -393,9 +396,11 @@ class BooksService:
         if book_cover_path:
             self.logger.debug(f"Deleting cover of book (ID={book_id})...")
             self.res_files_api.delete(book_cover_path)
+            self.qt_signals.emit_signal("book_removed_sg", str(book_id))
             return
 
         self.logger.warning(f"Could not find cover for book (ID={book_id})")
+        self.qt_signals.emit_signal("book_removed_sg", str(book_id))
 
     def delete_book_with_id(self, book_id: str, del_ref: bool = False):
         """
@@ -437,9 +442,11 @@ class BooksService:
         if cover_path:
             self.logger.debug(f"Deleting cover of shelf (ID={shelf_id}")
             self.res_files_api.delete(cover_path)
+            self.qt_signals.emit_signal("shelf_removed_sg", shelf_id)
             return
 
         self.logger.warning(f"Could not find cover file for shelf (ID={shelf_id}")
+        self.qt_signals.emit_signal("shelf_removed_sg", shelf_id)
 
     def delete_shelf_with_id(self, shelf_id: str, del_ref: bool = True):
         """
