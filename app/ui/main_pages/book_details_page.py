@@ -157,6 +157,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
                 value_widget = QtWidgets.QTextEdit(value[1])
                 value_widget.setMinimumSize(350, 120)
                 value_widget.setMaximumSize(400, 120)
+                value_widget.setReadOnly(True)
 
             else:
                 value_widget = QtWidgets.QLabel(value[1])
