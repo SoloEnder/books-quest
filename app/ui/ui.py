@@ -49,7 +49,7 @@ class UI(QtWidgets.QMainWindow):
         """
         self.logger.info("Drawing UI...")
         self.langs.set_language(
-            self.settings.get_setting_value("general.appearance.language")
+            self.settings.get_setting_value("general.appearance.language"), False
         )
         self.set_app_theme()
         self.books.books_handler.edit_default_shelf(
