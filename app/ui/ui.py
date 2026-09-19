@@ -192,7 +192,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.api,
         )
         self.shelf_details_page = shelf_details_page.ShelfDetailsPage(
-            self, self.books.books_handler.default_shelf, self.api
+            self, self.books.books_handler.default_shelf.id, self.api
         )
         self.book_creation_page = book_creation_page.BookCreationPage(
             self,
@@ -341,7 +341,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.shelf_details_page.deleteLater()
             self.shelf_details_page = shelf_details_page.ShelfDetailsPage(
                 self,
-                page_args["shelf"],
+                page_args["shelf_id"],
                 self.api,
             )
             self.pages["SHELF_DETAILS_PAGE"] = self.shelf_details_page

@@ -319,7 +319,10 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.view_b.setSizePolicy(self.button_size)
         self.view_b.clicked.connect(
             lambda: self.qt_signals.emit_signal(
-                "switch_page_sg", "SHELF_DETAILS_PAGE", True, {"shelf": self.shelf}
+                "switch_page_sg",
+                "SHELF_DETAILS_PAGE",
+                True,
+                {"shelf_id": self.shelf.id},
             )
         )
 

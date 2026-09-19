@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import shiboken6
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -26,14 +27,17 @@ class ShelfDetailsPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        shelf: book_sys.Shelf,
+        shelf_id: uuid.UUID,
         api: api.API,
     ):
 
         super().__init__(parent, api)
         self.PAGE_NAME = "SHELF_DETAILS_PAGE"
-        self.shelf = shelf
-        self.variables_kw = {"shelf": self.shelf}
+        self.shelf = (
+            self.books.books_handler.default_shelf
+            if shelf_id == self.books.books_handler.default_shelf.id
+            else self.books.books_handler.shelves[str(shelf_id)]
+        )  # Getting the shelf object
 
         # logger
         self.logger = logging.getLogger(__name__)
