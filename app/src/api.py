@@ -12,6 +12,6 @@ class API:
             paths.APP_PATH, paths.RESS_INDEXES_FILEPATH
         )
         self.settings = settings.SettingsService(self.res_files)
-        self.books = books.BooksService(self.res_files)
+        self.books = books.BooksService(self.res_files, self.qt_signals)
         self.langs = langs.LangsService(self.res_files, self.settings, self.qt_signals)
         self.logger.info("GeneralAPI initialized")
