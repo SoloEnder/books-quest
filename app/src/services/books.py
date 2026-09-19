@@ -6,14 +6,19 @@ import typing
 from PIL.Image import Image
 
 from app.src import book_sys
-from app.src.services import res_files
+from app.src.services import qt_signals, res_files
 from app.utils import images_tools
 
 
 class BooksService:
-    def __init__(self, res_file: res_files.ResourcesFilesService):
+    def __init__(
+        self,
+        res_file: res_files.ResourcesFilesService,
+        qt_signals: qt_signals.QtSignalsService,
+    ):
         self.books_handler = book_sys.BooksHandler()
         self.res_files_api = res_file
+        self.qt_signals = qt_signals
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
     def set_cover_for(
