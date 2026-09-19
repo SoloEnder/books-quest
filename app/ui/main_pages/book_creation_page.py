@@ -646,7 +646,7 @@ class BookCreationPage(base_page.BasePage):
                     self.books.edit_book(self.book, **books_infos)
 
                 else:
-                    self.books.books_handler.new_book(**books_infos)
+                    self.books.new_book(**books_infos)
 
                 if (
                     not self.is_original_cover()
@@ -667,8 +667,7 @@ class BookCreationPage(base_page.BasePage):
                         self,
                         "Success",
                         self.langs.tr("book.msg.book_edition_success"),
-                    )
-                    self.qt_signals.emit_signal("book_edited_sg", self.book.id)  # type: ignore
+                    )  # type: ignore
                     self.qt_signals.emit_signal("close_page_sg")
 
                 else:
@@ -677,5 +676,4 @@ class BookCreationPage(base_page.BasePage):
                         "Success",
                         self.langs.tr("book.msg.book_addition_success"),
                     )
-                    self.qt_signals.emit_signal("book_added_sg", books_infos["id"])
                     self.qt_signals.emit_signal("refresh_current_page_sg")
