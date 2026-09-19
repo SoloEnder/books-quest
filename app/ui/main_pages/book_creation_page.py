@@ -588,7 +588,8 @@ class BookCreationPage(base_page.BasePage):
             # Checking if read pages are less than total pages
             if books_infos["read_pages"] > books_infos["tot_pages"]:
                 self.qt_signals.emit_signal(
-                    "notify_sgerror",
+                    "notify_sg",
+                    "error",
                     "Books Quest",
                     self.langs.tr("book.msg.invalid_read_pages_count.too_high"),
                     "",
