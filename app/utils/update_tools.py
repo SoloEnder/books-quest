@@ -3,7 +3,7 @@ import logging
 import requests
 from PySide6 import QtWidgets
 
-from app.src.langs_handler import LangsHandler
+from app.src.services import langs
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def show_error(title: str | None = None, *, msg: str):
     QtWidgets.QMessageBox.critical(None, title or "Check for Updates", msg)
 
 
-def get_latest_release_infos(url: str, langs_handler: LangsHandler) -> None | dict:
+def get_latest_release_infos(url: str, langs: langs.LangsService) -> None | dict:
     logger.info(f"Getting latest release infos from {url}...")
 
     try:
@@ -42,24 +42,20 @@ def get_latest_release_infos(url: str, langs_handler: LangsHandler) -> None | di
     except requests.Timeout:
         logger.error("Could not get app latest release infos : request timed out")
         show_error(
-            msg=langs_handler.tr(
-                "updates.errors.latest_release_infos.request_timed_out"
-            )
+            msg=langs.tr("updates.errors.latest_release_infos.request_timed_out")
         )
         return
 
     except requests.HTTPError as httperr:
         logger.error(f"Could not get app latest release infos : {httperr}")
         show_error(
-            msg=langs_handler.tr(
-                "updates.errors.latest_release_infos.httperr", httperr=httperr
-            )
+            msg=langs.tr("updates.errors.latest_release_infos.httperr", httperr=httperr)
         )
         return
 
     except Exception:
         logger.exception("Unable to get latest release infos : ")
-        show_error(msg=langs_handler.tr("updates.errors.unable_to_check_for_updates"))
+        show_error(msg=langs.tr("updates.errors.unable_to_check_for_updates"))
         return
 
     return response.json()

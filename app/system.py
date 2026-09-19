@@ -7,13 +7,11 @@ import webbrowser
 from PySide6 import QtCore, QtWidgets
 
 from app.src import (
+    api,
     book_sys,
-    langs_handler,
-    resources_handler,
-    settings_handler,
 )
-from app.ui import qt_signals_handler, ui
-from app.utils import json_file_manager, paths, update_tools
+from app.ui import ui
+from app.utils import paths, update_tools
 
 
 class AppSystem:
@@ -22,61 +20,55 @@ class AppSystem:
         self.qt_app = qt_app
         self.instance_locker = None
         self.logger = logging.getLogger(__name__)
-        self.jfm = json_file_manager.JsonFileManager()
-        self.res_handler = resources_handler.RessourcesHandler(
-            self.jfm, {}, paths.APP_PATH
-        )
-        self.res_handler.load_from_file(paths.RESS_INDEXES_FILEPATH)
-        self.qt_signals_handler = qt_signals_handler.QtSignalsHandler()
-        self.app_infos = self.load_app_infos(self.res_handler.get_res("app_infos"))
+        self.api = api.API()
+        self.books = self.api.books
+        self.res_files = self.api.res_files
+        self.qt_signals = self.api.qt_signals
+        self.langs = self.api.langs
+        self.settings = self.api.settings
+
+        # Loading data
+        self.res_files.load_indexes()
+        self.books.load_books()
+        self.books.load_shelves()
+        self.settings.load_settings()
+        self.settings.apply_user_settings()
+
+        self.app_infos = self.load_app_infos(self.res_files.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
         self.check_and_make_missing()
         self.check_folder(
-            self.res_handler.get_res("data"),
-            self.res_handler.get_res("assets"),
-            self.res_handler.get_res("data.user"),
-            self.res_handler.get_res("data.user.books"),
-            self.res_handler.get_res("data.user.books.covers"),
-            self.res_handler.get_res("data.user.bookshelves"),
-            self.res_handler.get_res("data.user.bookshelves.covers"),
+            self.res_files.get_res("data"),
+            self.res_files.get_res("assets"),
+            self.res_files.get_res("data.user"),
+            self.res_files.get_res("data.user.books"),
+            self.res_files.get_res("data.user.books.covers"),
+            self.res_files.get_res("data.user.bookshelves"),
+            self.res_files.get_res("data.user.bookshelves.covers"),
         )
         self.logger.info("Initialising application...")
-        self.books_handler = book_sys.BooksHandler(
-            jfm=self.jfm,
-            res_handler=self.res_handler,
-        )
-        self.books_handler.load_books(self.res_handler.get_res("data.user.books.books"))
-        self.books_handler.load_shelves(
-            self.res_handler.get_res("data.user.bookshelves.bookshelves")
-        )
         self.qt_app.aboutToQuit.connect(self.close_app)
-        self.settings_handler = settings_handler.SettingsHandler(self.jfm)
         self.load_and_apply_settings()
-        self.langs_handler = langs_handler.LangsHandler(self.jfm, {}, self.res_handler)
-        self.langs_handler.load_from_file(
-            self.res_handler.get_res(
-                f"assets.langs.{self.settings_handler.get_setting_value('general.appearance.language')}"
-            )
-        )
+        self.langs.set_prefered_language()
         self.logger.info("Connecting signals to loaded slots...")
         self.connect_signals()
         self.logger.info("Erasing files in temporary folder...")
-        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
+        self.res_files.empty_tmp_folder()
 
     def connect_signals(self):
         """
         Connect signals to the already loaded slots
         """
-        self.qt_signals_handler.show_about_sg.connect(self.about)
-        self.qt_signals_handler.check_for_updates_sg.connect(self.check_for_update)
-        self.qt_signals_handler.write_version_on_widget_sg.connect(
-            self.write_version_on_widget
+        self.qt_signals.connect_to_signal("show_about_sg", self.about)
+        self.qt_signals.connect_to_signal("check_for_updates_sg", self.check_for_update)
+        self.qt_signals.connect_to_signal(
+            "write_version_on_widget_sg", self.write_version_on_widget
         )
 
     def get_installation_infos(self):
-        installation_infos = self.jfm.read_json(
-            self.res_handler.get_res("data.app.installation_infos"), catch_error=True
+        installation_infos = self.res_files.read_indexed_file(
+            "data.app.installation_infos"
         )
 
         if not installation_infos:
@@ -100,19 +92,19 @@ class AppSystem:
         return installation_infos
 
     def save_installation_infos(self):
-        self.jfm.write_json(
-            self.res_handler.get_res("data.app.installation_infos"),
+        self.res_files.write_indexed_file(
+            "data.app.installation_infos",
             self.installation_infos,
         )
 
     def load_and_apply_settings(self):
-        self.settings_handler.load_base_settings(
-            self.res_handler.get_res("data.app.static.base_settings")
+        self.settings.load_base_settings(
+            self.res_files.get_res("data.app.static.base_settings")
         )
 
         try:
-            self.settings_handler.load_user_settings(
-                self.res_handler.get_res("data.user.settings")
+            self.settings.load_user_settings(
+                self.res_files.get_res("data.user.settings")
             )
 
         except FileNotFoundError:
@@ -122,36 +114,27 @@ class AppSystem:
                 "Failed to load user settings : File not found !",
             )
 
-        self.settings_handler.apply_user_settings()
+        self.settings.apply_user_settings()
 
     def start(self):
         self.start_ui()
         self.installation_infos["boots_count"] += 1
 
-        if self.settings_handler.get_setting_value(
-            "general.update.auto_update_check_enabled"
-        ):
+        if self.settings.get_setting_value("general.update.auto_update_check_enabled"):
             self.check_for_update()
 
     def start_ui(self):
         self.logger.info("Initialising GUI...")
         self.ui = ui.UI(
-            self.books_handler,
-            self.res_handler,
-            self.qt_signals_handler,
-            self.settings_handler,
-            self.langs_handler,
+            self.api,
         )
-        self.jfm.set_signals_handler(self.ui.qt_signals_handler)
         self.ui.show()
         self.boot_end_time = time.time()
         self.logger.info(
             f"Initialised app in {self.boot_end_time - self.boot_start_time:.3f}s"
         )
 
-        if self.settings_handler.get_setting_value(
-            "developer_settings.show_indev_warning"
-        ):
+        if self.settings.get_setting_value("developer_settings.show_indev_warning"):
             self.show_indev_warn()
 
     def clean_updater_files(self):
@@ -183,41 +166,18 @@ class AppSystem:
     def close_app(self):
         self.logger.info("Closing window...")
         self.logger.info("Saving data...")
-        self.books_handler.save_books(self.res_handler.get_res("data.user.books.books"))
-        self.books_handler.save_shelfs(
-            self.res_handler.get_res("data.user.bookshelves.bookshelves")
-        )
-        self.settings_handler.save_settings(
-            self.res_handler.get_res("data.app.static.base_settings"),
-            self.res_handler.get_res("data.user.settings"),
+        self.books.save_books()
+        self.books.save_shelves()
+        self.settings.save_settings(
+            self.res_files.get_res("data.app.static.base_settings"),
+            self.res_files.get_res("data.user.settings"),
         )
         self.save_installation_infos()
-        self.empty_tmp_folder(self.res_handler.get_res("tmp"))
+        self.res_files.empty_tmp_folder()
         self.logger.info("Exiting app...")
 
     def set_instance_locker(self, instance_locker: QtCore.QLockFile):
         self.instance_locker = instance_locker
-
-    def empty_tmp_folder(self, dir_path):
-        """
-        Create the tmp directory if it does not exists, then erase its content
-        """
-        tmp_path = pathlib.Path(dir_path)
-
-        if not tmp_path.exists():
-            self.logger.warning(
-                "Temporary directory not found, attempting to make it..."
-            )
-            tmp_path.mkdir()
-
-        for element in tmp_path.iterdir():
-            try:
-                if element.is_file():
-                    element.unlink()
-            except Exception:
-                self.logger.error(
-                    f"Unable to destroy file '{element}' in the temporary folder !"
-                )
 
     def check_first_boot(self):
         if self.installation_infos["boots_count"] == 0:
@@ -228,17 +188,17 @@ class AppSystem:
 
     def check_and_make_missing(self):
         folder_to_make = (
-            self.res_handler.get_res("data.user"),
-            self.res_handler.get_res("data.user.books"),
-            self.res_handler.get_res("data.user.books.covers"),
-            self.res_handler.get_res("data.user.bookshelves"),
-            self.res_handler.get_res("data.user.bookshelves.covers"),
-            self.res_handler.get_res("tmp"),
+            self.res_files.get_res("data.user"),
+            self.res_files.get_res("data.user.books"),
+            self.res_files.get_res("data.user.books.covers"),
+            self.res_files.get_res("data.user.bookshelves"),
+            self.res_files.get_res("data.user.bookshelves.covers"),
+            self.res_files.get_res("tmp"),
         )
         file_to_make = (
-            (self.res_handler.get_res("data.user.books.books"), []),
-            (self.res_handler.get_res("data.user.bookshelves.bookshelves"), []),
-            (self.res_handler.get_res("data.user.settings"), {}),
+            (self.res_files.get_res("data.user.books.books"), []),
+            (self.res_files.get_res("data.user.bookshelves.bookshelves"), []),
+            (self.res_files.get_res("data.user.settings"), {}),
         )
 
         for folder in folder_to_make:
@@ -270,7 +230,7 @@ class AppSystem:
                 continue
 
             if filepath.endswith(".json"):
-                self.jfm.write_json(filepath, data, catch_error=False)
+                self.res_files.write_file(filepath, data, catch_error=False)
 
             else:
                 with open(filepath, "w") as f:
@@ -296,7 +256,7 @@ class AppSystem:
         - filepath (str, pathlib.Path): the app infos file path
         """
         try:
-            app_infos = self.jfm.read_json(filepath, catch_error=False)
+            app_infos = self.res_files.read_file(str(filepath))
 
         except (FileNotFoundError, PermissionError):
             self.logger.error("Could not find app infos file !")
@@ -320,8 +280,8 @@ class AppSystem:
                     "app/data/user_data/bookshelves_data",
                 ],
             }
-            self.jfm.write_json(
-                filepath,
+            self.res_files.write_file(
+                str(filepath),
                 app_infos,
             )
         return app_infos
@@ -333,7 +293,7 @@ class AppSystem:
 
         # self.indev_warning_w.show()
         QtWidgets.QMessageBox.information(
-            None, "Books Quest", self.langs_handler.tr("shared.msg.indev_warn")
+            None, "Books Quest", self.langs.tr("shared.msg.indev_warn")
         )
 
     @QtCore.Slot(bool)
@@ -346,9 +306,9 @@ class AppSystem:
         print_console (bool=True): whether to show the infos in the console too
         """
         if print_console:
-            print(f"===== {self.langs_handler.tr('about.title')} =====")
+            print(f"===== {self.langs.tr('about.title')} =====")
             print(
-                self.langs_handler.tr(
+                self.langs.tr(
                     "about.msg",
                     version=self.app_infos["app_version"],
                     developer="SoloEnder",
@@ -358,8 +318,8 @@ class AppSystem:
             print("=============================")
         QtWidgets.QMessageBox.about(
             None,
-            self.langs_handler.tr("about.title"),
-            self.langs_handler.tr(
+            self.langs.tr("about.title"),
+            self.langs.tr(
                 "about.msg",
                 version=self.app_infos["app_version"],
                 developer="SoloEnder",
@@ -378,17 +338,17 @@ class AppSystem:
     @QtCore.Slot(bool)
     def check_for_update(self, show_up_to_date_msg: bool = False):
         self.logger.info("Checking for updates...")
-        self.qt_signals_handler.edit_progress_msg.emit(
-            self.langs_handler.tr("updates.infos.checking_for_updates")
+        self.qt_signals.emit_signal(
+            "edit_progress_msg", self.langs.tr("updates.infos.checking_for_updates")
         )
         release_infos = update_tools.get_latest_release_infos(
             "https://api.github.com/repos/soloender/books-quest/releases/latest",
-            self.langs_handler,
+            self.langs,
         )
         if not release_infos:
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
             return
-        pop_up_title = self.langs_handler.tr("updates.download_pop_up_title")
+        pop_up_title = self.langs.tr("updates.download_pop_up_title")
         release_version = release_infos[
             "tag_name"
         ]  # Should be formatted like this : 'vminor.major.patch'. The 'v' is not a mistake
@@ -403,25 +363,27 @@ class AppSystem:
             self.logger.error(
                 f"Could not compare latest release version to app version tag name='{release_version}', app_version='{self.app_infos['app_version']}'"
             )
-            self.qt_signals_handler.notify_sg.emit(
+            self.qt_signals.emit_signal(
+                "notify_sg",
                 "error",
                 pop_up_title,
-                self.langs_handler.tr("updates.errors.uncomparables_versions"),
+                self.langs.tr("updates.errors.uncomparables_versions"),
                 "",
             )
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
             return
 
         if not is_update:
             self.logger.info("App is up-to-date")
             if show_up_to_date_msg:
-                self.qt_signals_handler.notify_sg.emit(
+                self.qt_signals.emit_signal(
+                    "notify_sg",
                     "info",
                     pop_up_title,
-                    self.langs_handler.tr("updates.infos.up_to_date"),
+                    self.langs.tr("updates.infos.up_to_date"),
                     "",
                 )
-            self.qt_signals_handler.edit_progress_msg.emit(" ")
+            self.qt_signals.emit_signal("edit_progress_msg", " ")
             return
 
         self.logger.info(f"Books Quest {release_version} is available")
@@ -429,14 +391,14 @@ class AppSystem:
         download = update_tools.download_pop_up(
             release_infos,
             pop_up_title,
-            self.langs_handler.tr(
+            self.langs.tr(
                 "updates.infos.update_available", update_version=release_version
             ),
-            self.langs_handler.tr("shared.actions.download"),
+            self.langs.tr("shared.actions.download"),
         )
         if download:
             self.logger.info(
                 f"Opening update page url ({release_infos['html_url']}) in web browser"
             )
             webbrowser.open_new_tab(release_infos["html_url"])
-        self.qt_signals_handler.edit_progress_msg.emit(" ")
+        self.qt_signals.emit_signal("edit_progress_msg", " ")

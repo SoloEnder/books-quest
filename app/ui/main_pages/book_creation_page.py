@@ -2,13 +2,12 @@ import datetime as dt
 import logging
 import os
 import shutil
+import typing
 import uuid
-from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from app.src import book_sys, langs_handler, resources_handler, settings_handler
-from app.ui import qt_signals_handler
+from app.src import api, book_sys
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -29,21 +28,14 @@ class BookCreationPage(base_page.BasePage):
     def __init__(
         self,
         parent: QtWidgets.QWidget,
-        books_handler: book_sys.BooksHandler,
-        res_handler: resources_handler.RessourcesHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
-        settings_handler: settings_handler.SettingsHandler,
-        langs_handler: langs_handler.LangsHandler,
+        api: api.API,
         **kwargs,
     ):
         super().__init__(
             parent,
-            res_handler,
-            settings_handler,
-            langs_handler,
-            qt_signals_handler,
+            api,
         )
-        self.books_handler = books_handler
+        self.books = self.api.books
         self._edition_mode_enabled = kwargs.get("edition_mode_enabled", False)
         self._book: book_sys.Book | None = kwargs.get("book", None)
         self.variables_kw = {**kwargs}
@@ -59,15 +51,15 @@ class BookCreationPage(base_page.BasePage):
                 f"Page {self.PAGE_NAME} called in edition mode, but no book provided for edition !"
             )
 
-        self.icons_folder = self.res_handler.get_res("assets.icons")
+        self.icons_folder = self.res_files.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
         self.basic_book_infos = {
-            "title": self.langs_handler.tr("shared.infos.title"),
-            "authors": self.langs_handler.tr("shared.infos.author"),
-            "edition": self.langs_handler.tr("shared.infos.edition"),
-            "summary": self.langs_handler.tr("shared.infos.summary"),
-            "tot_pages": self.langs_handler.tr("shared.infos.pages_count"),
+            "title": self.langs.tr("shared.infos.title"),
+            "authors": self.langs.tr("shared.infos.author"),
+            "edition": self.langs.tr("shared.infos.edition"),
+            "summary": self.langs.tr("shared.infos.summary"),
+            "tot_pages": self.langs.tr("shared.infos.pages_count"),
         }
         self.basic_book_info_ew = {}
         self.left_alignment = QtCore.Qt.AlignmentFlag.AlignLeft
@@ -75,24 +67,24 @@ class BookCreationPage(base_page.BasePage):
 
         # Cover widgets
         self.default_cover_img = os.path.join(
-            self.res_handler.get_res("assets.defaults_covers.book")
+            self.res_files.get_res("assets.defaults_covers.book")
         )
         self.cover_image = self.default_cover_img
         self.book_cover_lb = QtWidgets.QLabel()
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
         self.edit_cover_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.edit_cover")
+            self.langs.tr("shared.actions.edit_cover")
         )
         self.edit_cover_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.edit"))
+            images_tools.get_svg(self.res_files.get_res("assets.icons.edit"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
         self.restore_default_cover_b = QtWidgets.QPushButton(
-            self.langs_handler.tr("shared.actions.restore_default_cover")
+            self.langs.tr("shared.actions.restore_default_cover")
         )
         self.restore_default_cover_b.setIcon(
-            images_tools.get_svg(self.res_handler.get_res("assets.icons.remove_img"))
+            images_tools.get_svg(self.res_files.get_res("assets.icons.remove_img"))
         )
         self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
@@ -120,19 +112,19 @@ class BookCreationPage(base_page.BasePage):
 
         # Book status widgets
         self.reading_state_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.reading_state_header")
+            self.langs.tr("book.infos.reading_state_header")
         )
         self.book_reading_state_combob = QtWidgets.QComboBox()
         self.book_reading_state_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.unread"),
+            self.langs.tr("book.infos.reading_state.unread"),
             book_sys.Book.ReadingState.UNREAD,
         )
         self.book_reading_state_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.currently_reading"),
+            self.langs.tr("book.infos.reading_state.currently_reading"),
             book_sys.Book.ReadingState.CURRENTLY_READING,
         )
         self.book_reading_state_combob.addItem(
-            self.langs_handler.tr("book.infos.reading_state.finished"),
+            self.langs.tr("book.infos.reading_state.finished"),
             book_sys.Book.ReadingState.FINISHED,
         )
         self.book_reading_state_combob.currentIndexChanged.connect(
@@ -141,9 +133,7 @@ class BookCreationPage(base_page.BasePage):
         self.book_reading_state_widget = QtWidgets.QWidget(self)
         self.book_reading_state_widget_layout = QtWidgets.QGridLayout()
         self.book_reading_state_widget.setLayout(self.book_reading_state_widget_layout)
-        self.read_pages_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.read_pages")
-        )
+        self.read_pages_lb = QtWidgets.QLabel(self.langs.tr("book.infos.read_pages"))
         self.read_pages_le = QtWidgets.QLineEdit("0")
         self.read_pages_le.textEdited.connect(
             lambda: self.check_int(self.read_pages_le.text(), self.read_pages_le)
@@ -153,7 +143,7 @@ class BookCreationPage(base_page.BasePage):
             self.today_date_dt.year, self.today_date_dt.month, self.today_date_dt.day
         )
         self.starting_read_date_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.starting_read_date")
+            self.langs.tr("book.infos.starting_read_date")
         )
         self.starting_read_date_de = QtWidgets.QDateEdit()
         self.starting_read_date_de.setDate(self.today_date)
@@ -163,7 +153,7 @@ class BookCreationPage(base_page.BasePage):
         # -- Automatically sets the minimum date for book end read date as the starting read date --
         self.starting_read_date_de.dateChanged.connect(self.set_end_read_min_date)
         self.end_read_date_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.end_read_date")
+            self.langs.tr("book.infos.end_read_date")
         )
         self.end_read_date_de = QtWidgets.QDateEdit()
         self.end_read_date_de.setDate(self.today_date)
@@ -186,7 +176,7 @@ class BookCreationPage(base_page.BasePage):
 
         # Shelfs widgets
         self.shelfs_selection_lb = QtWidgets.QLabel(
-            self.langs_handler.tr("book.infos.shelfs_selection")
+            self.langs.tr("book.infos.shelfs_selection")
         )
         self.shelfs_selection_cbs = {}
         self.shelfs_selection_widget = QtWidgets.QWidget(self)
@@ -200,7 +190,7 @@ class BookCreationPage(base_page.BasePage):
         self.shelfs_selection_scroll_area.setWidgetResizable(True)
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
-        for shelf in self.books_handler.shelves.values():
+        for shelf in self.books.books_handler.shelves.values():
             shelf_cb = QtWidgets.QCheckBox(
                 utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
             )
@@ -209,17 +199,17 @@ class BookCreationPage(base_page.BasePage):
 
         self.existence_msgbox = QtWidgets.QMessageBox()
         self.cancel_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.actions.cancel"),
+            self.langs.tr("shared.actions.cancel"),
             QtWidgets.QMessageBox.ButtonRole.RejectRole,
         )
         self.rename_b = self.existence_msgbox.addButton(
-            self.langs_handler.tr("shared.actions.rename"),
+            self.langs.tr("shared.actions.rename"),
             QtWidgets.QMessageBox.ButtonRole.AcceptRole,
         )
-        self.existence_msgbox.setText(self.langs_handler.tr("shared.msg.add_confirm"))
+        self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
-        self.add_b = QtWidgets.QPushButton(self.langs_handler.tr("shared.actions.done"))
-        self.add_b.clicked.connect(self.create_book)
+        self.add_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.done"))
+        self.add_b.clicked.connect(self.save_modifications)
 
         # Add the widgets
         self.main_lyt.addWidget(self.book_cover_lb, 0, 0)
@@ -308,7 +298,7 @@ class BookCreationPage(base_page.BasePage):
         """
 
         self.logger.info("Appling normal mode...")
-        self.qt_signals_handler.switch_page_sg.emit("BOOK_CREATION_PAGE", True, {})
+        self.qt_signals.emit_signal("switch_page_sg", "BOOK_CREATION_PAGE", True, {})
 
     @QtCore.Slot()
     def set_starting_read_max_date(self):
@@ -332,8 +322,7 @@ class BookCreationPage(base_page.BasePage):
         self.logger.info("Appling edition mode...")
         if self.book:
             self.cover_image = (
-                self.books_handler.get_book_cover_path(self.book, False)
-                or self.default_cover_img
+                self.books.get_book_cover_path(self.book) or self.default_cover_img
             )
             self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
             for book_attr in self.basic_book_infos:
@@ -421,16 +410,15 @@ class BookCreationPage(base_page.BasePage):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.default_cover_img))
 
     def set_book_cover(self):
-        infos = images_tools.select_image()
+        """
+        Displays a files picker, allowing user to select an image as cover.
+        The selected images is then redimensionned and set as the current cover.
+        """
+        final_infos = self.books.select_book_cover()
 
-        if infos:
-            if infos[0]:
-                final_infos = images_tools.prepare_image(
-                    infos[0],
-                    os.path.join(self.res_handler.get_res("tmp"), "book_cover.png"),
-                )
-                self.cover_image = final_infos[0]
-                self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
+        if final_infos:
+            self.cover_image = final_infos[0]
+            self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
 
     def set_cover_lb_pixmap(self, new_path):
         self.book_cover_lb.setPixmap(QtGui.QPixmap(self.cover_image))
@@ -441,10 +429,10 @@ class BookCreationPage(base_page.BasePage):
         """
         # -- Removes the previous cover file
         if self.edition_mode_enabled:
-            book_cover = self.books_handler.get_book_cover_path(self.book, False)  # type: ignore
+            book_cover = self.books.get_book_cover_path(self.book, False)  # type: ignore
 
             if book_cover:
-                self.books_handler._delete_cover(book_cover)
+                self.res_files.delete(book_cover)
         self.cover_image = self.default_cover_img
         self.set_cover_lb_pixmap(self.cover_image)
 
@@ -456,12 +444,12 @@ class BookCreationPage(base_page.BasePage):
         matches = []
         if self.edition_mode_enabled and self.book:
             if self.book.title != title:
-                matches = self.books_handler.get_books(
+                matches = self.books.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
             elif self.book.authors != authors:
-                matches = self.books_handler.get_books(
+                matches = self.books.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
@@ -469,7 +457,7 @@ class BookCreationPage(base_page.BasePage):
             self.logger.debug(
                 "Searching for books the same title and authors as the currently being created book..."
             )
-            matches = self.books_handler.get_books(
+            matches = self.books.books_handler.get_books(
                 title=(title, True, False), authors=(authors, True, False)
             )
 
@@ -493,6 +481,43 @@ class BookCreationPage(base_page.BasePage):
             self.cover_image = dest_path
             self.set_cover_lb_pixmap(self.cover_image)
 
+    def attach_cover(self, id: str):
+        """
+        Attach the current cover to the book that has 'id' as ID
+        """
+        try:
+            self.books.set_cover_for_book(id)
+
+        except FileNotFoundError:
+            self.logger.error(
+                f"Could not attach cover file to book (ID='{id}') : File not found"
+            )
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "Cover not found", "Cover file not found", ""
+            )
+            return
+
+        except PermissionError:
+            self.logger.error(
+                f"Could not attach cover to book (ID='{id}') : Permission denied"
+            )
+            self.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Permission denied",
+                "Access to cover file denied !",
+                "",
+            )
+            return
+
+        except FileExistsError:
+            self.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Cover Exists",
+                "A cover file already exists for this book !",
+            )
+
     def get_book_infos(self):
         books_infos = {}
 
@@ -504,10 +529,11 @@ class BookCreationPage(base_page.BasePage):
                     value = int(text) if text else 1
 
                     if value <= 0:
-                        self.qt_signals_handler.notify_sg.emit(
+                        self.qt_signals.emit_signal(
+                            "notify_sg",
                             "error",
                             "Books Quest",
-                            self.langs_handler.tr("book.msg.invalid_pages_count"),
+                            self.langs.tr("book.msg.invalid_pages_count"),
                             "",
                         )
                         return
@@ -524,8 +550,8 @@ class BookCreationPage(base_page.BasePage):
                     books_infos[key] = text
 
         if not books_infos.get("title"):
-            self.qt_signals_handler.notify_sg.emit(
-                "error", "", self.langs_handler.tr("book.msg.invalid_title"), ""
+            self.qt_signals.emit_signal(
+                "notify_sg", "error", "", self.langs.tr("book.msg.invalid_title"), ""
             )
             return
 
@@ -537,7 +563,7 @@ class BookCreationPage(base_page.BasePage):
                 f"Found {title_suffix} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs_handler.tr('book.msg.book_already_exists')} ({title_suffix})\n{self.langs_handler.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({title_suffix})'"
+                f"{self.langs.tr('book.msg.book_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({title_suffix})'"
             )
             self.existence_msgbox.exec()
 
@@ -553,38 +579,6 @@ class BookCreationPage(base_page.BasePage):
         if self.edition_mode_enabled:
             books_infos["id"] = self.book.id  # type: ignore
 
-        cover_dest_path = os.path.join(
-            self.res_handler.get_res("data.user.books.covers"),
-            f"{str(books_infos['id'])}.png",
-        )
-
-        # Checking if the final cover path and the current cover path are different (very important)
-        #
-        if not self.is_original_cover():
-            try:
-                self.copy_book_cover(self.cover_image, cover_dest_path)
-
-            except FileNotFoundError:
-                self.logger.error(
-                    "Could not copy cover file to books covers folder : file not found"
-                )
-                self.qt_signals_handler.notify_sg.emit(
-                    "error", "Cover not found", "Cover file not found", ""
-                )
-                return
-
-            except PermissionError:
-                self.logger.error(
-                    "Could not copy cover file to books covers folder : Permission denied"
-                )
-                self.qt_signals_handler.notify_sg.emit(
-                    "error",
-                    "Permission denied",
-                    "Access to original cover file denied",
-                    "",
-                )
-                return
-
         books_infos["reading_state"] = self.book_reading_state_combob.currentData()
 
         if self.read_pages_le.isEnabled():
@@ -593,10 +587,11 @@ class BookCreationPage(base_page.BasePage):
 
             # Checking if read pages are less than total pages
             if books_infos["read_pages"] > books_infos["tot_pages"]:
-                self.qt_signals_handler.notify_sg.emit(
+                self.qt_signals.emit_signal(
+                    "notify_sg",
                     "error",
                     "Books Quest",
-                    self.langs_handler.tr("book.msg.invalid_read_pages_count.too_high"),
+                    self.langs.tr("book.msg.invalid_read_pages_count.too_high"),
                     "",
                 )
                 return
@@ -610,6 +605,9 @@ class BookCreationPage(base_page.BasePage):
             books_infos["end_read_date"] = self.end_read_date_de.date().toString(
                 QtCore.Qt.DateFormat.ISODate
             )
+
+        # Parents shelves
+        books_infos["parents_shelves"] = self.get_selected_shelves()
         return books_infos
 
     def is_original_cover(self):
@@ -619,49 +617,64 @@ class BookCreationPage(base_page.BasePage):
         original_cover = self.default_cover_img
 
         if self.edition_mode_enabled:
-            original_cover = self.books_handler.get_book_cover_path(self.book)  # type: ignore
+            original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
         return original_cover == self.cover_image
 
-    def create_book(self):
+    def get_selected_shelves(self, return_ids_only: bool = False):
+        """
+        Get and return the shelves that has been selected by the user.
+
+        Parameters
+        ----------
+        return_ids_only (bool=False): wether to return only the shelves ids instead of their objects.
+        """
+        shelves = []
+        for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
+            if shelf_selection_cbs.isChecked():
+                if return_ids_only:
+                    shelves.append(shelf_id)
+                    continue
+                shelves.append(self.books.books_handler.shelves[shelf_id])
+        return shelves
+
+    def save_modifications(self):
         books_infos = self.get_book_infos()
 
         if books_infos:
             try:
-                shelves = []
-                for shelf_id, shelf_selection_cbs in self.shelfs_selection_cbs.items():
-                    if shelf_selection_cbs.isChecked():
-                        shelves.append(self.books_handler.shelves[shelf_id])
-
-                books_infos["parents_shelves"] = shelves
-
                 if self.edition_mode_enabled and self.book:
-                    self.book.delete_from_parents()
-                    new_book = self.books_handler.create_book(**books_infos)
-                    self.books_handler.edit_book(self.book.id, new_book)
+                    self.books.edit_book(self.book, **books_infos)
 
                 else:
-                    self.books_handler.new_book(**books_infos)
+                    self.books.new_book(**books_infos)
+
+                if (
+                    not self.is_original_cover()
+                    and self.cover_image != self.default_cover_img
+                ):  # Cheking if the cover has changed, and if it's not the default cover
+                    self.logger.debug(
+                        f"Book cover has changed, attaching new cover to book (ID={books_infos['id']})"
+                    )
+                    self.attach_cover(books_infos["id"])
 
             except Exception:
                 self.logger.exception("Failed to create valid book : ")
-                self.qt_signals_handler.notify_sg.emit("error", "", "", "")
+                self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
 
             else:
                 if self.edition_mode_enabled:
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
-                        self.langs_handler.tr("book.msg.book_edition_success"),
-                    )
-                    self.qt_signals_handler.book_edited_sg.emit(self.book.id)  # type: ignore
-                    self.qt_signals_handler.close_page_sg.emit()
+                        self.langs.tr("book.msg.book_edition_success"),
+                    )  # type: ignore
+                    self.qt_signals.emit_signal("close_page_sg")
 
                 else:
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
-                        self.langs_handler.tr("book.msg.book_addition_success"),
+                        self.langs.tr("book.msg.book_addition_success"),
                     )
-                    self.qt_signals_handler.book_added_sg.emit(books_infos["id"])
-                    self.qt_signals_handler.refresh_current_page_sg.emit()
+                    self.qt_signals.emit_signal("refresh_current_page_sg")

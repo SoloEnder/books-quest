@@ -84,7 +84,7 @@
     "infos": {
       "object_type": "Shelf",
       "title": "Titre : ",
-      "default_shelf_title": "All Books"
+      "default_shelf_title": "Your Library"
     },
     "msg": {
       "invalid_title": "Shelf title is not valid",
