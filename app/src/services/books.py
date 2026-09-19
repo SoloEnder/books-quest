@@ -21,14 +21,14 @@ class BooksService:
         self.qt_signals = qt_signals
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
-    def add_book(self, **books_infos):
+    def new_book(self, **books_infos):
         """
         Create and add an instance of `Book` to the books handler
         """
         self.books_handler.new_book(**books_infos)
         self.qt_signals.emit_signal("book_added_sg", books_infos["id"])
 
-    def add_shelf(self, **shelf_infos):
+    def new_shelf(self, **shelf_infos):
         """
         Create a Shelf object and add it to the books handler
         """
