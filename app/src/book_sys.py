@@ -920,3 +920,15 @@ class ReadingSessionTime:
         self.day = day
         self.hour = hour
         self.minute = minute
+
+    def get_data(self) -> dict:
+        """
+        Return the data of this ReadingSessionTime into a dictionnary
+        """
+        return {
+            "year": self.year,
+            "month": self.month,
+            "day": self.day,
+            "hour": self.hour,
+            "minute": self.minute,
+        }
