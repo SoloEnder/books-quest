@@ -299,6 +299,11 @@ class Shelf:
         return str(self.id)
 
 
+class SessionIDAlreadyAssignedError(Exception):
+    def __init__(self, session_id: int, book_id: str):
+        self.msg = f"Session ID '{session_id}' is already assigned to another reading session in book (ID={book_id})!"
+
+
 class Book:
     class ReadingState(enum.Enum):
         UNREAD = "UNREAD"
@@ -323,7 +328,9 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
-        self.reading_sessions: list[ReadingSession] = kwargs.get("reading_sessions", [])
+        self.reading_sessions: dict[int, ReadingSession] = kwargs.get(
+            "reading_sessions", {}
+        )
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
             raise InvalidUUIDError(self.id)
@@ -363,7 +370,13 @@ class Book:
         if session.end_page > self.tot_pages:
             raise ReadingEndPageError(self.str_id())
 
-        self.reading_sessions.append(session)
+        # Checking if the session ID is already assigned to a reading session
+        if session.session_id in self.reading_sessions:
+            raise SessionIDAlreadyAssignedError(session.session_id, self.str_id())
+
+        new_id = max(self.reading_sessions.keys()) + 1
+        session.session_id = new_id
+        self.reading_sessions[new_id] = session
 
     def get_infos(self) -> dict:
         return {
@@ -838,6 +851,7 @@ class ReadingSession:
         duration: int,
         start_page: int = 0,
         end_page: int = 0,
+        session_id: int = -1,
     ):
         """
         The base class for books reading sessions
@@ -849,6 +863,7 @@ class ReadingSession:
         - duration (int): the duration of the reading session (in seconds)
         - start_page (int=0): the page where the reading session started
         - end_page (int=0): the page where the reading session end
+        - session_id (int=0): the position of this session in the book where it belong. Leave to `-1` if this session is not attached to a book yet
         """
         self.start_date = start_date
         self.end_date = end_date
@@ -857,6 +872,7 @@ class ReadingSession:
         self.end_page = end_page
         self._check_pages_infos()
         self.pages_read = self.end_page - self.start_page
+        self.session_id = session_id
 
     def _check_pages_infos(self):
         """
