@@ -125,6 +125,26 @@ class InvalidUUIDError(Exception):
         return self.msg
 
 
+class ReadingStartPageError(Exception):
+    def __init__(self, book_id: str) -> None:
+        super().__init__()
+        self.msg = f"Reading session start page is different from book (ID={book_id}) current page "
+
+    def __str__(self):
+        return self.msg
+
+
+class ReadingEndPageError(Exception):
+    def __init__(self, book_id: str) -> None:
+        super().__init__()
+        self.msg = (
+            f"The reading end page is higher than the book (ID={book_id}) end page !"
+        )
+
+    def __str__(self):
+        return self.msg
+
+
 class Shelf:
     def __init__(self, title: str, **kwargs):
         self.title = title
@@ -303,6 +323,7 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
+        self.reading_sessions: list[ReadingSession] = kwargs.get("reading_sessions", [])
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
             raise InvalidUUIDError(self.id)
@@ -311,6 +332,38 @@ class Book:
 
         for parent_shelf in self._parents_shelves:
             self.check_parent_shelf(parent_shelf)
+
+    def new_reading_session(
+        self,
+        start_date: ReadingSessionTime,
+        end_date: ReadingSessionTime,
+        duration: int,
+        start_page: int = 0,
+        end_page: int = 0,
+    ):
+        """
+        Creates and add an new reading session to this book
+
+        Parameters
+        ----------
+        - start_date (ReadingSessionTime): the begining date of the reading session
+        - end_date (ReadingSessionTime): the end date of the reading session
+        - duration (int): the duration of the reading session (in seconds)
+        - start_page (int=0): the page where the reading session started
+        - end_page (int=0): the page where the reading session end
+        """
+        session = ReadingSession(start_date, end_date, duration, start_page, end_page)
+        self.add_reading_session(session)
+
+    def add_reading_session(self, session: ReadingSession):
+        """
+        Add the reading session `session` to this book
+        """
+        # Checking if start page > 0
+        if session.end_page > self.tot_pages:
+            raise ReadingEndPageError(self.str_id())
+
+        self.reading_sessions.append(session)
 
     def get_infos(self) -> dict:
         return {
@@ -777,10 +830,53 @@ class BooksHandler:
         return shelves
 
 
-class Session:
-    def __init__(self, **kwargs):
-        self.start_date = kwargs.get("start_date", None)
-        self.end_date = kwargs.get("end_date", None)
-        self.start_page = kwargs.get("start_date", 0)
-        self.end_page = kwargs.get("end_page", 0)
+class ReadingSession:
+    def __init__(
+        self,
+        start_date: ReadingSessionTime,
+        end_date: ReadingSessionTime,
+        duration: int,
+        start_page: int = 0,
+        end_page: int = 0,
+    ):
+        """
+        The base class for books reading sessions
+
+        Parameters
+        ----------
+        - start_date (ReadingSessionTime): the begining date of the reading session
+        - end_date (ReadingSessionTime): the end date of the reading session
+        - duration (int): the duration of the reading session (in seconds)
+        - start_page (int=0): the page where the reading session started
+        - end_page (int=0): the page where the reading session end
+        """
+        self.start_date = start_date
+        self.end_date = end_date
+        self.duration = duration
+        self.start_page = start_page
+        self.end_page = end_page
+        self._check_pages_infos()
         self.pages_read = self.end_page - self.start_page
+
+    def _check_pages_infos(self):
+        """
+        Checks if the pages start and end values are possible
+
+        Raises
+        ------
+        ValueError: if the page start value is higher than the end page value or lower than 0
+        """
+        if self.start_page < 0:
+            raise ValueError("Session start page cannot be under 0 !")
+
+        if self.start_page > self.end_page:
+            raise ValueError("Session start page cannot be higher than end page !")
+
+
+class ReadingSessionTime:
+    def __init__(self, year: int, month: int, day: int, hour: int, minute: int):
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
