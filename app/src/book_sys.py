@@ -366,16 +366,27 @@ class Book:
         """
         Add the reading session `session` to this book
         """
-        # Checking if start page > 0
-        if session.end_page > self.tot_pages:
-            raise ReadingEndPageError(self.str_id())
-
         # Checking if the session ID is already assigned to a reading session
         if session.session_id in self.reading_sessions:
             raise SessionIDAlreadyAssignedError(session.session_id, self.str_id())
 
         new_id = max(self.reading_sessions.keys()) + 1
         session.session_id = new_id
+
+        if session.end_page >= self.tot_pages:
+            self.read_pages = self.tot_pages
+            session.end_page = (
+                self.tot_pages
+            )  # In case the session end page is higher than the book total pages count
+            self.reading_state = Book.ReadingState.FINISHED
+
+        elif self.reading_state == Book.ReadingState.UNREAD:
+            self.read_pages += session.pages_read
+            self.reading_state = Book.ReadingState.CURRENTLY_READING
+
+        else:
+            self.read_pages += session.pages_read
+
         self.reading_sessions[new_id] = session
 
     def get_infos(self) -> dict:
