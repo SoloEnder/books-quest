@@ -328,9 +328,13 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
-        self.reading_sessions: dict[int, ReadingSession] = kwargs.get(
-            "reading_sessions", {}
+        self._reading_sessions_list: list[ReadingSession] = kwargs.get(
+            "reading_sessions", []
         )
+        self.reading_sessions = {}
+
+        # Adding readings sessions
+        [self.add_reading_session(session) for session in self._reading_sessions_list]
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
             raise InvalidUUIDError(self.id)
@@ -690,7 +694,7 @@ class BooksHandler:
 
         return matches
 
-    def _serialize_reading_session(self, book: Book) -> list[dict]:
+    def _serialize_reading_sessions(self, book: Book) -> list[dict]:
         """
         Serialize non json serializable elements in the readings session of a Book, such as `ReadingSessionTime`
         Return the result into a list of dict (each dict is the serialized data of a reading session)
@@ -703,6 +707,26 @@ class BooksHandler:
             data.append(session_data)
 
         return data
+
+    def _deserialize_reading_sessions(
+        self, reading_sessions: list[dict]
+    ) -> list[ReadingSession]:
+        """
+        Deserialize a list of sessions data
+        Returns a list of `ReadingSession` objects made with `reading_session`
+        """
+        deserialized_data = []
+
+        for session_data in reading_sessions:
+            start_date = ReadingSessionTime(*session_data["start_date"])
+            end_date = ReadingSessionTime(*session_data["end_date"])
+            del session_data["end_date"]
+            del session_data["end_date"]
+            session = ReadingSession(
+                **session_data, start_date=start_date, end_date=end_date
+            )
+            deserialized_data.append(session)
+        return deserialized_data
 
     def save_books(self, filepath: str):
         self.logger.debug(f"Saving books data in {filepath}...")
@@ -721,6 +745,9 @@ class BooksHandler:
             del book_data["parents_shelves"]
 
             book_data["reading_state"] = book.reading_state.value
+
+            # Serialize reading sessions
+            book_data["reading_sessions"] = self._serialize_reading_sessions(book)
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
@@ -739,6 +766,11 @@ class BooksHandler:
                 book_data["reading_state"] = Book.ReadingState[
                     book_data["reading_state"]
                 ]
+                # If the books has reading sessions
+                if "reading_sessions" in book_data:
+                    book_data["reading_sessions"] = self._deserialize_reading_sessions(
+                        book_data["reading_sessions"]
+                    )
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):
