@@ -899,6 +899,19 @@ class ReadingSession:
         if self.start_page > self.end_page:
             raise ValueError("Session start page cannot be higher than end page !")
 
+    def get_data(self):
+        """
+        Return this Session data in a dict.
+        """
+        return {
+            "session_id": self.session_id,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "duration": self.duration,
+            "start_page": self.start_page,
+            "end_page": self.end_page,
+        }
+
 
 class ReadingSessionTime:
     def __init__(self, year: int, month: int, day: int, hour: int, minute: int):
