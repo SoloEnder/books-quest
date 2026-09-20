@@ -403,6 +403,7 @@ class Book:
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
             "read_pages": self.read_pages,
+            "reading_sessions": self.reading_sessions,
             "parents_shelves": self._parents_shelves,
         }
 
