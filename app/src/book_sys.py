@@ -689,6 +689,20 @@ class BooksHandler:
 
         return matches
 
+    def _serialize_reading_session(self, book: Book) -> list[dict]:
+        """
+        Serialize non json serializable elements in the readings session of a Book, such as `ReadingSessionTime`
+        Return the result into a list of dict (each dict is the serialized data of a reading session)
+        """
+        data = []
+        for session in book.reading_sessions.values():
+            session_data = session.get_data()
+            session_data["start_date"] = session_data["start_date"].get_data()
+            session_data["end_date"] = session_data["end_date"].get_data()
+            data.append(session_data)
+
+        return data
+
     def save_books(self, filepath: str):
         self.logger.debug(f"Saving books data in {filepath}...")
         data = []
