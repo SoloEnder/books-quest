@@ -40,6 +40,9 @@ class QtSignalsService(QtCore.QObject):
     shelf_edited_sg = QtCore.Signal(str)
     shelf_removed_sg = QtCore.Signal(str)
 
+    # Sessions
+    session_added_sg = QtCore.Signal(str, str)  # Book ID and session ID
+
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger(f"{__name__}-QtSignalsService")
