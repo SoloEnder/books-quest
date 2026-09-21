@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import enum
+import json
 import logging
 import os
 import pathlib
 import uuid
 
-from app.src import resources_handler
-from app.utils import json_file_manager as jfm
-
 
 class BooksShelfExistsError(Exception):
     def __init__(self, shelf_id: uuid.UUID | str, msg: str | None = None):
         self.shelf_id = shelf_id
-        self.msg = msg or f"Book shelf with the ID {shelf_id} already exists !"
+        self.msg = msg or f"Shelf with the ID '{shelf_id}' already exists in !"
         super().__init__(self.msg)
 
     def __str__(self):
@@ -33,11 +31,11 @@ class BooksShelfNotFoundError(Exception):
 
 
 class BookNotFoundError(Exception):
-    def __init__(self, book_id: uuid.UUID | str, container, msg: str | None = None):
+    def __init__(self, book_id: uuid.UUID | str, msg: str | None = None):
         self.book_id = book_id
         self.msg = (
             msg
-            or f"Book with ID {book_id} dosen't exists in {container} ! Has been it deleted ?"
+            or f"Book with ID {book_id} dosen't exists in BooksHandler ! Has been it deleted ?"
         )
         super().__init__()
 
@@ -46,11 +44,9 @@ class BookNotFoundError(Exception):
 
 
 class BookExistsError(Exception):
-    def __init__(
-        self, book_id: uuid.UUID | str, container_name: str, msg: str | None = None
-    ):
+    def __init__(self, book_id: uuid.UUID | str, msg: str | None = None):
         self.book_id = book_id
-        self.msg = msg or f"Book with ID {book_id} arleady exists in {container_name} !"
+        self.msg = msg or f"Book with ID {book_id} already exists in BooksHandler !"
         super().__init__(self.msg)
 
     def __str__(self) -> str:
@@ -129,6 +125,26 @@ class InvalidUUIDError(Exception):
         return self.msg
 
 
+class ReadingStartPageError(Exception):
+    def __init__(self, book_id: str) -> None:
+        super().__init__()
+        self.msg = f"Reading session start page is different from book (ID={book_id}) current page "
+
+    def __str__(self):
+        return self.msg
+
+
+class ReadingEndPageError(Exception):
+    def __init__(self, book_id: str) -> None:
+        super().__init__()
+        self.msg = (
+            f"The reading end page is higher than the book (ID={book_id}) end page !"
+        )
+
+    def __str__(self):
+        return self.msg
+
+
 class Shelf:
     def __init__(self, title: str, **kwargs):
         self.title = title
@@ -186,14 +202,14 @@ class Shelf:
         else:
             raise NotAChildShelfError(shelf.id, self.id)
 
-    def remove_all_parents(self):
+    def remove_from_parents(self):
         """
         Removes this shelf from all its parents
         """
         for parent_shelf in self._parent_shelves.copy():
             parent_shelf.remove_child_shelf(self)
 
-    def remove_all_child(self):
+    def remove_from_child_shelves(self):
         """
         Removes this shelf from all its children
         """
@@ -251,7 +267,7 @@ class Shelf:
                 f"Book with (ID={book.id}) is not contained in Shelf (ID={self.id}) !",
             )
 
-    def remove_all_books(self):
+    def remove_from_books(self):
         """
         Remove that shelf from all its books
         """
@@ -283,6 +299,11 @@ class Shelf:
         return str(self.id)
 
 
+class SessionIDAlreadyAssignedError(Exception):
+    def __init__(self, session_id: int, book_id: str):
+        self.msg = f"Session ID '{session_id}' is already assigned to another reading session in book (ID={book_id})!"
+
+
 class Book:
     class ReadingState(enum.Enum):
         UNREAD = "UNREAD"
@@ -307,6 +328,13 @@ class Book:
         self.tot_pages = kwargs.get("tot_pages", 1)
         self.read_pages = kwargs.get("read_pages", 0)
         self.id = kwargs.get("id", uuid.uuid4())  # The id must be an UUID 4 !
+        self._reading_sessions_list: list[ReadingSession] = kwargs.get(
+            "reading_sessions", []
+        )
+        self.reading_sessions = {}
+
+        # Adding readings sessions
+        [self.add_reading_session(session) for session in self._reading_sessions_list]
         # -- Check if the ID is a valid UUID
         if not isinstance(self.id, uuid.UUID):
             raise InvalidUUIDError(self.id)
@@ -315,6 +343,57 @@ class Book:
 
         for parent_shelf in self._parents_shelves:
             self.check_parent_shelf(parent_shelf)
+
+    def new_reading_session(
+        self,
+        start_date: ReadingSessionTime,
+        end_date: ReadingSessionTime,
+        duration: int,
+        start_page: int = 0,
+        end_page: int = 0,
+    ):
+        """
+        Creates and add an new reading session to this book
+
+        Parameters
+        ----------
+        - start_date (ReadingSessionTime): the begining date of the reading session
+        - end_date (ReadingSessionTime): the end date of the reading session
+        - duration (int): the duration of the reading session (in seconds)
+        - start_page (int=0): the page where the reading session started
+        - end_page (int=0): the page where the reading session end
+        """
+        session = ReadingSession(start_date, end_date, duration, start_page, end_page)
+        self.add_reading_session(session)
+
+    def add_reading_session(self, session: ReadingSession):
+        """
+        Add the reading session `session` to this book
+        """
+        # Checking if the session ID is already assigned to a reading session
+        if session.session_id in self.reading_sessions:
+            raise SessionIDAlreadyAssignedError(session.session_id, self.str_id())
+
+        new_id = max(self.reading_sessions.keys()) + 1
+        session.session_id = new_id
+
+        if session.end_page >= self.tot_pages:
+            self.read_pages = self.tot_pages
+            session.end_page = (
+                self.tot_pages
+            )  # In case the session end page is higher than the book total pages count
+            self.end_read_date = f"{session.end_date.year}-{session.end_date.month}-{session.end_date.day}"
+            self.reading_state = Book.ReadingState.FINISHED
+
+        elif self.reading_state == Book.ReadingState.UNREAD:
+            self.read_pages += session.pages_read
+            self.starting_read_date = f"{session.end_date.year}-{session.end_date.month}-{session.end_date.day}"
+            self.reading_state = Book.ReadingState.CURRENTLY_READING
+
+        else:
+            self.read_pages += session.pages_read
+
+        self.reading_sessions[new_id] = session
 
     def get_infos(self) -> dict:
         return {
@@ -330,6 +409,7 @@ class Book:
             "end_read_date": self.end_read_date,
             "tot_pages": self.tot_pages,
             "read_pages": self.read_pages,
+            "reading_sessions": self.reading_sessions,
             "parents_shelves": self._parents_shelves,
         }
 
@@ -384,8 +464,6 @@ IDsList = list[str] | tuple[str, ...] | set[str]
 class BooksHandler:
     def __init__(
         self,
-        jfm: jfm.JsonFileManager,
-        res_handler: resources_handler.RessourcesHandler,
         books: BooksDict | None = None,
         shelves: ShelvesDict | None = None,
     ):
@@ -394,8 +472,6 @@ class BooksHandler:
         """
         self.logger = logging.getLogger(__name__)
         self.books = books or {}
-        self.res_handler = res_handler
-        self.jfm = jfm
         self.shelves = shelves or {}
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
@@ -406,31 +482,11 @@ class BooksHandler:
         if book_id in self.books.keys():
             self.logger.debug(f"Removing book with ID '{book_id}' from BooksHandler...")
             book_obj: Book = self.books[book_id]
-            cover_path = self.get_book_cover_path(book_obj, False)
-            if cover_path:
-                self._delete_cover(cover_path, True)
             book_obj.delete_from_parents()
             del self.books[str(book_obj.id)]
 
         else:
             raise BookNotFoundError(book_id, f"BooksHandler ({self})")
-
-    def _delete_cover(self, cover_path, check_default: bool = True):
-
-        if check_default:
-            if cover_path in (
-                self.res_handler.get_res("assets.defaults_covers.book"),
-                self.res_handler.get_res("assets.defaults_covers.shelf"),
-            ):
-                raise DefaultCoverPathDeletion(cover_path)
-
-        if os.path.exists(cover_path):
-            pathlib.Path(cover_path).unlink()
-
-        else:
-            raise FileNotFoundError(
-                f"Counldn't delete cover at {cover_path} : File not found !"
-            )
 
     def create_book(self, **kwargs) -> Book:
         """
@@ -502,16 +558,13 @@ class BooksHandler:
 
     def delete_shelf(self, id: str):
         self.logger.debug(f"Removing shelf with ID : '{id}' from BooksHandler...")
-
-        if id in self.shelves.keys():
+        id = str(id)
+        if id in self.shelves:
             shelf = self.shelves[id]
 
-            shelf.remove_all_books()
-            shelf.remove_all_parents()
-            shelf.remove_all_child()
-            cover_path = self.get_shelf_cover_path(shelf, False)
-            if cover_path:
-                self._delete_cover(cover_path)
+            shelf.remove_from_books()  # Removes from all the childs books
+            shelf.remove_from_parents()  # Removes from all the parents shelves
+            shelf.remove_from_child_shelves()  # Removes from all its child shelves
 
             del self.shelves[id]
 
@@ -537,66 +590,6 @@ class BooksHandler:
 
         else:
             raise BooksShelfNotFoundError(shelf_id)
-
-    def get_cover_path(self, object: Shelf | Book, return_default: bool = True):
-        """
-        Constructs and returns the path to the `object` (an `Shelf`/`Book` instance) cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Shelf|book_sys.Book): the shelf/book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        if isinstance(object, Book):
-            excepted_path = (
-                os.path.join(
-                    self.res_handler.get_res("data.user.books.covers"),
-                    object.str_id(),
-                )
-                + ".png"
-            )
-
-        elif isinstance(object, Shelf):
-            excepted_path = (
-                os.path.join(
-                    self.res_handler.get_res("data.user.bookshelves.covers"),
-                    object.str_id(),
-                )
-                + ".png"
-            )
-
-        else:
-            raise TypeError(f"Could not get cover for object of type {type(object)}")
-
-        if os.path.exists(excepted_path):
-            return excepted_path
-
-        if return_default:
-            return self.res_handler.get_res("assets.defaults_covers.shelf")
-
-    def get_shelf_cover_path(
-        self, shelf: Shelf, return_default: bool = True
-    ) -> str | None:
-        """
-        Constructs and returns the path to the `shelf` cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Shelf): the shelf object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        return self.get_cover_path(shelf, return_default)
-
-    def get_book_cover_path(self, book: Book, return_default: bool = True):
-        """
-        Constructs and returns the path to the `book` cover file.
-
-        Parameters
-        ----------
-        shelf (book_sys.Book): the book object
-        return_default (bool=True): whether to return the default cover path if the constructed path does not exist
-        """
-        return self.get_cover_path(book, return_default)
 
     def get_books(self, **kwargs):
         """
@@ -703,6 +696,40 @@ class BooksHandler:
 
         return matches
 
+    def _serialize_reading_sessions(self, book: Book) -> list[dict]:
+        """
+        Serialize non json serializable elements in the readings session of a Book, such as `ReadingSessionTime`
+        Return the result into a list of dict (each dict is the serialized data of a reading session)
+        """
+        data = []
+        for session in book.reading_sessions.values():
+            session_data = session.get_data()
+            session_data["start_date"] = session_data["start_date"].get_data()
+            session_data["end_date"] = session_data["end_date"].get_data()
+            data.append(session_data)
+
+        return data
+
+    def _deserialize_reading_sessions(
+        self, reading_sessions: list[dict]
+    ) -> list[ReadingSession]:
+        """
+        Deserialize a list of sessions data
+        Returns a list of `ReadingSession` objects made with `reading_session`
+        """
+        deserialized_data = []
+
+        for session_data in reading_sessions:
+            start_date = ReadingSessionTime(*session_data["start_date"])
+            end_date = ReadingSessionTime(*session_data["end_date"])
+            del session_data["end_date"]
+            del session_data["end_date"]
+            session = ReadingSession(
+                **session_data, start_date=start_date, end_date=end_date
+            )
+            deserialized_data.append(session)
+        return deserialized_data
+
     def save_books(self, filepath: str):
         self.logger.debug(f"Saving books data in {filepath}...")
         data = []
@@ -720,15 +747,20 @@ class BooksHandler:
             del book_data["parents_shelves"]
 
             book_data["reading_state"] = book.reading_state.value
+
+            # Serialize reading sessions
+            book_data["reading_sessions"] = self._serialize_reading_sessions(book)
             book_data = self._remove_empty_items(book_data)
             data.append(book_data)
 
-        self.jfm.write_json(filepath, data, catch_error=True)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f)
 
     def load_books(self, filepath: str):
         self.logger.info(f"Loading books data from {filepath}...")
 
-        data = self.jfm.read_json(filepath, catch_error=False)
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
         if data:
             for book_data in data:
@@ -736,6 +768,11 @@ class BooksHandler:
                 book_data["reading_state"] = Book.ReadingState[
                     book_data["reading_state"]
                 ]
+                # If the books has reading sessions
+                if "reading_sessions" in book_data:
+                    book_data["reading_sessions"] = self._deserialize_reading_sessions(
+                        book_data["reading_sessions"]
+                    )
                 self.new_book(**book_data)
 
     def save_shelfs(self, filepath: str):
@@ -766,7 +803,8 @@ class BooksHandler:
             shelf_data = self._remove_empty_items(shelf_data)
             data.append(shelf_data)
 
-        self.jfm.write_json(filepath=filepath, data=data, catch_error=False)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f)
 
     def _remove_empty_items(
         self, data: dict, ignore_keys: list | None = None, ignore_int_float: bool = True
@@ -797,7 +835,8 @@ class BooksHandler:
         """
         self.logger.debug(f"Loading shelves data from  {filepath}...")
 
-        data: list = self.jfm.read_json(filepath)
+        with open(filepath, "r") as f:
+            data: list = json.load(f)
 
         if data:
             deferred_adoption_data: dict[str, list[str]] = {}
@@ -864,10 +903,81 @@ class BooksHandler:
         return shelves
 
 
-class Session:
-    def __init__(self, **kwargs):
-        self.start_date = kwargs.get("start_date", None)
-        self.end_date = kwargs.get("end_date", None)
-        self.start_page = kwargs.get("start_date", 0)
-        self.end_page = kwargs.get("end_page", 0)
+class ReadingSession:
+    def __init__(
+        self,
+        start_date: ReadingSessionTime,
+        end_date: ReadingSessionTime,
+        duration: int,
+        start_page: int = 0,
+        end_page: int = 0,
+        session_id: int = -1,
+    ):
+        """
+        The base class for books reading sessions
+
+        Parameters
+        ----------
+        - start_date (ReadingSessionTime): the begining date of the reading session
+        - end_date (ReadingSessionTime): the end date of the reading session
+        - duration (int): the duration of the reading session (in seconds)
+        - start_page (int=0): the page where the reading session started
+        - end_page (int=0): the page where the reading session end
+        - session_id (int=0): the position of this session in the book where it belong. Leave to `-1` if this session is not attached to a book yet
+        """
+        self.start_date = start_date
+        self.end_date = end_date
+        self.duration = duration
+        self.start_page = start_page
+        self.end_page = end_page
+        self._check_pages_infos()
         self.pages_read = self.end_page - self.start_page
+        self.session_id = session_id
+
+    def _check_pages_infos(self):
+        """
+        Checks if the pages start and end values are possible
+
+        Raises
+        ------
+        ValueError: if the page start value is higher than the end page value or lower than 0
+        """
+        if self.start_page < 0:
+            raise ValueError("Session start page cannot be under 0 !")
+
+        if self.start_page > self.end_page:
+            raise ValueError("Session start page cannot be higher than end page !")
+
+    def get_data(self):
+        """
+        Return this Session data in a dict.
+        """
+        return {
+            "session_id": self.session_id,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "duration": self.duration,
+            "start_page": self.start_page,
+            "end_page": self.end_page,
+        }
+
+
+class ReadingSessionTime:
+    def __init__(self, year: int, month: int, day: int, hour: int, minute: int):
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
+
+    def get_data(self) -> dict:
+        """
+        Return the data of this ReadingSessionTime into a dictionnary
+        """
+        return {
+            "year": self.year,
+            "month": self.month,
+            "day": self.day,
+            "hour": self.hour,
+            "minute": self.minute,
+        }

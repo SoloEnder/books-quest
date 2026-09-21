@@ -1,27 +1,25 @@
 from PySide6 import QtGui, QtWidgets
 
-from app.src import langs_handler, resources_handler, settings_handler
-from app.ui import qt_signals_handler
+from app.src import api
 
 
 class BasePage(QtWidgets.QWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
-        res_handler: resources_handler.RessourcesHandler,
-        settings_handler: settings_handler.SettingsHandler,
-        langs_handler: langs_handler.LangsHandler,
-        qt_signals_handler: qt_signals_handler.QtSignalsHandler,
+        api: api.API,
     ):
         """
         This class is the base skellet of all pages, it define a main layout, and a main widgets with a scroll are\n
         If you want to add some widget, you should only deal with the  'main_widget' and the 'main_lyt' widgets.
         """
         # Assigning arguments
-        self.res_handler = res_handler
-        self.settings_handler = settings_handler
-        self.langs_handler = langs_handler
-        self.qt_signals_handler = qt_signals_handler
+        self.api = api
+        self.books = self.api.books
+        self.res_files = self.api.res_files
+        self.settings = self.api.settings
+        self.langs = self.api.langs
+        self.qt_signals = self.api.qt_signals
         self.PAGE_NAME = "BASE_PAGE"  # the page name, mostly used for identify the page on page switching
         # Calling the __init__ of the parent
         super().__init__(parent)

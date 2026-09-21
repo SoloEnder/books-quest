@@ -84,7 +84,7 @@
     "infos": {
       "object_type": "Etagère",
       "title": "Title : ",
-      "default_shelf_title": "Tout les livres"
+      "default_shelf_title": "Votre Bibliothèque"
     },
     "msg": {
       "invalid_title": "Titre d'étagère non valide",
