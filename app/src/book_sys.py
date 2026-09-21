@@ -382,10 +382,12 @@ class Book:
             session.end_page = (
                 self.tot_pages
             )  # In case the session end page is higher than the book total pages count
+            self.end_read_date = f"{session.end_date.year}-{session.end_date.month}-{session.end_date.day}"
             self.reading_state = Book.ReadingState.FINISHED
 
         elif self.reading_state == Book.ReadingState.UNREAD:
             self.read_pages += session.pages_read
+            self.starting_read_date = f"{session.end_date.year}-{session.end_date.month}-{session.end_date.day}"
             self.reading_state = Book.ReadingState.CURRENTLY_READING
 
         else:
