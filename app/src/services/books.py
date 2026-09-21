@@ -21,6 +21,18 @@ class BooksService:
         self.qt_signals = qt_signals
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
+    def add_reading_session(
+        self, book: book_sys.Book, reading_session: book_sys.ReadingSession
+    ):
+        """
+        Add `reading_session` to `book`.
+        Emit an "session_added_sg" signal
+        """
+        book.add_reading_session(reading_session)
+        self.qt_signals.emit_signal(
+            "session_added_sg", book.str_id(), reading_session.session_id
+        )
+
     def new_book(self, **books_infos):
         """
         Create and add an instance of `Book` to the books handler
@@ -232,9 +244,7 @@ class BooksService:
         - **shelf_data: The new data of the shelf
         """
 
-        self.logger.debug(
-            f"Editing Shelf (ID={shelf.id}), shelves={self.books_handler.shelves}"
-        )
+        self.logger.debug(f"Editing Shelf (ID={shelf.id})")
         # Remove from parents/child
         shelf.remove_from_books()
         shelf.remove_from_child_shelves()
