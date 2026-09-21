@@ -33,6 +33,31 @@ class BooksService:
             "session_added_sg", book.str_id(), reading_session.session_id
         )
 
+    def new_reading_session(
+        self,
+        book: book_sys.Book,
+        start_date: book_sys.ReadingSessionTime,
+        end_date: book_sys.ReadingSessionTime,
+        duration: int,
+        start_page: int = 0,
+        end_page: int = 0,
+    ):
+        """
+        Creates and add an new reading session to this `Book`
+
+        Parameters
+        ----------
+        - start_date (ReadingSessionTime): the begining date of the reading session
+        - end_date (ReadingSessionTime): the end date of the reading session
+        - duration (int): the duration of the reading session (in seconds)
+        - start_page (int=0): the page where the reading session started
+        - end_page (int=0): the page where the reading session end
+        """
+        session = book_sys.ReadingSession(
+            start_date, end_date, duration, start_page, end_page
+        )
+        self.add_reading_session(book, session)
+
     def new_book(self, **books_infos):
         """
         Create and add an instance of `Book` to the books handler
