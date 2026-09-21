@@ -295,6 +295,15 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_summary_te.setMaximumSize(400, 120)
         self.book_summary_te.setReadOnly(True)
         self.book_summary_te.setObjectName("BookSummary")
+        self.read_book_b = QtWidgets.QPushButton("Lire")
+        self.read_book_b.clicked.connect(
+            lambda: self.qt_signals.emit_signal(
+                "switch_page_sg",
+                "READING_SESSION_PAGE",
+                True,
+                {"book_id": self.book.str_id()},
+            )
+        )
         self.book_details_b = QtWidgets.QPushButton(
             self.langs.tr("shared.actions.see_details")
         )
@@ -338,25 +347,30 @@ class SubBookWidget(QtWidgets.QWidget):
             QtCore.Qt.AlignmentFlag.AlignTop,
         )
         self.main_layout.addWidget(
-            self.book_details_b,
+            self.read_book_b,
             3,
             1,
         )
         self.main_layout.addWidget(
-            self.edit_b,
+            self.book_details_b,
             4,
             1,
         )
         self.main_layout.addWidget(
-            self.delete_b,
+            self.edit_b,
             5,
+            1,
+        )
+        self.main_layout.addWidget(
+            self.delete_b,
+            6,
             1,
         )
         self.main_layout.addWidget(
             self.book_cover_lb,
             0,
             0,
-            6,
+            7,
             1,
         )
 
