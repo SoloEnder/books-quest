@@ -1,7 +1,8 @@
 import enum
 import logging
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QObject, QTimer
+from shiboken6.Shiboken import Object
 
 
 class TimerState(enum.Enum):
@@ -15,7 +16,8 @@ class Timer(QTimer):
     This class act as a subclass of `QTimer`, that add methods to pause/resume timer
     """
 
-    def __init__(self):
+    def __init__(self, parent: QObject | None = None):
+        super().__init__(parent)
         self.logger = logging.getLogger(__name__ + " - Timer")
         self.loops_count: int = 0
         self.interval_: int = 1000
