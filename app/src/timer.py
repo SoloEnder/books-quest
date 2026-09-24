@@ -1,8 +1,7 @@
 import enum
 import logging
 
-from PySide6.QtCore import QObject, QTimer
-from shiboken6.Shiboken import Object
+from PySide6.QtCore import QObject, QTimer, Signal
 
 
 class TimerState(enum.Enum):
@@ -15,6 +14,11 @@ class Timer(QTimer):
     """
     This class act as a subclass of `QTimer`, that add methods to pause/resume timer
     """
+
+    timer_paused = Signal()
+    timer_stopped = Signal()
+    timer_resumed = Signal()
+    timer_started = Signal()
 
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent)
@@ -38,6 +42,7 @@ class Timer(QTimer):
         self.loops_count = 0
         self.interval_ = interval
         self.start(interval)
+        self.timer_started.emit()
         self.logger.debug("Timer restarted !")
 
     def stop_timer(self):
@@ -46,6 +51,7 @@ class Timer(QTimer):
         """
         self.stop()
         self.timer_state = TimerState.INACTIVE
+        self.timer_stopped.emit()
         self.logger.info(
             f"Timer stopped, counted {self.loops_count} loops with interval={self.interval()} "
         )
@@ -54,11 +60,13 @@ class Timer(QTimer):
         """
         Pause the timer if it was active. Otherwise, this will do nothing
         """
+        print("UwU")
         if self.timer_state == TimerState.ACTIVE:
             self.timer_state = TimerState.PAUSED
             self.stop()
+            self.timer_paused.emit()
             self.logger.debug(
-                f"Timer paused, counted {self.loops_count} with interval={self.interval} ms !"
+                f"Timer paused, counted {self.loops_count} with interval={self.interval()} ms !"
             )
 
         else:
@@ -70,6 +78,7 @@ class Timer(QTimer):
         """
         if self.timer_state == TimerState.PAUSED:
             self.start(self.interval_)
+            self.timer_resumed.emit()
             self.logger.info("Timer resumed !")
 
         else:
