@@ -60,13 +60,12 @@ class Timer(QTimer):
         """
         Pause the timer if it was active. Otherwise, this will do nothing
         """
-        print("UwU")
         if self.timer_state == TimerState.ACTIVE:
             self.timer_state = TimerState.PAUSED
-            self.stop()
             self.timer_paused.emit()
+            self.blockSignals(True)
             self.logger.debug(
-                f"Timer paused, counted {self.loops_count} with interval={self.interval()} ms !"
+                f"Timer paused, counted {self.loops_count} loops with interval={self.interval()} ms !"
             )
 
         else:
@@ -77,8 +76,9 @@ class Timer(QTimer):
         Resume the timer if it was paused. Otherwise, this will do nothing
         """
         if self.timer_state == TimerState.PAUSED:
-            self.start(self.interval_)
+            self.timer_state = TimerState.ACTIVE
             self.timer_resumed.emit()
+            self.blockSignals(False)
             self.logger.info("Timer resumed !")
 
         else:
