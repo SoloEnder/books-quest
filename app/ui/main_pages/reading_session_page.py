@@ -20,8 +20,11 @@ class ReadingSessionPage(base_page.BasePage):
         self.currently_reading_book_title_lb = QtWidgets.QLabel(
             f'Reading "{self._book.title}"...'
         )
+        self.currently_reading_book_title_lb.setObjectName("CurrentlyReadingBookLabel")
         self.time_lb = QtWidgets.QLabel()
+        self.time_lb.setObjectName("TimerLabel")
         self.timer_action_b = QtWidgets.QPushButton("Pause")
+        self.timer_action_b.setObjectName("TimerActionButton")
         self.main_lyt.addWidget(
             self.currently_reading_book_title_lb,
             0,
