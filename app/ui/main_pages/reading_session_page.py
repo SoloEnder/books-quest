@@ -57,8 +57,6 @@ class ReadingSessionPage(base_page.BasePage):
         """
         print(self.timer.timer_state)
         if self.timer.timer_state == timer.TimerState.ACTIVE:
-            print("En vrai...")
-
             # -- Calculate time to show --
             self.seconds = self.timer.loops_count % 60
             self.minutes = self.timer.loops_count // 60 if self.timer.loops_count else 0
@@ -70,8 +68,6 @@ class ReadingSessionPage(base_page.BasePage):
             if self.minutes >= 60:
                 self.minutes = 0
             self.refresh_time_label()
-        else:
-            print("Nope")
 
     def refresh_time_label(self):
         self.time_lb.setText(f"{self.hours:02} : {self.minutes:02} : {self.seconds:02}")
