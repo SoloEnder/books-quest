@@ -56,7 +56,6 @@ class ReadingSessionPage(base_page.BasePage):
         """
         Update the values of the seconds, minutes and hours attribut and refresh the time widgets
         """
-        print(self.timer.timer_state)
         if self.timer.timer_state == timer.TimerState.ACTIVE:
             # -- Calculate time to show --
             self.seconds = self.timer.loops_count % 60
@@ -85,8 +84,10 @@ class ReadingSessionPage(base_page.BasePage):
         match self.timer.timer_state:
             case timer.TimerState.PAUSED:
                 self.timer_action_b.setText("Resume")
+                self.timer_action_b.clicked.disconnect(self.timer.pause)
                 self.timer_action_b.clicked.connect(self.timer.resume)
 
             case timer.TimerState.ACTIVE:
                 self.timer_action_b.setText("Pause")
+                self.timer_action_b.clicked.disconnect(self.timer.resume)
                 self.timer_action_b.clicked.connect(self.timer.pause)
