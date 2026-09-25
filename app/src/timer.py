@@ -23,7 +23,7 @@ class Timer(QTimer):
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent)
         self.logger = logging.getLogger(__name__ + " - Timer")
-        self.loops_count: int = 0
+        self.loops_count: int = 8765
         self.interval_: int = 1000
         self.timer_state = TimerState.INACTIVE
         self.timeout.connect(self.count_time)
@@ -39,7 +39,7 @@ class Timer(QTimer):
         ----------
         """
         self.timer_state = TimerState.ACTIVE
-        self.loops_count = 0
+        # self.loops_count = 0
         self.interval_ = interval
         self.start(interval)
         self.timer_started.emit()
@@ -77,8 +77,8 @@ class Timer(QTimer):
         """
         if self.timer_state == TimerState.PAUSED:
             self.timer_state = TimerState.ACTIVE
-            self.timer_resumed.emit()
             self.blockSignals(False)
+            self.timer_resumed.emit()
             self.logger.info("Timer resumed !")
 
         else:
