@@ -70,9 +70,17 @@ class ReadingSessionPage(base_page.BasePage):
             self.refresh_time_label()
 
     def refresh_time_label(self):
+        """
+        Refresh the widgets that are displaying the timer
+        """
         self.time_lb.setText(f"{self.hours:02} : {self.minutes:02} : {self.seconds:02}")
 
     def switch_timer_action(self):
+        """
+        Switch the action to do when the play/pause button is clicked
+        If the timer is paused, the action will be to resume it
+        If the timer is active, the action will be to pause it
+        """
         match self.timer.timer_state:
             case timer.TimerState.PAUSED:
                 self.timer_action_b.setText("Resume")
@@ -81,19 +89,3 @@ class ReadingSessionPage(base_page.BasePage):
             case timer.TimerState.ACTIVE:
                 self.timer_action_b.setText("Pause")
                 self.timer_action_b.clicked.connect(self.timer.pause)
-
-    def pause_timer(self):
-        if self.timer_state == TimerState.INACTIVE:
-            self.logger.info("Timer is not active, could not pause it")
-            return
-
-        self.timer_state = TimerState.PAUSED
-        self.logger.info(f"Timer paused at {self.seconds}s")
-
-    def resume_timer(self):
-        if self.timer_state == TimerState.INACTIVE:
-            self.logger.info("Timer is not active, could not resume it")
-            return
-
-        self.timer_state = TimerState.ACTIVE
-        self.logger.info("Timer resumed")
