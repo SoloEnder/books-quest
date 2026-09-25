@@ -1,16 +1,9 @@
-import enum
 import logging
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, timer
 from app.ui.main_pages import base_page
-
-
-class TimerState(enum.Enum):
-    INACTIVE = enum.auto()
-    ACTIVE = enum.auto()
-    PAUSED = enum.auto()
 
 
 class ReadingSessionPage(base_page.BasePage):
@@ -49,6 +42,10 @@ class ReadingSessionPage(base_page.BasePage):
         self.timer.start_timer(1000)
         self.timer.timer_paused.connect(self.switch_timer_action)
         self.timer.timer_resumed.connect(self.switch_timer_action)
+
+        self._pause_connected = False
+        self._resume_connected = False
+
         self.switch_timer_action()
         self.refresh_time_label()
 
@@ -79,10 +76,20 @@ class ReadingSessionPage(base_page.BasePage):
         match self.timer.timer_state:
             case timer.TimerState.PAUSED:
                 self.timer_action_b.setText("Resume")
-                self.timer_action_b.clicked.disconnect(self.timer.pause)
-                self.timer_action_b.clicked.connect(self.timer.resume)
+                if self._pause_connected:
+                    self.timer_action_b.clicked.disconnect(self.timer.pause)
+                    self._pause_connected = False
+
+                if not self._resume_connected:
+                    self.timer_action_b.clicked.connect(self.timer.resume)
+                    self._resume_connected = True
 
             case timer.TimerState.ACTIVE:
                 self.timer_action_b.setText("Pause")
-                self.timer_action_b.clicked.disconnect(self.timer.resume)
-                self.timer_action_b.clicked.connect(self.timer.pause)
+                if self._resume_connected:
+                    self.timer_action_b.clicked.disconnect(self.timer.resume)
+                    self._resume_connected = False
+
+                if not self._pause_connected:
+                    self.timer_action_b.clicked.connect(self.timer.pause)
+                    self._pause_connected = True
