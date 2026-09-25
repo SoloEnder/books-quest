@@ -50,6 +50,7 @@ class ReadingSessionPage(base_page.BasePage):
         self.timer.timer_paused.connect(self.switch_timer_action)
         self.timer.timer_resumed.connect(self.switch_timer_action)
         self.switch_timer_action()
+        self.refresh_time_label()
 
     def count_time(self):
         """
