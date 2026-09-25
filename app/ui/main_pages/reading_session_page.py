@@ -60,13 +60,8 @@ class ReadingSessionPage(base_page.BasePage):
             # -- Calculate time to show --
             self.seconds = self.timer.loops_count % 60
             self.minutes = self.timer.loops_count // 60 if self.timer.loops_count else 0
+            self.minutes %= 60  # Prevent from having value >= 60
             self.hours = self.timer.loops_count // 3600
-
-            # The current minutes calculation system generate minutes that are > 60
-            # When `timer.timer_loops` is > 3600 (one hour)
-            # So the code below recalibrate the minutes to 0 in such cases
-            if self.minutes >= 60:
-                self.minutes = 0
             self.refresh_time_label()
 
     def refresh_time_label(self):
