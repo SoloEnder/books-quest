@@ -4,6 +4,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, timer
 from app.ui.main_pages import base_page
+from app.utils import images_tools, utils_funcs
 
 
 class ReadingSessionPage(base_page.BasePage):
@@ -20,8 +21,10 @@ class ReadingSessionPage(base_page.BasePage):
         self.currently_reading_book_title_lb = QtWidgets.QLabel(
             f'Reading "{self._book.title}"...'
         )
+        self.currently_reading_book_title_lb.setProperty("role", "TitleLabel")
         self.currently_reading_book_title_lb.setObjectName("CurrentlyReadingBookLabel")
         self.time_lb = QtWidgets.QLabel()
+        self.time_lb.setProperty("role", "h1")
         self.time_lb.setObjectName("TimerLabel")
         self.timer_action_b = QtWidgets.QPushButton("Pause")
         self.timer_action_b.setObjectName("TimerActionButton")
@@ -34,6 +37,11 @@ class ReadingSessionPage(base_page.BasePage):
         self.main_lyt.addWidget(self.time_lb, 1, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
         self.main_lyt.addWidget(
             self.timer_action_b, 2, 0, QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        utils_funcs.load_and_set_ss(
+            self.res_files.get_res("assets.qss.general"),
+            self.res_files.get_res("assets.qss.reading_session_page"),
+            widget=self,
         )
 
         # Timer
