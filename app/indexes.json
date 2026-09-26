@@ -25,6 +25,8 @@
     },
     "icons": {
       "_base_": "icons/lucide",
+      "play": "play.svg",
+      "pause": "pause.svg",
       "infos": "info.svg",
       "add": "plus-circle.svg",
       "go_back": "move-left.svg",
