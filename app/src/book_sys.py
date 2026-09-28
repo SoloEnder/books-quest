@@ -374,7 +374,9 @@ class Book:
         if session.session_id in self.reading_sessions:
             raise SessionIDAlreadyAssignedError(session.session_id, self.str_id())
 
-        new_id = max(self.reading_sessions.keys()) + 1
+        new_id = (
+            max(self.reading_sessions.keys()) + 1 if self.reading_sessions.keys() else 1
+        )
         session.session_id = new_id
 
         if session.end_page >= self.tot_pages:
