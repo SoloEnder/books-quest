@@ -52,7 +52,21 @@
       "pages_count_args": "/f:<count>/f pages"
     }
   },
+  "reading_session": {
+    "current_page": "Current page : ",
+    "book_currently_read": "Reading '/f:<book_title>/f'...",
+    "save": "Save session",
+    "duration_hours": "Session duration (hours) : ",
+    "duration_minutes": "Session duration (minutes) : ",
+    "duration_seconds": "Session duration (seconds) : ",
+    "book_finished": "Book finished"
+  },
+  "timer": {
+    "pause": "Pause",
+    "resume": "Resume"
+  },
   "book": {
+    "read": "Read",
     "infos": {
       "object_type": "Book",
       "read_pages": "Read pages : ",

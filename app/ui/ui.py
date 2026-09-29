@@ -8,6 +8,7 @@ from app.ui.main_pages import (
     base_page,
     book_creation_page,
     book_details_page,
+    reading_session_page,
     settings_page,
     shelf_creation_page,
     shelf_details_page,
@@ -183,6 +184,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.current_page_infos: (
             tuple[str, base_page.BasePage, dict] | tuple
         ) = ()  # This tuple should contain 3 values : the current page name the current page object (in this order), and the specials arguments of the current page
+        self.reading_session_page = reading_session_page.ReadingSessionPage(
+            self, self.api, self.books.books_handler.default_book.str_id()
+        )
         self.settings_page = settings_page.SettingsPage(
             self,
             self.api,
@@ -209,6 +213,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.books.books_handler.default_book.id,
         )
         self.pages = {
+            "READING_SESSION_PAGE": self.reading_session_page,
             "SETTINGS_PAGE": self.settings_page,
             "SHELFS_VIEW_PAGE": self.shelfs_view_page,
             "SHELF_DETAILS_PAGE": self.shelf_details_page,
@@ -357,6 +362,17 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             )
             self.pages["BOOK_DETAILS_PAGE"] = self.book_details_page
             self.addWidget(self.book_details_page)
+
+        elif page_name == "READING_SESSION_PAGE":
+            self.removeWidget(self.reading_session_page)
+            self.reading_session_page.deleteLater()
+            self.reading_session_page = reading_session_page.ReadingSessionPage(
+                self,
+                self.api,
+                page_args["book_id"],
+            )
+            self.pages["READING_SESSION_PAGE"] = self.reading_session_page
+            self.addWidget(self.reading_session_page)
 
         else:
             raise ValueError(f"Unknown page : '{page_name}'")
