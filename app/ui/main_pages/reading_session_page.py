@@ -68,7 +68,6 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             lambda: self.current_page_selector.setValue(self.read_book.tot_pages)
         )
         self.save_b = QtWidgets.QPushButton("Save")
-        self.save_b.clicked.connect(self.save_reading_session.emit)
         self.save_b.clicked.connect(self.save_session)
 
         self.main_lyt.setSpacing(15)
@@ -142,7 +141,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             "duration": self.session_duration,
         }
 
-    def save_session(self, auto_close: bool = False):
+    def save_session(self, auto_close: bool = True):
         """
         Add a new reading session for the current book, based on the infos provided by the widgets
 
@@ -163,6 +162,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
                 "",
             )
         else:
+            self.reading_session_saved.emit()
             if auto_close:
                 self.close()
 
