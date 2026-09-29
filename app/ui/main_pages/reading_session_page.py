@@ -243,7 +243,7 @@ class ReadingSessionPage(base_page.BasePage):
         self.refresh_time_label()
 
     def set_start_date(self):
-        self.start_date = dt.datetime.today()
+        self.start_date = QtCore.QDate.currentDate()
 
     def count_time(self):
         """
