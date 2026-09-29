@@ -724,7 +724,7 @@ class BooksHandler:
         for session_data in reading_sessions:
             start_date = ReadingSessionTime(*session_data["start_date"])
             end_date = ReadingSessionTime(*session_data["end_date"])
-            del session_data["end_date"]
+            del session_data["start_date"]
             del session_data["end_date"]
             session = ReadingSession(
                 **session_data, start_date=start_date, end_date=end_date
