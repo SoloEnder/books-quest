@@ -296,6 +296,7 @@ class ReadingSessionPage(base_page.BasePage):
 
             except Exception:
                 self.logger.exception("Unable to save session for book : ")
+                self.session_details_editor.close()
                 self.qt_signals.emit_signal(
                     "notify_sg",
                     "error",
