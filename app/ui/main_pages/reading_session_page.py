@@ -139,6 +139,9 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         return {
             "start_date": [*self.start_date.getDate()],
             "duration": self.session_duration,
+            "start_page": self.read_book.read_pages,
+            "end_page": self.current_page_selector.value(),
+            "book": self.read_book,
         }
 
     def save_session(self, auto_close: bool = True):
