@@ -51,6 +51,19 @@
       "pages_count_args": "/f:<count>/f pages"
     }
   },
+  "reading_session": {
+    "current_page": "Page actuelle : ",
+    "book_currently_read": "Lecture de '/f:<book_title>/f'...",
+    "save": "Sauvegarder la session",
+    "duration_hours": "Durée de la session (hours) : ",
+    "duration_minutes": "Durée de la session (minutes) : ",
+    "duration_seconds": "Durée de la session (seconds) : ",
+    "book_finished": "Tout lut !"
+  },
+  "timer": {
+    "pause": "Pause",
+    "resume": "Reprendre"
+  },
   "book": {
     "infos": {
       "object_type": "Livre",

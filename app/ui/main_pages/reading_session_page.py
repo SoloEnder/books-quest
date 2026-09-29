@@ -34,40 +34,52 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
 
         # Widgets
         self.main_lyt = QtWidgets.QGridLayout(self)
-        self.start_date_lb = QtWidgets.QLabel("Started at :")
+        self.start_date_lb = QtWidgets.QLabel(
+            self.api.langs.tr("book.infos.starting_read_date")
+        )
         self.start_date_selector = QtWidgets.QDateEdit(self.start_date)
         self.start_date_selector.setCalendarPopup(True)
 
         # -- Duration
-        self.hours_selector_lb = QtWidgets.QLabel("Session duration (hours) : ")
+        self.hours_selector_lb = QtWidgets.QLabel(
+            self.api.langs.tr("reading_session.duration_hours")
+        )
         self.hours_selector_lb.setObjectName("HoursSelectorLabel")
         self.hours_selector = QtWidgets.QSpinBox(minimum=0, value=self.hours)
         self.hours_selector.setObjectName("HoursSelector")
-        self.minutes_selector_lb = QtWidgets.QLabel("Session duration (minutes) : ")
+        self.minutes_selector_lb = QtWidgets.QLabel(
+            self.api.langs.tr("reading_session.duration_minutes")
+        )
         self.minutes_selector_lb.setObjectName("MinutesSelectorLabel")
         self.minutes_selector = QtWidgets.QSpinBox(
             minimum=0, maximum=60, value=self.minutes
         )
         self.minutes_selector.setObjectName("MinutesSelector")
-        self.seconds_selector_lb = QtWidgets.QLabel("Session duration (seconds) : ")
+        self.seconds_selector_lb = QtWidgets.QLabel(
+            self.api.langs.tr("reading_session.duration_seconds")
+        )
         self.seconds_selector_lb.setObjectName("SecondsSelectorLabel")
         self.seconds_selector = QtWidgets.QSpinBox(
             minimum=0, maximum=60, value=self.seconds
         )
         self.seconds_selector_lb.setObjectName("SecondsSelector")
         self.calc_duration()
-        self.current_page_selector_lb = QtWidgets.QLabel(self, text="Current page : ")
+        self.current_page_selector_lb = QtWidgets.QLabel(
+            self, text=self.api.langs.tr("reading_session.current_page")
+        )
         self.current_page_selector_lb.setObjectName("CurrentPageSelectorLabel")
         self.current_page_selector = QtWidgets.QSpinBox(
             self, minimum=self.read_book.read_pages, maximum=self.read_book.tot_pages
         )
         self.current_page_selector.setObjectName("CurrentPageSelector")
-        self.book_finished_b = QtWidgets.QPushButton("Book finished")
+        self.book_finished_b = QtWidgets.QPushButton(
+            self.api.langs.tr("reading_session.book_finished")
+        )
         self.book_finished_b.setObjectName("BookFinishedButton")
         self.book_finished_b.clicked.connect(
             lambda: self.current_page_selector.setValue(self.read_book.tot_pages)
         )
-        self.save_b = QtWidgets.QPushButton("Save")
+        self.save_b = QtWidgets.QPushButton(self.api.langs.tr("reading_session.save"))
         self.save_b.clicked.connect(lambda: self.save_session(True))
 
         self.main_lyt.setSpacing(15)
@@ -193,16 +205,20 @@ class ReadingSessionPage(base_page.BasePage):
 
         # Widgets
         self.currently_reading_book_title_lb = QtWidgets.QLabel(
-            f'Reading "{self._book.title}"...'
+            self.langs.tr(
+                "reading_session.book_currently_read", book_title=self._book.title
+            )
         )
         self.currently_reading_book_title_lb.setProperty("role", "TitleLabel")
         self.currently_reading_book_title_lb.setObjectName("CurrentlyReadingBookLabel")
         self.time_lb = QtWidgets.QLabel()
         self.time_lb.setProperty("role", "h1")
         self.time_lb.setObjectName("TimerLabel")
-        self.timer_action_b = QtWidgets.QPushButton("Pause")
+        self.timer_action_b = QtWidgets.QPushButton(self.langs.tr("timer.pause"))
         self.timer_action_b.setObjectName("TimerActionButton")
-        self.save_session_b = QtWidgets.QPushButton("Save session")
+        self.save_session_b = QtWidgets.QPushButton(
+            self.langs.tr("reading_session.save")
+        )
         self.main_lyt.addWidget(
             self.currently_reading_book_title_lb,
             0,
@@ -271,7 +287,7 @@ class ReadingSessionPage(base_page.BasePage):
         """
         match self.timer.timer_state:
             case timer.TimerState.PAUSED:
-                self.timer_action_b.setText("Resume")
+                self.timer_action_b.setText(self.langs.tr("timer.resume"))
                 self.timer_action_b.setIcon(
                     images_tools.get_svg(self.res_files.get_res("assets.icons.play"))
                 )
@@ -284,7 +300,7 @@ class ReadingSessionPage(base_page.BasePage):
                     self._resume_connected = True
 
             case timer.TimerState.ACTIVE:
-                self.timer_action_b.setText("Pause")
+                self.timer_action_b.setText(self.langs.tr("timer.pause"))
                 self.timer_action_b.setIcon(
                     images_tools.get_svg(self.res_files.get_res("assets.icons.pause"))
                 )
