@@ -288,7 +288,6 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_authors_lb.setObjectName("BookAuthorLabel")
         self.book_reading_state_lb = QtWidgets.QLabel()
         self.book_reading_state_lb.setObjectName("BookReadingStateLabel")
-        self.display_reading_state()
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setMinimumSize(350, 120)
@@ -308,6 +307,7 @@ class SubBookWidget(QtWidgets.QWidget):
                 {"book_id": self.book.str_id()},
             )
         )
+        self.display_reading_state()
         self.book_details_b = QtWidgets.QPushButton(
             self.langs.tr("shared.actions.see_details")
         )
@@ -396,6 +396,7 @@ class SubBookWidget(QtWidgets.QWidget):
             self.book_reading_state_lb.setText(
                 f"{self.langs.tr('book.infos.reading_state.finished')} - {self.langs.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
+            self.read_book_b.setVisible(False)  # Hide "read" button on finished books
 
         else:
             self.logger.warning(
