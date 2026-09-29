@@ -65,6 +65,7 @@
     "resume": "Reprendre"
   },
   "book": {
+    "read": "Lire",
     "infos": {
       "object_type": "Livre",
       "read_pages": "Pages lues : ",

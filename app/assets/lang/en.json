@@ -66,6 +66,7 @@
     "resume": "Resume"
   },
   "book": {
+    "read": "Read",
     "infos": {
       "object_type": "Book",
       "read_pages": "Read pages : ",

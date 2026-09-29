@@ -25,6 +25,7 @@
     },
     "icons": {
       "_base_": "icons/lucide",
+      "read": "book-open.svg",
       "play": "play.svg",
       "pause": "pause.svg",
       "infos": "info.svg",
