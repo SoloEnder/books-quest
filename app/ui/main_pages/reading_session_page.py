@@ -123,17 +123,27 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         """
         Returns the reading session data in a `ReadingSession` object
         """
-        start_date = book_sys.ReadingSessionTime(*self.start_date.getDate(), 0, 0)
-        end_date = book_sys.ReadingSessionTime(0, 0, 0, 0, 0)
         self.calc_duration()
+        session_data = self.get_session_data()
+        start_date = book_sys.ReadingSessionTime(
+            *session_data["start_date"], hour=0, minute=0
+        )
+        end_date = book_sys.ReadingSessionTime(
+            *session_data["start_date"], hour=0, minute=0
+        )
+
         reading_session = book_sys.ReadingSession(
-            start_date, end_date, self.session_duration
+            start_date,
+            end_date,
+            self.session_duration,
+            session_data["start_page"],
+            session_data["end_page"],
         )
         return reading_session
 
     def get_session_data(self) -> dict:
         """
-        Returns the session starts date and duration
+        Returns the session starts date, duration, start/end page and the book that was read
         """
         self.calc_duration()
         return {
