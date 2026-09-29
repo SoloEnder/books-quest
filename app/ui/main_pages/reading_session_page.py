@@ -68,7 +68,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             lambda: self.current_page_selector.setValue(self.read_book.tot_pages)
         )
         self.save_b = QtWidgets.QPushButton("Save")
-        self.save_b.clicked.connect(self.save_session)
+        self.save_b.clicked.connect(lambda: self.save_session(True))
 
         self.main_lyt.setSpacing(15)
         self.main_lyt.addWidget(self.start_date_lb, 0, 0)
@@ -160,13 +160,14 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
 
         Parameters
         ----------
-        - auto_close (bool=False): wehter to close the widgets when the session is successfully added
+        - auto_close (bool=True): wehter to close the widgets when the session is successfully added
         """
         try:
             self.api.books.add_reading_session(self.read_book, self.get_session())
 
         except Exception:
             self.logger.exception("Unable to save session for book : ")
+            self.close()
             self.api.qt_signals.emit_signal(
                 "notify_sg",
                 "error",
