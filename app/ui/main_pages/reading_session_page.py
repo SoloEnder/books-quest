@@ -9,7 +9,7 @@ from app.utils import images_tools, utils_funcs
 
 
 class SessionsDetailsWindow(QtWidgets.QWidget):
-    save_reading_session = QtCore.Signal()
+    reading_session_saved = QtCore.Signal()
     about_to_close = QtCore.Signal()
 
     def __init__(
@@ -21,6 +21,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         read_book: book_sys.Book,
     ):
         super().__init__(parent)
+        self.logger = logging.getLogger(__name__ + " - SessionsDetailsWindow")
         self.api = api
         self.start_date = start_date
         self.session_duration = session_duration
@@ -68,6 +69,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         )
         self.save_b = QtWidgets.QPushButton("Save")
         self.save_b.clicked.connect(self.save_reading_session.emit)
+        self.save_b.clicked.connect(self.save_session)
 
         self.main_lyt.setSpacing(15)
         self.main_lyt.addWidget(self.start_date_lb, 0, 0)
@@ -139,6 +141,30 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             "start_date": [*self.start_date.getDate()],
             "duration": self.session_duration,
         }
+
+    def save_session(self, auto_close: bool = False):
+        """
+        Add a new reading session for the current book, based on the infos provided by the widgets
+
+        Parameters
+        ----------
+        - auto_close (bool=False): wehter to close the widgets when the session is successfully added
+        """
+        try:
+            self.api.books.add_reading_session(self.read_book, self.get_session())
+
+        except Exception:
+            self.logger.exception("Unable to save session for book : ")
+            self.api.qt_signals.emit_signal(
+                "notify_sg",
+                "error",
+                "Reading Session",
+                "Unable to save reading session, please try again",
+                "",
+            )
+        else:
+            if auto_close:
+                self.close()
 
 
 class ReadingSessionPage(base_page.BasePage):
@@ -277,7 +303,9 @@ class ReadingSessionPage(base_page.BasePage):
             )
             self._session_details_editor_active = True
             self.session_details_editor.destroyed.connect(self.session_editor_closed)
-            self.session_details_editor.save_reading_session.connect(self.save_session)
+            self.session_details_editor.reading_session_saved.connect(
+                lambda: self.qt_signals.emit_signal("close_page_sg")
+            )
             self.session_details_editor.show()
             return
 
@@ -286,23 +314,3 @@ class ReadingSessionPage(base_page.BasePage):
         Note that the session editor has been closed
         """
         self._session_details_editor_active = False
-
-    def save_session(self):
-        if self._session_details_editor_active:
-            try:
-                self.books.add_reading_session(
-                    self._book, self.session_details_editor.get_session()
-                )
-
-            except Exception:
-                self.logger.exception("Unable to save session for book : ")
-                self.session_details_editor.close()
-                self.qt_signals.emit_signal(
-                    "notify_sg",
-                    "error",
-                    "Reading Session",
-                    "Unable to save reading session, please try again",
-                    "",
-                )
-            else:
-                self.qt_signals.emit_signal("close_page_sg")
