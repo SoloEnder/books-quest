@@ -118,6 +118,14 @@ class DetailedBookInfos(QtWidgets.QWidget):
             ),
         }
         self.config_basic_infos_widgets()
+
+        # The widgets that display the book's reading sessions
+        if self.book.reading_state != book_sys.Book.ReadingState.UNREAD:
+            self.reading_sessions_viewer = ReadingSessionsViwer(
+                self, self.api, list(self.book.reading_sessions.values())
+            )
+            self.main_lyt.addWidget(self.reading_sessions_viewer)
+
         utils_funcs.load_and_set_ss(
             self.res_files.get_res("assets.qss.general"),
             self.res_files.get_res("assets.qss.book_details_page"),
