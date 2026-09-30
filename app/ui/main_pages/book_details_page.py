@@ -121,7 +121,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
 
         # The widgets that display the book's reading sessions
         if self.book.reading_state != book_sys.Book.ReadingState.UNREAD:
-            self.reading_sessions_viewer = ReadingSessionsViwer(
+            self.reading_sessions_viewer = ReadingSessionsViewer(
                 self, self.api, list(self.book.reading_sessions.values())
             )
             self.main_lyt.addWidget(self.reading_sessions_viewer)
@@ -507,7 +507,7 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         return result
 
 
-class ReadingSessionsViwer(QtWidgets.QWidget):
+class ReadingSessionsViewer(QtWidgets.QWidget):
     def __init__(
         self,
         parent: QtWidgets.QWidget | None,
