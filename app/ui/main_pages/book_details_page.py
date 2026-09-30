@@ -497,3 +497,25 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         result = result.replace("dd", str(day))
 
         return result
+
+
+class ReadingSessionsViwer(QtWidgets.QWidget):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        api: api.API,
+        reading_sessions: list[book_sys.ReadingSession],
+    ):
+        """
+        Displays an vertical list of `ReadingSessionWidget` based on the reading sessions given in `reading_session`
+        """
+        super().__init__(parent)
+        self.api = api
+        self._reading_sessions = reading_sessions
+
+        # Widgets
+        self.main_lyt = QtWidgets.QVBoxLayout(self)
+
+        # Generating widgets for each sessions
+        for session in self._reading_sessions:
+            self.main_lyt.addWidget(ReadingSessionWidget(self, self.api, session))
