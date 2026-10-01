@@ -118,3 +118,10 @@ class ReadingSessionsViewer(QtWidgets.QWidget):
         # Generating widgets for each sessions
         for session in self._reading_sessions:
             self.main_lyt.addWidget(ReadingSessionWidget(self, self.api, session))
+            self.main_lyt.addWidget(
+                QtWidgets.QFrame(
+                    self,
+                    frameShape=QtWidgets.QFrame.Shape.HLine,
+                    frameShadow=QtWidgets.QFrame.Shadow.Raised,
+                )
+            )
