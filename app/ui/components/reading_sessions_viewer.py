@@ -33,7 +33,8 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         self.start_date_lb.setObjectName("SessionDurationLabel")
         self.duration_lb.setProperty("role", "BookDetailValue")
         self.pages_read_lb = QtWidgets.QLabel(
-            self, text=f"(+{self._session.pages_read} pages)"
+            self,
+            text=f"(+{self.api.langs.tr('shared.infos.pages_count_args', count=self._session.pages_read)} )",
         )
         self.pages_read_lb.setObjectName("SessionPagesReadLabel")
         self.pages_read_lb.setProperty("role", "BookDetailValue")
@@ -56,12 +57,16 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         formatted = ""
 
         if hours:
-            formatted += f"{hours}h, "
+            formatted += (
+                f"{hours}{self.api.langs.tr('shared.time_units.hours_abbreviated')}, "
+            )
 
         if minutes:
-            formatted += f"{minutes}min, "
+            formatted += f"{minutes}{self.api.langs.tr('shared.time_units.minutes_abbreviated')}, "
 
-        formatted += f"{seconds}s"
+        formatted += (
+            f"{seconds}{self.api.langs.tr('shared.time_units.seconds_abbreviated')}"
+        )
 
         return formatted
 
