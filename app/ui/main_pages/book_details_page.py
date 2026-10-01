@@ -139,7 +139,10 @@ class DetailedBookInfos(QtWidgets.QWidget):
         """
         Add the reading sessions viewer and it's label to the layout only if the book is not unread
         """
-        if self.book.reading_state == book_sys.Book.ReadingState.UNREAD:
+        if (
+            self.book.reading_state == book_sys.Book.ReadingState.UNREAD
+            or not self.book.reading_sessions
+        ):
             return
         self.reading_sessions_viewer_lb = QtWidgets.QLabel(
             self, text=f"Reading sessions ({len(self.book.reading_sessions)}): "
