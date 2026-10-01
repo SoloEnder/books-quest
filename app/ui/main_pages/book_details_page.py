@@ -5,6 +5,7 @@ import widgets_pagination_view
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys
+from app.ui.components.reading_sessions_viewer import ReadingSessionsViewer
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -118,11 +119,43 @@ class DetailedBookInfos(QtWidgets.QWidget):
             ),
         }
         self.config_basic_infos_widgets()
+
+        # The widget that display the book's reading sessions
+        self.reading_sessions_list = list(self.book.reading_sessions.values())
+        self.reading_sessions_list.reverse()
+        self.reading_sessions_viewer = ReadingSessionsViewer(
+            self, self.api, self.reading_sessions_list
+        )
+        self.config_reading_sessions_viewer()
+
         utils_funcs.load_and_set_ss(
             self.res_files.get_res("assets.qss.general"),
             self.res_files.get_res("assets.qss.book_details_page"),
             widget=self,
             logger=self.logger,
+        )
+
+    def config_reading_sessions_viewer(self):
+        """
+        Add the reading sessions viewer and it's label to the layout only if the book is not unread
+        """
+        if (
+            self.book.reading_state == book_sys.Book.ReadingState.UNREAD
+            or not self.book.reading_sessions
+        ):
+            return
+        self.reading_sessions_viewer_lb = QtWidgets.QLabel(
+            self, text=f"Reading sessions ({len(self.book.reading_sessions)}): "
+        )
+        self.reading_sessions_viewer_lb.setProperty("role", "h5")
+        self.main_lyt.addWidget(self.reading_sessions_viewer_lb)
+        self.main_lyt.addWidget(self.reading_sessions_viewer)
+        self.main_lyt.addWidget(
+            QtWidgets.QFrame(
+                self,
+                frameShape=QtWidgets.QFrame.Shape.HLine,
+                frameShadow=QtWidgets.QFrame.Shadow.Sunken,
+            )
         )
 
     def config_basic_infos_widgets(self):
