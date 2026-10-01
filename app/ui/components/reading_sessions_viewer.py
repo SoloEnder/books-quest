@@ -31,7 +31,7 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         )
         self.duration_lb.setProperty("role", "BookDetailValue")
         self.pages_read_lb = QtWidgets.QLabel(
-            self, text=f" +{self._session.pages_read} pages"
+            self, text=f"(+{self._session.pages_read} pages)"
         )
         self.pages_read_lb.setProperty("role", "BookDetailValue")
 
@@ -67,7 +67,7 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         year: int | str,
         month: int | str,
         day: int | str,
-        format: str = "yyyy-mm-dd",
+        format: str = "yyyy-mm-dd : ",
     ):
         """
         Format an date (year, month, date) in an string based on `format`.
