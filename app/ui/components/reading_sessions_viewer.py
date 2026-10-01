@@ -53,12 +53,12 @@ class ReadingSessionWidget(QtWidgets.QWidget):
         formatted = ""
 
         if hours:
-            formatted += f"{hours:02}h, "
+            formatted += f"{hours}h, "
 
         if minutes:
-            formatted += f"{minutes:02}min, "
+            formatted += f"{minutes}min, "
 
-        formatted += f"{seconds:02}s"
+        formatted += f"{seconds}s"
 
         return formatted
 
