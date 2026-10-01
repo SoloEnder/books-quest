@@ -26,13 +26,16 @@ class ReadingSessionWidget(QtWidgets.QWidget):
             )
         )
         self.start_date_lb.setProperty("role", "BookDetailValue")
+        self.start_date_lb.setObjectName("SessionStartDateLabel")
         self.duration_lb = QtWidgets.QLabel(
             self, text=self.format_duration(self._session.duration)
         )
+        self.start_date_lb.setObjectName("SessionDurationLabel")
         self.duration_lb.setProperty("role", "BookDetailValue")
         self.pages_read_lb = QtWidgets.QLabel(
             self, text=f"(+{self._session.pages_read} pages)"
         )
+        self.pages_read_lb.setObjectName("SessionPagesReadLabel")
         self.pages_read_lb.setProperty("role", "BookDetailValue")
 
         self.main_lyt.addWidget(
