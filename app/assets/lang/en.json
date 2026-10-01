@@ -1,5 +1,13 @@
 {
   "shared": {
+    "time_units": {
+      "seconds": "seconds",
+      "seconds_abbreviated": "s",
+      "minutes": "minutes",
+      "minutes_abbreviated": "min",
+      "hours": "hours",
+      "hours_abbreviated": "h"
+    },
     "actions": {
       "add": "Add",
       "edit": "Edit",
@@ -53,6 +61,7 @@
     }
   },
   "reading_session": {
+    "header": "Reading sessions : ",
     "current_page": "Current page : ",
     "book_currently_read": "Reading '/f:<book_title>/f'...",
     "save": "Save session",
