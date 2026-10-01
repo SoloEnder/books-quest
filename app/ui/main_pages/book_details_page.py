@@ -142,7 +142,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
         if self.book.reading_state == book_sys.Book.ReadingState.UNREAD:
             return
         self.reading_sessions_viewer_lb = QtWidgets.QLabel(
-            self, text="Reading sessions : "
+            self, text=f"Reading sessions ({len(self.book.reading_sessions)}): "
         )
         self.reading_sessions_viewer_lb.setProperty("role", "h5")
         self.main_lyt.addWidget(self.reading_sessions_viewer_lb)
