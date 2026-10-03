@@ -145,7 +145,8 @@ class DetailedBookInfos(QtWidgets.QWidget):
         ):
             return
         self.reading_sessions_viewer_lb = QtWidgets.QLabel(
-            self, text=f"Reading sessions ({len(self.book.reading_sessions)}): "
+            self,
+            text=f"{self.api.langs.tr('reading_session.header')} ({len(self.book.reading_sessions)}): ",
         )
         self.reading_sessions_viewer_lb.setProperty("role", "h5")
         self.main_lyt.addWidget(self.reading_sessions_viewer_lb)
