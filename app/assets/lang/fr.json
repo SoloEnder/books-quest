@@ -1,5 +1,13 @@
 {
   "shared": {
+    "time_units": {
+      "seconds": "secondes",
+      "seconds_abbreviated": "s",
+      "minutes": "minutes",
+      "minutes_abbreviated": "min",
+      "hours": "heures",
+      "hours_abbreviated": "h"
+    },
     "actions": {
       "add": "Ajouter",
       "edit": "Modifier",
@@ -52,7 +60,11 @@
     }
   },
   "reading_session": {
+<<<<<<< HEAD
     "session_editor_title": "Editeur de session",
+=======
+    "header": "Sessions de lectures : ",
+>>>>>>> 0d5ccbad6014ee1842ea3498a6bf7dab90b03e79
     "current_page": "Page actuelle : ",
     "book_currently_read": "Lecture de '/f:<book_title>/f'...",
     "save": "Sauvegarder la session",
