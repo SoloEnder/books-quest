@@ -53,6 +53,7 @@
     }
   },
   "reading_session": {
+    "session_editor_title": "Reading session editor",
     "current_page": "Current page : ",
     "book_currently_read": "Reading '/f:<book_title>/f'...",
     "save": "Save session",

@@ -33,6 +33,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.hours = self.session_duration // 3600
 
         # Widgets
+        self.setWindowTitle(self.api.langs.tr("reading_session.session_editor_title"))
         self.main_lyt = QtWidgets.QGridLayout(self)
         self.start_date_lb = QtWidgets.QLabel(
             self.api.langs.tr("book.infos.starting_read_date")
