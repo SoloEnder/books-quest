@@ -61,15 +61,8 @@
     }
   },
   "reading_session": {
-<<<<<<< HEAD
     "session_editor_title": "Reading session editor",
-<<<<<<< HEAD
     "header": "Reading sessions : ",
-=======
-=======
-    "header": "Reading sessions : ",
->>>>>>> 0d5ccbad6014ee1842ea3498a6bf7dab90b03e79
->>>>>>> 7c0d19962cd06709607d71c7654ba75ea8681b05
     "current_page": "Current page : ",
     "book_currently_read": "Reading '/f:<book_title>/f'...",
     "save": "Save session",
