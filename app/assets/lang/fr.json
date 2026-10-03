@@ -60,8 +60,15 @@
     }
   },
   "reading_session": {
+<<<<<<< HEAD
     "session_editor_title": "Editeur de session",
+<<<<<<< HEAD
     "header": "Sessions de lectures : ",
+=======
+=======
+    "header": "Sessions de lectures : ",
+>>>>>>> 0d5ccbad6014ee1842ea3498a6bf7dab90b03e79
+>>>>>>> 7c0d19962cd06709607d71c7654ba75ea8681b05
     "current_page": "Page actuelle : ",
     "book_currently_read": "Lecture de '/f:<book_title>/f'...",
     "save": "Sauvegarder la session",
