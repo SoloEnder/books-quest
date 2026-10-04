@@ -40,6 +40,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         )
         self.start_date_selector = QtWidgets.QDateEdit(self.start_date)
         self.start_date_selector.setCalendarPopup(True)
+        self.start_date_selector.setMaximumDate(QtCore.QDate.currentDate())
 
         # -- Duration
         self.hours_selector_lb = QtWidgets.QLabel(
