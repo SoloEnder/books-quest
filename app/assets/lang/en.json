@@ -61,6 +61,10 @@
     }
   },
   "reading_session": {
+    "warn_sessions_preservation": {
+      "title": "Reading session preservation",
+      "message": "This book has /f:<sessions_count>/f reading sessions\nMarking this book as 'unread' will delete them !"
+    },
     "session_editor_title": "Reading session editor",
     "header": "Reading sessions : ",
     "current_page": "Current page : ",

@@ -534,11 +534,18 @@ class BookCreationPage(base_page.BasePage):
         """
         Shows an pop-up to warn the user that the reading sessions of the currently edited book will be deleted
         Returns `True` if the user accepted, else `False`
+
+        Parameters
+        ----------
+        - sessions_count: the number of reading sessions
         """
         response = QtWidgets.QMessageBox.warning(
             self,
-            "Preserve session ?",
-            f"This book has {sessions_count} reading sessions\nMarking this book has 'unread' will delete them !",
+            self.langs.tr("reading_session.warn_sessions_preservation.title"),
+            self.langs.tr(
+                "reading_session.warn_sessions_preservation.message",
+                sessions_count=sessions_count,
+            ),
             QtWidgets.QMessageBox.StandardButton.Cancel,
             QtWidgets.QMessageBox.StandardButton.Ok,
         )
