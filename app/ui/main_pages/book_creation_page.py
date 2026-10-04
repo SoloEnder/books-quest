@@ -518,6 +518,33 @@ class BookCreationPage(base_page.BasePage):
                 "A cover file already exists for this book !",
             )
 
+    def get_reading_sessions(self):
+        """
+        Return an list of the reading sessions of the current book
+        """
+        if not self.edition_mode_enabled:
+            return {}
+
+        if not self.book:
+            return {}
+
+        return list(self.book.reading_sessions.values())
+
+    def warn_for_sessions_preservation(self, sessions_count: int = 1):
+        """
+        Shows an pop-up to warn the user that the reading sessions of the currently edited book will be deleted
+        Returns `True` if the user accepted, else `False`
+        """
+        response = QtWidgets.QMessageBox.warning(
+            self,
+            "Preserve session ?",
+            f"This book has {sessions_count} reading sessions\nMarking this book has 'unread' will delete them !",
+            QtWidgets.QMessageBox.StandardButton.Cancel,
+            QtWidgets.QMessageBox.StandardButton.Ok,
+        )
+
+        return response == QtWidgets.QMessageBox.StandardButton.Ok
+
     def get_book_infos(self):
         books_infos = {}
 
@@ -580,6 +607,20 @@ class BookCreationPage(base_page.BasePage):
             books_infos["id"] = self.book.id  # type: ignore
 
         books_infos["reading_state"] = self.book_reading_state_combob.currentData()
+
+        # Get book reading sessions
+        sessions = self.get_reading_sessions()
+
+        if (
+            sessions
+            and books_infos["reading_state"] == book_sys.Book.ReadingState.UNREAD
+        ):
+            continue_ = self.warn_for_sessions_preservation(len(sessions))
+            if not continue_:
+                self.logger.info("User aborted book edition")
+                return
+
+        books_infos["reading_sessions"] = sessions
 
         if self.read_pages_le.isEnabled():
             text = self.read_pages_le.text()
