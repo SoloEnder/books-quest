@@ -64,6 +64,7 @@
       "title": "Avertissement sur la preservation des sessions",
       "message": "Ce livre a /f:<sessions_count>/f sessions de lectures\nMarquer ce livre comme 'non lut' les supprimera !"
     },
+    "session_editor_title": "Reading session editor",
     "header": "Sessions de lectures : ",
     "current_page": "Page actuelle : ",
     "book_currently_read": "Lecture de '/f:<book_title>/f'...",
