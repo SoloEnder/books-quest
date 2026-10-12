@@ -1,8 +1,8 @@
 import logging
 import uuid
 
-import widgets_pagination_view
 from PySide6 import QtCore, QtGui, QtWidgets
+from widgets_pagination_view.widgets_pagination_view import InPageWidget
 
 from app.src import api, book_sys
 from app.ui.components.reading_sessions_viewer import ReadingSessionsViewer
@@ -28,7 +28,7 @@ class BookDetailsPage(base_page.BasePage):
         )
 
         # Connecting signals to slot
-        self.book_widget = BookWidget(
+        self.book_widget = PagedBookWidget(
             self.book,
             self.api,
         )
@@ -217,13 +217,25 @@ class DetailedBookInfos(QtWidgets.QWidget):
         return self._book
 
 
-class BookWidget(widgets_pagination_view.InPageWidget):
+class PagedBookWidget(InPageWidget):
     def __init__(
         self,
         book: book_sys.Book,
         api: api.API,
     ):
-        super().__init__(None, None)
+        """
+        The base book widget class.
+        Displays some basics books informations suchs as :
+            - the title
+            - the cover
+            - the author
+
+        It also provide 3 buttons :
+            - a button to edit the book
+            - a button to show the books details
+            - a button to delete the book from the books handler
+        """
+        super().__init__(None)
         self.logger = logging.getLogger(__name__)
         self.api = api
         self.book = book
@@ -267,30 +279,36 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             logger=self.logger,
         )
 
-    def delete_book(self):
+    def delete_book(self, switch_to_page: str = ""):
+        self.logger.info(f"Deleting book with ID={self.book.id}")
+        self.qt_signals.emit_signal(
+            "edit_progress_msg", self.langs.tr("book.msg.book_deletion", count=1)
+        )
 
-        if self.pages_widgets_handler:
-            self.logger.info(f"Deleting book with ID={self.book.id}")
+        try:
+            self.books.books_handler.delete_book(self.book.str_id())
+
+        except book_sys.BookNotFoundError:
+            self.logger.error(
+                f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books.books_handler}) !"
+            )
             self.qt_signals.emit_signal(
-                "edit_progress_msg", self.langs.tr("book.msg.book_deletion", count=1)
+                "notify_sg",
+                "error",
+                "",
+                self.langs.tr("book.msg.book_not_found"),
+                "",
             )
 
-            try:
-                self.books.books_handler.delete_book(self.book.str_id())
-
-            except book_sys.BookNotFoundError:
-                self.logger.error(
-                    f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books.books_handler}) !"
-                )
-                self.qt_signals.emit_signal(
-                    "notify_sgerror",
-                    "",
-                    self.langs.tr("book.msg.book_not_found"),
-                    "",
-                )
-
+        if self.pages_widgets_handler:
             self.pages_widgets_handler.delete_widget(self)
             self.qt_signals.emit_signal("edit_progress_msg", "")
+
+        else:
+            # Executed only if the book has been deleted from the details page
+            self.api.qt_signals.emit_signal(
+                "switch_page_sg", "SHELFS_VIEW_PAGE", True, {}
+            )
 
 
 class SubBookWidget(QtWidgets.QWidget):

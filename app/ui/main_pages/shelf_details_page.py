@@ -139,7 +139,7 @@ class ShelfDetailsPage(base_page.BasePage):
         for object in children_obj:
             widget = None
             if isinstance(object, book_sys.Book):
-                widget = book_details_page.BookWidget(
+                widget = book_details_page.PagedBookWidget(
                     object,
                     self.api,
                 )
