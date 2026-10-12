@@ -279,7 +279,7 @@ class PagedBookWidget(InPageWidget):
             logger=self.logger,
         )
 
-    def delete_book(self):
+    def delete_book(self, switch_to_page: str = ""):
         self.logger.info(f"Deleting book with ID={self.book.id}")
         self.qt_signals.emit_signal(
             "edit_progress_msg", self.langs.tr("book.msg.book_deletion", count=1)
@@ -302,8 +302,13 @@ class PagedBookWidget(InPageWidget):
 
         if self.pages_widgets_handler:
             self.pages_widgets_handler.delete_widget(self)
+            self.qt_signals.emit_signal("edit_progress_msg", "")
 
-        self.qt_signals.emit_signal("edit_progress_msg", "")
+        else:
+            # Executed only if the book has been deleted from the details page
+            self.api.qt_signals.emit_signal(
+                "switch_page_sg", "SHELFS_VIEW_PAGE", True, {}
+            )
 
 
 class SubBookWidget(QtWidgets.QWidget):
