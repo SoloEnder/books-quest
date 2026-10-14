@@ -1,4 +1,3 @@
-import datetime as dt
 import logging
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -8,7 +7,7 @@ from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
 
-class SessionsDetailsWindow(QtWidgets.QWidget):
+class SessionsDetailsWindow(QtWidgets.QDialog):
     reading_session_saved = QtCore.Signal()
     about_to_close = QtCore.Signal()
 
@@ -322,14 +321,11 @@ class ReadingSessionPage(base_page.BasePage):
         if not self._session_details_editor_active:
             self.timer.pause()
             self.session_details_editor = SessionsDetailsWindow(
-                None,
+                self,
                 self.api,
                 QtCore.QDate.currentDate(),
                 self.timer.loops_count,
                 self._book,
-            )
-            self.session_details_editor.setWindowFlag(
-                QtCore.Qt.WindowType.WindowStaysOnTopHint, True
             )
             self.session_details_editor.setAttribute(
                 QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True
