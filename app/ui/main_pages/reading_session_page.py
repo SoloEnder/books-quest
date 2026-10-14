@@ -1,4 +1,3 @@
-import datetime as dt
 import logging
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -8,7 +7,7 @@ from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
 
-class SessionsDetailsWindow(QtWidgets.QWidget):
+class SessionsDetailsWindow(QtWidgets.QDialog):
     reading_session_saved = QtCore.Signal()
     about_to_close = QtCore.Signal()
 
@@ -24,7 +23,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__ + " - SessionsDetailsWindow")
         self.api = api
         self.start_date = start_date
-        self.session_duration = session_duration
+        self.session_duration = session_duration  # In seconds
         self.read_book = read_book
 
         self.seconds = self.session_duration % 60
@@ -33,12 +32,14 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.hours = self.session_duration // 3600
 
         # Widgets
+        self.setWindowTitle(self.api.langs.tr("reading_session.session_editor_title"))
         self.main_lyt = QtWidgets.QGridLayout(self)
         self.start_date_lb = QtWidgets.QLabel(
             self.api.langs.tr("book.infos.starting_read_date")
         )
         self.start_date_selector = QtWidgets.QDateEdit(self.start_date)
         self.start_date_selector.setCalendarPopup(True)
+        self.start_date_selector.setMaximumDate(QtCore.QDate.currentDate())
 
         # -- Duration
         self.hours_selector_lb = QtWidgets.QLabel(
@@ -100,7 +101,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.about_to_close.emit()
         return super().closeEvent(event)
 
-    def calc_duration(self, duration: int | None = None) -> int:
+    def calc_duration(self) -> int:
         """
         Calculate the reading session duration based on the value of the `seconds`, `minutes` and `hours` widgets
         Returns the new duration
@@ -108,8 +109,8 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.seconds = self.seconds_selector.value()
         self.minutes = self.minutes_selector.value()
         self.hours = self.hours_selector.value()
-        self.duration = self.seconds + self.minutes * 60 + self.hours * 3600
-        return self.duration
+        self.session_duration = self.seconds + self.minutes * 60 + self.hours * 3600
+        return self.session_duration
 
     def set_duration(self, duration: int):
         """
@@ -151,6 +152,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             session_data["start_page"],
             session_data["end_page"],
         )
+        self.logger.debug(f"Session duration={self.session_duration}s")
         return reading_session
 
     def get_session_data(self) -> dict:
@@ -319,14 +321,11 @@ class ReadingSessionPage(base_page.BasePage):
         if not self._session_details_editor_active:
             self.timer.pause()
             self.session_details_editor = SessionsDetailsWindow(
-                None,
+                self,
                 self.api,
                 QtCore.QDate.currentDate(),
                 self.timer.loops_count,
                 self._book,
-            )
-            self.session_details_editor.setWindowFlag(
-                QtCore.Qt.WindowType.WindowStaysOnTopHint, True
             )
             self.session_details_editor.setAttribute(
                 QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True

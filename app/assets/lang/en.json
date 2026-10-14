@@ -1,5 +1,13 @@
 {
   "shared": {
+    "time_units": {
+      "seconds": "seconds",
+      "seconds_abbreviated": "s",
+      "minutes": "minutes",
+      "minutes_abbreviated": "min",
+      "hours": "hours",
+      "hours_abbreviated": "h"
+    },
     "actions": {
       "add": "Add",
       "edit": "Edit",
@@ -53,6 +61,12 @@
     }
   },
   "reading_session": {
+    "warn_sessions_preservation": {
+      "title": "Reading session preservation",
+      "message": "This book has /f:<sessions_count>/f reading sessions\nMarking this book as 'unread' will delete them !"
+    },
+    "session_editor_title": "Reading session editor",
+    "header": "Reading sessions : ",
     "current_page": "Current page : ",
     "book_currently_read": "Reading '/f:<book_title>/f'...",
     "save": "Save session",

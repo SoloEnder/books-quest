@@ -1,10 +1,11 @@
 import logging
 import uuid
 
-import widgets_pagination_view
 from PySide6 import QtCore, QtGui, QtWidgets
+from widgets_pagination_view.widgets_pagination_view import InPageWidget
 
 from app.src import api, book_sys
+from app.ui.components.reading_sessions_viewer import ReadingSessionsViewer
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -27,7 +28,7 @@ class BookDetailsPage(base_page.BasePage):
         )
 
         # Connecting signals to slot
-        self.book_widget = BookWidget(
+        self.book_widget = PagedBookWidget(
             self.book,
             self.api,
         )
@@ -118,11 +119,44 @@ class DetailedBookInfos(QtWidgets.QWidget):
             ),
         }
         self.config_basic_infos_widgets()
+
+        # The widget that display the book's reading sessions
+        self.reading_sessions_list = list(self.book.reading_sessions.values())
+        self.reading_sessions_list.reverse()
+        self.reading_sessions_viewer = ReadingSessionsViewer(
+            self, self.api, self.reading_sessions_list
+        )
+        self.config_reading_sessions_viewer()
+
         utils_funcs.load_and_set_ss(
             self.res_files.get_res("assets.qss.general"),
             self.res_files.get_res("assets.qss.book_details_page"),
             widget=self,
             logger=self.logger,
+        )
+
+    def config_reading_sessions_viewer(self):
+        """
+        Add the reading sessions viewer and it's label to the layout only if the book is not unread
+        """
+        if (
+            self.book.reading_state == book_sys.Book.ReadingState.UNREAD
+            or not self.book.reading_sessions
+        ):
+            return
+        self.reading_sessions_viewer_lb = QtWidgets.QLabel(
+            self,
+            text=f"{self.api.langs.tr('reading_session.header')} ({len(self.book.reading_sessions)}): ",
+        )
+        self.reading_sessions_viewer_lb.setProperty("role", "h5")
+        self.main_lyt.addWidget(self.reading_sessions_viewer_lb)
+        self.main_lyt.addWidget(self.reading_sessions_viewer)
+        self.main_lyt.addWidget(
+            QtWidgets.QFrame(
+                self,
+                frameShape=QtWidgets.QFrame.Shape.HLine,
+                frameShadow=QtWidgets.QFrame.Shadow.Sunken,
+            )
         )
 
     def config_basic_infos_widgets(self):
@@ -183,13 +217,25 @@ class DetailedBookInfos(QtWidgets.QWidget):
         return self._book
 
 
-class BookWidget(widgets_pagination_view.InPageWidget):
+class PagedBookWidget(InPageWidget):
     def __init__(
         self,
         book: book_sys.Book,
         api: api.API,
     ):
-        super().__init__(None, None)
+        """
+        The base book widget class.
+        Displays some basics books informations suchs as :
+            - the title
+            - the cover
+            - the author
+
+        It also provide 3 buttons :
+            - a button to edit the book
+            - a button to show the books details
+            - a button to delete the book from the books handler
+        """
+        super().__init__(None)
         self.logger = logging.getLogger(__name__)
         self.api = api
         self.book = book
@@ -233,30 +279,36 @@ class BookWidget(widgets_pagination_view.InPageWidget):
             logger=self.logger,
         )
 
-    def delete_book(self):
+    def delete_book(self, switch_to_page: str = ""):
+        self.logger.info(f"Deleting book with ID={self.book.id}")
+        self.qt_signals.emit_signal(
+            "edit_progress_msg", self.langs.tr("book.msg.book_deletion", count=1)
+        )
 
-        if self.pages_widgets_handler:
-            self.logger.info(f"Deleting book with ID={self.book.id}")
+        try:
+            self.books.books_handler.delete_book(self.book.str_id())
+
+        except book_sys.BookNotFoundError:
+            self.logger.error(
+                f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books.books_handler}) !"
+            )
             self.qt_signals.emit_signal(
-                "edit_progress_msg", self.langs.tr("book.msg.book_deletion", count=1)
+                "notify_sg",
+                "error",
+                "",
+                self.langs.tr("book.msg.book_not_found"),
+                "",
             )
 
-            try:
-                self.books.books_handler.delete_book(self.book.str_id())
-
-            except book_sys.BookNotFoundError:
-                self.logger.error(
-                    f"Failed to delete book with ID={self.book.id} : Book not found in BooksHandler ({self.books.books_handler}) !"
-                )
-                self.qt_signals.emit_signal(
-                    "notify_sgerror",
-                    "",
-                    self.langs.tr("book.msg.book_not_found"),
-                    "",
-                )
-
+        if self.pages_widgets_handler:
             self.pages_widgets_handler.delete_widget(self)
             self.qt_signals.emit_signal("edit_progress_msg", "")
+
+        else:
+            # Executed only if the book has been deleted from the details page
+            self.api.qt_signals.emit_signal(
+                "switch_page_sg", "SHELFS_VIEW_PAGE", True, {}
+            )
 
 
 class SubBookWidget(QtWidgets.QWidget):
@@ -288,7 +340,6 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_authors_lb.setObjectName("BookAuthorLabel")
         self.book_reading_state_lb = QtWidgets.QLabel()
         self.book_reading_state_lb.setObjectName("BookReadingStateLabel")
-        self.display_reading_state()
         self.book_summary_te = QtWidgets.QTextEdit()
         self.book_summary_te.setText(self.book.summary if self.book.summary else "")
         self.book_summary_te.setMinimumSize(350, 120)
@@ -308,6 +359,7 @@ class SubBookWidget(QtWidgets.QWidget):
                 {"book_id": self.book.str_id()},
             )
         )
+        self.display_reading_state()
         self.book_details_b = QtWidgets.QPushButton(
             self.langs.tr("shared.actions.see_details")
         )
@@ -396,6 +448,7 @@ class SubBookWidget(QtWidgets.QWidget):
             self.book_reading_state_lb.setText(
                 f"{self.langs.tr('book.infos.reading_state.finished')} - {self.langs.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
+            self.read_book_b.setVisible(False)  # Hide "read" button on finished books
 
         else:
             self.logger.warning(
