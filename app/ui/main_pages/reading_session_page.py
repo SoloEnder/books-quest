@@ -24,7 +24,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.logger = logging.getLogger(__name__ + " - SessionsDetailsWindow")
         self.api = api
         self.start_date = start_date
-        self.session_duration = session_duration
+        self.session_duration = session_duration  # In seconds
         self.read_book = read_book
 
         self.seconds = self.session_duration % 60
@@ -102,7 +102,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.about_to_close.emit()
         return super().closeEvent(event)
 
-    def calc_duration(self, duration: int | None = None) -> int:
+    def calc_duration(self) -> int:
         """
         Calculate the reading session duration based on the value of the `seconds`, `minutes` and `hours` widgets
         Returns the new duration
@@ -110,8 +110,8 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
         self.seconds = self.seconds_selector.value()
         self.minutes = self.minutes_selector.value()
         self.hours = self.hours_selector.value()
-        self.duration = self.seconds + self.minutes * 60 + self.hours * 3600
-        return self.duration
+        self.session_duration = self.seconds + self.minutes * 60 + self.hours * 3600
+        return self.session_duration
 
     def set_duration(self, duration: int):
         """
@@ -153,6 +153,7 @@ class SessionsDetailsWindow(QtWidgets.QWidget):
             session_data["start_page"],
             session_data["end_page"],
         )
+        self.logger.debug(f"Session duration={self.session_duration}s")
         return reading_session
 
     def get_session_data(self) -> dict:
