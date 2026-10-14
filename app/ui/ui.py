@@ -187,6 +187,7 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.reading_session_page = reading_session_page.ReadingSessionPage(
             self, self.api, self.books.books_handler.default_book.str_id()
         )
+        self.reading_session_page.timer.stop_timer()
         self.settings_page = settings_page.SettingsPage(
             self,
             self.api,
