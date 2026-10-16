@@ -333,10 +333,19 @@ class ReadingSessionPage(base_page.BasePage):
             self._session_details_editor_active = True
             self.session_details_editor.destroyed.connect(self.session_editor_closed)
             self.session_details_editor.reading_session_saved.connect(
-                lambda: self.qt_signals.emit_signal("close_page_sg")
+                self.show_session_summary()
             )
+            # self.session_details_editor.reading_session_saved.connect(
+            #     lambda: self.qt_signals.emit_signal("close_page_sg")
+            # )
             self.session_details_editor.show()
             return
+
+    def show_session_summary(self):
+        self.session_summary_viewer = ReadingSessionSummaryViewer(
+            self.api, self.session_details_editor.get_session(), self._book.str_id()
+        )
+        self.session_summary_viewer.show()
 
     def session_editor_closed(self):
         """
