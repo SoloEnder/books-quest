@@ -343,3 +343,54 @@ class ReadingSessionPage(base_page.BasePage):
         Note that the session editor has been closed
         """
         self._session_details_editor_active = False
+
+
+class ReadingSessionSummaryViewer(QtWidgets.QWidget):
+    def __init__(
+        self, api: api.API, reading_session: book_sys.ReadingSession, book_id: str
+    ):
+        """
+        This widget displays a summary of a reading session, including :
+            - The pages read
+            - The reading speed (in pages/hours)
+            - The estimated reading time remaining
+        """
+        super().__init__()
+
+        # Parameters attribution
+        self.api = api
+        self.reading_session = reading_session
+        self.book_id = book_id
+
+        # -- Gets book with the provided id --
+        self.book = self.api.books.books_handler.books[book_id]
+
+        self.main_lyt = QtWidgets.QLayout(self)
+
+        # -- Convert seconds duration into seconds, minutes and hours --
+        self.converted_duration = self.convert_duration(self.reading_session.duration)
+        # -- Get reading speed, in pages/seconds --
+        self.read_pages_per_sec = (
+            self.reading_session.pages_read // self.reading_session.duration
+        ) // 3600
+
+        # -- Remainin reading time for the book
+        self.remaining_reading_time = (
+            self.book.tot_pages - self.book.read_pages
+        ) // self.read_pages_per_sec
+        self.summary_lb = QtWidgets.QLabel(
+            self,
+            text=f"You read {self.reading_session.pages_read} in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}\nYou read {self.read_pages_per_sec * 3600} pages per hours\nThe estimated reading time remaining is {self.remaining_reading_time}",
+        )
+        self.main_lyt.addWidget(self.summary_lb)
+
+    def convert_duration(self, duration) -> tuple[int, int, int]:
+        """
+        Convert a `duration` (in seconds) into seconds, minutes and hours and return the result in a tuple
+        """
+        seconds = duration % 60
+        minutes = duration // 60 if duration else 0
+        minutes %= 60  # Prevent from having value >= 60
+        hours = duration // 3600
+
+        return (seconds, minutes, hours)
