@@ -400,6 +400,8 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
         # -- Gets book with the provided id --
         self.book = self.api.books.books_handler.books[book_id]
 
+        self.setWindowTitle("Reading Session Summary Viewer - " + self.book.title)
+
         self.main_lyt = QtWidgets.QGridLayout(self)
 
         # -- Convert seconds duration into seconds, minutes and hours --
