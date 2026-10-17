@@ -364,6 +364,14 @@ class ReadingSessionPage(base_page.BasePage):
 
 
 class ReadingSessionSummaryViewer(QtWidgets.QWidget):
+    """
+    Displays various information about a reading session :
+        - The pages read
+        - The time of reading
+        - The estimated reading speed (in pages/hours)
+        - The time remaining to complete reading of the book
+    """
+
     def __init__(
         self, api: api.API, reading_session: book_sys.ReadingSession, book_id: str
     ):
@@ -372,6 +380,12 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
             - The pages read
             - The reading speed (in pages/hours)
             - The estimated reading time remaining
+
+        Parameters
+        ----------
+        - api (API): the app internal api
+        - reading_session (ReadingSession): the reading session to summarize
+        - book_id: the id of the book that has been read
         """
         super().__init__()
 
