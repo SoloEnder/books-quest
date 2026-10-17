@@ -396,10 +396,6 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
             if self.reading_session.duration
             else 0
         )
-        self.logger.debug(f"{self.reading_session.get_data()}")
-        self.logger.debug(f"{self.reading_session.pages_read=}")
-        self.logger.debug(f"{self.reading_session.duration=}")
-        self.logger.debug(f"{self.read_pages_per_sec=}")
 
         # -- Estimated Remaining reading time for the book in seconds
         self.remaining_reading_time = (
@@ -410,9 +406,12 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
         self.converted_remaining_reading_time = self.convert_duration(
             self.remaining_reading_time
         )
+        self.logger.info(
+            f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.read_pages_per_sec=}, {self.remaining_reading_time=}"
+        )
         self.summary_lb = QtWidgets.QLabel(
             self,
-            text=f"You read {self.reading_session.pages_read} in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}\nYou read {self.read_pages_per_sec * 3600} pages per hours\nThe estimated reading time remaining is {self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+            text=f"You read {self.reading_session.pages_read} in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}\nYou read {self.read_pages_per_sec * 3600} pages per hours\nThe estimated reading time remaining is {self.converted_remaining_reading_time[2]:02}{self.converted_remaining_reading_time[1]:02}{self.converted_remaining_reading_time[0]:02}",
         )
         self.main_lyt.addWidget(self.summary_lb)
 
