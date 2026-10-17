@@ -348,7 +348,11 @@ class ReadingSessionPage(base_page.BasePage):
 
     def show_session_summary(self):
         self.session_summary_viewer = ReadingSessionSummaryViewer(
-            self.api, self.session_details_editor.get_session(), self._book.str_id()
+            self.api,
+            self.session_details_editor._last_saved_session
+            if self.session_details_editor._last_saved_session
+            else self.session_details_editor.get_session(),
+            self._book.str_id(),
         )
         self.session_summary_viewer.show()
 
