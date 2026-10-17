@@ -31,6 +31,9 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
         self.minutes %= 60  # Prevent from having value >= 60
         self.hours = self.session_duration // 3600
 
+        # -- Store the latest session that has been saved by this widget
+        self._last_saved_session = None
+
         # Widgets
         self.setWindowTitle(self.api.langs.tr("reading_session.session_editor_title"))
         self.main_lyt = QtWidgets.QGridLayout(self)
@@ -177,7 +180,8 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
         - auto_close (bool=True): wehter to close the widgets when the session is successfully added
         """
         try:
-            self.api.books.add_reading_session(self.read_book, self.get_session())
+            session = self.get_session()
+            self.api.books.add_reading_session(self.read_book, session)
 
         except Exception:
             self.logger.exception("Unable to save session for book : ")
@@ -190,6 +194,7 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
                 "",
             )
         else:
+            self._last_saved_session = session
             self.reading_session_saved.emit()
             if auto_close:
                 self.close()
@@ -387,6 +392,10 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
             if self.reading_session.duration
             else 0
         )
+        self.logger.debug(f"{self.reading_session.get_data()}")
+        self.logger.debug(f"{self.reading_session.pages_read=}")
+        self.logger.debug(f"{self.reading_session.duration=}")
+        self.logger.debug(f"{self.read_pages_per_sec=}")
 
         # -- Estimated Remaining reading time for the book in seconds
         self.remaining_reading_time = (
