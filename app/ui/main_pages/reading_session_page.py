@@ -371,6 +371,9 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
         self.reading_session = reading_session
         self.book_id = book_id
 
+        # -- Logger --
+        self.logger = logging.getLogger(__name__ + " - Reading Session Summary Viewer")
+
         # -- Gets book with the provided id --
         self.book = self.api.books.books_handler.books[book_id]
 
