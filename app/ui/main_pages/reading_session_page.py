@@ -333,7 +333,7 @@ class ReadingSessionPage(base_page.BasePage):
             self._session_details_editor_active = True
             self.session_details_editor.destroyed.connect(self.session_editor_closed)
             self.session_details_editor.reading_session_saved.connect(
-                self.show_session_summary()
+                self.show_session_summary
             )
             # self.session_details_editor.reading_session_saved.connect(
             #     lambda: self.qt_signals.emit_signal("close_page_sg")
@@ -380,7 +380,7 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
         self.converted_duration = self.convert_duration(self.reading_session.duration)
         # -- Get reading speed, in pages/seconds --
         self.read_pages_per_sec = (
-            (self.reading_session.pages_read / self.reading_session.duration) // 3600
+            self.reading_session.pages_read / self.reading_session.duration
             if self.reading_session.duration
             else 0
         )
