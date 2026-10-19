@@ -343,7 +343,7 @@ class ReadingSessionPage(base_page.BasePage):
             # self.session_details_editor.reading_session_saved.connect(
             #     lambda: self.qt_signals.emit_signal("close_page_sg")
             # )
-            self.session_details_editor.show()
+            self.session_details_editor.open()
             return
 
     def show_session_summary(self):
