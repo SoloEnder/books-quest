@@ -347,6 +347,10 @@ class ReadingSessionPage(base_page.BasePage):
             return
 
     def show_session_summary(self):
+
+        # -- Prevent from showing the summary if the pages read are 0
+        if self.session_details_editor._last_saved_session.pages_read <= 0:
+            return
         self.session_summary_viewer = ReadingSessionSummaryViewer(
             self.api,
             self.session_details_editor._last_saved_session
