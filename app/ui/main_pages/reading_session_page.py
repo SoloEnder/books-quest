@@ -352,6 +352,7 @@ class ReadingSessionPage(base_page.BasePage):
         if self.session_details_editor._last_saved_session.pages_read <= 0:
             return
         self.session_summary_viewer = ReadingSessionSummaryViewer(
+            None,
             self.api,
             self.session_details_editor._last_saved_session
             if self.session_details_editor._last_saved_session
@@ -367,7 +368,7 @@ class ReadingSessionPage(base_page.BasePage):
         self._session_details_editor_active = False
 
 
-class ReadingSessionSummaryViewer(QtWidgets.QWidget):
+class ReadingSessionSummaryViewer(QtWidgets.QDialog):
     """
     Displays various information about a reading session :
         - The pages read
@@ -377,7 +378,11 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
     """
 
     def __init__(
-        self, api: api.API, reading_session: book_sys.ReadingSession, book_id: str
+        self,
+        parent: QtWidgets.QWidget | None,
+        api: api.API,
+        reading_session: book_sys.ReadingSession,
+        book_id: str,
     ):
         """
         This widget displays a summary of a reading session, including :
@@ -391,7 +396,7 @@ class ReadingSessionSummaryViewer(QtWidgets.QWidget):
         - reading_session (ReadingSession): the reading session to summarize
         - book_id: the id of the book that has been read
         """
-        super().__init__()
+        super().__init__(parent)
 
         # Parameters attribution
         self.api = api
