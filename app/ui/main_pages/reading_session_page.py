@@ -437,12 +437,34 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         self.book_cover_viewer = QtWidgets.QLabel(
             self, pixmap=QtGui.QPixmap(self.api.books.get_book_cover_path(self.book))
         )
-        self.summary_lb = QtWidgets.QLabel(
+        self.read_pages_times_lb = QtWidgets.QLabel(
             self,
-            text=f"You read {self.reading_session.pages_read} pages in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}\nYou read {int(self.read_pages_per_sec * 3600)} pages per hours\nThe estimated reading time remaining is {self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+            text=f"You read {self.reading_session.pages_read} pages in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}",
         )
-        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0)
-        self.main_lyt.addWidget(self.summary_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop)
+
+        # -- Session summary widgets
+        self.read_pages_times_lb.setObjectName("ReadPagesInTimeLabel")
+        self.reading_speed_lb = QtWidgets.QLabel(
+            self, text=f"That's {int(self.read_pages_per_sec * 3600)} pages per hours"
+        )
+        self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
+        self.estimated_remaining_time_lb = QtWidgets.QLabel(
+            self,
+            text=f"The estimated reading time remaining is {self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+        )
+        self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
+
+        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 3, 1)
+        self.main_lyt.setVerticalSpacing(1)
+        self.main_lyt.addWidget(
+            self.read_pages_times_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.main_lyt.addWidget(
+            self.reading_speed_lb, 1, 1, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.main_lyt.addWidget(
+            self.estimated_remaining_time_lb, 2, 1, QtCore.Qt.AlignmentFlag.AlignTop
+        )
 
     def convert_duration(self, duration) -> tuple[int, int, int]:
         """
