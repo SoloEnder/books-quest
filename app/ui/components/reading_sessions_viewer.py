@@ -1,4 +1,6 @@
-from PySide6 import QtWidgets
+import logging
+
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys
 
