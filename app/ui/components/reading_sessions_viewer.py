@@ -100,8 +100,13 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
         self.finished_reading_lb.setObjectName("FinishedReadingLabel")
 
+        # -- Close button --
+        self.close_button = QtWidgets.QPushButton("Ok")
+        self.close_button.clicked.connect(self.close)
+        self.close_button.setObjectName("CloseButton")
+
         # -- Add widgets to layout --
-        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 6, 1)
+        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 7, 1)
         self.main_lyt.addWidget(
             self.read_pages_times_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignBottom
         )
@@ -123,7 +128,6 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
 
         # -- Wether to show congratulations message --
         if self.book.reading_state == book_sys.Book.ReadingState.FINISHED:
-            print("Yes")
             self.main_lyt.addWidget(
                 self.finished_reading_lb,
                 4,
@@ -132,7 +136,6 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
             )
 
         else:
-            print("Yes (non, pas yes !)")
             self.main_lyt.addWidget(
                 self.estimated_remaining_time_lb,
                 4,
@@ -145,6 +148,12 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
             5,
             1,
             QtCore.Qt.AlignmentFlag.AlignTop,
+        )
+        self.main_lyt.addWidget(
+            self.close_button,
+            6,
+            1,
+            QtCore.Qt.AlignmentFlag.AlignLeft,
         )
 
     def convert_duration(self, duration) -> tuple[int, int, int]:
