@@ -47,7 +47,11 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         # -- Gets book with the provided id --
         self.book = self.api.books.books_handler.books[book_id]
 
-        self.setWindowTitle("Reading Session Summary Viewer - " + self.book.title)
+        self.setWindowTitle(
+            self.api.langs.tr("reading_session.summary_viewer.title")
+            + " - "
+            + self.book.title
+        )
 
         self.main_lyt = QtWidgets.QGridLayout(self)
 
@@ -80,24 +84,37 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
 
         self.read_pages_times_lb = QtWidgets.QLabel(
             self,
-            text=f"You read <b>{self.reading_session.pages_read}</b> pages in <b>{self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}</b>",
+            text=self.api.langs.tr(
+                "reading_session.summary_viewer.read_pages_in_time",
+                pages_read=self.reading_session.pages_read,
+                duration=f"{self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}",
+            ),
         )
 
         # -- Session summary widgets --
         self.read_pages_times_lb.setObjectName("ReadPagesInTimeLabel")
         self.reading_speed_lb = QtWidgets.QLabel(
             self,
-            text=f"That's <b>{int(self.read_pages_per_sec * 3600)}</b> pages per hours",
+            text=self.api.langs.tr(
+                "reading_session.summary_viewer.reading_speed_hours",
+                reading_speed=int(self.read_pages_per_sec * 3600),
+            ),
         )
         self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
         self.estimated_remaining_time_lb = QtWidgets.QLabel(
-            text=f"The estimated reading time remaining is <b>{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}</b>",
+            text=self.api.langs.tr(
+                "reading_session.summary_viewer.estimated_remaining_time",
+                remaining_time=f"{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+            )
         )
         self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
 
         # -- Congratulation message if the whole book has been read --
         self.finished_reading_lb = QtWidgets.QLabel(
-            f'Congratulation, You are done reading <b>"{self.book.title}"</b> !'
+            self.api.langs.tr(
+                "reading_session.summary_viewer.finished_reading_msg",
+                book_title=self.book.title,
+            )
         )
         self.finished_reading_lb.setObjectName("FinishedReadingLabel")
 
