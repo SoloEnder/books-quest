@@ -454,16 +454,34 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
         self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
 
-        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 3, 1)
-        self.main_lyt.setVerticalSpacing(1)
+        # -- Add widgets to layout --
+        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 6, 1)
         self.main_lyt.addWidget(
-            self.read_pages_times_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignTop
+            self.read_pages_times_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignBottom
         )
         self.main_lyt.addWidget(
-            self.reading_speed_lb, 1, 1, QtCore.Qt.AlignmentFlag.AlignTop
+            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
+            1,
+            1,
+            QtCore.Qt.AlignmentFlag.AlignTop,
         )
         self.main_lyt.addWidget(
-            self.estimated_remaining_time_lb, 2, 1, QtCore.Qt.AlignmentFlag.AlignTop
+            self.reading_speed_lb, 2, 1, QtCore.Qt.AlignmentFlag.AlignBottom
+        )
+        self.main_lyt.addWidget(
+            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
+            3,
+            1,
+            QtCore.Qt.AlignmentFlag.AlignTop,
+        )
+        self.main_lyt.addWidget(
+            self.estimated_remaining_time_lb, 4, 1, QtCore.Qt.AlignmentFlag.AlignBottom
+        )
+        self.main_lyt.addWidget(
+            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
+            5,
+            1,
+            QtCore.Qt.AlignmentFlag.AlignTop,
         )
 
     def convert_duration(self, duration) -> tuple[int, int, int]:
