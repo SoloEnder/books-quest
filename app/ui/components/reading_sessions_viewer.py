@@ -3,6 +3,7 @@ import logging
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys
+from app.utils import utils_funcs
 
 
 class ReadingSessionSummaryViewer(QtWidgets.QDialog):
@@ -154,6 +155,13 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
             6,
             1,
             QtCore.Qt.AlignmentFlag.AlignLeft,
+        )
+
+        # -- Load style sheet --
+        utils_funcs.load_and_set_ss(
+            self.api.res_files.get_res("assets.qss.general"),
+            self.api.res_files.get_res("assets.qss.reading_session_summary_viewer"),
+            widget=self,
         )
 
     def convert_duration(self, duration) -> tuple[int, int, int]:
