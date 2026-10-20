@@ -61,6 +61,13 @@
     }
   },
   "reading_session": {
+    "summary_viewer": {
+      "title": "Reading Session Summary Viewer",
+      "read_pages_in_time": "You read <b>/f:<pages_read>/f<b> pages in <b>/f:<duration>/f</b>",
+      "reading_speed_hours": "That's <b>/f:<reading_speed>/f</b> pages per hours",
+      "estimated_remaining_time": "The estimated reading time remaining is <b>/f:<remaining_time>/f</b>",
+      "finished_reading_msg": "Congratulation, You are done reading <b>/f:<book_title>/f</b> !"
+    },
     "warn_sessions_preservation": {
       "title": "Reading session preservation",
       "message": "This book has /f:<sessions_count>/f reading sessions\nMarking this book as 'unread' will delete them !"

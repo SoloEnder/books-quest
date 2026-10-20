@@ -21,6 +21,35 @@ class BooksService:
         self.qt_signals = qt_signals
         self.logger = logging.getLogger(f"{__name__}-BooksService")
 
+    def get_session_stats(
+        self, book: book_sys.Book, reading_session: book_sys.ReadingSession
+    ) -> dict[str, float]:
+        """
+        Return some usefull stats about a reading session:
+            - Reading speed (in pages/s)
+            - Remaining time (in seconds)
+
+        Note that the values are not rounded, and are in `float`
+        """
+        # -- Get reading speed, in pages/seconds --
+        read_pages_per_sec = (
+            reading_session.pages_read / reading_session.duration
+            if reading_session.duration
+            else 0
+        )
+
+        # -- Estimated Remaining reading time for the book in seconds
+        remaining_reading_time = (
+            (book.tot_pages - book.read_pages) / read_pages_per_sec
+            if read_pages_per_sec > 0
+            else 0
+        )
+
+        return {
+            "reading_speed": read_pages_per_sec,
+            "remaining_reading_time": remaining_reading_time,
+        }
+
     def add_reading_session(
         self, book: book_sys.Book, reading_session: book_sys.ReadingSession
     ):

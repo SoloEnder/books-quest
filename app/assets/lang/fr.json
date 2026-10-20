@@ -60,6 +60,13 @@
     }
   },
   "reading_session": {
+    "summary_viewer": {
+      "title": "Résumé de session de lecture",
+      "read_pages_in_time": "Vous avez lu <b>/f:<pages_read>/f<b> pages en <b>/f:<duration>/f</b>",
+      "reading_speed_hours": "Vous lisez <b>/f:<reading_speed>/f</b> pages par heures",
+      "estimated_remaining_time": "Le temps estimé avant la fin est de <b>/f:<remaining_time>/f</b>",
+      "finished_reading_msg": "Bravo, vous avez finit de lire <b>'/f:<book_title>/f</b>' !"
+    },
     "warn_sessions_preservation": {
       "title": "Avertissement sur la preservation des sessions",
       "message": "Ce livre a /f:<sessions_count>/f sessions de lectures\nMarquer ce livre comme 'non lut' les supprimera !"
