@@ -57,21 +57,22 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
 
         # -- Convert seconds duration into seconds, minutes and hours --
         self.converted_duration = self.convert_duration(self.reading_session.duration)
-        # -- Get reading speed, in pages/seconds --
-        self.read_pages_per_sec = (
-            self.reading_session.pages_read / self.reading_session.duration
-            if self.reading_session.duration
-            else 0
+
+        # Reading session stats
+        self.session_stats = self.api.books.get_session_stats(
+            self.book, self.reading_session
         )
+        # -- Get reading speed, in pages/seconds --
 
         # -- Estimated Remaining reading time for the book in seconds
         self.remaining_reading_time = int(
-            (self.book.tot_pages - self.book.read_pages) / self.read_pages_per_sec
-            if self.read_pages_per_sec > 0
+            (self.book.tot_pages - self.book.read_pages)
+            / self.session_stats["reading_speed"]
+            if self.session_stats["reading_speed"] > 0
             else 0
         )
         self.converted_remaining_reading_time = self.convert_duration(
-            self.remaining_reading_time
+            self.session_stats["remaining_reading_time"]
         )
         self.logger.info(
             f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.read_pages_per_sec=}, {self.remaining_reading_time=}"
