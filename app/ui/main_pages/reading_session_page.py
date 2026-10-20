@@ -350,21 +350,20 @@ class ReadingSessionPage(base_page.BasePage):
     def show_session_summary(self):
         """
         Show a reading summary viewer instance.
-        Not that the reading summary viewer is not a child of this widget
         """
 
         # -- Prevent from showing the summary if the pages read are 0
         if self.session_details_editor._last_saved_session.pages_read <= 0:
             return
         self.session_summary_viewer = ReadingSessionSummaryViewer(
-            None,
+            self,
             self.api,
             self.session_details_editor._last_saved_session
             if self.session_details_editor._last_saved_session
             else self.session_details_editor.get_session(),
             self._book.str_id(),
         )
-        self.session_summary_viewer.show()
+        self.session_summary_viewer.open()
 
     def session_editor_closed(self):
         """
