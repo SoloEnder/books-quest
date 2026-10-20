@@ -439,18 +439,19 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
         self.read_pages_times_lb = QtWidgets.QLabel(
             self,
-            text=f"You read {self.reading_session.pages_read} pages in {self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}",
+            text=f"You read <b>{self.reading_session.pages_read}</b> pages in <b>{self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}</b>",
         )
 
         # -- Session summary widgets
         self.read_pages_times_lb.setObjectName("ReadPagesInTimeLabel")
         self.reading_speed_lb = QtWidgets.QLabel(
-            self, text=f"That's {int(self.read_pages_per_sec * 3600)} pages per hours"
+            self,
+            text=f"That's <b>{int(self.read_pages_per_sec * 3600)}</b> pages per hours",
         )
         self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
         self.estimated_remaining_time_lb = QtWidgets.QLabel(
             self,
-            text=f"The estimated reading time remaining is {self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+            text=f"The estimated reading time remaining is <b>{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}</b>",
         )
         self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
 
