@@ -423,9 +423,9 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
 
         # -- Estimated Remaining reading time for the book in seconds
-        self.remaining_reading_time = (
-            (self.book.tot_pages - self.book.read_pages) // int(self.read_pages_per_sec)
-            if int(self.read_pages_per_sec)
+        self.remaining_reading_time = int(
+            (self.book.tot_pages - self.book.read_pages) / self.read_pages_per_sec
+            if self.read_pages_per_sec > 0
             else 0
         )
         self.converted_remaining_reading_time = self.convert_duration(
@@ -434,15 +434,18 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         self.logger.info(
             f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.read_pages_per_sec=}, {self.remaining_reading_time=}"
         )
+
+        # -- Read book cover --
         self.book_cover_viewer = QtWidgets.QLabel(
             self, pixmap=QtGui.QPixmap(self.api.books.get_book_cover_path(self.book))
         )
+
         self.read_pages_times_lb = QtWidgets.QLabel(
             self,
             text=f"You read <b>{self.reading_session.pages_read}</b> pages in <b>{self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}</b>",
         )
 
-        # -- Session summary widgets
+        # -- Session summary widgets --
         self.read_pages_times_lb.setObjectName("ReadPagesInTimeLabel")
         self.reading_speed_lb = QtWidgets.QLabel(
             self,
