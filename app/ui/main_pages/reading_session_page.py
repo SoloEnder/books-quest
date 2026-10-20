@@ -453,10 +453,15 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
         self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
         self.estimated_remaining_time_lb = QtWidgets.QLabel(
-            self,
             text=f"The estimated reading time remaining is <b>{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}</b>",
         )
         self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
+
+        # -- Congratulation message if the whole book has been read --
+        self.finished_reading_lb = QtWidgets.QLabel(
+            f'Congratulation, You are done reading <b>"{self.book.title}"</b> !'
+        )
+        self.finished_reading_lb.setObjectName("FinishedReadingLabel")
 
         # -- Add widgets to layout --
         self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 6, 1)
@@ -478,9 +483,26 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
             1,
             QtCore.Qt.AlignmentFlag.AlignTop,
         )
-        self.main_lyt.addWidget(
-            self.estimated_remaining_time_lb, 4, 1, QtCore.Qt.AlignmentFlag.AlignBottom
-        )
+
+        # -- Wether to show congratulations message --
+        if self.book.reading_state == book_sys.Book.ReadingState.FINISHED:
+            print("Yes")
+            self.main_lyt.addWidget(
+                self.finished_reading_lb,
+                4,
+                1,
+                QtCore.Qt.AlignmentFlag.AlignBottom,
+            )
+
+        else:
+            print("Yes (non, pas yes !)")
+            self.main_lyt.addWidget(
+                self.estimated_remaining_time_lb,
+                4,
+                1,
+                QtCore.Qt.AlignmentFlag.AlignBottom,
+            )
+
         self.main_lyt.addWidget(
             QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
             5,
