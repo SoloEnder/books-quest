@@ -3,6 +3,7 @@ import logging
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys, timer
+from app.ui.components.reading_sessions_viewer import ReadingSessionSummaryViewer
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -347,6 +348,10 @@ class ReadingSessionPage(base_page.BasePage):
             return
 
     def show_session_summary(self):
+        """
+        Show a reading summary viewer instance.
+        Not that the reading summary viewer is not a child of this widget
+        """
 
         # -- Prevent from showing the summary if the pages read are 0
         if self.session_details_editor._last_saved_session.pages_read <= 0:
@@ -366,157 +371,3 @@ class ReadingSessionPage(base_page.BasePage):
         Note that the session editor has been closed
         """
         self._session_details_editor_active = False
-
-
-class ReadingSessionSummaryViewer(QtWidgets.QDialog):
-    """
-    Displays various information about a reading session :
-        - The pages read
-        - The time of reading
-        - The estimated reading speed (in pages/hours)
-        - The time remaining to complete reading of the book
-    """
-
-    def __init__(
-        self,
-        parent: QtWidgets.QWidget | None,
-        api: api.API,
-        reading_session: book_sys.ReadingSession,
-        book_id: str,
-    ):
-        """
-        This widget displays a summary of a reading session, including :
-            - The pages read
-            - The reading speed (in pages/hours)
-            - The estimated reading time remaining
-
-        Parameters
-        ----------
-        - api (API): the app internal api
-        - reading_session (ReadingSession): the reading session to summarize
-        - book_id: the id of the book that has been read
-        """
-        super().__init__(parent)
-
-        # Parameters attribution
-        self.api = api
-        self.reading_session = reading_session
-        self.book_id = book_id
-
-        # -- Logger --
-        self.logger = logging.getLogger(__name__ + " - Reading Session Summary Viewer")
-
-        # -- Gets book with the provided id --
-        self.book = self.api.books.books_handler.books[book_id]
-
-        self.setWindowTitle("Reading Session Summary Viewer - " + self.book.title)
-
-        self.main_lyt = QtWidgets.QGridLayout(self)
-
-        # -- Convert seconds duration into seconds, minutes and hours --
-        self.converted_duration = self.convert_duration(self.reading_session.duration)
-        # -- Get reading speed, in pages/seconds --
-        self.read_pages_per_sec = (
-            self.reading_session.pages_read / self.reading_session.duration
-            if self.reading_session.duration
-            else 0
-        )
-
-        # -- Estimated Remaining reading time for the book in seconds
-        self.remaining_reading_time = int(
-            (self.book.tot_pages - self.book.read_pages) / self.read_pages_per_sec
-            if self.read_pages_per_sec > 0
-            else 0
-        )
-        self.converted_remaining_reading_time = self.convert_duration(
-            self.remaining_reading_time
-        )
-        self.logger.info(
-            f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.read_pages_per_sec=}, {self.remaining_reading_time=}"
-        )
-
-        # -- Read book cover --
-        self.book_cover_viewer = QtWidgets.QLabel(
-            self, pixmap=QtGui.QPixmap(self.api.books.get_book_cover_path(self.book))
-        )
-
-        self.read_pages_times_lb = QtWidgets.QLabel(
-            self,
-            text=f"You read <b>{self.reading_session.pages_read}</b> pages in <b>{self.converted_duration[2]:02}:{self.converted_duration[1]:02}:{self.converted_duration[0]:02}</b>",
-        )
-
-        # -- Session summary widgets --
-        self.read_pages_times_lb.setObjectName("ReadPagesInTimeLabel")
-        self.reading_speed_lb = QtWidgets.QLabel(
-            self,
-            text=f"That's <b>{int(self.read_pages_per_sec * 3600)}</b> pages per hours",
-        )
-        self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
-        self.estimated_remaining_time_lb = QtWidgets.QLabel(
-            text=f"The estimated reading time remaining is <b>{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}</b>",
-        )
-        self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
-
-        # -- Congratulation message if the whole book has been read --
-        self.finished_reading_lb = QtWidgets.QLabel(
-            f'Congratulation, You are done reading <b>"{self.book.title}"</b> !'
-        )
-        self.finished_reading_lb.setObjectName("FinishedReadingLabel")
-
-        # -- Add widgets to layout --
-        self.main_lyt.addWidget(self.book_cover_viewer, 0, 0, 6, 1)
-        self.main_lyt.addWidget(
-            self.read_pages_times_lb, 0, 1, QtCore.Qt.AlignmentFlag.AlignBottom
-        )
-        self.main_lyt.addWidget(
-            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
-            1,
-            1,
-            QtCore.Qt.AlignmentFlag.AlignTop,
-        )
-        self.main_lyt.addWidget(
-            self.reading_speed_lb, 2, 1, QtCore.Qt.AlignmentFlag.AlignBottom
-        )
-        self.main_lyt.addWidget(
-            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
-            3,
-            1,
-            QtCore.Qt.AlignmentFlag.AlignTop,
-        )
-
-        # -- Wether to show congratulations message --
-        if self.book.reading_state == book_sys.Book.ReadingState.FINISHED:
-            print("Yes")
-            self.main_lyt.addWidget(
-                self.finished_reading_lb,
-                4,
-                1,
-                QtCore.Qt.AlignmentFlag.AlignBottom,
-            )
-
-        else:
-            print("Yes (non, pas yes !)")
-            self.main_lyt.addWidget(
-                self.estimated_remaining_time_lb,
-                4,
-                1,
-                QtCore.Qt.AlignmentFlag.AlignBottom,
-            )
-
-        self.main_lyt.addWidget(
-            QtWidgets.QFrame(frameShape=QtWidgets.QFrame.Shape.HLine),
-            5,
-            1,
-            QtCore.Qt.AlignmentFlag.AlignTop,
-        )
-
-    def convert_duration(self, duration) -> tuple[int, int, int]:
-        """
-        Convert a `duration` (in seconds) into seconds, minutes and hours and return the result in a tuple
-        """
-        seconds = duration % 60
-        minutes = duration // 60 if duration else 0
-        minutes %= 60  # Prevent from having value >= 60
-        hours = duration // 3600
-
-        return (seconds, minutes, hours)
