@@ -105,7 +105,7 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         self.estimated_remaining_time_lb = QtWidgets.QLabel(
             text=self.api.langs.tr(
                 "reading_session.summary_viewer.estimated_remaining_time",
-                remaining_time=f"{self.converted_remaining_reading_time[2]:02}:{self.converted_remaining_reading_time[1]:02}:{self.converted_remaining_reading_time[0]:02}",
+                remaining_time=f"{int(self.converted_remaining_reading_time[2]):02}:{int(self.converted_remaining_reading_time[1]):02}:{int(self.converted_remaining_reading_time[0]):02}",
             )
         )
         self.estimated_remaining_time_lb.setObjectName("EstimatedRemainingTimeLabel")
