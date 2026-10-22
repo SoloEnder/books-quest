@@ -62,20 +62,20 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         self.session_stats = self.api.books.get_session_stats(
             self.book, self.reading_session
         )
+        self.reading_speed = self.session_stats["reading_speed"]
         # -- Get reading speed, in pages/seconds --
 
         # -- Estimated Remaining reading time for the book in seconds
         self.remaining_reading_time = int(
-            (self.book.tot_pages - self.book.read_pages)
-            / self.session_stats["reading_speed"]
-            if self.session_stats["reading_speed"] > 0
+            (self.book.tot_pages - self.book.read_pages) / self.reading_speed
+            if self.reading_speed > 0
             else 0
         )
         self.converted_remaining_reading_time = self.convert_duration(
             self.session_stats["remaining_reading_time"]
         )
         self.logger.info(
-            f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.read_pages_per_sec=}, {self.remaining_reading_time=}"
+            f"Reading session summary : {self.reading_session.pages_read=}, {self.reading_session.duration=}, {self.session_stats["reading_speed"]=}, {self.remaining_reading_time=}"
         )
 
         # -- Read book cover --
@@ -98,7 +98,7 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
             self,
             text=self.api.langs.tr(
                 "reading_session.summary_viewer.reading_speed_hours",
-                reading_speed=int(self.read_pages_per_sec * 3600),
+                reading_speed=int(self.reading_speed * 3600),
             ),
         )
         self.reading_speed_lb.setObjectName("ReadingSpeedLabel")
