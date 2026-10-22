@@ -384,6 +384,7 @@ class BookCreationPage(base_page.BasePage):
 
         elif status == book_sys.Book.ReadingState.UNREAD:
             self.read_pages_le.setEnabled(False)
+            self.read_pages_le.setText("0")
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)
 
