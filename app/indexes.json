@@ -16,7 +16,8 @@
       "shelf_details_page": "shelf_details_page.qss",
       "shelfs_view_page": "shelfs_view_page.qss",
       "settings_page": "settings_page.qss",
-      "reading_session_page": "reading_session_page.qss"
+      "reading_session_page": "reading_session_page.qss",
+      "reading_session_summary_viewer": "reading_session_summary_viewer.qss"
     },
     "defaults_covers": {
       "_base_": "defaults_covers",

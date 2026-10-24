@@ -3,6 +3,7 @@ import logging
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys, timer
+from app.ui.components.reading_sessions_viewer import ReadingSessionSummaryViewer
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
 
@@ -30,6 +31,9 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
         self.minutes = self.session_duration // 60 if self.session_duration else 0
         self.minutes %= 60  # Prevent from having value >= 60
         self.hours = self.session_duration // 3600
+
+        # -- Store the latest session that has been saved by this widget
+        self._last_saved_session = None
 
         # Widgets
         self.setWindowTitle(self.api.langs.tr("reading_session.session_editor_title"))
@@ -177,7 +181,8 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
         - auto_close (bool=True): wehter to close the widgets when the session is successfully added
         """
         try:
-            self.api.books.add_reading_session(self.read_book, self.get_session())
+            session = self.get_session()
+            self.api.books.add_reading_session(self.read_book, session)
 
         except Exception:
             self.logger.exception("Unable to save session for book : ")
@@ -190,6 +195,7 @@ class SessionsDetailsWindow(QtWidgets.QDialog):
                 "",
             )
         else:
+            self._last_saved_session = session
             self.reading_session_saved.emit()
             if auto_close:
                 self.close()
@@ -333,10 +339,31 @@ class ReadingSessionPage(base_page.BasePage):
             self._session_details_editor_active = True
             self.session_details_editor.destroyed.connect(self.session_editor_closed)
             self.session_details_editor.reading_session_saved.connect(
+                self.show_session_summary
+            )
+            self.session_details_editor.reading_session_saved.connect(
                 lambda: self.qt_signals.emit_signal("close_page_sg")
             )
-            self.session_details_editor.show()
+            self.session_details_editor.open()
             return
+
+    def show_session_summary(self):
+        """
+        Show a reading summary viewer instance.
+        """
+
+        # -- Prevent from showing the summary if the pages read are 0
+        if self.session_details_editor._last_saved_session.pages_read <= 0:
+            return
+        self.session_summary_viewer = ReadingSessionSummaryViewer(
+            self,
+            self.api,
+            self.session_details_editor._last_saved_session
+            if self.session_details_editor._last_saved_session
+            else self.session_details_editor.get_session(),
+            self._book.str_id(),
+        )
+        self.session_summary_viewer.open()
 
     def session_editor_closed(self):
         """

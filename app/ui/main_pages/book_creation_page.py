@@ -384,6 +384,7 @@ class BookCreationPage(base_page.BasePage):
 
         elif status == book_sys.Book.ReadingState.UNREAD:
             self.read_pages_le.setEnabled(False)
+            self.read_pages_le.setText("0")
             self.starting_read_date_de.setEnabled(False)
             self.end_read_date_de.setEnabled(False)
 
@@ -617,7 +618,10 @@ class BookCreationPage(base_page.BasePage):
 
         # Get book reading sessions
         sessions = self.get_reading_sessions()
+        books_infos["reading_sessions"] = sessions
 
+        # Ask user confirmation to reset reading sessions
+        # If the reading state of an existing book has been changed to UNREAD
         if (
             sessions
             and books_infos["reading_state"] == book_sys.Book.ReadingState.UNREAD
@@ -626,8 +630,9 @@ class BookCreationPage(base_page.BasePage):
             if not continue_:
                 self.logger.info("User aborted book edition")
                 return
-
-        books_infos["reading_sessions"] = sessions
+            del books_infos[
+                "reading_sessions"
+            ]  # Reset readings sesssions to 0 for this book
 
         if self.read_pages_le.isEnabled():
             text = self.read_pages_le.text()

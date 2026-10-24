@@ -770,6 +770,12 @@ class BooksHandler:
                 book_data["reading_state"] = Book.ReadingState[
                     book_data["reading_state"]
                 ]
+
+                # - The book read pages is the sum of all reading sessions read pages
+                # The line below prevent the 'read_pages' attr of a book from having a value
+                # Superior than the saved value, since each reading session of the book add it's 'read_pages'
+                # The book read pages is the sum of all reading sessions read pages
+                book_data["read_pages"] = 0
                 # If the books has reading sessions
                 if "reading_sessions" in book_data:
                     book_data["reading_sessions"] = self._deserialize_reading_sessions(
