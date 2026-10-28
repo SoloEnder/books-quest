@@ -269,7 +269,7 @@ class BookCreationPage(base_page.BasePage):
                 raise EditionModeNotEnabled(
                     "Couldn't set value of 'BookCreationPage.book' while edition mode isn't enabled"
                 )
-            self.__dir__book = new_value
+            self.__book = new_value
             self.apply_edition_mode()
 
         else:
