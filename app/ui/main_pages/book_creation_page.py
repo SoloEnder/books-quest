@@ -243,6 +243,7 @@ class BookCreationPage(base_page.BasePage):
         Configure the editor to book creation
         """
         self.__editor_mode = EditorMode.CREATION
+        delattr(self, "__book")
         self.apply_creation_mode()
 
     def set_edition_mode(self, book: book_sys.Book):
@@ -250,6 +251,7 @@ class BookCreationPage(base_page.BasePage):
         Configure the editor to book edition
         """
         self.__editor_mode = EditorMode.EDITION
+        self.book = book
         self.apply_edition_mode()
 
     @property
