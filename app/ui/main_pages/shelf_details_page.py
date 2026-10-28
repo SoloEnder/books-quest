@@ -104,7 +104,7 @@ class ShelfDetailsPage(base_page.BasePage):
         )
         self.add_shelf_b.clicked.connect(
             lambda: self.qt_signals.emit_signal(
-                "switch_page_sg", "SHELF_CREATION_PAGE", True, {"mode": "creation"}
+                "switch_page_sg", "SHELF_CREATION_PAGE", True, {}
             )
         )
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
