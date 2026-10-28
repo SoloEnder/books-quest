@@ -175,9 +175,7 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Switch the page to shelf creation mode
         """
-        self.qt_signals.emit_signal(
-            "switch_page_sg", "SHELF_CREATION_MODE", True, {"mode": "edition"}
-        )
+        self.qt_signals.emit_signal("switch_page_sg", "SHELF_CREATION_PAGE", True)
 
     def edition_mode(self):
         # Replace the displayed cover by the shelf's cover
