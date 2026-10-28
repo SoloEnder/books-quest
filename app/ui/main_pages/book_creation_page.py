@@ -231,29 +231,26 @@ class BookCreationPage(base_page.BasePage):
             0,
         )
         self.main_lyt.addWidget(self.add_b, self.main_lyt.rowCount() + 1, 0)
-        if self._edition_mode_enabled:
+        if self.__editor_mode == EditorMode.EDITION:
             self.apply_edition_mode()
 
     def get_editor_mode(self):
         """Getter of property 'edition_mode_enabled'"""
         return self.__editor_mode
 
-    def set_editor_mode(self, editor_mode: EditorMode):
+    def set_creation_mode(self):
         """
-        Setter of property 'edition_mode_enabled'
+        Configure the editor to book creation
         """
+        self.__editor_mode = EditorMode.CREATION
+        self.apply_creation_mode()
 
-        if isinstance(editor_mode, EditorMode):
-            self._edition_mode_enabled = editor_mode
-
-            if self._edition_mode_enabled:
-                self.apply_edition_mode()
-
-            else:
-                self.apply_creation_mode()
-
-        else:
-            raise ValueError(f"Wrong value given to 'set_editor_mode': {editor_mode}")
+    def set_edition_mode(self, book: book_sys.Book):
+        """
+        Configure the editor to book edition
+        """
+        self.__editor_mode = EditorMode.EDITION
+        self.apply_edition_mode()
 
     @property
     def book(self):
