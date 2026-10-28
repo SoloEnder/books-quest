@@ -2,10 +2,10 @@ import datetime as dt
 import logging
 import os
 import shutil
-import typing
 import uuid
 
 from PySide6 import QtCore, QtGui, QtWidgets
+from utils.contexts import EditorMode
 
 from app.src import api, book_sys
 from app.ui.main_pages import base_page
@@ -36,21 +36,15 @@ class BookCreationPage(base_page.BasePage):
             api,
         )
         self.books = self.api.books
-        self._edition_mode_enabled = kwargs.get("edition_mode_enabled", False)
-        self._book: book_sys.Book | None = kwargs.get("book", None)
+        self.__editor_mode: EditorMode = EditorMode.CREATION
+
+        if kwargs.get("book"):
+            self.__editor_mode = EditorMode.EDITION
+            self.__book: book_sys.Book = kwargs["book"]
         self.variables_kw = {**kwargs}
 
         self.PAGE_NAME = "BOOK_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-
-        if self._edition_mode_enabled and not self._book:
-            self.logger.info(
-                f"Page {self.PAGE_NAME} called in edition mode, but no book provided for edition !"
-            )
-            raise ValueError(
-                f"Page {self.PAGE_NAME} called in edition mode, but no book provided for edition !"
-            )
-
         self.icons_folder = self.res_files.get_res("assets.icons")
         self.today_date_dt = dt.date.today()
 
@@ -240,19 +234,17 @@ class BookCreationPage(base_page.BasePage):
         if self._edition_mode_enabled:
             self.apply_edition_mode()
 
-    @property
-    def edition_mode_enabled(self):
+    def get_editor_mode(self):
         """Getter of property 'edition_mode_enabled'"""
-        return self._edition_mode_enabled
+        return self.__editor_mode
 
-    @edition_mode_enabled.setter
-    def edition_mode_enabled(self, new_value: bool):
+    def set_editor_mode(self, editor_mode: EditorMode):
         """
         Setter of property 'edition_mode_enabled'
         """
 
-        if isinstance(new_value, bool):
-            self._edition_mode_enabled = new_value
+        if isinstance(editor_mode, EditorMode):
+            self._edition_mode_enabled = editor_mode
 
             if self._edition_mode_enabled:
                 self.apply_edition_mode()
@@ -261,9 +253,7 @@ class BookCreationPage(base_page.BasePage):
                 self.apply_creation_mode()
 
         else:
-            raise ValueError(
-                f"Wrong value given to 'edition_mode_enabled': {new_value}"
-            )
+            raise ValueError(f"Wrong value given to 'set_editor_mode': {editor_mode}")
 
     @property
     def book(self):
@@ -278,19 +268,15 @@ class BookCreationPage(base_page.BasePage):
         Setter of property 'book'
         """
         if isinstance(new_value, book_sys.Book):
-            if self.edition_mode_enabled:
-                self._book = new_value
-                self.apply_edition_mode()
-
-            else:
+            if self.__editor_mode != EditorMode.EDITION:
                 raise EditionModeNotEnabled(
                     "Couldn't set value of 'BookCreationPage.book' while edition mode isn't enabled"
                 )
+            self._book = new_value
+            self.apply_edition_mode()
 
         else:
-            raise ValueError(
-                f"Wrong value given for 'BookCreationPage.book' : {new_value}"
-            )
+            raise ValueError(f"Wrong value given to setter of `book` : {new_value}")
 
     def apply_creation_mode(self):
         """
@@ -429,7 +415,7 @@ class BookCreationPage(base_page.BasePage):
         Set the cover image to the default value
         """
         # -- Removes the previous cover file
-        if self.edition_mode_enabled:
+        if self.__editor_mode == EditorMode.EDITION:
             book_cover = self.books.get_book_cover_path(self.book, False)  # type: ignore
 
             if book_cover:
@@ -443,18 +429,13 @@ class BookCreationPage(base_page.BasePage):
         In edition mode, this method checks if the book title/author has been modified before get the matches
         """
         matches = []
-        if self.edition_mode_enabled and self.book:
-            if self.book.title != title:
+        if self.__editor_mode == EditorMode.EDITION:
+            if self.book.title != title or self.book.authors != authors:
                 matches = self.books.books_handler.get_books(
                     title=(title, True, False), authors=(authors, True, False)
                 )
 
-            elif self.book.authors != authors:
-                matches = self.books.books_handler.get_books(
-                    title=(title, True, False), authors=(authors, True, False)
-                )
-
-        elif not self.edition_mode_enabled:
+        else:
             self.logger.debug(
                 "Searching for books the same title and authors as the currently being created book..."
             )
@@ -523,10 +504,7 @@ class BookCreationPage(base_page.BasePage):
         """
         Return an list of the reading sessions of the current book
         """
-        if not self.edition_mode_enabled:
-            return {}
-
-        if not self.book:
+        if self.__editor_mode == EditorMode.CREATION:
             return {}
 
         return list(self.book.reading_sessions.values())
@@ -611,7 +589,7 @@ class BookCreationPage(base_page.BasePage):
         books_infos["id"] = uuid.uuid4()
 
         # If in edition mode, the ID of the currently being edited book is used
-        if self.edition_mode_enabled:
+        if self.__editor_mode == EditorMode.EDITION:
             books_infos["id"] = self.book.id  # type: ignore
 
         books_infos["reading_state"] = self.book_reading_state_combob.currentData()
@@ -669,7 +647,7 @@ class BookCreationPage(base_page.BasePage):
         """
         original_cover = self.default_cover_img
 
-        if self.edition_mode_enabled:
+        if self.__editor_mode == EditorMode.EDITION:
             original_cover = self.books.get_book_cover_path(self.book)  # type: ignore
 
         return original_cover == self.cover_image
@@ -696,7 +674,7 @@ class BookCreationPage(base_page.BasePage):
 
         if books_infos:
             try:
-                if self.edition_mode_enabled and self.book:
+                if self.__editor_mode == EditorMode.EDITION:
                     self.books.edit_book(self.book, **books_infos)
 
                 else:
@@ -716,7 +694,7 @@ class BookCreationPage(base_page.BasePage):
                 self.qt_signals.emit_signal("notify_sg", "error", "", "", "")
 
             else:
-                if self.edition_mode_enabled:
+                if self.__editor_mode == EditorMode.EDITION:
                     QtWidgets.QMessageBox.information(
                         self,
                         "Success",
