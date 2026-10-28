@@ -5,11 +5,11 @@ import shutil
 import uuid
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from utils.contexts import EditorMode
 
 from app.src import api, book_sys
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
+from app.utils.contexts import EditorMode
 
 
 class EditionModeNotEnabled(Exception):
@@ -280,7 +280,7 @@ class BookCreationPage(base_page.BasePage):
         Switch the page to normal mode
         """
 
-        self.logger.info("Appling normal mode...")
+        self.logger.info("Switching to CREATION mode...")
         self.qt_signals.emit_signal("switch_page_sg", "BOOK_CREATION_PAGE", True, {})
 
     @QtCore.Slot()

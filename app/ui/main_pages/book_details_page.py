@@ -384,7 +384,7 @@ class SubBookWidget(QtWidgets.QWidget):
                 "switch_page_sg",
                 "BOOK_CREATION_PAGE",
                 True,
-                {"edition_mode_enabled": True, "book": self.book},
+                {"book": self.book},
             )
         )
         self.delete_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.delete"))  # type: ignore
