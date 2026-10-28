@@ -260,7 +260,7 @@ class BookCreationPage(base_page.BasePage):
         """
         Getter of property 'book'
         """
-        return self._book
+        return self.__book
 
     @book.setter
     def book(self, new_value: book_sys.Book):
@@ -272,7 +272,7 @@ class BookCreationPage(base_page.BasePage):
                 raise EditionModeNotEnabled(
                     "Couldn't set value of 'BookCreationPage.book' while edition mode isn't enabled"
                 )
-            self._book = new_value
+            self.__dir__book = new_value
             self.apply_edition_mode()
 
         else:
