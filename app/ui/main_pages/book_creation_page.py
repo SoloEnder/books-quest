@@ -252,7 +252,6 @@ class BookCreationPage(base_page.BasePage):
         """
         self.__editor_mode = EditorMode.EDITION
         self.book = book
-        self.apply_edition_mode()
 
     @property
     def book(self):
