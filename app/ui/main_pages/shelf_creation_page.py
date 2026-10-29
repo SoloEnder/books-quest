@@ -1,14 +1,13 @@
 import logging
 import os
-import shutil
 import uuid
-from typing import Literal
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from app.src import api, book_sys
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
+from app.utils.contexts import EditorMode
 
 
 class EditionModeNotEnabled(Exception):
@@ -36,35 +35,13 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.PAGE_NAME = "SHELF_CREATION_PAGE"
         self.logger = logging.getLogger(__name__)
-        self.modes = ("edition", "creation")
-        self._current_mode = kwargs.get("mode")
+        self.__editor_mode: EditorMode = EditorMode.CREATION
         self.variables_kw = {**kwargs}
 
         self.PAGE_NAME = "SHELF_CREATION_PAGE"
-        if self._current_mode:
-            if self._current_mode not in self.modes:
-                self.logger.error(
-                    f"Mode '{self._current_mode}' is not a valid mode for Shelf Creation Page. Valids mode : {self.modes}"
-                )
-                raise ValueError(
-                    f"Mode '{self._current_mode}' is not a valid mode for Shelf Creation Page. Valids mode : {self.modes}"
-                )
-
-        else:
-            raise ValueError(
-                "No mode provided for Shelf Creation Page initialisation !"
-            )
-        if self._current_mode == "edition":
-            if kwargs.get("shelf"):
-                self._shelf: book_sys.Shelf = kwargs["shelf"]
-
-            else:
-                self.logger.error(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
-                raise KeyError(
-                    "Shelf Creation Page generated in edit mode, but no shelf object was provided !"
-                )
+        if "shelf" in kwargs:
+            self.__editor_mode = EditorMode.EDITION
+            self.__shelf: book_sys.Shelf = kwargs["shelf"]
 
         # Shelf cover
         self.default_shelf_cover = self.res_files.get_res(
@@ -127,7 +104,7 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.confirm_b.clicked.connect(self.save_modifications)
 
-        if self._current_mode == "edition":
+        if self.__editor_mode == EditorMode.EDITION:
             self.edition_mode()
 
         # Add the widgets to the layout
@@ -153,37 +130,27 @@ class ShelfCreationPage(base_page.BasePage):
         )
         self.main_lyt.addWidget(self.confirm_b, 8, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
 
-    @property
-    def current_mode(self) -> Literal["edition", "creation"]:
+    def set_creation_mode(self):
         """
-        Getter of property 'current_mode'
+        Switch the editor mode to shelf creation
         """
-        return self._current_mode
+        delattr(self, "shelf")
+        self.__editor_mode = EditorMode.CREATION
+        self.creation_mode()
 
-    @current_mode.setter
-    def current_mode(self, new_value: Literal["edition", "creation"]):
+    def set_edition_mode(self, shelf: book_sys.Shelf):
         """
-        Setter of property 'current_mode'
+        Switch the editor mode to shelf edition
         """
-
-        if new_value in ("edition", "creation"):
-            self._current_mode = new_value
-
-            if self._current_mode == "creation":
-                self.edition_mode()
-
-            else:
-                self.creation_mode()
-
-        else:
-            raise ValueError(f"Wrong argument given to 'current_mode' : {new_value}")
+        self.__editor_mode = EditorMode.CREATION
+        self.shelf = shelf
 
     @property
     def shelf(self):
         """
         Getter of property 'shelf'
         """
-        return self._shelf
+        return self.__shelf
 
     @shelf.setter
     def shelf(self, new_value: book_sys.Shelf):
@@ -192,8 +159,8 @@ class ShelfCreationPage(base_page.BasePage):
         """
 
         if isinstance(new_value, book_sys.Shelf):
-            if self._current_mode == "edition":
-                self._shelf = new_value
+            if self.__editor_mode == EditorMode.EDITION:
+                self.__shelf = new_value
                 self.edition_mode()
 
             else:
@@ -208,25 +175,22 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Switch the page to shelf creation mode
         """
-        self.qt_signals.emit_signal(
-            "switch_page_sg", "SHELF_CREATION_MODE", True, {"mode": "edition"}
-        )
+        self.qt_signals.emit_signal("switch_page_sg", "SHELF_CREATION_PAGE", True)
 
     def edition_mode(self):
-        if self.shelf:
-            # Replace the displayed cover by the shelf's cover
-            shelf_cover_path = self.books.get_shelf_cover_path(self.shelf, False)
-            if shelf_cover_path:
-                self.current_shelf_cover = shelf_cover_path
-                self.set_cover_lb_pixmap(self.current_shelf_cover)
-            self.title_e.setText(self.shelf.title)
+        # Replace the displayed cover by the shelf's cover
+        shelf_cover_path = self.books.get_shelf_cover_path(self.shelf, False)
+        if shelf_cover_path:
+            self.current_shelf_cover = shelf_cover_path
+            self.set_cover_lb_pixmap(self.current_shelf_cover)
+        self.title_e.setText(self.shelf.title)
 
-            for title_item in self.objects_title_items:
-                if self.shelf.has_book(title_item.data()):
-                    title_item.setCheckState(QtCore.Qt.CheckState.Checked)
+        for title_item in self.objects_title_items:
+            if self.shelf.has_book(title_item.data()):
+                title_item.setCheckState(QtCore.Qt.CheckState.Checked)
 
-                if self.shelf.has_shelf(title_item.data()):
-                    title_item.setCheckState(QtCore.Qt.CheckState.Checked)
+            if self.shelf.has_shelf(title_item.data()):
+                title_item.setCheckState(QtCore.Qt.CheckState.Checked)
 
     def set_shelf_cover(self):
         infos = images_tools.select_image()
@@ -248,7 +212,7 @@ class ShelfCreationPage(base_page.BasePage):
         """
         Set the cover image to the default value
         """
-        if self.current_mode == "edition":
+        if self.__editor_mode == EditorMode.EDITION:
             shelf_cover = self.books.get_shelf_cover_path(self.shelf, False)
 
             if shelf_cover:
@@ -287,7 +251,7 @@ class ShelfCreationPage(base_page.BasePage):
         objects.update(books_dict)
 
         for object in objects.values():
-            if self.current_mode == "edition":
+            if self.__editor_mode == EditorMode.EDITION:
                 if object == self.shelf:
                     continue
 
@@ -342,21 +306,19 @@ class ShelfCreationPage(base_page.BasePage):
         """
         matches = []
 
-        if self.current_mode == "creation":
+        if (
+            self.__editor_mode == EditorMode.CREATION
+            or self.__editor_mode == EditorMode.EDITION
+            and self.shelf.title != title
+        ):
             matches = self.books.books_handler.get_shelfs(title=(title, True, False))
-
-        elif self.current_mode == "edition" and self.shelf:
-            if self.shelf.title != title:
-                matches = self.books.books_handler.get_shelfs(
-                    title=(title, True, False)
-                )
 
         return matches
 
     def get_shelf_infos(self) -> dict | None:
         id = uuid.uuid4()
 
-        if self.current_mode == "edition":
+        if self.__editor_mode == EditorMode.EDITION:
             id = self.shelf.id
 
         shelf_title = self.title_e.text().strip()
@@ -397,7 +359,7 @@ class ShelfCreationPage(base_page.BasePage):
                     child_shelves.append(object_title_item.data())
 
         parents_shelves = []
-        if self.current_mode == "edition":
+        if self.__editor_mode == EditorMode.EDITION:
             parents_shelves = self.shelf._parent_shelves
 
         return {
@@ -415,7 +377,7 @@ class ShelfCreationPage(base_page.BasePage):
         """
         original_cover = self.default_shelf_cover
 
-        if self.current_mode == "edition":
+        if self.__editor_mode == EditorMode.EDITION:
             original_cover = self.books.get_book_cover_path(self.shelf)  # type: ignore
 
         return original_cover == self.current_shelf_cover
@@ -477,7 +439,7 @@ class ShelfCreationPage(base_page.BasePage):
         shelf_infos = self.get_shelf_infos()
 
         if shelf_infos:
-            if self.current_mode == "creation":
+            if self.__editor_mode == EditorMode.CREATION:
                 self.books.new_shelf(**shelf_infos)
                 if not self.is_original_cover():
                     self.attach_cover(shelf_infos["id"])
@@ -486,14 +448,13 @@ class ShelfCreationPage(base_page.BasePage):
                 )
                 self.qt_signals.emit_signal("refresh_current_page_sg")
 
-            elif self.current_mode == "edition":
-                if self.shelf:
-                    self.books.edit_shelf(self.shelf, **shelf_infos)
-                    if not self.is_original_cover():
-                        self.attach_cover(shelf_infos["id"])
-                    QtWidgets.QMessageBox.information(
-                        self,
-                        "Success",
-                        self.langs.tr("shelf.msg.edition_success"),
-                    )
-                    self.qt_signals.emit_signal("close_page_sg")
+            elif self.__editor_mode == EditorMode.EDITION:
+                self.books.edit_shelf(self.shelf, **shelf_infos)
+                if not self.is_original_cover():
+                    self.attach_cover(shelf_infos["id"])
+                QtWidgets.QMessageBox.information(
+                    self,
+                    "Success",
+                    self.langs.tr("shelf.msg.edition_success"),
+                )
+                self.qt_signals.emit_signal("close_page_sg")

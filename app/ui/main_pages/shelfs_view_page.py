@@ -57,7 +57,7 @@ class ShelfsViewPage(base_page.BasePage):
         )
         self.shelf_creation_b.clicked.connect(
             lambda: self.qt_signals.emit_signal(
-                "switch_page_sg", "SHELF_CREATION_PAGE", True, {"mode": "creation"}
+                "switch_page_sg", "SHELF_CREATION_PAGE", True, {}
             )
         )
 
@@ -335,7 +335,7 @@ class SubShelfWidget(QtWidgets.QWidget):
                 "switch_page_sg",
                 "SHELF_CREATION_PAGE",
                 True,
-                {"mode": "edition", "shelf": self.shelf},
+                {"shelf": self.shelf},
             )
         )
         self.edit_b.setSizePolicy(self.button_size)

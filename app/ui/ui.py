@@ -206,7 +206,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
         self.shelf_creation_page = shelf_creation_page.ShelfCreationPage(
             self,
             self.api,
-            mode="creation",
         )
         self.book_details_page = book_details_page.BookDetailsPage(
             self,
