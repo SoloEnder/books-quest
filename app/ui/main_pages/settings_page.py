@@ -43,6 +43,7 @@ class SettingsPage(base_page.BasePage):
             self.api,
             images_tools.get_svg(self.res_files.get_res("assets.icons.color_palette")),
         )
+        self.reading_settings = ReadingSettings(None, self.api)
         self.update_settings = UpdateSettings(
             None,
             self.api,
@@ -61,6 +62,10 @@ class SettingsPage(base_page.BasePage):
         self.add_section(
             self.appearance_settings,
             self.langs.tr("settings.general.appearance.section_title"),
+        )
+        self.add_section(
+            self.reading_settings,
+            self.langs.tr("settings.general.readings.section_title"),
         )
         self.add_section(
             self.update_settings,
@@ -417,6 +422,43 @@ class LangsSettings(SettingsSection):
         self.settings.set_setting_value(
             "general.appearance.language",
             self.lang_selection_combob.currentData(),
+        )
+
+
+class ReadingSettings(SettingsSection):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None,
+        api: api.API,
+        icon: QtGui.QIcon | None = None,
+    ):
+        super().__init__(
+            parent,
+            "reading_settings",
+            "settings.general.readings.section_title",
+            api,
+            icon,
+        )
+        self.header_lb.setProperty("role", "h3")
+        self.header_lb.setStatusTip(
+            self.langs.tr("settings.general.readings.section_description")
+        )
+        self.show_session_summary_after_reading_check_b = QtWidgets.QCheckBox(
+            self.langs.tr(
+                "settings.general.readings.show_session_summary_after_reading"
+            ),
+        )
+        self.show_session_summary_after_reading_check_b.setChecked(
+            self.settings.get_setting_value(
+                "general.readings.show_session_summary_after_reading"
+            )
+        )
+        self.base_lyt.addWidget(self.show_session_summary_after_reading_check_b)
+
+    def apply_settings(self):
+        self.settings.set_setting_value(
+            "general.readings.show_session_summary_after_reading",
+            self.show_session_summary_after_reading_check_b.isChecked(),
         )
 
 
