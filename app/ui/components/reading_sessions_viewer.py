@@ -146,7 +146,12 @@ class ReadingSessionSummaryViewer(QtWidgets.QDialog):
         )
 
         # -- Wether to show congratulations message --
-        if self.book.reading_state == book_sys.Book.ReadingState.FINISHED:
+        if (
+            self.api.settings.get_setting_value(
+                "general.readings.show_congratulation_message_when_finishing_book"
+            )
+            and self.book.reading_state == book_sys.Book.ReadingState.FINISHED
+        ):
             self.main_lyt.addWidget(
                 self.finished_reading_lb,
                 4,
