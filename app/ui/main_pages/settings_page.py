@@ -453,12 +453,29 @@ class ReadingSettings(SettingsSection):
                 "general.readings.show_session_summary_after_reading"
             )
         )
+        self.show_congratulations_message_when_finishing_book_check_b = QtWidgets.QCheckBox(
+            self.langs.tr(
+                "settings.general.readings.show_congratulation_message_when_finishing_book"
+            )
+        )
+        self.show_congratulations_message_when_finishing_book_check_b.setChecked(
+            self.settings.get_setting_value(
+                "general.readings.show_congratulation_message_when_finishing_book"
+            )
+        )
         self.base_lyt.addWidget(self.show_session_summary_after_reading_check_b)
+        self.base_lyt.addWidget(
+            self.show_congratulations_message_when_finishing_book_check_b
+        )
 
     def apply_settings(self):
         self.settings.set_setting_value(
             "general.readings.show_session_summary_after_reading",
             self.show_session_summary_after_reading_check_b.isChecked(),
+        )
+        self.settings.set_setting_value(
+            "general.readings.show_congratulation_message_when_finishing_book",
+            self.show_congratulations_message_when_finishing_book_check_b.isChecked(),
         )
 
 

@@ -179,7 +179,8 @@
       "readings": {
         "section_title": "Lecture",
         "section_description": "Paramères relatifs aux sessions de lectures",
-        "show_session_summary_after_reading": "Afficher le résumé de la session après la lecture"
+        "show_session_summary_after_reading": "Afficher le résumé de la session après la lecture",
+        "show_congratulation_message_when_finishing_book": "Afficher un message de félicitation quand un livre est entièrement lus"
       },
       "update": {
         "section_title": "Mises à jour",
