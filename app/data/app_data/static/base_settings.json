@@ -1,1 +1,24 @@
-{"general": {"appearance": {"theme": {"current": "dark", "choices": ["light", "system", "dark"]}, "language": {"current": "en", "choices": ["fr", "en"]}}, "update": {"auto_update_check_enabled": {"current": true, "choices": [true, false]}}}, "developer_settings": {"show_indev_warning": {"current": true, "choices": [true, false]}}}
+{
+  "general": {
+    "appearance": {
+      "theme": { "current": "dark", "choices": ["light", "system", "dark"] },
+      "language": { "current": "en", "choices": ["fr", "en"] }
+    },
+    "readings": {
+      "show_session_summary_after_reading": {
+        "current": true,
+        "choices": [true, false]
+      },
+      "show_congratulation_message_when_finishing_book": {
+        "current": true,
+        "choices": [true, false]
+      }
+    },
+    "update": {
+      "auto_update_check_enabled": { "current": true, "choices": [true, false] }
+    }
+  },
+  "developer_settings": {
+    "show_indev_warning": { "current": true, "choices": [true, false] }
+  }
+}

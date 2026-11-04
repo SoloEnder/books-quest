@@ -351,10 +351,15 @@ class ReadingSessionPage(base_page.BasePage):
         """
         Show a reading summary viewer instance.
         """
+        if not self.settings.get_setting_value(
+            "general.readings.show_session_summary_after_reading"
+        ):
+            return
 
         # -- Prevent from showing the summary if the pages read are 0
         if self.session_details_editor._last_saved_session.pages_read <= 0:
             return
+
         self.session_summary_viewer = ReadingSessionSummaryViewer(
             self,
             self.api,

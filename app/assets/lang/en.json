@@ -176,6 +176,12 @@
           "edit_current_lang": "Edit interface language"
         }
       },
+      "readings": {
+        "section_title": "Reading",
+        "section_description": "Settings related to the readings sessions",
+        "show_session_summary_after_reading": "Show session summary after reading",
+        "show_congratulation_message_when_finishing_book": "Show special message when finishing book"
+      },
       "update": {
         "section_title": "Update Settings",
         "section_description": "Settings related to the updates of the application",
