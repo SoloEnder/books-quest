@@ -43,7 +43,11 @@ class SettingsPage(base_page.BasePage):
             self.api,
             images_tools.get_svg(self.res_files.get_res("assets.icons.color_palette")),
         )
-        self.reading_settings = ReadingSettings(None, self.api)
+        self.reading_settings = ReadingSettings(
+            None,
+            self.api,
+            images_tools.get_svg(self.res_files.get_res("assets.icons.read")),
+        )
         self.update_settings = UpdateSettings(
             None,
             self.api,
