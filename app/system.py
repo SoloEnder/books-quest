@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import pathlib
@@ -68,11 +69,13 @@ class AppSystem:
         )
 
     def get_installation_infos(self):
-        installation_infos = self.res_files.read_indexed_file(
-            "data.app.installation_infos"
-        )
 
-        if not installation_infos:
+        try:
+            installation_infos = self.res_files.read_indexed_file(
+                "data.app.installation_infos"
+            )
+
+        except (FileNotFoundError, json.JSONDecodeError):
             self.logger.warning(
                 "Could not get valid installation infos from file, writting default installation infos"
             )
