@@ -27,13 +27,6 @@ class AppSystem:
         self.langs = self.api.langs
         self.settings = self.api.settings
 
-        # Loading data
-        self.res_files.load_indexes()
-        self.books.load_books()
-        self.books.load_shelves()
-        self.settings.load_settings()
-        self.settings.apply_user_settings()
-
         self.app_infos = self.load_app_infos(self.res_files.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
@@ -47,6 +40,14 @@ class AppSystem:
             self.res_files.get_res("data.user.bookshelves"),
             self.res_files.get_res("data.user.bookshelves.covers"),
         )
+
+        # Loading data
+        self.res_files.load_indexes()
+        self.books.load_books()
+        self.books.load_shelves()
+        self.settings.load_settings()
+        self.settings.apply_user_settings()
+
         self.logger.info("Initialising application...")
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.load_and_apply_settings()
