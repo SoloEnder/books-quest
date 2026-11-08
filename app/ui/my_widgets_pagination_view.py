@@ -2,6 +2,7 @@ import logging
 
 import widgets_pagination_view
 from PySide6 import QtGui, QtWidgets
+from PySide6.QtCore import Qt
 
 from app.src import api
 from app.utils import utils_funcs
@@ -37,6 +38,7 @@ class MyWidgetsPaginationView(widgets_pagination_view.WidgetsPaginationView):
             self, self.langs.tr("shared.msg.nothing_to_show")
         )
         self.main_lyt.addWidget(self.nothing_to_show_page, 0, 0)
+        self.pages_numbers_widget_lyt.setAlignment(Qt.AlignmentFlag.AlignCenter)
         utils_funcs.load_and_set_ss(
             self.res_files.get_res("assets.qss.widgets_pagination_view"),
             widget=self,
