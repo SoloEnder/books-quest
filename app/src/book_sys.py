@@ -478,6 +478,19 @@ class BooksHandler:
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
 
+    def sort_by_titles(self, items: BooksList | ShelvesList, reverse: bool = True):
+        """
+        Sort a list of books/shelves by their titles
+
+        Parameters
+        ----------
+        - items: a list of shelves or/and books
+        - reverse(bool=False): wether to sort the items by Z-A instead of A-Z
+        """
+        sorted_data = [(item.title, item) for item in items]
+        sorted_data.sort(reverse=reverse)
+        return [item for item_title, item in sorted_data]
+
     def delete_book(self, book_id: str):
         book_id = book_id
 
