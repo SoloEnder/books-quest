@@ -478,7 +478,7 @@ class BooksHandler:
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
 
-    def sort_by_titles(self, items: BooksList | ShelvesList, reverse: bool = True):
+    def sort_by_titles(self, items: BooksList | ShelvesList, reverse: bool = False):
         """
         Sort a list of books/shelves by their titles
 
