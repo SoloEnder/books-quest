@@ -123,9 +123,7 @@ class ShelfsViewPage(base_page.BasePage):
 
         Parameters
         ----------
-        - shelves(list): a list of Shelf
         - sort_option(SortsOptions): the option used to sort the shelves
-        - refresh_viewer(bool=True): whether to replace the currently displayed shelves with the sorted shelves
         """
         self.logger.debug(f"{sort_option=}")
         sort_option = sort_option or self.sort_shelves_dropdown.currentData()
