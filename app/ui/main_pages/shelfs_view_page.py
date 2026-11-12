@@ -74,7 +74,6 @@ class ShelfsViewPage(base_page.BasePage):
         )
         self.search_le.textEdited.connect(self.exit_search)
         # -- Sort shelves widgets --
-        self.sort_shelves_lb = QtWidgets.QLabel("Sort by")  # To tr
         self.sort_shelves_dropdown = QtWidgets.QComboBox(editable=False)
         self.sort_shelves_dropdown.addItem(
             "Sort By Name (A-Z)", SortsOptions.NAME_AZ
