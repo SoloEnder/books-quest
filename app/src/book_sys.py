@@ -317,6 +317,7 @@ class Book:
         The base class for the books
         """
         self.title = title
+        self.creation_date = kwargs.get("creation_date", datetime.now())
         self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
         self.edition = kwargs.get("edition")
