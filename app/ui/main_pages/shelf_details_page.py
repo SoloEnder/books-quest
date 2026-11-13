@@ -117,11 +117,11 @@ class ShelfDetailsPage(base_page.BasePage):
         # -- Sort shelves widgets --
         self.sort_items_dropdown = QtWidgets.QComboBox(editable=False)
         self.sort_items_dropdown.addItem(
-            "Sort By Name (A-Z)", SortsOptions.NAME_AZ
-        )  # To tr
+            self.langs.tr("sort_options.name_az"), SortsOptions.NAME_AZ
+        )
         self.sort_items_dropdown.addItem(
-            "Sort By Name (Z-A)", SortsOptions.NAME_ZA
-        )  # To tr
+            self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
+        )
         self.sort_items_dropdown.currentIndexChanged.connect(self.__sort_items)
         # Generating shelf content widget
         self.sort_items(SortsOptions.NAME_AZ)

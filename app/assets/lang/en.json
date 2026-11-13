@@ -60,6 +60,10 @@
       "pages_count_args": "/f:<count>/f pages"
     }
   },
+  "sort_options": {
+    "name_az": "Sort By Name (A-Z)",
+    "name_za": "Sort By Name (Z-A)"
+  },
   "reading_session": {
     "summary_viewer": {
       "title": "Reading Session Summary Viewer",
