@@ -143,7 +143,7 @@ class ShelfsViewPage(base_page.BasePage):
             )
 
         else:
-            self.logger.warning(f"Got unsupported sort option '{sort_option}'")
+            self.logger.error(f"Got unexpected sort option '{sort_option}'")
 
         self.logger.debug(f"{sorted_shelves=}")
         shelves_widgets = self.create_shelves_widgets(sorted_shelves)
