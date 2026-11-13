@@ -290,6 +290,7 @@ class Shelf:
     def get_infos(self) -> dict:
         return {
             "title": self.title,
+            "creation_date": self.creation_date,
             "title_suffix": self.title_suffix,
             "id": self.id,
             "children_shelves": self._children_shelves,
@@ -404,6 +405,7 @@ class Book:
         return {
             "id": self.id,
             "title": self.title,
+            "creation_date": self.creation_date,
             "title_suffix": self.title_suffix,
             "authors": self.authors,
             "edition": self.edition,
