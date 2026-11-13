@@ -488,12 +488,12 @@ class BooksHandler:
         self, items: BooksList | ShelvesList, reverse: bool = False
     ):
         """
-        Sort `items` by creation date (most to least recent)
+        Sort `items` by creation date (least to most recent)
 
         Parameters
         ----------
         - items: a list of book or/and shelves
-        - reverse: wether to reverse the order (sort by least to most recent istead of most to least)
+        - reverse: wether to reverse the order (sort by most to least recent instead of least to most)
         """
         return sorted(items, key=operator.attrgetter("creation_date"), reverse=reverse)
 
