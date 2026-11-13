@@ -758,6 +758,9 @@ class BooksHandler:
             book_data = book.get_infos()
             # -- Converting book `id` into a string
             book_data["id"] = book.str_id()
+
+            # -- Convert 'creation_date' attribut into a string --
+            book_data["creation_date"] = book_data["creation_date"].strftime("%c")
             book_data["parents_shelves_ids"] = []
 
             for shelf in book_data["parents_shelves"]:
@@ -785,6 +788,13 @@ class BooksHandler:
         if data:
             for book_data in data:
                 book_data["id"] = uuid.UUID(book_data["id"])
+
+                # -- Convert "creation_date" into a datetime object
+                if "creation_date" in book_data:
+                    book_data["creation_date"] = datetime.strptime(
+                        book_data["creation_date"], "%d"
+                    )
+
                 book_data["reading_state"] = Book.ReadingState[
                     book_data["reading_state"]
                 ]
@@ -814,6 +824,9 @@ class BooksHandler:
         for shelf in self.shelves.values():
             shelf_data = shelf.get_infos()
             shelf_data["id"] = str(shelf_data["id"])
+            shelf_data["creation_date"] = shelf_data["creation_date"].strftime(
+                "%c"
+            )  # Convert datetime object into a string
             shelf_data["books_ids"] = []
             shelf_data["parents_shelves_ids"] = [
                 shelf.str_id() for shelf in shelf_data["parents_shelves"]
@@ -867,6 +880,11 @@ class BooksHandler:
         if data:
             deferred_adoption_data: dict[str, list[str]] = {}
             for shelf_data in data:
+                # -- Convert creation_date into a datetime object --
+                if "creation_date" in shelf_data:
+                    shelf_data["creation_date"] = datetime.strptime(
+                        shelf_data["creation_date"], "%c"
+                    )
                 books = list(
                     self.convert_books_ids(shelf_data.get("books_ids", [])).values()
                 )
