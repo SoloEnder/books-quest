@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import json
 import logging
+import operator
 import os
 import pathlib
 import uuid
@@ -482,6 +483,19 @@ class BooksHandler:
         self.shelves = shelves or {}
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
+
+    def sort_by_creation_date(
+        self, items: BooksList | ShelvesList, reverse: bool = False
+    ):
+        """
+        Sort `items` by creation date (most to least recent)
+
+        Parameters
+        ----------
+        - items: a list of book or/and shelves
+        - reverse: wether to reverse the order (sort by least to most recent istead of most to least)
+        """
+        return sorted(items, key=operator.attrgetter("creation_date"), reverse=reverse)
 
     def sort_by_titles(self, items: BooksList | ShelvesList, reverse: bool = False):
         """
