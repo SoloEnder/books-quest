@@ -128,9 +128,10 @@ class ShelfDetailsPage(base_page.BasePage):
         self.sort_items_dropdown.addItem(
             "Creation Date (Least Recent)", SortsOptions.LEAST_RECENT
         )  # to tr
+        self.sort_items_dropdown.setCurrentIndex(2)
         self.sort_items_dropdown.currentIndexChanged.connect(self.__sort_items)
         # Generating shelf content widget
-        self.sort_items_dropdown.setCurrentIndex(2)
+        self.sort_items()
 
         # Adding widgets to layout
         self.main_lyt.addWidget(
