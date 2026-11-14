@@ -122,9 +122,15 @@ class ShelfDetailsPage(base_page.BasePage):
         self.sort_items_dropdown.addItem(
             self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
         )
+        self.sort_items_dropdown.addItem(
+            "Creation Date (Most Recent)", SortsOptions.MOST_RECENT
+        )  # to tr
+        self.sort_items_dropdown.addItem(
+            "Creation Date (Least Recent)", SortsOptions.LEAST_RECENT
+        )  # to tr
         self.sort_items_dropdown.currentIndexChanged.connect(self.__sort_items)
         # Generating shelf content widget
-        self.sort_items(SortsOptions.NAME_AZ)
+        self.sort_items_dropdown.setCurrentIndex(2)
 
         # Adding widgets to layout
         self.main_lyt.addWidget(
@@ -171,6 +177,18 @@ class ShelfDetailsPage(base_page.BasePage):
             self.logger.info("Sorting shelf content by title (Z-A)...")
             sorted_items = self.books.books_handler.sort_by_titles(
                 list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.MOST_RECENT:
+            self.logger.info("Sorting shelf content by most recent...")
+            sorted_items = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.LEAST_RECENT:
+            self.logger.info("Sorting shelf content by least recent...")
+            sorted_items = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values())
             )
 
         else:
