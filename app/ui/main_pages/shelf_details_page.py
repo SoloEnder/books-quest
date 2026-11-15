@@ -195,7 +195,6 @@ class ShelfDetailsPage(base_page.BasePage):
         else:
             self.logger.error(f"Got unexpected sort option '{sort_option}'")
 
-        self.logger.debug(f"{sorted_items=}")
         items_widgets = self.create_children_widgets(sorted_items, [])
         self.widgets_pagination_view_handler.widgets = items_widgets
 

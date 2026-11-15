@@ -164,7 +164,6 @@ class ShelfsViewPage(base_page.BasePage):
         else:
             self.logger.error(f"Got unexpected sort option '{sort_option}'")
 
-        self.logger.debug(f"{sorted_shelves=}")
         shelves_widgets = self.create_shelves_widgets(sorted_shelves)
 
         # -- This will ensure that the default shelf is always the last element
