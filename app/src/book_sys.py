@@ -6,6 +6,7 @@ import logging
 import operator
 import os
 import pathlib
+import typing
 import uuid
 from datetime import datetime
 
@@ -468,6 +469,9 @@ ShelvesList = list[Shelf]
 ShelvesDict = dict[str, Shelf]
 IDsList = list[str] | tuple[str, ...] | set[str]
 
+ItemsList = list[Shelf | Book]
+ItemsDict = dict[str, Shelf | Book]
+
 
 class BooksHandler:
     def __init__(
@@ -484,9 +488,7 @@ class BooksHandler:
         self.default_shelf = Shelf(title="All", books=self.books.values())
         self.default_book = Book(title="DefaultBook")
 
-    def sort_by_creation_date(
-        self, items: BooksList | ShelvesList, reverse: bool = False
-    ):
+    def sort_by_creation_date(self, items: ItemsList, reverse: bool = False):
         """
         Sort `items` by creation date (least to most recent)
 
@@ -497,7 +499,7 @@ class BooksHandler:
         """
         return sorted(items, key=operator.attrgetter("creation_date"), reverse=reverse)
 
-    def sort_by_titles(self, items: BooksList | ShelvesList, reverse: bool = False):
+    def sort_by_titles(self, items: ItemsList, reverse: bool = False):
         """
         Sort a list of books/shelves by their titles
 
