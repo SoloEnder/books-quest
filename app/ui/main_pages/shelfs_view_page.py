@@ -81,6 +81,13 @@ class ShelfsViewPage(base_page.BasePage):
         self.sort_shelves_dropdown.addItem(
             self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
         )
+        self.sort_shelves_dropdown.addItem(
+            "Creation Date (Most Recent)", SortsOptions.MOST_RECENT
+        )  # to tr
+        self.sort_shelves_dropdown.addItem(
+            "Creation Date (Least Recent)", SortsOptions.LEAST_RECENT
+        )  # to tr
+        self.sort_shelves_dropdown.setCurrentIndex(2)
         self.sort_shelves_dropdown.currentIndexChanged.connect(self.__sort_shelves)
 
         # Shelfs pages widgets handler
@@ -106,7 +113,7 @@ class ShelfsViewPage(base_page.BasePage):
             self.sort_shelves_dropdown, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
         self.main_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
-        self.sort_shelves(SortsOptions.NAME_AZ)
+        self.sort_shelves()
 
     def __sort_shelves(self, index):
         """
@@ -140,6 +147,18 @@ class ShelfsViewPage(base_page.BasePage):
             self.logger.info("Sorting shelves by title (Z-A)...")
             sorted_shelves = self.books.books_handler.sort_by_titles(
                 list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.MOST_RECENT:
+            self.logger.info("Sorting shelf content by most recent...")
+            sorted_shelves = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.LEAST_RECENT:
+            self.logger.info("Sorting shelf content by least recent...")
+            sorted_shelves = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values())
             )
 
         else:
