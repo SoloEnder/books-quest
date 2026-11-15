@@ -59,6 +59,12 @@
       "pages_count_args": "/f:<count>/f pages"
     }
   },
+  "sort_options": {
+    "name_az": "Trier Par Nom (A-Z)",
+    "name_za": "Trier Par Nom (Z-A)",
+    "least_recent": "Date de Création (Moins Récent)",
+    "most_recent": "Date de Création (Plus Récent)"
+  },
   "reading_session": {
     "summary_viewer": {
       "title": "Résumé de session de lecture",

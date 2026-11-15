@@ -8,6 +8,7 @@ from app.src import api, book_sys
 from app.ui import my_widgets_pagination_view
 from app.ui.main_pages import base_page
 from app.utils import images_tools, utils_funcs
+from app.utils.contexts import SortsOptions
 
 
 class ShelfsViewPage(base_page.BasePage):
@@ -72,6 +73,22 @@ class ShelfsViewPage(base_page.BasePage):
             lambda: self.search_shelfs(self.search_le.text())
         )
         self.search_le.textEdited.connect(self.exit_search)
+        # -- Sort shelves widgets --
+        self.sort_shelves_dropdown = QtWidgets.QComboBox(editable=False)
+        self.sort_shelves_dropdown.addItem(
+            self.langs.tr("sort_options.name_az"), SortsOptions.NAME_AZ
+        )
+        self.sort_shelves_dropdown.addItem(
+            self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
+        )
+        self.sort_shelves_dropdown.addItem(
+            self.langs.tr("sort_options.most_recent"), SortsOptions.MOST_RECENT
+        )
+        self.sort_shelves_dropdown.addItem(
+            self.langs.tr("sort_options.least_recent"), SortsOptions.LEAST_RECENT
+        )
+        self.sort_shelves_dropdown.setCurrentIndex(2)
+        self.sort_shelves_dropdown.currentIndexChanged.connect(self.__sort_shelves)
 
         # Shelfs pages widgets handler
         self.pages_view_handler = my_widgets_pagination_view.MyWidgetsPaginationView(
@@ -92,8 +109,77 @@ class ShelfsViewPage(base_page.BasePage):
         self.main_lyt.addWidget(
             self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
+        self.main_lyt.addWidget(
+            self.sort_shelves_dropdown, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
+        )
         self.main_lyt.addWidget(self.pages_view_handler, 3, 0, 1, 3)
-        self.generate_shelves_pages()
+        self.sort_shelves()
+
+    def __sort_shelves(self, index):
+        """
+        The only purpose of this function is to be called by the `sort options` dropdown every time its value change
+        """
+        self.sort_shelves(self.sort_shelves_dropdown.currentData())
+
+    def sort_shelves(
+        self,
+        sort_option: SortsOptions | None = None,
+    ):
+        """
+        Sort the displayed shelves
+
+        Parameters
+        ----------
+        - sort_option(SortsOptions): the option used to sort the shelves
+        """
+        self.logger.debug(f"{sort_option=}")
+        sort_option = sort_option or self.sort_shelves_dropdown.currentData()
+        sorted_shelves = []
+        self.logger.debug(f"{sort_option=}")
+
+        if sort_option == SortsOptions.NAME_AZ:
+            self.logger.info("Sorting shelves by title (A-Z)...")
+            sorted_shelves = self.books.books_handler.sort_by_titles(
+                list(self.books.books_handler.shelves.values())
+            )
+
+        elif sort_option == SortsOptions.NAME_ZA:
+            self.logger.info("Sorting shelves by title (Z-A)...")
+            sorted_shelves = self.books.books_handler.sort_by_titles(
+                list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.MOST_RECENT:
+            self.logger.info("Sorting shelf content by most recent...")
+            sorted_shelves = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values()), reverse=True
+            )
+
+        elif sort_option == SortsOptions.LEAST_RECENT:
+            self.logger.info("Sorting shelf content by least recent...")
+            sorted_shelves = self.books.books_handler.sort_by_creation_date(
+                list(self.books.books_handler.shelves.values())
+            )
+
+        else:
+            self.logger.error(f"Got unexpected sort option '{sort_option}'")
+
+        shelves_widgets = self.create_shelves_widgets(sorted_shelves)
+
+        # -- This will ensure that the default shelf is always the last element
+        self.logger.debug("Correcting DefaultShelf position...")
+        default_shelf_widget = shelves_widgets[0]
+
+        if isinstance(default_shelf_widget, DefaultShelfWidget):
+            shelves_widgets.append(default_shelf_widget)
+            del shelves_widgets[0]
+
+        else:
+            self.logger.error(
+                "Could not correct DefaultShelf position : first sorted widget is not a DefaultShelfWidget instance !"
+            )
+
+        self.pages_view_handler.widgets = shelves_widgets
 
     @QtCore.Slot(str)
     def search_shelfs(self, given_input: str):

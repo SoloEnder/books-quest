@@ -9,6 +9,7 @@ from app.ui import my_widgets_pagination_view
 from app.ui.main_pages import base_page, book_details_page
 from app.ui.main_pages.shelfs_view_page import DefaultShelfWidget, ShelfWidget
 from app.utils import utils_funcs
+from app.utils.contexts import SortsOptions
 
 
 class UnknownChildrenError(Exception):
@@ -113,18 +114,89 @@ class ShelfDetailsPage(base_page.BasePage):
         self.widgets_pagination_view_handler.nothing_to_show_page.main_lyt.addWidget(
             self.add_shelf_b, 2, 0, QtGui.Qt.AlignmentFlag.AlignCenter
         )
-        # books widgets
-        self.generate_widgets_pages()
+        # -- Sort shelves widgets --
+        self.sort_items_dropdown = QtWidgets.QComboBox(editable=False)
+        self.sort_items_dropdown.addItem(
+            self.langs.tr("sort_options.name_az"), SortsOptions.NAME_AZ
+        )
+        self.sort_items_dropdown.addItem(
+            self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
+        )
+        self.sort_items_dropdown.addItem(
+            self.langs.tr("sort_options.most_recent"), SortsOptions.MOST_RECENT
+        )  # to tr
+        self.sort_items_dropdown.addItem(
+            self.langs.tr("sort_options.least_recent"), SortsOptions.LEAST_RECENT
+        )  # to tr
+        self.sort_items_dropdown.setCurrentIndex(2)
+        self.sort_items_dropdown.currentIndexChanged.connect(self.__sort_items)
+        # Generating shelf content widget
+        self.sort_items()
 
         # Adding widgets to layout
         self.main_lyt.addWidget(
             self.search_le, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
         self.main_lyt.addWidget(
-            self.shelf_basic_infos_w, 1, 0, QtCore.Qt.AlignmentFlag.AlignTop
+            self.sort_items_dropdown, 1, 2, QtCore.Qt.AlignmentFlag.AlignRight
         )
-        self.main_lyt.addWidget(self.sep, 1, 1)
-        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 1, 2)
+        self.main_lyt.addWidget(
+            self.shelf_basic_infos_w, 2, 0, QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self.main_lyt.addWidget(self.sep, 2, 1)
+        self.main_lyt.addWidget(self.widgets_pagination_view_handler, 2, 2)
+
+    def __sort_items(self, index):
+        """
+        The only purpose of this function is to be called by the `sort options` dropdown every time its value change
+        """
+        self.sort_items(self.sort_items_dropdown.currentData())
+
+    def sort_items(
+        self,
+        sort_option: SortsOptions | None = None,
+    ):
+        """
+        Sort the subshelves/books of this shelf using `sort_option`
+
+        Parameters
+        ----------
+        - sort_option(SortsOptions): the option used to sort the books & shelves
+        """
+        self.logger.debug(f"{sort_option=}")
+        sort_option = sort_option or self.sort_items_dropdown.currentData()
+        sorted_items = []
+        self.logger.debug(f"{sort_option=}")
+
+        if sort_option == SortsOptions.NAME_AZ:
+            self.logger.info("Sorting shelf content by title (A-Z)...")
+            sorted_items = self.books.books_handler.sort_by_titles(
+                self.shelf._books + self.shelf._children_shelves
+            )
+
+        elif sort_option == SortsOptions.NAME_ZA:
+            self.logger.info("Sorting shelf content by title (Z-A)...")
+            sorted_items = self.books.books_handler.sort_by_titles(
+                self.shelf._books + self.shelf._children_shelves, reverse=True
+            )
+
+        elif sort_option == SortsOptions.MOST_RECENT:
+            self.logger.info("Sorting shelf content by most recent...")
+            sorted_items = self.books.books_handler.sort_by_creation_date(
+                self.shelf._books + self.shelf._children_shelves, reverse=True
+            )
+
+        elif sort_option == SortsOptions.LEAST_RECENT:
+            self.logger.info("Sorting shelf content by least recent...")
+            sorted_items = self.books.books_handler.sort_by_creation_date(
+                self.shelf._books + self.shelf._children_shelves
+            )
+
+        else:
+            self.logger.error(f"Got unexpected sort option '{sort_option}'")
+
+        items_widgets = self.create_children_widgets(sorted_items, [])
+        self.widgets_pagination_view_handler.widgets = items_widgets
 
     def create_children_widgets(
         self, books: book_sys.BooksList, shelves: book_sys.ShelvesList
