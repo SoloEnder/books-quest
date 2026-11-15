@@ -37,8 +37,6 @@ class AppSystem:
         self.res_files.load_indexes()
         self.books.load_books()
         self.books.load_shelves()
-        self.settings.load_settings()
-        self.settings.apply_user_settings()
 
         self.logger.info("Initialising application...")
         self.qt_app.aboutToQuit.connect(self.close_app)
