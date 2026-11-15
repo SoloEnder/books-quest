@@ -60,14 +60,18 @@ class LangsService:
         if send_refresh_request:
             self.qt_signals.emit_signal("refresh_ui_sg")
 
-    def set_prefered_language(self):
+    def set_prefered_language(self, send_refresh_request: bool = True):
         """
         Sets the current language to the one in the user settings
+
+        Parameters
+        ----------
+        - send_refresh_requests (bool=True): wether to order an UI refresh
         """
         prefered_language = self.settings.get_setting_value(
             "general.appearance.language"
         )
-        self.set_language(prefered_language)
+        self.set_language(prefered_language, send_refresh_request)
 
     @functools.cache  # Warning ingored, because these are singletons, instancied only at startup
     def tr(self, lang_dict_path: str, **kwargs):
