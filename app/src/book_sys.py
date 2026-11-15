@@ -808,7 +808,7 @@ class BooksHandler:
                 # -- Convert "creation_date" into a datetime object
                 if "creation_date" in book_data:
                     book_data["creation_date"] = datetime.strptime(
-                        book_data["creation_date"], "%d"
+                        book_data["creation_date"], "%c"
                     )
 
                 book_data["reading_state"] = Book.ReadingState[
