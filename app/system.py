@@ -32,14 +32,11 @@ class AppSystem:
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
         self.check_and_make_missing()
+
+        # Check the existsence of folders that are mandatory for the program to start
         self.check_folder(
             self.res_files.get_res("data"),
             self.res_files.get_res("assets"),
-            self.res_files.get_res("data.user"),
-            self.res_files.get_res("data.user.books"),
-            self.res_files.get_res("data.user.books.covers"),
-            self.res_files.get_res("data.user.bookshelves"),
-            self.res_files.get_res("data.user.bookshelves.covers"),
         )
 
         # Loading data
