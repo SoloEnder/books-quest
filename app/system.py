@@ -41,7 +41,6 @@ class AppSystem:
         self.logger.info("Initialising application...")
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.load_and_apply_settings()
-        self.langs.set_prefered_language()
         self.logger.info("Connecting signals to loaded slots...")
         self.connect_signals()
         self.logger.info("Erasing files in temporary folder...")
