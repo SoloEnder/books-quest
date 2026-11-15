@@ -166,6 +166,20 @@ class ShelfsViewPage(base_page.BasePage):
 
         self.logger.debug(f"{sorted_shelves=}")
         shelves_widgets = self.create_shelves_widgets(sorted_shelves)
+
+        # -- This will ensure that the default shelf is always the last element
+        self.logger.debug("Correcting DefaultShelf position...")
+        default_shelf_widget = shelves_widgets[0]
+
+        if isinstance(default_shelf_widget, DefaultShelfWidget):
+            shelves_widgets.append(default_shelf_widget)
+            del shelves_widgets[0]
+
+        else:
+            self.logger.error(
+                "Could not correct DefaultShelf position : first sorted widget is not a DefaultShelfWidget instance !"
+            )
+
         self.pages_view_handler.widgets = shelves_widgets
 
     @QtCore.Slot(str)
