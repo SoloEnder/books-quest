@@ -82,11 +82,11 @@ class ShelfsViewPage(base_page.BasePage):
             self.langs.tr("sort_options.name_za"), SortsOptions.NAME_ZA
         )
         self.sort_shelves_dropdown.addItem(
-            "Creation Date (Most Recent)", SortsOptions.MOST_RECENT
-        )  # to tr
+            self.langs.tr("sort_options.most_recent"), SortsOptions.MOST_RECENT
+        )
         self.sort_shelves_dropdown.addItem(
-            "Creation Date (Least Recent)", SortsOptions.LEAST_RECENT
-        )  # to tr
+            self.langs.tr("sort_options.least_recent"), SortsOptions.LEAST_RECENT
+        )
         self.sort_shelves_dropdown.setCurrentIndex(2)
         self.sort_shelves_dropdown.currentIndexChanged.connect(self.__sort_shelves)
 

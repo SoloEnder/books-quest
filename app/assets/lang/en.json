@@ -62,7 +62,9 @@
   },
   "sort_options": {
     "name_az": "Sort By Name (A-Z)",
-    "name_za": "Sort By Name (Z-A)"
+    "name_za": "Sort By Name (Z-A)",
+    "least_recent": "Least Recent First",
+    "most_recent": "Most Recent First"
   },
   "reading_session": {
     "summary_viewer": {
