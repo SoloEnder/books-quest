@@ -31,13 +31,12 @@ class AppSystem:
         self.app_infos = self.load_app_infos(self.res_files.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
-        self.check_and_make_missing()
-
         # Check the existsence of folders that are mandatory for the program to start
         self.check_folder(
             self.res_files.get_res("data"),
             self.res_files.get_res("assets"),
         )
+        self.check_and_make_missing()
 
         # Loading data
         self.res_files.load_indexes()
