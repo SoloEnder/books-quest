@@ -161,7 +161,7 @@ class ShelfDetailsPage(base_page.BasePage):
 
         Parameters
         ----------
-        - sort_option(SortsOptions): the option used to sort the shelves
+        - sort_option(SortsOptions): the option used to sort the books & shelves
         """
         self.logger.debug(f"{sort_option=}")
         sort_option = sort_option or self.sort_items_dropdown.currentData()
@@ -171,25 +171,25 @@ class ShelfDetailsPage(base_page.BasePage):
         if sort_option == SortsOptions.NAME_AZ:
             self.logger.info("Sorting shelf content by title (A-Z)...")
             sorted_items = self.books.books_handler.sort_by_titles(
-                list(self.books.books_handler.shelves.values())
+                self.shelf._books + self.shelf._children_shelves
             )
 
         elif sort_option == SortsOptions.NAME_ZA:
             self.logger.info("Sorting shelf content by title (Z-A)...")
             sorted_items = self.books.books_handler.sort_by_titles(
-                list(self.books.books_handler.shelves.values()), reverse=True
+                self.shelf._books + self.shelf._children_shelves, reverse=True
             )
 
         elif sort_option == SortsOptions.MOST_RECENT:
             self.logger.info("Sorting shelf content by most recent...")
             sorted_items = self.books.books_handler.sort_by_creation_date(
-                list(self.books.books_handler.shelves.values()), reverse=True
+                self.shelf._books + self.shelf._children_shelves, reverse=True
             )
 
         elif sort_option == SortsOptions.LEAST_RECENT:
             self.logger.info("Sorting shelf content by least recent...")
             sorted_items = self.books.books_handler.sort_by_creation_date(
-                list(self.books.books_handler.shelves.values())
+                self.shelf._books + self.shelf._children_shelves
             )
 
         else:
