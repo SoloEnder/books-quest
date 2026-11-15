@@ -31,11 +31,6 @@ class AppSystem:
         self.app_infos = self.load_app_infos(self.res_files.get_res("app_infos"))
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
-        # Check the existsence of folders that are mandatory for the program to start
-        self.check_folder(
-            self.res_files.get_res("data"),
-            self.res_files.get_res("assets"),
-        )
         self.check_and_make_missing()
 
         # Loading data
@@ -235,18 +230,6 @@ class AppSystem:
             else:
                 with open(filepath, "w") as f:
                     f.write(str(data))
-
-    def check_folder(self, *folders):
-        """
-        Check the existence of a folder send an logging.ERROR message else
-        """
-
-        for folder in folders:
-            self.logger.info(f"Checking the existence of {folder}")
-            folder = pathlib.Path(folder)
-
-            if not folder.exists():
-                self.logger.error(f"Folder {folder} not found !")
 
     def load_app_infos(self, filepath: str | pathlib.Path) -> dict:
         """
