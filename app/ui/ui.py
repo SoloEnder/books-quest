@@ -30,11 +30,11 @@ class UI(QtWidgets.QMainWindow):
         self.qt_signals = self.api.qt_signals
         self.langs = self.api.langs
         self.settings = self.api.settings
+        self.draw_ui()
         self.notification_service = notification_service.NotificationService(
             self, self.langs
         )
         self.qt_signals.connect_to_signal("notify_sg", self.notification_service.notify)
-        self.draw_ui()
         self.progress_info_lb = QtWidgets.QLabel()
         self.statusBar().addPermanentWidget(self.progress_info_lb)
         self.qt_signals.connect_to_signal("edit_progress_msg", self.set_progress_msg)
@@ -49,9 +49,7 @@ class UI(QtWidgets.QMainWindow):
         Draws almost the entire widgets, and remove the existant ones before.
         """
         self.logger.info("Drawing UI...")
-        self.langs.set_language(
-            self.settings.get_setting_value("general.appearance.language"), False
-        )
+        self.langs.set_prefered_language(False)
         self.set_app_theme()
         self.books.books_handler.edit_default_shelf(
             title=self.langs.tr("shelf.infos.default_shelf_title")

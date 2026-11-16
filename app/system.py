@@ -32,27 +32,15 @@ class AppSystem:
         self.installation_infos = self.get_installation_infos()
         self.clean_updater_files()
         self.check_and_make_missing()
-        self.check_folder(
-            self.res_files.get_res("data"),
-            self.res_files.get_res("assets"),
-            self.res_files.get_res("data.user"),
-            self.res_files.get_res("data.user.books"),
-            self.res_files.get_res("data.user.books.covers"),
-            self.res_files.get_res("data.user.bookshelves"),
-            self.res_files.get_res("data.user.bookshelves.covers"),
-        )
 
         # Loading data
         self.res_files.load_indexes()
         self.books.load_books()
         self.books.load_shelves()
-        self.settings.load_settings()
-        self.settings.apply_user_settings()
 
         self.logger.info("Initialising application...")
         self.qt_app.aboutToQuit.connect(self.close_app)
         self.load_and_apply_settings()
-        self.langs.set_prefered_language()
         self.logger.info("Connecting signals to loaded slots...")
         self.connect_signals()
         self.logger.info("Erasing files in temporary folder...")
@@ -239,18 +227,6 @@ class AppSystem:
             else:
                 with open(filepath, "w") as f:
                     f.write(str(data))
-
-    def check_folder(self, *folders):
-        """
-        Check the existence of a folder send an logging.ERROR message else
-        """
-
-        for folder in folders:
-            self.logger.info(f"Checking the existence of {folder}")
-            folder = pathlib.Path(folder)
-
-            if not folder.exists():
-                self.logger.error(f"Folder {folder} not found !")
 
     def load_app_infos(self, filepath: str | pathlib.Path) -> dict:
         """
