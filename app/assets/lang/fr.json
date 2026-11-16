@@ -92,6 +92,7 @@
     "resume": "Reprendre"
   },
   "book": {
+    "done_reading": "Vous avez finit de lire ce livre !",
     "read": "Lire",
     "infos": {
       "object_type": "Livre",

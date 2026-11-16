@@ -451,6 +451,7 @@ class SubBookWidget(QtWidgets.QWidget):
             self.read_book_b.setDisabled(
                 True
             )  # Disable "read" button on finished books
+            self.read_book_b.setToolTip(self.langs.tr("book.done_reading"))
 
         else:
             self.logger.warning(

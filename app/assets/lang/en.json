@@ -94,6 +94,7 @@
   },
   "book": {
     "read": "Read",
+    "done_reading": "You are done reading this book !",
     "infos": {
       "object_type": "Book",
       "read_pages": "Read pages : ",
