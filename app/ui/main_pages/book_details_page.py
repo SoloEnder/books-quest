@@ -448,7 +448,9 @@ class SubBookWidget(QtWidgets.QWidget):
             self.book_reading_state_lb.setText(
                 f"{self.langs.tr('book.infos.reading_state.finished')} - {self.langs.tr('shared.infos.pages_count_args', count=self.book.tot_pages)}"
             )
-            self.read_book_b.setVisible(False)  # Hide "read" button on finished books
+            self.read_book_b.setDisabled(
+                True
+            )  # Disable "read" button on finished books
 
         else:
             self.logger.warning(
