@@ -85,6 +85,9 @@ class UI(QtWidgets.QMainWindow):
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
         )
+        self.api.qt_signals.connect_to_signal(
+            "close_page_sg", self.switch_close_page_button_state
+        )
         self.my_stacked_widgets.switch_page("SHELFS_VIEW_PAGE")
         self.setCentralWidget(self.my_stacked_widgets)
 
@@ -132,19 +135,21 @@ class UI(QtWidgets.QMainWindow):
         self.my_actions = {
             "close_page": QtGui.QAction(
                 self.langs.tr("shared.actions.close"),
-                icon=images_tools.get_svg(
+                icon=images_tools.get_svg_icon(
                     self.res_files.get_res("assets.icons.exit"), "red"
                 ),
             ),
             "open_settings": QtGui.QAction(
                 self.langs.tr("shared.actions.open_settings"),
-                icon=images_tools.get_svg(
+                icon=images_tools.get_svg_icon(
                     self.res_files.get_res("assets.icons.settings")
                 ),
             ),
             "quit_app": QtGui.QAction(
                 "Quit Books Quest",
-                icon=images_tools.get_svg(self.res_files.get_res("assets.icons.exit")),
+                icon=images_tools.get_svg_icon(
+                    self.res_files.get_res("assets.icons.exit")
+                ),
             ),
         }
         self.my_actions["close_page"].triggered.connect(
@@ -162,6 +167,17 @@ class UI(QtWidgets.QMainWindow):
         self.app_menu = self.menuBar().addMenu("Books Quest")
         self.app_menu.addAction(self.my_actions["open_settings"])
         self.app_menu.addAction(self.my_actions["quit_app"])
+
+    def switch_close_page_button_state(self):
+        """
+        Enable or disable the "close_page" action according to the pages history
+        Disable it if there is no page to switch to when closing the active one, else enable it
+        """
+        if len(self.my_stacked_widgets.history) > 2:
+            self.my_actions["close_page"].setDisabled(False)
+
+        else:  # There is no pages to switch to after closing the active one
+            self.my_actions["close_page"].setDisabled(False)
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
@@ -278,6 +294,9 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.switch_page(self.history[1][0], True, self.history[1][2])
             del self.history[1]
             del self.history[0]
+
+        if not len(self.history):
+            self.my_a
 
         # history_copy = self.history.copy()
         # if len(history_copy) >= 1:

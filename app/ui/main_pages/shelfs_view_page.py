@@ -36,7 +36,7 @@ class ShelfsViewPage(base_page.BasePage):
         self.shelves_widgets = []
 
         # icons
-        self.book_creation_ico = images_tools.get_svg(
+        self.book_creation_ico = images_tools.get_svg_icon(
             self.res_files.get_res("assets.icons.new_book")
         )
 
@@ -54,7 +54,7 @@ class ShelfsViewPage(base_page.BasePage):
             self.langs.tr("shared.actions.shelf_creation")
         )
         self.shelf_creation_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.shelf"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.shelf"))
         )
         self.shelf_creation_b.clicked.connect(
             lambda: self.qt_signals.emit_signal(
@@ -400,7 +400,7 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.view_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.see_details"))
         self.view_b.setObjectName("SeeDetailsButton")
         self.view_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.view_books"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.view_books"))
         )
         self.view_b.setSizePolicy(self.button_size)
         self.view_b.clicked.connect(
@@ -414,7 +414,7 @@ class SubShelfWidget(QtWidgets.QWidget):
 
         self.edit_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.edit"))
         self.edit_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.edit"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.edit"))
         )
         self.edit_b.clicked.connect(
             lambda: self.qt_signals.emit_signal(
@@ -429,7 +429,9 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.delete_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.delete"))
         self.delete_b.setProperty("role", "DeleteButton")
         self.delete_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.exit"), "red")
+            images_tools.get_svg_icon(
+                self.res_files.get_res("assets.icons.exit"), "red"
+            )
         )
         self.delete_b.setSizePolicy(self.button_size)
 

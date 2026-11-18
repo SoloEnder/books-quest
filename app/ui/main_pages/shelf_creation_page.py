@@ -54,7 +54,7 @@ class ShelfCreationPage(base_page.BasePage):
         self.cover_selection_b = QtWidgets.QPushButton(
             self.langs.tr("shared.actions.edit_cover")
         )
-        self.cover_selection_b_ico = images_tools.get_svg(
+        self.cover_selection_b_ico = images_tools.get_svg_icon(
             self.res_files.get_res("assets.icons.edit")
         )
         self.cover_selection_b.setIcon(self.cover_selection_b_ico)
@@ -63,7 +63,7 @@ class ShelfCreationPage(base_page.BasePage):
             self.langs.tr("shared.actions.restore_default_cover")
         )
         self.restore_default_cover_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.remove_img"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.remove_img"))
         )
         self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 
@@ -100,7 +100,7 @@ class ShelfCreationPage(base_page.BasePage):
         # Confirm widgets
         self.confirm_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.done"))
         self.confirm_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.done"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.done"))
         )
         self.confirm_b.clicked.connect(self.save_modifications)
 
