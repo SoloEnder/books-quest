@@ -96,6 +96,24 @@ def get_svg_icon(
     return QtGui.QIcon(QtGui.QPixmap.fromImage(get_svg_icon_img(filepath, color, size)))
 
 
+def get_svg_pixmap(
+    filepath: str, color: str | None = None, size: int = 50
+) -> QtGui.QPixmap:
+    """
+    Apply `color` to a svg file and return a PySide6.QtGui.QPixmap with the modified image inside
+
+    Parameters
+    ----------
+    color (str|None): the color to apply to the svg image.
+    size (int): the size to give to the final svg image
+
+    Returns
+    -------
+    PySide6.QtGui.QPixmap: an image with the clorized SVG inside
+    """
+    return QtGui.QPixmap.fromImage(get_svg_icon_img(filepath, color, size))
+
+
 @cache
 def prepare_image(
     image_path: str | Path, dest_path: str, size: tuple[int, int] = (170, 250)
