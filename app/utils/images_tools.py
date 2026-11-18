@@ -96,6 +96,7 @@ def get_svg_icon(
     return QtGui.QIcon(QtGui.QPixmap.fromImage(get_svg_img(filepath, color, size)))
 
 
+@lru_cache
 def get_svg_pixmap(
     filepath: str, color: str | None = None, size: int = 50
 ) -> QtGui.QPixmap:
