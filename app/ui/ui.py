@@ -177,7 +177,7 @@ class UI(QtWidgets.QMainWindow):
             self.my_actions["close_page"].setDisabled(False)
 
         else:  # There is no pages to switch to after closing the active one
-            self.my_actions["close_page"].setDisabled(False)
+            self.my_actions["close_page"].setDisabled(True)
 
 
 class MyStackedWidgets(QtWidgets.QStackedWidget):
