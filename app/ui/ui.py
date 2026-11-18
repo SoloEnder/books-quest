@@ -173,7 +173,7 @@ class UI(QtWidgets.QMainWindow):
         Enable or disable the "close_page" action according to the pages history
         Disable it if there is no page to switch to when closing the active one, else enable it
         """
-        if len(self.my_stacked_widgets.history) > 2:
+        if len(self.my_stacked_widgets.history) > 1:
             self.my_actions["close_page"].setDisabled(False)
 
         else:  # There is no pages to switch to after closing the active one
@@ -294,9 +294,6 @@ class MyStackedWidgets(QtWidgets.QStackedWidget):
             self.switch_page(self.history[1][0], True, self.history[1][2])
             del self.history[1]
             del self.history[0]
-
-        if not len(self.history):
-            self.my_a
 
         # history_copy = self.history.copy()
         # if len(history_copy) >= 1:
