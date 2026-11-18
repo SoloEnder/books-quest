@@ -15,6 +15,8 @@ def clear_all_caches():
     """
     logger.info("Clearing caches...")
     get_svg_img.cache_clear()
+    get_svg_icon.cache_clear()
+    get_svg_pixmap.cache_clear()
     prepare_image.cache_clear()
 
 
