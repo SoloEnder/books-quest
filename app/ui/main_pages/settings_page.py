@@ -41,22 +41,24 @@ class SettingsPage(base_page.BasePage):
         self.appearance_settings = AppearanceSettings(
             None,
             self.api,
-            images_tools.get_svg(self.res_files.get_res("assets.icons.color_palette")),
+            images_tools.get_svg_icon(
+                self.res_files.get_res("assets.icons.color_palette")
+            ),
         )
         self.reading_settings = ReadingSettings(
             None,
             self.api,
-            images_tools.get_svg(self.res_files.get_res("assets.icons.read")),
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.read")),
         )
         self.update_settings = UpdateSettings(
             None,
             self.api,
-            images_tools.get_svg(self.res_files.get_res("assets.icons.refresh")),
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.refresh")),
         )
         self.about_settings = HelpSettings(
             None,
             self.api,
-            images_tools.get_svg(
+            images_tools.get_svg_icon(
                 self.res_files.get_res("assets.icons.question_circle")
             ),
         )

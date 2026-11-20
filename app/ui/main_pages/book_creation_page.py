@@ -70,7 +70,7 @@ class BookCreationPage(base_page.BasePage):
             self.langs.tr("shared.actions.edit_cover")
         )
         self.edit_cover_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.edit"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.edit"))
         )
         self.edit_cover_b.setSizePolicy(QtWidgets.QSizePolicy())
         self.edit_cover_b.clicked.connect(self.set_book_cover)
@@ -78,7 +78,7 @@ class BookCreationPage(base_page.BasePage):
             self.langs.tr("shared.actions.restore_default_cover")
         )
         self.restore_default_cover_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.remove_img"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.remove_img"))
         )
         self.restore_default_cover_b.clicked.connect(self.restore_default_cover)
 

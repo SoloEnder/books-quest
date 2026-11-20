@@ -297,7 +297,9 @@ class ReadingSessionPage(base_page.BasePage):
             case timer.TimerState.PAUSED:
                 self.timer_action_b.setText(self.langs.tr("timer.resume"))
                 self.timer_action_b.setIcon(
-                    images_tools.get_svg(self.res_files.get_res("assets.icons.play"))
+                    images_tools.get_svg_icon(
+                        self.res_files.get_res("assets.icons.play")
+                    )
                 )
                 if self._pause_connected:
                     self.timer_action_b.clicked.disconnect(self.timer.pause)
@@ -310,7 +312,9 @@ class ReadingSessionPage(base_page.BasePage):
             case timer.TimerState.ACTIVE:
                 self.timer_action_b.setText(self.langs.tr("timer.pause"))
                 self.timer_action_b.setIcon(
-                    images_tools.get_svg(self.res_files.get_res("assets.icons.pause"))
+                    images_tools.get_svg_icon(
+                        self.res_files.get_res("assets.icons.pause")
+                    )
                 )
                 if self._resume_connected:
                     self.timer_action_b.clicked.disconnect(self.timer.resume)

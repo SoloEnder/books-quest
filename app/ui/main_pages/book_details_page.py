@@ -348,7 +348,7 @@ class SubBookWidget(QtWidgets.QWidget):
         self.book_summary_te.setObjectName("BookSummary")
         self.read_book_b = QtWidgets.QPushButton(self.langs.tr("book.read"))
         self.read_book_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.read"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.read"))
         )
         self.read_book_b.setSizePolicy(self.fixed_sp)
         self.read_book_b.clicked.connect(
@@ -364,7 +364,7 @@ class SubBookWidget(QtWidgets.QWidget):
             self.langs.tr("shared.actions.see_details")
         )
         self.book_details_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.infos"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.infos"))
         )
         self.book_details_b.setObjectName("SeeDetailsButton")
         self.book_details_b.clicked.connect(
@@ -376,7 +376,7 @@ class SubBookWidget(QtWidgets.QWidget):
         self.edit_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.edit"))  # type: ignore
         self.edit_b.setObjectName("EditButton")
         self.edit_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.edit"))
+            images_tools.get_svg_icon(self.res_files.get_res("assets.icons.edit"))
         )
         self.edit_b.setSizePolicy(self.fixed_sp)
         self.edit_b.clicked.connect(
@@ -389,7 +389,9 @@ class SubBookWidget(QtWidgets.QWidget):
         )
         self.delete_b = QtWidgets.QPushButton(self.langs.tr("shared.actions.delete"))  # type: ignore
         self.delete_b.setIcon(
-            images_tools.get_svg(self.res_files.get_res("assets.icons.exit"), "red")
+            images_tools.get_svg_icon(
+                self.res_files.get_res("assets.icons.exit"), "red"
+            )
         )
         self.delete_b.setSizePolicy(self.fixed_sp)
         self.delete_b.setProperty("role", "DeleteButton")
