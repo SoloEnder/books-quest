@@ -85,9 +85,6 @@ class UI(QtWidgets.QMainWindow):
         utils_funcs.load_and_set_ss(
             self.gen_qss_filepath, widget=self.my_stacked_widgets, logger=self.logger
         )
-        self.api.qt_signals.connect_to_signal(
-            "close_page_sg", self.switch_close_page_button_state
-        )
         self.my_stacked_widgets.switch_page("SHELFS_VIEW_PAGE")
         self.setCentralWidget(self.my_stacked_widgets)
 
