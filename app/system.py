@@ -115,6 +115,16 @@ class AppSystem:
                 "Failed to load user settings : File is corrupted !",
             )
 
+        except Exception:
+            self.logger.exception(
+                "Failed to load user settings file du to exception : "
+            )
+            QtWidgets.QMessageBox.warning(
+                None,
+                "Settings Error",
+                "Failed to load user settings !",
+            )
+
         self.settings.apply_user_settings()
 
     def start(self):
