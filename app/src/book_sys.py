@@ -255,6 +255,7 @@ class Shelf:
 
         if book not in self._books:
             self._books.append(book)
+            book._parents_shelves.append(self)
 
         else:
             BookExistsError(book.id, f"this Shelf ({self})")
