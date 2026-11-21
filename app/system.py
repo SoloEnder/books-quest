@@ -100,10 +100,19 @@ class AppSystem:
             )
 
         except FileNotFoundError:
+            self.logger.error("Failed to load user settings file : File not found !")
             QtWidgets.QMessageBox.warning(
                 None,
                 "Settings Error",
                 "Failed to load user settings : File not found !",
+            )
+
+        except json.JSONDecodeError:
+            self.logger.error("Failed to load user settings file : File is corrupted !")
+            QtWidgets.QMessageBox.warning(
+                None,
+                "Settings Error",
+                "Failed to load user settings : File is corrupted !",
             )
 
         self.settings.apply_user_settings()
