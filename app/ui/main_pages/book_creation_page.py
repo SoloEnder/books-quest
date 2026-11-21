@@ -529,6 +529,26 @@ class BookCreationPage(base_page.BasePage):
 
         return response == QtWidgets.QMessageBox.StandardButton.Ok
 
+    def check_reading_state(
+        self, reading_sessions, reading_state: book_sys.Book.ReadingState
+    ) -> bool:
+        """
+        Check if the new reading state set is compatible with the book current reading state
+
+        Parameters
+        -----------
+        reading_sessions: the reading sessions of the book
+        reading_state: the reading state that has been set by the user
+
+        Returns
+        -------
+        bool: wether this reading state can be set without erasing the reading sessions history
+        """
+        if reading_sessions and reading_state == book_sys.Book.ReadingState.UNREAD:
+            return False
+
+        return True
+
     def get_book_infos(self):
         books_infos = {}
 
@@ -598,10 +618,7 @@ class BookCreationPage(base_page.BasePage):
 
         # Ask user confirmation to reset reading sessions
         # If the reading state of an existing book has been changed to UNREAD
-        if (
-            sessions
-            and books_infos["reading_state"] == book_sys.Book.ReadingState.UNREAD
-        ):
+        if not self.check_reading_state(sessions, books_infos["reading_state"]):
             continue_ = self.warn_for_sessions_preservation(len(sessions))
             if not continue_:
                 self.logger.info("User aborted book edition")
