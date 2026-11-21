@@ -28,7 +28,7 @@ def select_image(base_path: str | None = None):
         None,
         "Select Image",
         base_path,
-        "Supported Formats (*.png *.jpeg *.jpg);;PNG Images (*.png);;JPEG Images (*.jpeg);;JPG Images (*.jpg)",
+        "Supported Formats (*.png *.jpeg *.jpg *webp);;PNG Images (*.png);;JPEG Images (*.jpeg);;JPG Images (*.jpg);;Webp (*.webp)",
     )
     return infos
 
