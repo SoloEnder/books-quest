@@ -93,6 +93,8 @@ class AppSystem:
         self.settings.load_base_settings(
             self.res_files.get_res("data.app.static.base_settings")
         )
+        caught_exception: bool = False
+        error_message = ""
 
         try:
             self.settings.load_user_settings(
@@ -100,29 +102,28 @@ class AppSystem:
             )
 
         except FileNotFoundError:
-            self.logger.error("Failed to load user settings file : File not found !")
-            QtWidgets.QMessageBox.warning(
-                None,
-                "Settings Error",
-                "Failed to load user settings : File not found !",
-            )
+            caught_exception = True
+            error_message = "Failed to load user settings file : File not found !"
+            self.logger.error(error_message)
 
         except json.JSONDecodeError:
-            self.logger.error("Failed to load user settings file : File is corrupted !")
-            QtWidgets.QMessageBox.warning(
-                None,
-                "Settings Error",
-                "Failed to load user settings : File is corrupted !",
-            )
+            caught_exception = True
+            error_message = "Failed to load user settings file : File is corrupted !"
+            self.logger.error(error_message)
 
         except Exception:
+            caught_exception = True
+            error_message = "Failed to load user settings file !"
             self.logger.exception(
                 "Failed to load user settings file du to exception : "
             )
+
+        # -- Show error pop-up if an error has been caught
+        if caught_exception:
             QtWidgets.QMessageBox.warning(
                 None,
                 "Settings Error",
-                "Failed to load user settings !",
+                error_message,
             )
 
         self.settings.apply_user_settings()
