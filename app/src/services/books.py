@@ -596,7 +596,35 @@ class BooksService:
         filepath = custom_path or self.res_files_api.get_res(
             "data.user.bookshelves.bookshelves"
         )
-        self.books_handler.load_shelves(filepath)
+
+        caught_exception: bool = False
+        error_message = ""
+
+        try:
+            self.books_handler.load_shelves(filepath)
+
+        except FileNotFoundError:
+            caught_exception = True
+            error_message = "Failed to load shelves : Save file not found !"
+            self.logger.error(error_message)
+
+        except json.JSONDecodeError:
+            caught_exception = True
+            error_message = "Failed to load shelves : Save file is corrupted !"
+            self.logger.error(error_message)
+
+        except Exception:
+            caught_exception = True
+            error_message = "Failed to load shelves !"
+            self.logger.exception("Failed to load shelves du to exception : ")
+
+        # -- Show error pop-up if an error has been caught
+        if caught_exception:
+            QtWidgets.QMessageBox.warning(
+                None,
+                "Settings Error",
+                error_message,
+            )
 
     def save_books(self, custom_path: str | None = None):
         """
