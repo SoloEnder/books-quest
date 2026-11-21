@@ -1,9 +1,10 @@
+import json
 import logging
 import os
 import shutil
-import typing
 
 from PIL.Image import Image
+from PySide6 import QtWidgets
 
 from app.src import book_sys
 from app.src.services import qt_signals, res_files
@@ -555,7 +556,34 @@ class BooksService:
         - custom_path (str): the path of the file. If not given/equal to `None`, then the value in the files indexes is used
         """
         filepath = custom_path or self.res_files_api.get_res("data.user.books.books")
-        self.books_handler.load_books(filepath)
+        caught_exception: bool = False
+        error_message = ""
+
+        try:
+            self.books_handler.load_books(filepath)
+
+        except FileNotFoundError:
+            caught_exception = True
+            error_message = "Failed to load books : Save file not found !"
+            self.logger.error(error_message)
+
+        except json.JSONDecodeError:
+            caught_exception = True
+            error_message = "Failed to load books : Save file is corrupted !"
+            self.logger.error(error_message)
+
+        except Exception:
+            caught_exception = True
+            error_message = "Failed to load books !"
+            self.logger.exception("Failed to load books du to exception : ")
+
+        # -- Show error pop-up if an error has been caught
+        if caught_exception:
+            QtWidgets.QMessageBox.warning(
+                None,
+                "Settings Error",
+                error_message,
+            )
 
     def load_shelves(self, custom_path: str | None = None):
         """
@@ -568,7 +596,35 @@ class BooksService:
         filepath = custom_path or self.res_files_api.get_res(
             "data.user.bookshelves.bookshelves"
         )
-        self.books_handler.load_shelves(filepath)
+
+        caught_exception: bool = False
+        error_message = ""
+
+        try:
+            self.books_handler.load_shelves(filepath)
+
+        except FileNotFoundError:
+            caught_exception = True
+            error_message = "Failed to load shelves : Save file not found !"
+            self.logger.error(error_message)
+
+        except json.JSONDecodeError:
+            caught_exception = True
+            error_message = "Failed to load shelves : Save file is corrupted !"
+            self.logger.error(error_message)
+
+        except Exception:
+            caught_exception = True
+            error_message = "Failed to load shelves !"
+            self.logger.exception("Failed to load shelves du to exception : ")
+
+        # -- Show error pop-up if an error has been caught
+        if caught_exception:
+            QtWidgets.QMessageBox.warning(
+                None,
+                "Settings Error",
+                error_message,
+            )
 
     def save_books(self, custom_path: str | None = None):
         """
