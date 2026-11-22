@@ -172,6 +172,27 @@ class Shelf:
             if not shelf.has_parent_shelf(self):
                 shelf._parent_shelves.append(self)
 
+    @property
+    def books(self) -> BooksList:
+        """
+        Returns a copy of the list of books that are in this shelf
+        """
+        return self._books.copy()
+
+    @property
+    def children_shelves(self) -> ShelvesList:
+        """
+        Returns a copy of the list of shelves that are in this shelf
+        """
+        return self._children_shelves.copy()
+
+    @property
+    def parents_shelves(self) -> ShelvesList:
+        """
+        Returns a copy of the list of parents shelves of this shelf
+        """
+        return self._parent_shelves.copy()
+
     def add_child_shelf(self, shelf: Shelf):
         """
         Define `shelf` as a child of this shelf
