@@ -4,9 +4,6 @@ import enum
 import json
 import logging
 import operator
-import os
-import pathlib
-import typing
 import uuid
 from datetime import datetime
 
@@ -317,13 +314,36 @@ class Shelf:
             "creation_date": self.creation_date,
             "title_suffix": self.title_suffix,
             "id": self.id,
-            "children_shelves": self._children_shelves,
-            "parents_shelves": self._parent_shelves,
-            "books": self._books,
+            "children_shelves": self.children_shelves,
+            "parents_shelves": self.parents_shelves,
+            "books": self.books,
         }
 
     def str_id(self) -> str:
         return str(self.id)
+
+
+class DefaultShelf(Shelf):
+    def __init__(self, title: str, books_handler: BooksHandler):
+        """
+        A `Shelf` subclass that is intended to be used as a default shelf for the `BooksHandler`
+        """
+        super().__init__(title)
+        self._books_handler = books_handler
+
+    @property
+    def books(self) -> BooksList:
+        """
+        Return a copy of the list of books that are in the BooksHandler
+        """
+        return list(self._books_handler.books.values())
+
+    @property
+    def children_shelves(self) -> ShelvesList:
+        """
+        Return a copy of the list of shelves that are in the BooksHandler
+        """
+        return list(self._books_handler.shelves.values())
 
 
 class SessionIDAlreadyAssignedError(Exception):
