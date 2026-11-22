@@ -527,11 +527,7 @@ class BooksHandler:
         self.logger = logging.getLogger(__name__)
         self.books = books or {}
         self.shelves = shelves or {}
-        self.default_shelf = Shelf(
-            title="All",
-            books=list(self.books.values()),
-            children_shelves=list(self.shelves.values()),
-        )
+        self.default_shelf = DefaultShelf("All", self)
         self.default_book = Book(title="DefaultBook")
 
     def sort_by_creation_date(self, items: ItemsList, reverse: bool = False):
