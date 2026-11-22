@@ -586,7 +586,6 @@ class BooksHandler:
 
         if book_obj.str_id() not in self.books:
             self.books[book_obj.str_id()] = book_obj
-            self.default_shelf.add_book(book_obj)
 
         else:
             raise BookExistsError(book_obj.id, f"this BooksHandler ({self})")
@@ -627,11 +626,10 @@ class BooksHandler:
 
         if shelf.str_id() not in self.shelves.keys():
             self.shelves[shelf.str_id()] = shelf
-            self.default_shelf.add_child_shelf(shelf)
 
         else:
             raise BooksShelfExistsError(
-                shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !"
+                shelf.id, f"Shelf (ID={shelf.id}) already in BooksHandler ({self}) !"
             )
 
     def delete_shelf(self, id: str):
