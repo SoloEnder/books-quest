@@ -173,11 +173,18 @@ class Shelf:
                 shelf._parent_shelves.append(self)
 
     @property
-    def books(self):
+    def books(self) -> list:
         """
         Returns a copy of the list of books that are in this shelf
         """
         return self._books.copy()
+
+    @property
+    def children_shelves(self):
+        """
+        Returns a copy of the list of shelves that are in this shelf
+        """
+        return self._children_shelves.copy()
 
     def add_child_shelf(self, shelf: Shelf):
         """
