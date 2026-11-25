@@ -333,14 +333,12 @@ class ShelfCreationPage(base_page.BasePage):
         matches = self.get_matches(shelf_title)
 
         if matches:
-            title_suffix = utils_funcs.get_title_suffix(matches)
-
             self.existence_msgbox.setInformativeText(
                 f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
             )
-            self.existence_msgbox.exec()
+            choice = self.existence_msgbox.exec()
 
-            if not self.existence_msgbox.clickedButton() == self.rename_b:
+            if choice == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return
 
         books: book_sys.BooksList = []
