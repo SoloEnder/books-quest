@@ -185,9 +185,7 @@ class BookCreationPage(base_page.BasePage):
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for shelf in self.books.books_handler.shelves.values():
-            shelf_cb = QtWidgets.QCheckBox(
-                utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
-            )
+            shelf_cb = QtWidgets.QCheckBox(shelf.title)
             self.shelfs_selection_cbs[shelf.str_id()] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
@@ -585,12 +583,11 @@ class BookCreationPage(base_page.BasePage):
         matches = self.get_matches(books_infos["title"], books_infos.get("authors"))
 
         if matches:
-            title_suffix = utils_funcs.get_title_suffix(matches)
             self.logger.debug(
-                f"Found {title_suffix} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
+                f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('book.msg.book_already_exists')} ({title_suffix})"
+                f"{self.langs.tr('book.msg.book_already_exists')} ({len(matches)})"
             )
             choice = self.existence_msgbox.exec()
 

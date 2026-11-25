@@ -255,9 +255,7 @@ class ShelfCreationPage(base_page.BasePage):
                     continue
 
             object_type_item = QtGui.QStandardItem("N/A")
-            title_item = QtGui.QStandardItem(
-                utils_funcs.add_title_suffix(object.title, object.title_suffix)
-            )
+            title_item = QtGui.QStandardItem(object.title)
             title_item.setData(object)
             title_item.setCheckable(True)
 
@@ -333,6 +331,9 @@ class ShelfCreationPage(base_page.BasePage):
         matches = self.get_matches(shelf_title)
 
         if matches:
+            self.logger.debug(
+                f"Found {len(matches)} shelves that matches with the currently being created shelf"
+            )
             self.existence_msgbox.setInformativeText(
                 f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({len(matches)}"
             )
