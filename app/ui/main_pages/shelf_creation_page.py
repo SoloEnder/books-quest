@@ -334,7 +334,7 @@ class ShelfCreationPage(base_page.BasePage):
                 f"Found {len(matches)} shelves that matches with the currently being created shelf"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({len(matches)}"
+                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({len(matches)})"
             )
             choice = self.existence_msgbox.exec()
 
