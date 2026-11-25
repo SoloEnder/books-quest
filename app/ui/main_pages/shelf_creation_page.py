@@ -87,13 +87,9 @@ class ShelfCreationPage(base_page.BasePage):
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.cancel_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.cancel"),
-            QtWidgets.QMessageBox.ButtonRole.RejectRole,
-        )
-        self.rename_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.rename"),
-            QtWidgets.QMessageBox.ButtonRole.AcceptRole,
+        self.existence_msgbox.setStandardButtons(
+            QtWidgets.QMessageBox.StandardButton.Cancel
+            | QtWidgets.QMessageBox.StandardButton.Yes
         )
         self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
@@ -259,9 +255,7 @@ class ShelfCreationPage(base_page.BasePage):
                     continue
 
             object_type_item = QtGui.QStandardItem("N/A")
-            title_item = QtGui.QStandardItem(
-                utils_funcs.add_title_suffix(object.title, object.title_suffix)
-            )
+            title_item = QtGui.QStandardItem(object.title)
             title_item.setData(object)
             title_item.setCheckable(True)
 
@@ -322,7 +316,6 @@ class ShelfCreationPage(base_page.BasePage):
             id = self.shelf.id
 
         shelf_title = self.title_e.text().strip()
-        title_suffix = None
 
         if (
             not shelf_title.lower()
@@ -337,14 +330,15 @@ class ShelfCreationPage(base_page.BasePage):
         matches = self.get_matches(shelf_title)
 
         if matches:
-            title_suffix = utils_funcs.get_title_suffix(matches)
-
-            self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
+            self.logger.debug(
+                f"Found {len(matches)} shelves that matches with the currently being created shelf"
             )
-            self.existence_msgbox.exec()
+            self.existence_msgbox.setInformativeText(
+                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({len(matches)})"
+            )
+            choice = self.existence_msgbox.exec()
 
-            if not self.existence_msgbox.clickedButton() == self.rename_b:
+            if choice == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return
 
         books: book_sys.BooksList = []
@@ -364,7 +358,6 @@ class ShelfCreationPage(base_page.BasePage):
 
         return {
             "title": shelf_title,
-            "title_suffix": title_suffix,
             "books": books,
             "parents_shelves": parents_shelves,
             "children_shelves": child_shelves,

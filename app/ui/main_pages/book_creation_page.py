@@ -185,20 +185,14 @@ class BookCreationPage(base_page.BasePage):
         self.shelfs_selection_scroll_area.setWidget(self.shelfs_selection_widget)
 
         for shelf in self.books.books_handler.shelves.values():
-            shelf_cb = QtWidgets.QCheckBox(
-                utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
-            )
+            shelf_cb = QtWidgets.QCheckBox(shelf.title)
             self.shelfs_selection_cbs[shelf.str_id()] = shelf_cb
             self.shelfs_selection_layout.addWidget(shelf_cb)
 
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.cancel_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.cancel"),
-            QtWidgets.QMessageBox.ButtonRole.RejectRole,
-        )
-        self.rename_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.rename"),
-            QtWidgets.QMessageBox.ButtonRole.AcceptRole,
+        self.existence_msgbox.setStandardButtons(
+            QtWidgets.QMessageBox.StandardButton.Cancel
+            | QtWidgets.QMessageBox.StandardButton.Yes
         )
         self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
@@ -589,19 +583,15 @@ class BookCreationPage(base_page.BasePage):
         matches = self.get_matches(books_infos["title"], books_infos.get("authors"))
 
         if matches:
-            title_suffix = utils_funcs.get_title_suffix(matches)
             self.logger.debug(
-                f"Found {title_suffix} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
+                f"Found {len(matches)} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('book.msg.book_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({title_suffix})'"
+                f"{self.langs.tr('book.msg.book_already_exists')} ({len(matches)})"
             )
-            self.existence_msgbox.exec()
+            choice = self.existence_msgbox.exec()
 
-            if self.existence_msgbox.clickedButton() == self.rename_b:
-                books_infos["title_suffix"] = title_suffix
-
-            else:
+            if choice == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return
 
         books_infos["id"] = uuid.uuid4()

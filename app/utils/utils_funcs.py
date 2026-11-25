@@ -40,51 +40,6 @@ def unknown_shelf_name_fmt(shelf: book_sys.Shelf):
     return f"[Unnamed]-{creation_date.date()}"
 
 
-def add_title_suffix(
-    title: str,
-    title_suffix,
-) -> str:
-    """
-    Add the suffix of a book/shelf title and return the result
-
-    Parameters
-    ----------
-    title (str): the title
-    title_suffix (str): the title suffix
-
-    Returns
-    -------
-    str: the result text
-    """
-    return f"{title} ({title_suffix})" if title_suffix else title
-
-
-def get_title_suffix(
-    obj_with_the_same_title: book_sys.ShelvesList | book_sys.BooksList,
-) -> int | None:
-    """
-    Select an appropriate title suffix (the number following the shelf/book title) for the shelf/book being created;
-    the suffix is initially set based on the number of shelves/books with the same title,
-    and is then determined by adding 1 to the highest title suffix found among shelves/books sharing the same title as the one being created.
-
-    Parameters
-    ----------
-    obj_with_the_same_title (ShelvesList): a list of shelves that share the same title as the one being created
-
-    Returns
-    -------
-    int: the title suffix found
-    """
-    title_suffix = len(obj_with_the_same_title)
-
-    for obj in obj_with_the_same_title:
-        if obj.title_suffix:
-            if obj.title_suffix >= title_suffix:
-                title_suffix = obj.title_suffix + 1
-
-    return title_suffix
-
-
 def load_and_set_ss(
     *filepaths, widget: QtWidgets.QWidget, logger: logging.Logger | None = None
 ):

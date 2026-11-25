@@ -294,9 +294,7 @@ class ShelfWidget(widgets_pagination_view.InPageWidget):
             self.api,
         )
         self.sub_widget.delete_b.clicked.connect(self.delete_shelf)
-        self.title_lb = QtWidgets.QLabel(
-            utils_funcs.add_title_suffix(shelf.title, shelf.title_suffix)
-        )
+        self.title_lb = QtWidgets.QLabel(shelf.title)
         self.title_lb.setProperty("role", "h3")
         self.main_layout.addWidget(
             self.title_lb, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft

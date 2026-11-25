@@ -83,7 +83,7 @@ class DetailedBookInfos(QtWidgets.QWidget):
         self.book_basic_infos = {
             "title": (
                 self.langs.tr("shared.infos.title"),
-                utils_funcs.add_title_suffix(self.book.title, self.book.title_suffix),
+                self.book.title,
             ),  # Basic info:(title, value)
             "authors": (
                 self.langs.tr("shared.infos.author"),
@@ -245,9 +245,7 @@ class PagedBookWidget(InPageWidget):
         self.qt_signals = self.api.qt_signals
 
         self.main_layout = QtWidgets.QGridLayout(self)
-        self.book_title_lb = QtWidgets.QLabel(
-            utils_funcs.add_title_suffix(book.title, title_suffix=book.title_suffix)
-        )
+        self.book_title_lb = QtWidgets.QLabel(book.title)
         self.sub_widget = SubBookWidget(
             self.book,
             self.api,
