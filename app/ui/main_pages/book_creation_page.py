@@ -590,7 +590,7 @@ class BookCreationPage(base_page.BasePage):
                 f"Found {title_suffix} {[x.id for x in matches]} books which have the same authors and the same title that the on creating book !"
             )
             self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('book.msg.book_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{books_infos.get('title')} ({title_suffix})'"
+                f"{self.langs.tr('book.msg.book_already_exists')} ({title_suffix})"
             )
             choice = self.existence_msgbox.exec()
 

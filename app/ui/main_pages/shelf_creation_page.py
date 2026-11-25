@@ -334,7 +334,7 @@ class ShelfCreationPage(base_page.BasePage):
 
         if matches:
             self.existence_msgbox.setInformativeText(
-                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({title_suffix})\n{self.langs.tr('shared.msg.renaming_future')} '{shelf_title} ({title_suffix})'"
+                f"{self.langs.tr('shelf.msg.shelf_already_exists')} ({len(matches)}"
             )
             choice = self.existence_msgbox.exec()
 
