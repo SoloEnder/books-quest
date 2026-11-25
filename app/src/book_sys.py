@@ -148,7 +148,6 @@ class ReadingEndPageError(Exception):
 class Shelf:
     def __init__(self, title: str, **kwargs):
         self.title = title
-        self.title_suffix = kwargs.get("title_suffix")
         self.creation_date: datetime = kwargs.get("creation_date", datetime.now())
         self._parent_shelves: ShelvesList = kwargs.get("parents_shelves", [])
         self._children_shelves: ShelvesList = kwargs.get("children_shelves", [])
@@ -363,7 +362,6 @@ class Book:
         """
         self.title = title
         self.creation_date = kwargs.get("creation_date", datetime.now())
-        self.title_suffix = kwargs.get("title_suffix")
         self.authors = kwargs.get("authors")
         self.edition = kwargs.get("edition")
         self.summary = kwargs.get("summary")
