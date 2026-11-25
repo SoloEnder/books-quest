@@ -4,9 +4,6 @@ import enum
 import json
 import logging
 import operator
-import os
-import pathlib
-import typing
 import uuid
 from datetime import datetime
 
@@ -317,13 +314,36 @@ class Shelf:
             "creation_date": self.creation_date,
             "title_suffix": self.title_suffix,
             "id": self.id,
-            "children_shelves": self._children_shelves,
-            "parents_shelves": self._parent_shelves,
-            "books": self._books,
+            "children_shelves": self.children_shelves,
+            "parents_shelves": self.parents_shelves,
+            "books": self.books,
         }
 
     def str_id(self) -> str:
         return str(self.id)
+
+
+class DefaultShelf(Shelf):
+    def __init__(self, title: str, books_handler: BooksHandler):
+        """
+        A `Shelf` subclass that is intended to be used as a default shelf for the `BooksHandler`
+        """
+        super().__init__(title)
+        self._books_handler = books_handler
+
+    @property
+    def books(self) -> BooksList:
+        """
+        Return a copy of the list of books that are in the BooksHandler
+        """
+        return list(self._books_handler.books.values())
+
+    @property
+    def children_shelves(self) -> ShelvesList:
+        """
+        Return a copy of the list of shelves that are in the BooksHandler
+        """
+        return list(self._books_handler.shelves.values())
 
 
 class SessionIDAlreadyAssignedError(Exception):
@@ -507,11 +527,7 @@ class BooksHandler:
         self.logger = logging.getLogger(__name__)
         self.books = books or {}
         self.shelves = shelves or {}
-        self.default_shelf = Shelf(
-            title="All",
-            books=list(self.books.values()),
-            children_shelves=list(self.shelves.values()),
-        )
+        self.default_shelf = DefaultShelf("All", self)
         self.default_book = Book(title="DefaultBook")
 
     def sort_by_creation_date(self, items: ItemsList, reverse: bool = False):
@@ -570,7 +586,6 @@ class BooksHandler:
 
         if book_obj.str_id() not in self.books:
             self.books[book_obj.str_id()] = book_obj
-            self.default_shelf.add_book(book_obj)
 
         else:
             raise BookExistsError(book_obj.id, f"this BooksHandler ({self})")
@@ -611,11 +626,10 @@ class BooksHandler:
 
         if shelf.str_id() not in self.shelves.keys():
             self.shelves[shelf.str_id()] = shelf
-            self.default_shelf.add_child_shelf(shelf)
 
         else:
             raise BooksShelfExistsError(
-                shelf.id, f"Shelf (ID={shelf.id}) arleady in BooksHandler ({self}) !"
+                shelf.id, f"Shelf (ID={shelf.id}) already in BooksHandler ({self}) !"
             )
 
     def delete_shelf(self, id: str):

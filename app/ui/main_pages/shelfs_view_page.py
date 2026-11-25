@@ -366,14 +366,14 @@ class SubShelfWidget(QtWidgets.QWidget):
         self.cover_lb = QtWidgets.QLabel()
         self.cover_lb.setPixmap(self.cover_pm)
         self.total_elements = QtWidgets.QLabel(
-            f"{len(self.shelf._books)} {self.langs.tr('book.infos.object_type')}, {len(self.shelf._children_shelves)} {self.langs.tr('shelf.infos.object_type')}"
+            f"{len(self.shelf.books)} {self.langs.tr('book.infos.object_type')}, {len(self.shelf.children_shelves)} {self.langs.tr('shelf.infos.object_type')}"
         )
         self.total_elements.setObjectName("ShelfElementsCount")
         self.unread_books_count = 0
         self.on_reading_books_count = 0
         self.finished_books_count = 0
 
-        for book in self.shelf._books:
+        for book in self.shelf.books:
             if book.reading_state == book_sys.Book.ReadingState.UNREAD:
                 self.unread_books_count += 1
 

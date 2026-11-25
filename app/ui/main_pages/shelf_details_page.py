@@ -171,25 +171,25 @@ class ShelfDetailsPage(base_page.BasePage):
         if sort_option == SortsOptions.NAME_AZ:
             self.logger.info("Sorting shelf content by title (A-Z)...")
             sorted_items = self.books.books_handler.sort_by_titles(
-                self.shelf._books + self.shelf._children_shelves
+                self.shelf.books + self.shelf.children_shelves
             )
 
         elif sort_option == SortsOptions.NAME_ZA:
             self.logger.info("Sorting shelf content by title (Z-A)...")
             sorted_items = self.books.books_handler.sort_by_titles(
-                self.shelf._books + self.shelf._children_shelves, reverse=True
+                self.shelf.books + self.shelf.children_shelves, reverse=True
             )
 
         elif sort_option == SortsOptions.MOST_RECENT:
             self.logger.info("Sorting shelf content by most recent...")
             sorted_items = self.books.books_handler.sort_by_creation_date(
-                self.shelf._books + self.shelf._children_shelves, reverse=True
+                self.shelf.books + self.shelf.children_shelves, reverse=True
             )
 
         elif sort_option == SortsOptions.LEAST_RECENT:
             self.logger.info("Sorting shelf content by least recent...")
             sorted_items = self.books.books_handler.sort_by_creation_date(
-                self.shelf._books + self.shelf._children_shelves
+                self.shelf.books + self.shelf.children_shelves
             )
 
         else:
@@ -231,7 +231,7 @@ class ShelfDetailsPage(base_page.BasePage):
         """
 
         self.children_widget = self.create_children_widgets(
-            self.shelf._books, self.shelf._children_shelves
+            self.shelf.books, self.shelf.children_shelves
         )
         self.widgets_pagination_view_handler.widgets = self.children_widget
 
@@ -248,10 +248,10 @@ class ShelfDetailsPage(base_page.BasePage):
                 "edit_progress_msg", self.langs.tr("shared.msg.search_in_progress")
             )
             books_matches = self.books.books_handler.get_obj(
-                self.shelf._books, title=(given_input, False, False)
+                self.shelf.books, title=(given_input, False, False)
             )
             shelves_matches = self.books.books_handler.get_obj(
-                self.shelf._children_shelves, title=(given_input, False, False)
+                self.shelf.children_shelves, title=(given_input, False, False)
             )
             self.logger.info(
                 f"Found {len(books_matches)} books and {len(shelves_matches)} shelves which matches with the query"
@@ -278,8 +278,8 @@ class ShelfDetailsPage(base_page.BasePage):
                     widget.deleteLater()
 
             self.shelf_content_widgets = self.create_children_widgets(
-                list(self.shelf._books),
-                list(self.shelf._children_shelves),
+                list(self.shelf.books),
+                list(self.shelf.children_shelves),
             )
             self.widgets_pagination_view_handler.widgets = self.shelf_content_widgets
 
