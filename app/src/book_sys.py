@@ -311,7 +311,6 @@ class Shelf:
         return {
             "title": self.title,
             "creation_date": self.creation_date,
-            "title_suffix": self.title_suffix,
             "id": self.id,
             "children_shelves": self.children_shelves,
             "parents_shelves": self.parents_shelves,
@@ -448,7 +447,6 @@ class Book:
             "id": self.id,
             "title": self.title,
             "creation_date": self.creation_date,
-            "title_suffix": self.title_suffix,
             "authors": self.authors,
             "edition": self.edition,
             "summary": self.summary,
