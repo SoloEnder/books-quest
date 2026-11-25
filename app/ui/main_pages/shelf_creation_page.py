@@ -87,13 +87,9 @@ class ShelfCreationPage(base_page.BasePage):
         self.book_research_e.returnPressed.connect(self.search_book)
         self.stop_research_b = QtWidgets.QPushButton()
         self.existence_msgbox = QtWidgets.QMessageBox()
-        self.cancel_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.cancel"),
-            QtWidgets.QMessageBox.ButtonRole.RejectRole,
-        )
-        self.rename_b = self.existence_msgbox.addButton(
-            self.langs.tr("shared.actions.rename"),
-            QtWidgets.QMessageBox.ButtonRole.AcceptRole,
+        self.existence_msgbox.setStandardButtons(
+            QtWidgets.QMessageBox.StandardButton.Cancel
+            | QtWidgets.QMessageBox.StandardButton.Yes
         )
         self.existence_msgbox.setText(self.langs.tr("shared.msg.add_confirm"))
 
