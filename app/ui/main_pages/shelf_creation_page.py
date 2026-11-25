@@ -316,7 +316,6 @@ class ShelfCreationPage(base_page.BasePage):
             id = self.shelf.id
 
         shelf_title = self.title_e.text().strip()
-        title_suffix = None
 
         if (
             not shelf_title.lower()
@@ -359,7 +358,6 @@ class ShelfCreationPage(base_page.BasePage):
 
         return {
             "title": shelf_title,
-            "title_suffix": title_suffix,
             "books": books,
             "parents_shelves": parents_shelves,
             "children_shelves": child_shelves,
